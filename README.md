@@ -33,12 +33,12 @@ amount of micromanagement needed drastically.
 
 To run the mod:
 
-* Download my distribution of ROTP-1.2.jar (large file) and run that instead of 
+* Download my distribution of ROTP-1.3.jar (large file) and run that instead of 
 original game.
 
 or
 
-* Download only the ROTP-1.2-governor.jar and run.bat or run.sh if you are on Linux.
+* Download only the ROTP-1.3-governor.jar and run.bat or run.sh if you are on Linux.
 * Place them in same directory that contains original Remnants.jar
 * Execute run.bat or run.sh
 
@@ -56,20 +56,20 @@ transported. Only population that will grow back in 1 turn will be transported
 be taken into account. If you want to turn this off, add "-Dautotransport=false" 
 to Java command line like this:
 
-java -Dautotransport=false -Xmx2048m ROTP-1.2.jar arg1
+java -Dautotransport=false -Xmx2048m ROTP-1.3.jar arg1
 
 or
 
-java -cp ROTP-1.2-governor.jar:Remnants.jar -Dautotransport=false -Xmx2048m rotp.Rotp arg1
+java -cp ROTP-1.3-governor.jar:Remnants.jar -Dautotransport=false -Xmx2048m rotp.Rotp arg1
 
 * This mod will build stargates on all planets when technology is available. If you
 want to turn this off, add "-Dautogate=false" to Java command line.
 
-java -Dautotransport=false -Xmx2048m ROTP-1.2.jar arg1
+java -Dautotransport=false -Xmx2048m ROTP-1.3.jar arg1
 
 or
 
-java -cp ROTP-1.2-governor.jar:Remnants.jar -Dautogate=false -Xmx2048m rotp.Rotp arg1
+java -cp ROTP-1.3-governor.jar:Remnants.jar -Dautogate=false -Xmx2048m rotp.Rotp arg1
 
 ---
 
