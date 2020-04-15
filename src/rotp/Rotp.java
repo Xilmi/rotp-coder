@@ -38,7 +38,7 @@ public class Rotp {
     private static final int MB = 1048576;
     public static int IMG_W = 1229;
     public static int IMG_H = 768;
-    public static String jarFileName = "Remnants.jar";
+    public static String jarFileName = "ROTP-"+RotpGovernor.governorVersion+".jar";
     private static String jarPath;
     private static JFrame frame;
     public static String releaseId = "Beta 1.9";

@@ -9,6 +9,7 @@
         <fileSet>
             <directory>${basedir}/target/classes</directory>
             <includes>
+                <include>**/RotpGovernor.class</include>
                 <include>**/Colony.class</include>
                 <include>**/Empire.class</include>
                 <include>**/EmpireColonySpendingPane*.class</include>

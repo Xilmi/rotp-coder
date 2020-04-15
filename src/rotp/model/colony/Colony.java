@@ -1212,7 +1212,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         if (expectedPopulation() < planet.currentSize()) {
             return;
         }
-        float floatExcess = this.workingPopulation() + unrestrictedPopGrowth() + incomingTransports() - planet().currentSize();
+        float floatExcess = this.workingPopulation() + unrestrictedPopGrowth() + incomingTransportsNextTurn() - planet().currentSize();
         // if we are at max pop, send out transports even if growth is between 0 and 1, so always round up
         int excess = (int)Math.ceil(floatExcess);
 //        System.out.println("autotransport "+this.name()+" excess "+excess);
@@ -1278,6 +1278,9 @@ public final class Colony implements Base, IMappedObject, Serializable {
         governor = false;
         scheduleTransportsToSystem(targets.get(0), toTransport);
         governor = true;
+    }
+    public int incomingTransportsNextTurn() {
+        return galaxy().friendlyPopApproachingSystemNextTurn(starSystem());
     }
 
 }

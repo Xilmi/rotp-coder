@@ -33,14 +33,14 @@ amount of micromanagement needed drastically.
 
 To run the mod:
 
-* Download my distribution of ROTP-1.4.jar (large file) and run that instead of 
+* Download my distribution of ROTP-1.4.1.jar (large file) and run that instead of 
 original game.
 
 or
 
-* Download only the ROTP-1.4-governor.jar and run.bat or run.sh if you are on Linux.
-* Place them in same directory that contains original Remnants.jar
-* Execute run.bat or run.sh
+* Download only the ROTP-1.4.1-governor.jar
+* Place it in same directory that contains original Remnants.jar version Beta 1.4
+* Run ROTP-1.4.1-governor.jar
 
 To enable governor, use 'q' key on keyboard, or else click "Allocate Spending"
 text in the planetary spending screen.
@@ -52,24 +52,20 @@ Additional features.
 * This mod will transport population from planets that are full to planets that
 are underpopulated. Population from planets with maximum population will be 
 transported. Only population that will grow back in 1 turn will be transported 
-(usually 1-2 pop). When chosing destination, target population and distance will
+(usually 1-2 pop). When choosing destination, target population and distance will
 be taken into account. If you want to turn this off, add "-Dautotransport=false" 
 to Java command line like this:
 
-java -Dautotransport=false -Xmx2048m ROTP-1.4.jar arg1
-
+java -Dautotransport=false -Xmx2560m -jar ROTP-1.4.1.jar arg1
 or
-
-java -cp ROTP-1.4-governor.jar:Remnants.jar -Dautotransport=false -Xmx2048m rotp.Rotp arg1
+java -Dautotransport=false -Xmx2560m -jar ROTP-1.4.1-governor.jar
 
 * This mod will build stargates on all planets when technology is available. If you
 want to turn this off, add "-Dautogate=false" to Java command line.
 
-java -Dautotransport=false -Xmx2048m ROTP-1.4.jar arg1
-
+java -Dautogate=false -Xmx2560m -jar ROTP-1.4.1.jar arg1
 or
-
-java -cp ROTP-1.4-governor.jar:Remnants.jar -Dautogate=false -Xmx2048m rotp.Rotp arg1
+java -Dautogate=false -Xmx2560m -jar ROTP-1.4.1-governor.jar
 
 ---
 
