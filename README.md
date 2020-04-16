@@ -33,17 +33,17 @@ amount of micromanagement needed drastically.
 
 To run the mod:
 
-* Download my distribution of ROTP-1.4.1.jar (large file) and run that instead of 
+* Download my distribution of ROTP-1.5.jar (large file) and run that instead of 
 original game.
 
 or
 
-* Download only the ROTP-1.4.1-governor.jar
+* Download only the ROTP-1.5-governor.jar
 * Place it in same directory that contains original Remnants.jar version Beta 1.4
-* Run ROTP-1.4.1-governor.jar
+* Run ROTP-1.5-governor.jar
 
 To enable governor, use 'q' key on keyboard, or else click "Allocate Spending"
-text in the planetary spending screen.
+text in the planetary spending screen. Since version 1.5 Governor is on by default.
 
 ---
 
@@ -56,16 +56,26 @@ transported. Only population that will grow back in 1 turn will be transported
 be taken into account. If you want to turn this off, add "-Dautotransport=false" 
 to Java command line like this:
 
-java -Dautotransport=false -Xmx2560m -jar ROTP-1.4.1.jar arg1
+java -Dautotransport=false -Xmx2560m -jar ROTP-1.5.jar arg1
 or
-java -Dautotransport=false -Xmx2560m -jar ROTP-1.4.1-governor.jar
+java -Dautotransport=false -Xmx2560m -jar ROTP-1.5-governor.jar
 
 * This mod will build stargates on all planets when technology is available. If you
 want to turn this off, add "-Dautogate=false" to Java command line.
 
-java -Dautogate=false -Xmx2560m -jar ROTP-1.4.1.jar arg1
+java -Dautogate=false -Xmx2560m -jar ROTP-1.5.jar arg1
 or
-java -Dautogate=false -Xmx2560m -jar ROTP-1.4.1-governor.jar
+java -Dautogate=false -Xmx2560m -jar ROTP-1.5-governor.jar
+
+* Since version 1.5 governor will be on by default on new colonies. If you want to 
+turn this off, add "-Ddefaultgovernor=false" to Java command line.
+
+java -Ddefaultgovernor=false -Xmx2560m -jar ROTP-1.5.jar arg1
+or
+java -Ddefaultgovernor=false -Xmx2560m -jar ROTP-1.5-governor.jar
+
+* You can add multiple "-Dxxx=yyy" options on command line. I will implement GUI at
+some point to toggle these options...
 
 ---
 
