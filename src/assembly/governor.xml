@@ -15,6 +15,11 @@
                 <include>**/EmpireColonySpendingPane*.class</include>
                 <include>**/EmpireSystemPanel*.class</include>
                 <include>**/PlanetsUI*.class</include>
+                <include>**/GameSession*.class</include>
+                <include>**/GovernorOptions*.class</include>
+                <include>**/GovernorOptionsPanel*.class</include>
+                <include>**/Galaxy*.class</include>
+                <include>**/en/labels.txt</include>
             </includes>
             <outputDirectory>/</outputDirectory>
         </fileSet>

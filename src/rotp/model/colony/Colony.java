@@ -28,6 +28,8 @@ import rotp.model.galaxy.IMappedObject;
 import rotp.model.galaxy.ShipFleet;
 import rotp.model.galaxy.StarSystem;
 import rotp.model.galaxy.Transport;
+import rotp.model.game.GameSession;
+import rotp.model.game.GovernorOptions;
 import rotp.model.incidents.ColonyCapturedIncident;
 import rotp.model.incidents.ColonyInvadedIncident;
 import rotp.model.planet.Planet;
@@ -1070,7 +1072,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         }
     }
 
-    private boolean governor = !"false".equalsIgnoreCase(System.getProperty("defaultgovernor", "true"));
+    private boolean governor = GameSession.instance().getGovernorOptions().isGovernorOnByDefault();
 
     public boolean isGovernor() {
         return governor;
@@ -1124,7 +1126,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
      *
      */
     public void govern() {
-        if (!"false".equalsIgnoreCase(System.getProperty("autotransport"))) {
+        if (session().getGovernorOptions().isAutotransport()) {
             autotransport();
         }
         // unlock all sliders
@@ -1154,25 +1156,9 @@ public final class Colony implements Base, IMappedObject, Serializable {
         if (!defense().isCompleted()) {
             moveSlider(Colony.DEFENSE, null, "Reserve");
         }
+
         // Build gate if tech is available. Also add a system property to turn it off.
-        if (!"false".equalsIgnoreCase(System.getProperty("autogate"))) {
-            if (this.shipyard().canBuildStargate()) {
-                Design first = this.shipyard().design();
-                Design current = this.shipyard().design();
-                while (!this.empire.shipLab().stargateDesign().equals(current)) {
-                    this.shipyard().goToNextDesign();
-                    current = this.shipyard().design();
-                    if (current.equals(first)) {
-                        System.out.println("unable to cycle to Shargate design");
-                        break;
-                    }
-                }
-                if (this.empire.shipLab().stargateDesign().equals(current)) {
-                    locked(Colony.SHIP, false);
-                    moveSlider(Colony.SHIP, null, "Reserve");
-                }
-            }
-        }
+        buildStargate();
 
         // if all sliders are set to 0, increase research.
         boolean noSpending = true;
@@ -1279,8 +1265,40 @@ public final class Colony implements Base, IMappedObject, Serializable {
         scheduleTransportsToSystem(targets.get(0), toTransport);
         governor = true;
     }
-    public int incomingTransportsNextTurn() {
+    private int incomingTransportsNextTurn() {
         return galaxy().friendlyPopApproachingSystemNextTurn(starSystem());
     }
 
+    private void buildStargate() {
+        if (!this.shipyard().canBuildStargate()) {
+            return;
+        }
+        if (session().getGovernorOptions().getGates() == GovernorOptions.GatesGovernor.None) {
+            return;
+        }
+        if (session().getGovernorOptions().getGates() == GovernorOptions.GatesGovernor.Rich) {
+            if (!planet().isResourceRich() && !planet.isResourceUltraRich()) {
+                return;
+            }
+        }
+        // don't build gate if planet production is below 300
+        // Not sure about this one, now that maintenance is taken from global pool
+//        if (production() < 300) {
+//            return;
+//        }
+        Design first = this.shipyard().design();
+        Design current = this.shipyard().design();
+        while (!this.empire.shipLab().stargateDesign().equals(current)) {
+            this.shipyard().goToNextDesign();
+            current = this.shipyard().design();
+            if (current.equals(first)) {
+                System.out.println("unable to cycle to Shargate design");
+                break;
+            }
+        }
+        if (this.empire.shipLab().stargateDesign().equals(current)) {
+            locked(Colony.SHIP, false);
+            moveSlider(Colony.SHIP, null, "Reserve");
+        }
+    }
 }

@@ -793,4 +793,14 @@ public final class GameSession implements Base, Serializable {
             return t;
         };
     }
+
+    private GovernorOptions governorOptions = new GovernorOptions();
+
+    public GovernorOptions getGovernorOptions() {
+        // can happen on deserialized stock save game
+        if (governorOptions == null) {
+            governorOptions = new GovernorOptions();
+        }
+        return governorOptions;
+    }
 }

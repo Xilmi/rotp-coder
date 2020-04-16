@@ -34,6 +34,8 @@ import rotp.model.galaxy.StarSystem;
 import rotp.ui.BasePanel;
 import rotp.ui.SystemViewer;
 
+import javax.swing.*;
+
 public class EmpireColonySpendingPane extends BasePanel {
     private static final long serialVersionUID = 1L;
     static final Color sliderHighlightColor = new Color(255,255,255);
@@ -183,6 +185,9 @@ public class EmpireColonySpendingPane extends BasePanel {
                 String titleText = text("MAIN_COLONY_ALLOCATE_SPENDING");
                 int titleY = getHeight() - s6;
                 drawShadowedString(g, titleText, 2, s5, titleY, color, textC);
+
+                String governorOptionsText = text("GOVERNOR_OPTIONS");
+                drawShadowedString(g, governorOptionsText, 2, w-s60, titleY, MainUI.shadeBorderC(), textC);
                 return;
             }
             String text = text(Colony.categoryName(category));
@@ -377,7 +382,11 @@ public class EmpireColonySpendingPane extends BasePanel {
                 increment(true);
             else {
                 if (this.category < 0) {
-                    toggleGovernor();
+                    if (x < EmpireColonySpendingPane.this.getWidth() - s60) {
+                        toggleGovernor();
+                    } else {
+                        governorOptions();
+                    }
                 }
                 float pct = pctBoxSelected(x,y);
                 if (pct >= 0) {
@@ -440,6 +449,28 @@ public class EmpireColonySpendingPane extends BasePanel {
             return num/den;
         }
     }
+
+    JFrame governorOptionsFrame = null;
+    private void governorOptions() {
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                if (governorOptionsFrame == null) {
+                    governorOptionsFrame = new JFrame("GovernorOptions");
+                    governorOptionsFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+
+                    //Create and set up the content pane.
+                    GovernorOptionsPanel newContentPane = new GovernorOptionsPanel(governorOptionsFrame);
+                    newContentPane.getPanel().setOpaque(true); //content panes must be opaque
+                    governorOptionsFrame.setContentPane(newContentPane.getPanel());
+                }
+                //Display the window.
+                governorOptionsFrame.pack();
+                governorOptionsFrame.setVisible(true);
+
+            }
+        });
+    }
+
     private void toggleGovernor() {
         if (parent.systemViewToDisplay() != null && parent.systemViewToDisplay().colony() != null) {
             Colony colony = parent.systemViewToDisplay().colony();
