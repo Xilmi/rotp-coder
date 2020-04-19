@@ -33,21 +33,27 @@ amount of micromanagement needed drastically.
 
 To run the mod:
 
-* Download my distribution of ROTP-1.6.jar (large file) and run that instead of 
+* Download my distribution of ROTP-1.6.1.jar (large file) and run that instead of 
 original game.
 
 or
 
-* Download only the ROTP-1.6-governor.jar
+* Download only the ROTP-1.6.1-governor.jar
 * Place it in same directory that contains original Remnants.jar version Beta 1.4
-* Run ROTP-1.6-governor.jar
+* Run ROTP-1.6.1-governor.jar
 
 To enable governor, use 'q' key on keyboard, or else click "Allocate Spending"
-text in the planetary spending screen. Since version 1.6 Governor is on by default.
+text in the planetary spending screen. Since version 1.6.1 Governor is on by default.
 
 ---
 
 Additional features.
+
+* ROTP-1.6.1-mini.jar is now provided. It uses WebP images and Ooo Vorbis sounds.
+It should have all the same features as ROTP but take up less space (~193 MB). Since
+WebP library uses native parts, this will only work on Windows (32 and 64 bit),
+Mac OSX 64 bit, Linux 64 bit. If you have a different system, use full-size ROTP.
+Please report any bugs with this (especially sounds) as it needs wider testing.
 
 * Since version 1.5 governor will be on by default on new colonies. 
 
@@ -72,3 +78,6 @@ Governor options should be saved in your save game file.
 
 It's a maven build. Git clone the sources, then do "mvn package" and you have entire
 project built and packaged in "target" directory.
+
+Minimized build is provided on a separate branch. Minimized assets are not committed 
+to git, use shell scripts provided to do the conversion yourself.
