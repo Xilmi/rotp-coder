@@ -22,6 +22,7 @@ import rotp.model.colony.Colony;
 import rotp.model.colony.ColonySpendingCategory;
 import rotp.model.empires.Empire;
 import rotp.model.galaxy.StarSystem;
+import rotp.model.game.GameSession;
 import rotp.util.Base;
 
 public class AIGovernor implements Base, Governor {
@@ -79,8 +80,12 @@ public class AIGovernor implements Base, Governor {
             session().addSystemToAllocate(sys, text("MAIN_ALLOCATE_BASES_COMPLETE", name, col.defense().maxBases()));
         if (col.industry().isCompletedThisTurn())
             session().addSystemToAllocate(sys, text("MAIN_ALLOCATE_MAX_FACTORIES", name, (int)col.industry().maxFactories()));
-        if (col.ecology().populationGrowthCompleted())
-            session().addSystemToAllocate(sys, text("MAIN_ALLOCATE_MAX_POPULATION", name, (int)col.maxSize()));
+        if (col.ecology().populationGrowthCompleted()) {
+            // disable colony at max pop message if governor is on and we are using auto transport
+            if (!col.isGovernor() || !GameSession.instance().getGovernorOptions().isAutotransport()) {
+                session().addSystemToAllocate(sys, text("MAIN_ALLOCATE_MAX_POPULATION", name, (int) col.maxSize()));
+            }
+        }
         if (col.ecology().atmosphereCompleted())
             session().addSystemToAllocate(sys, text("MAIN_ALLOCATE_ATMOSPHERE_COMPLETE", name));
         if (col.ecology().soilEnrichCompleted()) {

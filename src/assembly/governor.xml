@@ -19,6 +19,9 @@
                 <include>**/GovernorOptions*.class</include>
                 <include>**/GovernorOptionsPanel*.class</include>
                 <include>**/Galaxy*.class</include>
+                <include>**/AIGovernor*.class</include>
+                <include>**/SystemListingUI*.class</include>
+                <include>**/ErrorUI*.class</include>
                 <include>**/en/labels.txt</include>
             </includes>
             <outputDirectory>/</outputDirectory>

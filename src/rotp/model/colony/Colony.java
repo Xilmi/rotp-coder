@@ -1149,7 +1149,17 @@ public final class Colony implements Base, IMappedObject, Serializable {
         // Add maximum ecology
         if (!ecology().isCompleted() || ecology().enrichSoilCost() > 0.0 || planet().canTerraformAtmosphere(this.empire())) {
             locked(Colony.ECOLOGY, false);
-            moveSlider(Colony.ECOLOGY, null, "Reserve");
+            // Provision for autotransport. Don't spend on pop growth if only pop growth remains and we have close to max pop
+            float expectedGrowth = Math.max(2, normalPopGrowth());
+            if (session().getGovernorOptions().isAutotransport()
+                    && ecology().enrichSoilCost() <= 0.0
+                    && ecology().terraformCost() <= 0.0
+                    && (ecology().waste() <= 0 || empire().race().ignoresPlanetEnvironment)
+                    && (population() + expectedGrowth >= planet().currentSize()) ) {
+                // do nothing
+            } else {
+                moveSlider(Colony.ECOLOGY, null, "Reserve");
+            }
             locked(Colony.ECOLOGY, true);
         }
         // add maximum defence

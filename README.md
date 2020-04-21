@@ -33,23 +33,33 @@ amount of micromanagement needed drastically.
 
 To run the mod:
 
-* Download my distribution of ROTP-1.6.1.jar (large file) and run that instead of 
+* Download my distribution of ROTP-1.6.2.jar (large file) and run that instead of 
 original game.
 
 or
 
-* Download only the ROTP-1.6.1-governor.jar
+* Download only the ROTP-1.6.2-governor.jar
 * Place it in same directory that contains original Remnants.jar version Beta 1.4
-* Run ROTP-1.6.1-governor.jar
+* Run ROTP-1.6.2-governor.jar
 
 To enable governor, use 'q' key on keyboard, or else click "Allocate Spending"
-text in the planetary spending screen. Since version 1.6.1 Governor is on by default.
+text in the planetary spending screen. Since version 1.6.2 Governor is on by default.
 
 ---
 
 Additional features.
 
-* ROTP-1.6.1-mini.jar is now provided. It uses WebP images and Ooo Vorbis sounds.
+* Changed in 1.6.2. Governed colonies are now shown in green in colonies list.
+If autotransport is on, maximum population reached message should not be shown 
+for governed planets and governor won't spend production on population growth if
+only 1-3 population remains until limit. Also, my email is shown in case of error.
+
+Some problems with ROTP-mini have been fixed. I also found out that to run on 
+Windows, ROTP-mini needs "vcruntime140d.dll" & "ucrtbased.dll" to run. Please get
+them and place them in the same directory. This issue has been raised with WebP
+library authors already: https://github.com/sejda-pdf/webp-imageio/issues/1   
+
+* ROTP-1.6.2-mini.jar is now provided. It uses WebP images and Ooo Vorbis sounds.
 It should have all the same features as ROTP but take up less space (~193 MB). Since
 WebP library uses native parts, this will only work on Windows (32 and 64 bit),
 Mac OSX 64 bit, Linux 64 bit. If you have a different system, use full-size ROTP.
