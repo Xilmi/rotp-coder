@@ -24,8 +24,8 @@ import javax.swing.*;
  * to get more memory it uses the right jar file name.
  */
 public class RotpGovernor {
-    static String governorVersion = "1.6.2";
-    static String expectedROTPVersion = "Beta 1.6a";
+    static String governorVersion = "1.7";
+    static String expectedROTPVersion = "Beta 1.7";
 
     public static void main(String[] args) {
         String jarFilename = "ROTP-" + governorVersion + "-governor.jar";
