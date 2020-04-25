@@ -33,32 +33,34 @@ amount of micromanagement needed drastically.
 
 To run the mod:
 
-* Download my distribution of ROTP-1.7.jar (large file) and run that instead of 
-original game.
+* Download my distribution of ROTP-1.8.1.jar (large file) and run that instead of 
+original game. You are also welcome to try ROTP-mini-1.8.1.jar which is smaller
+as it uses better compression for game assets. 
 
 or
 
-* Download only the ROTP-1.7-governor.jar
+* Download only the ROTP-1.8.1-governor.jar
 * Place it in same directory that contains original Remnants.jar version Beta 1.4
-* Run ROTP-1.7-governor.jar
+* Run ROTP-1.8.1-governor.jar
 
 To enable governor, use 'q' key on keyboard, or else click "Allocate Spending"
-text in the planetary spending screen. Since version 1.7 Governor is on by default.
+text in the planetary spending screen. Since version 1.8.1 Governor is on by default.
 
 ---
 
 Additional features.
 
-* Changed in 1.7. Governed colonies are now shown in green in colonies list.
-If autotransport is on, maximum population reached message should not be shown 
-for governed planets and governor won't spend production on population growth if
-only 1-3 population remains until limit. Also, my email is shown in case of error.
+* Governed colonies are now shown in green in colonies list. If autotransport is on,
+maximum population reached message should not be shown for governed planets and 
+governor won't spend production on population growth if only 1-3 population remains 
+until limit. Also, my email is shown in case of error.
 
-
-* ROTP-1.7-mini.jar is now provided. It uses WebP images and Ooo Vorbis sounds.
+* ROTP-1.8.1-mini.jar is now provided. It uses WebP images and Ooo Vorbis sounds.
 It should have all the same features as ROTP but take up less space (~193 MB). Since
 WebP library uses native parts, this will only work on Windows (32 and 64 bit),
 Mac OSX 64 bit, Linux 64 bit. If you have a different system, use full-size ROTP.
+On Windows, please install Microsoft Visual C++ 2015 Redistributable 
+(https://www.microsoft.com/en-us/download/details.aspx?id=52685).
 Please report any bugs with this (especially sounds) as it needs wider testing.
 
 * Some problems with ROTP-mini have been fixed. I also found out that to run on 
