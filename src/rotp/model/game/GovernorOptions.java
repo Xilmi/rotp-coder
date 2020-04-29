@@ -13,7 +13,7 @@ public class GovernorOptions implements Serializable {
     }
     // keep backwards compatibility with system properties
     private boolean governorOnByDefault = !"false".equalsIgnoreCase(System.getProperty("defaultgovernor", "true"));;
-    private boolean autotransport = !"false".equalsIgnoreCase(System.getProperty("autotransport", "true"));
+    private boolean autotransport = "true".equalsIgnoreCase(System.getProperty("autotransport", "false"));
     private GatesGovernor gates = "false".equalsIgnoreCase(System.getProperty("autogate", "true")) ? GatesGovernor.None : GatesGovernor.Rich;
 
     public GovernorOptions() {
