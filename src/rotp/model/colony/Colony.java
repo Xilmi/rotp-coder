@@ -757,7 +757,15 @@ public final class Colony implements Base, IMappedObject, Serializable {
         return inTransport();
     }
     public void clearTransport() {
+        StarSystem oldDest = transport().destination();
         transport().reset(empire);
+        // recalculate destination and this colony if applicable
+        if (oldDest != null && !oldDest.colony().isAutopilot() && oldDest.colony().isGovernor()) {
+            oldDest.colony().govern();
+        }
+        if (!this.isAutopilot() && this.isGovernor()) {
+            govern();
+        }
     }
     public int maxTransportsAllowed() {
         if (quarantined())
@@ -791,9 +799,13 @@ public final class Colony implements Base, IMappedObject, Serializable {
         if ((dest == starSystem()) || (xPop == 0))
             clearTransport();
         else {
+            StarSystem oldDest = transport().destination();
             transport().size(pop);
             transport().setDest(dest);
             transport().setDefaultTravelSpeed();
+            if (oldDest != null && oldDest != dest && !oldDest.colony().isAutopilot() && oldDest.colony().isGovernor()) {
+                oldDest.colony().govern();
+            }
         }
 
         // reset ship views
@@ -803,6 +815,10 @@ public final class Colony implements Base, IMappedObject, Serializable {
         // recalculate governor if transports are sent
         if (!this.isAutopilot() && this.isGovernor()) {
             govern();
+        }
+        // recalculate destination colony
+        if (!dest.colony().isAutopilot() && dest.colony().isGovernor()) {
+            dest.colony().govern();
         }
     }
     public void acceptTransport(Transport t) {
@@ -1134,17 +1150,23 @@ public final class Colony implements Base, IMappedObject, Serializable {
     }
     /**
      * Govern the colony.
-     * - First, set ecology to minimum.
-     * - Then set industry to maximum. Skip a turn if there are more factories than population can control to
-     * spend production on ecology instead.
-     * - Then set ecology to maximum.
+     * - First, send auto transports if enabled
+     * - Then balance ecology and industry spending for maximum production
      * - Then set defence to maximum.
+     * - Then build a stargate if applicable
      *
      * This is quite crude- works by moving slider by 1 tick until desired results happen.
      * Better way would be to calculate and set each slider directly to the right percentage.
      *
      */
     public void govern() {
+        // don't govern if it hasn't been fully initialized
+        // I added this due to adding governor logic in clearTransports which is called
+        // during the initialization process
+        for (int i = 0; i < spending.length; i++)
+            if (spending[i] == null || spending[i].colony() == null)
+                return;
+
         if (session().getGovernorOptions().isAutotransport()) {
             autotransport();
         }
@@ -1154,36 +1176,16 @@ public final class Colony implements Base, IMappedObject, Serializable {
         }
         // start from scratch
         clearSpending();
-        // Add minimum ecology
-        moveSlider(Colony.ECOLOGY, "Waste", null);
-        locked(Colony.ECOLOGY, true);
-        // Add maximum industry if factories would actually get used
-        float canBeUsed = workingPopulation() * (float)industry().effectiveRobotControls();
-        // if we can refit, we need to spend on industry anyway
-        boolean refit = industry().effectiveRobotControls() < empire().maxRobotControls();
-        if (!industry().isCompleted() && (refit || industry().factories() <= canBeUsed)) {
-            moveSlider(Colony.INDUSTRY, null, "Reserve");
-        }
-        locked(Colony.INDUSTRY, true);
-        // Add maximum ecology
-        if (!ecology().isCompleted() || ecology().enrichSoilCost() > 0.0 || planet().canTerraformAtmosphere(this.empire())) {
-            locked(Colony.ECOLOGY, false);
-            // Provision for autotransport. Don't spend on pop growth if only pop growth remains and we have close to max pop
-            float expectedGrowth = Math.max(2, normalPopGrowth());
-            if (session().getGovernorOptions().isAutotransport()
-                    && ecology().enrichSoilCost() <= 0.0
-                    && ecology().terraformCost() <= 0.0
-                    && (ecology().waste() <= 0 || empire().race().ignoresPlanetEnvironment)
-                    && (population() + expectedGrowth >= planet().currentSize()) ) {
-                // do nothing
-            } else {
-                moveSlider(Colony.ECOLOGY, null, "Reserve");
-            }
-            locked(Colony.ECOLOGY, true);
-        }
+
+        // Leave some room for normal population growth if we're auto transporting
+        if (session().getGovernorOptions().isAutotransport())
+            balanceEcoAndInd(1 - Math.max(normalPopGrowth(), 2) / maxSize());
+        else
+            balanceEcoAndInd(1);
+
         // add maximum defence
         if (!defense().isCompleted()) {
-            moveSlider(Colony.DEFENSE, null, "Reserve");
+            moveSlider(Colony.DEFENSE, null, text(ColonySpendingCategory.reserveText));
         }
 
         // Build gate if tech is available. Also add a system property to turn it off.
@@ -1199,10 +1201,187 @@ public final class Colony implements Base, IMappedObject, Serializable {
         }
         if (noSpending) {
 //            System.out.println("NO SPENDING "+this.name());
-            moveSlider(Colony.RESEARCH, null, "Reserve");
+            moveSlider(Colony.RESEARCH, null, text(ColonySpendingCategory.reserveText));
         }
         // unlock industry slider. Thanks DM666a
         locked(Colony.INDUSTRY, false);
+    }
+
+    /**
+     * Balances ECO and IND spending for maximum production next turn.
+     * - targetPopPercent is between 0 and 1 for target population size by spending on ECO.
+     *   So, you can say 0.99 to leave a little population for natural growth, or use 0.5 to
+     *   maximize growth rate, 1 to always grow to max size, or 0 to never spend on pop growth.
+     * - It will also not spend to grow larger than max size less all incoming transports.
+     *   So if you have 10 transports arriving in 5 turns, it won't spend ECO to grow the last 10,
+     *   but it will spend IND to build factories for them.
+     *
+     * - first allocate minimum ECO spend to prevent waste
+     * - then prioritize IND for refitting / converting factories
+     * - then prioritize IND up to maximum controlled by next turn's population
+     * - then spend ECO to improve environment (atmosphere, soil, terraforming)
+     * - then spend ECO to grow population enough to control existing factories
+     * - then spend ECO/IND proportionally to build factories at the rate the new pop can control
+     * - then build any remaining factories that can be built (if target population percent is not 1)
+     * - then make sure we don't allocate more than needed for either ECO or IND (can happen due to
+     *   rounding or situations like terraforming where the factories for the new population can't be
+     *   built until the next turn).  If there is extra, assign it to the other category if it can be used
+     * - finally make sure that we aren't over MAX_TICKS for both ECO and IND (can happen due to rounding).
+     *   If we are, prioritize IND making sure to keep ECO at least at minimum spend to prevent waste
+     */
+    public void balanceEcoAndInd(float targetPopPercent) {
+        targetPopPercent = Math.min(Math.max(targetPopPercent, 0), 1);
+        // new pop next turn before spending
+        float baseNewPop = workingPopulation() + normalPopGrowth() + incomingTransportsNextTurn();
+        // transports coming after next turn; use to limit pop growth spending
+        float additionalTransports = Math.max(incomingTransports() - incomingTransportsNextTurn(), 0);
+        // population target for growth spending
+        float popTarget = Math.min(maxSize() * targetPopPercent, maxSize() - additionalTransports);
+
+        float totalBC = totalIncome();
+        float cleanupCost = minimumCleanupCost();
+        int minEcoAll = ecology().cleanupAllocationNeeded();
+        // ECO allocation to clean up + everything else
+        // I compute it here instead of adding maxSpendingAllocation + cleanupAllocationNeeded because that could produce
+        // a result too high by 1 due to rounding.
+        int maxEcoAll = Math.min((int) Math.ceil((cleanupCost + ecology().maxSpendingNeeded()) / totalBC * MAX_TICKS), MAX_TICKS);
+        int maxIndAll = industry().maxAllocationNeeded();
+        // Factor for industry spending based on planet adjustmen (rich, poor, etc.).  Reserve
+        // spending doesn't get adjusted, so we calculate an overall factor here.
+        float indFactor = totalIncome() / (maxReserveIncome() + totalProductionIncome() * planet.productionAdj());
+        float maxIndBC = industry().maxSpendingNeeded() * indFactor;
+        float remainingBC = Math.max(totalBC - cleanupCost, 0);  // BC remaining to allocate
+        float popCost = tech().populationCost();
+        float factoryCost = industry().newFactoryCost() * indFactor;
+        float robotControls = industry().effectiveRobotControls();
+        float factories = industry().factories();
+        float canBeUsed = baseNewPop * (float)industry().effectiveRobotControls();
+        // limit growth based on target population
+        float maxGrowth = Math.max(popTarget - baseNewPop, 0);
+        float ecoBC = cleanupCost;
+        float indBC = 0;
+        int ecoAll = 0;
+        int indAll = 0;
+        boolean refit = industry().effectiveRobotControls() < empire().maxRobotControls();
+        boolean hasAlienFactories = planet().numAlienFactories() > 0;
+
+        /*
+        System.out.println("balance "+this.name()+" popTarget "+popTarget);
+        System.out.println("balance "+this.name()+" baseNewPop "+baseNewPop);
+        System.out.println("balance "+this.name()+" totalBC "+totalBC);
+        System.out.println("balance "+this.name()+" cleanupCost "+cleanupCost);
+        System.out.println("balance "+this.name()+" minEcoAll "+minEcoAll);
+        System.out.println("balance "+this.name()+" maxEcoAll "+maxEcoAll);
+        System.out.println("balance "+this.name()+" maxIndAll "+maxIndAll);
+        System.out.println("balance "+this.name()+" maxIndBC "+maxIndBC);
+        System.out.println("balance "+this.name()+" indFactor "+indFactor);
+        System.out.println("balance "+this.name()+" popCost "+popCost);
+        System.out.println("balance "+this.name()+" factoryCost "+factoryCost);
+        System.out.println("balance "+this.name()+" robotControls "+robotControls);
+        System.out.println("balance "+this.name()+" factories "+factories);
+        System.out.println("balance "+this.name()+" canBeUsed "+canBeUsed);
+        System.out.println("balance "+this.name()+" maxGrowth "+maxGrowth);
+        System.out.println("balance "+this.name()+" remainingBC "+remainingBC);
+        System.out.println("balance "+this.name()+" maxControls "+empire().maxRobotControls());
+        System.out.println("balance "+this.name()+" industry complete "+industry().isCompleted());
+        System.out.println("balance "+this.name()+" refit "+refit);
+        */
+
+        // If there's alien factories or refitting, allocate ECO to clean and then the rest (up to max needed) to industry.
+        // Any leftovers go to ECO up to max.
+        // To properly balance this would require changes to ColonyIndustry to expose some internal numbers.
+        if (!industry().isCompleted() && (hasAlienFactories || refit)) {
+            //System.out.println("balance "+this.name()+" has alien factories or refit");
+            indAll = Math.min(MAX_TICKS - ecoAll, industry().maxAllocationNeeded());
+            indBC = indAll * totalBC / MAX_TICKS;
+            remainingBC = Math.max(remainingBC - indBC, 0);
+            // max out pop growth if there is some leftover production
+            ecoBC += Math.min(ecology().maxSpendingNeeded(), remainingBC);
+            ecoAll = Math.max((int) Math.ceil(ecoBC / totalBC * MAX_TICKS), minEcoAll);
+        } else {
+            // For all other situations (no refit; no alien factories), max out IND first to usefulness, then
+            // balance ECO and IND spend to get max production next turn
+
+            // Build factories to max out population use of factories
+            indBC = Math.min(Math.max(canBeUsed - factories, 0) * factoryCost, remainingBC);
+            float newFactories = indBC / factoryCost;
+            remainingBC = Math.max(remainingBC - indBC, 0);
+            //System.out.println("balance "+this.name()+" newFactories "+newFactories);
+            //System.out.println("balance "+this.name()+" indBC "+indBC);
+            //System.out.println("balance "+this.name()+" remainingBC "+remainingBC);
+
+            // Check for terraforming / atmosphere / soil enrichment
+            float terraformBC = Math.min(ecology().terraformSpendingNeeded(), remainingBC);
+            ecoBC += terraformBC;
+            remainingBC = Math.max(remainingBC - terraformBC, 0);
+            //System.out.println("balance "+this.name()+" terraformBC "+terraformBC);
+            //System.out.println("balance "+this.name()+" remainingBC "+remainingBC);
+
+            // Grow population to use existing factories
+            float popGrowth = Math.min(Math.max(factories - canBeUsed, 0) / robotControls, maxGrowth);
+            float popBC = Math.min(popGrowth * popCost, remainingBC);
+            ecoBC += popBC;
+            remainingBC = Math.max(remainingBC - popBC, 0);
+            //System.out.println("balance "+this.name()+" popGrowth "+popGrowth);
+            //System.out.println("balance "+this.name()+" popBC "+popBC);
+            //System.out.println("balance "+this.name()+" remainingBC "+remainingBC);
+
+            // room left we can grow
+            maxGrowth = Math.max(maxGrowth - popGrowth, 0);
+            //System.out.println("balance "+this.name()+" maxGrowth "+maxGrowth);
+
+            // Allocate remaining BC between ECO and IND to get max production benefit
+            float factoryCostPerPop = factoryCost * robotControls;
+            float totalCostPerPop = popCost + factoryCostPerPop;
+            popGrowth = Math.min(remainingBC / totalCostPerPop, maxGrowth);
+            indBC += popGrowth * factoryCostPerPop;
+            ecoBC += popGrowth * popCost;
+            remainingBC = Math.max(remainingBC - popGrowth * totalCostPerPop, 0);
+            //System.out.println("balance "+this.name()+" popGrowth "+popGrowth);
+            //System.out.println("balance "+this.name()+" added ind BC "+popGrowth * factoryCostPerPop);
+            //System.out.println("balance "+this.name()+" added eco BC "+popGrowth * popCost);
+            //System.out.println("balance "+this.name()+" remainingBC "+remainingBC);
+
+            // If we're not growing some pop, still build out those factories for when natural growth/transports need them
+            if (popTarget < maxSize() && indBC < maxIndBC) {
+                float extraIndBC = Math.min(maxIndBC - indBC, remainingBC);
+                indBC += extraIndBC;
+                remainingBC = Math.max(remainingBC - extraIndBC, 0);
+                //System.out.println("balance "+this.name()+" extraIndBC "+extraIndBC);
+                //System.out.println("balance "+this.name()+" remainingBC "+remainingBC);
+            }
+
+            ecoAll = (int) Math.ceil(ecoBC / totalBC * MAX_TICKS);
+            indAll = (int) Math.ceil(indBC / totalBC * MAX_TICKS);
+        }
+        //System.out.println("balance "+this.name()+" indAll before min/max checks "+indAll);
+        //System.out.println("balance "+this.name()+" ecoAll before min/max checks "+ecoAll);
+
+        // we over allocated industry (can be due to terraforming or industry reserve)
+        if (indAll > maxIndAll) {
+            // assign excess to ECO
+            ecoAll = Math.min(ecoAll + indAll - maxIndAll, maxEcoAll);
+            indAll = maxIndAll;
+        }
+        // we over allocated ecology, so reduce to max needed
+        if (ecoAll > maxEcoAll) {
+            // assign excess to IND
+            indAll = Math.min(indAll + ecoAll - maxEcoAll, maxIndAll);
+            ecoAll = maxEcoAll;
+        }
+
+        // adjust allocations to maximum total if we exceeded due to rounding
+        if (indAll + ecoAll > MAX_TICKS) {
+            // favor IND over ECO, but don't reduce ECO below minimum
+            ecoAll = Math.max(MAX_TICKS - indAll, minEcoAll);
+            indAll = Math.max(MAX_TICKS - ecoAll, 0);
+        }
+        //System.out.println("balance "+this.name()+" indAll final "+indAll);
+        //System.out.println("balance "+this.name()+" ecoAll final "+ecoAll);
+        increment(Colony.ECOLOGY, ecoAll);
+        locked(Colony.ECOLOGY, true);
+        increment(Colony.INDUSTRY, indAll);
+        locked(Colony.INDUSTRY, true);
     }
 
     public float unrestrictedPopGrowth() {
@@ -1343,7 +1522,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         }
         if (this.empire.shipLab().stargateDesign().equals(current)) {
             locked(Colony.SHIP, false);
-            moveSlider(Colony.SHIP, null, "Reserve");
+            moveSlider(Colony.SHIP, null, text(ColonySpendingCategory.reserveText));
         }
     }
 }
