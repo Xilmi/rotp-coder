@@ -1,139 +1,410 @@
 package rotp.ui.main;
 
+import java.awt.event.MouseWheelEvent;
+import javax.swing.JFrame;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 import rotp.model.galaxy.StarSystem;
 import rotp.model.game.GameSession;
 import rotp.model.game.GovernorOptions;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
-import java.awt.*;
+import rotp.ui.RotPUI;
 
 /**
- * Controls
- * <p>
- * [ X ] Governor on by default
- * [ X ] Automatically send transports
- * [ X ] Turn governor on all colonies
- * BOX Stargates
- * ( o ) Never build automatically
- * ( o ) Rich and Ultra Rich planets
- * ( o ) Always build
+ * Produced using Netbeans Swing GUI builder.
  */
-
-public class GovernorOptionsPanel {
-    private JFrame frame;
-    private JPanel panel;
-    private JCheckBox governorDefault;
-    private JCheckBox autotransport;
-    private JRadioButton gateNever;
-    private JRadioButton gateRich;
-    private JRadioButton gateAlways;
-
+public class GovernorOptionsPanel extends javax.swing.JPanel {
+    private final JFrame frame;
     public GovernorOptionsPanel(JFrame frame) {
         this.frame = frame;
-        panel = new JPanel();
-
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBorder(BorderFactory.createLineBorder(Color.red, 1));
-
-        governorDefault = new JCheckBox("Governor is on by default");
-        governorDefault.setBorder(new EmptyBorder(10, 10, 10, 10));
-        governorDefault.setSelected(GameSession.instance().getGovernorOptions().isGovernorOnByDefault());
-
-        panel.add(governorDefault);
-        autotransport = new JCheckBox("Population automatically transported from full colonies");
-        autotransport.setBorder(new EmptyBorder(10, 10, 10, 10));
-        autotransport.setSelected(GameSession.instance().getGovernorOptions().isAutotransport());
-        panel.add(autotransport);
-
-        panel.add(new Box.Filler(new Dimension(100, 5), new Dimension(100, 20), new Dimension(100, 30)));
-        JButton allOn = new JButton("All governors ON");
-        allOn.addActionListener(e -> {
-            for (StarSystem ss : GameSession.instance().galaxy().player().orderedColonies()) {
-                if (!ss.isColonized()) {
-                    // shouldn't happen
-                    continue;
-                }
-                ss.colony().setGovernor(true);
-            }
-        });
-        panel.add(allOn);
-        panel.add(new Box.Filler(new Dimension(100, 5), new Dimension(100, 20), new Dimension(100, 30)));
-        JButton allOff = new JButton("All governors OFF");
-        allOff.addActionListener(e -> {
-            for (StarSystem ss : GameSession.instance().galaxy().player().orderedColonies()) {
-                if (!ss.isColonized()) {
-                    // shouldn't happen
-                    continue;
-                }
-                ss.colony().setGovernor(false);
-            }
-        });
-        panel.add(allOff);
-        panel.add(new Box.Filler(new Dimension(100, 5), new Dimension(100, 20), new Dimension(100, 30)));
-
-        JPanel radioButtons = new JPanel();
-        radioButtons.setLayout(new BoxLayout(radioButtons, BoxLayout.PAGE_AXIS));
-        radioButtons.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
-                "Stargate Options"));
-        ButtonGroup gates = new ButtonGroup();
-        gateNever = new JRadioButton("Never build stargates");
-        gateRich = new JRadioButton("Build stargates on Rich and Ultra Rich planets");
-        gateAlways = new JRadioButton("Always build stargates");
-        gates.add(gateNever);
-        gates.add(gateRich);
-        gates.add(gateAlways);
-        radioButtons.add(gateNever);
-        radioButtons.add(gateRich);
-        radioButtons.add(gateAlways);
+        initComponents();
+        // initial values
+        GovernorOptions options = GameSession.instance().getGovernorOptions();
+        this.governorDefault.setSelected(options.isGovernorOnByDefault());
+        this.autotransport.setSelected(options.isAutotransport());
+        this.transportPop.setValue(options.getTransportPopulation());
+        this.transportMaxPercent.setValue(options.getTransportMaxPercent());
+        this.transportMaxTurns.setValue(options.getTransportMaxTurns());
+        changePopulationLabel();
         switch (GameSession.instance().getGovernorOptions().getGates()) {
             case None:
-                gateNever.setSelected(true);
+                this.stargateOff.setSelected(true);
                 break;
             case Rich:
-                gateRich.setSelected(true);
+                this.stargateRich.setSelected(true);
                 break;
             case All:
-                gateAlways.setSelected(true);
+                this.stargateOn.setSelected(true);
                 break;
         }
-        panel.add(radioButtons);
-
-        JPanel okCancelButtons = new JPanel();
-        JButton ok = new JButton("OK");
-        ok.addActionListener(e -> {
-            GameSession.instance().getGovernorOptions().setGovernorOnByDefault(governorDefault.isSelected());
-            GameSession.instance().getGovernorOptions().setAutotransport(autotransport.isSelected());
-            if (gateNever.isSelected()) {
-                GameSession.instance().getGovernorOptions().setGates(GovernorOptions.GatesGovernor.None);
-            }
-            if (gateRich.isSelected()) {
-                GameSession.instance().getGovernorOptions().setGates(GovernorOptions.GatesGovernor.Rich);
-            }
-            if (gateAlways.isSelected()) {
-                GameSession.instance().getGovernorOptions().setGates(GovernorOptions.GatesGovernor.All);
-            }
-            frame.setVisible(false);
-        });
-        JButton cancel = new JButton("Cancel");
-        cancel.addActionListener(e -> {
-            frame.setVisible(false);
-        });
-        okCancelButtons.add(ok);
-        okCancelButtons.add(cancel);
-        panel.add(okCancelButtons);
     }
 
-    public JPanel getPanel() {
-        return panel;
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        stargateOptions = new javax.swing.ButtonGroup();
+        governorDefault = new javax.swing.JCheckBox();
+        javax.swing.JPanel autotransportPanel = new javax.swing.JPanel();
+        autotransport = new javax.swing.JCheckBox();
+        transportPop = new javax.swing.JSpinner();
+        javax.swing.JLabel transportPopLabel = new javax.swing.JLabel();
+        transportMaxPercent = new javax.swing.JSpinner();
+        javax.swing.JLabel transportMaxPercentLabel = new javax.swing.JLabel();
+        transportSizeLabel = new javax.swing.JLabel();
+        transportMaxTurns = new javax.swing.JSpinner();
+        javax.swing.JLabel transportMaxTurnsLabel = new javax.swing.JLabel();
+        javax.swing.JLabel transportMaxTurnsNebula = new javax.swing.JLabel();
+        allGovernorsOn = new javax.swing.JButton();
+        allGovernorsOff = new javax.swing.JButton();
+        javax.swing.JPanel stargatePanel = new javax.swing.JPanel();
+        stargateOff = new javax.swing.JRadioButton();
+        stargateRich = new javax.swing.JRadioButton();
+        stargateOn = new javax.swing.JRadioButton();
+        okButton = new javax.swing.JButton();
+        cancelButton = new javax.swing.JButton();
+
+        governorDefault.setText("Governor is on by default");
+
+        autotransportPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Autotransport Options"));
+
+        autotransport.setText("Population automatically transported from full colonies");
+
+        transportPop.setModel(new javax.swing.SpinnerNumberModel(10, 1, 10, 1));
+        transportPop.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                transportPopStateChanged(evt);
+            }
+        });
+        transportPop.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                transportPopMouseWheelMoved(evt);
+            }
+        });
+
+        transportPopLabel.setText("Population to transport");
+        transportPopLabel.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                transportPopLabelMouseWheelMoved(evt);
+            }
+        });
+
+        transportMaxPercent.setModel(new javax.swing.SpinnerNumberModel(20, 3, 20, 1));
+        transportMaxPercent.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                transportMaxPercentStateChanged(evt);
+            }
+        });
+        transportMaxPercent.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                transportMaxPercentMouseWheelMoved(evt);
+            }
+        });
+
+        transportMaxPercentLabel.setText("Maximum population % to transport");
+        transportMaxPercentLabel.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                transportMaxPercentLabelMouseWheelMoved(evt);
+            }
+        });
+
+        transportSizeLabel.setText("Only planets size X and above will transport population");
+
+        transportMaxTurns.setModel(new javax.swing.SpinnerNumberModel(15, 1, 15, 1));
+        transportMaxTurns.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                transportMaxTurnsMouseWheelMoved(evt);
+            }
+        });
+
+        transportMaxTurnsLabel.setText("Maximum transport distance in turns");
+        transportMaxTurnsLabel.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                transportMaxTurnsLabelMouseWheelMoved(evt);
+            }
+        });
+
+        transportMaxTurnsNebula.setText("(1.5x higher distance when transporting to nebulae)");
+
+        javax.swing.GroupLayout autotransportPanelLayout = new javax.swing.GroupLayout(autotransportPanel);
+        autotransportPanel.setLayout(autotransportPanelLayout);
+        autotransportPanelLayout.setHorizontalGroup(
+            autotransportPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(autotransportPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(autotransportPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(autotransport)
+                    .addGroup(autotransportPanelLayout.createSequentialGroup()
+                        .addGroup(autotransportPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(transportMaxPercent, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
+                            .addComponent(transportPop))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(autotransportPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(transportPopLabel)
+                            .addComponent(transportMaxPercentLabel)))
+                    .addComponent(transportSizeLabel)
+                    .addGroup(autotransportPanelLayout.createSequentialGroup()
+                        .addComponent(transportMaxTurns, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(transportMaxTurnsLabel))
+                    .addComponent(transportMaxTurnsNebula))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        autotransportPanelLayout.setVerticalGroup(
+            autotransportPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(autotransportPanelLayout.createSequentialGroup()
+                .addComponent(autotransport)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(autotransportPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(transportPop, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(transportPopLabel))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(autotransportPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(transportMaxPercent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(transportMaxPercentLabel))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(transportSizeLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(autotransportPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(transportMaxTurns, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(transportMaxTurnsLabel))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(transportMaxTurnsNebula))
+        );
+
+        allGovernorsOn.setText("All Governors ON");
+        allGovernorsOn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                allGovernorsOnActionPerformed(evt);
+            }
+        });
+
+        allGovernorsOff.setText("All Governos OFF");
+        allGovernorsOff.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                allGovernorsOffActionPerformed(evt);
+            }
+        });
+
+        stargatePanel.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Stargate Options"));
+
+        stargateOptions.add(stargateOff);
+        stargateOff.setText("Never build stargates");
+
+        stargateOptions.add(stargateRich);
+        stargateRich.setText("Build stargates on Rich and Ultra Rich planets");
+
+        stargateOptions.add(stargateOn);
+        stargateOn.setText("Always build stargates");
+
+        javax.swing.GroupLayout stargatePanelLayout = new javax.swing.GroupLayout(stargatePanel);
+        stargatePanel.setLayout(stargatePanelLayout);
+        stargatePanelLayout.setHorizontalGroup(
+            stargatePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(stargatePanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(stargatePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(stargateOff)
+                    .addComponent(stargateRich)
+                    .addComponent(stargateOn))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        stargatePanelLayout.setVerticalGroup(
+            stargatePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(stargatePanelLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(stargateOff)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(stargateRich)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(stargateOn))
+        );
+
+        okButton.setText("OK");
+        okButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                okButtonActionPerformed(evt);
+            }
+        });
+
+        cancelButton.setText("Cancel");
+        cancelButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cancelButtonActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+        this.setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(autotransportPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(stargatePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(okButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(cancelButton))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(governorDefault)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(allGovernorsOn)
+                                .addGap(143, 143, 143)
+                                .addComponent(allGovernorsOff)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(governorDefault)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(autotransportPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(allGovernorsOn)
+                    .addComponent(allGovernorsOff))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(stargatePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(okButton)
+                    .addComponent(cancelButton))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void allGovernorsOnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_allGovernorsOnActionPerformed
+        for (StarSystem ss : GameSession.instance().galaxy().player().orderedColonies()) {
+            if (!ss.isColonized()) {
+                // shouldn't happen
+                continue;
+            }
+            ss.colony().setGovernor(true);
+            ss.colony().governIfNeeded();
+        }
+    }//GEN-LAST:event_allGovernorsOnActionPerformed
+
+    private void transportPopMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_transportPopMouseWheelMoved
+        mouseWheel(transportPop, evt);
+    }//GEN-LAST:event_transportPopMouseWheelMoved
+
+    private void transportMaxPercentMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_transportMaxPercentMouseWheelMoved
+        mouseWheel(transportMaxPercent, evt);
+    }//GEN-LAST:event_transportMaxPercentMouseWheelMoved
+
+    private void transportMaxTurnsMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_transportMaxTurnsMouseWheelMoved
+        mouseWheel(transportMaxTurns, evt);
+    }//GEN-LAST:event_transportMaxTurnsMouseWheelMoved
+
+    private void transportPopLabelMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_transportPopLabelMouseWheelMoved
+        mouseWheel(transportPop, evt);
+    }//GEN-LAST:event_transportPopLabelMouseWheelMoved
+
+    private void transportMaxPercentLabelMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_transportMaxPercentLabelMouseWheelMoved
+        mouseWheel(transportMaxPercent, evt);
+    }//GEN-LAST:event_transportMaxPercentLabelMouseWheelMoved
+
+    private void transportMaxTurnsLabelMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_transportMaxTurnsLabelMouseWheelMoved
+        mouseWheel(transportMaxTurns, evt);
+    }//GEN-LAST:event_transportMaxTurnsLabelMouseWheelMoved
+
+    private void allGovernorsOffActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_allGovernorsOffActionPerformed
+        for (StarSystem ss : GameSession.instance().galaxy().player().orderedColonies()) {
+            if (!ss.isColonized()) {
+                // shouldn't happen
+                continue;
+            }
+            ss.colony().setGovernor(false);
+        }
+    }//GEN-LAST:event_allGovernorsOffActionPerformed
+
+    private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
+        GovernorOptions options = GameSession.instance().getGovernorOptions();
+        options.setGovernorOnByDefault(governorDefault.isSelected());
+        options.setAutotransport(autotransport.isSelected());
+        options.setTransportPopulation((Integer)transportPop.getValue());
+        options.setTransportMaxPercent((Integer)transportMaxPercent.getValue());
+        options.setTransportMaxTurns((Integer)transportMaxTurns.getValue());
+
+        if (stargateOff.isSelected()) {
+            options.setGates(GovernorOptions.GatesGovernor.None);
+        } else if (stargateRich.isSelected()) {
+            options.setGates(GovernorOptions.GatesGovernor.Rich);
+        } else if (stargateOn.isSelected()) {
+            options.setGates(GovernorOptions.GatesGovernor.All);
+        }
+        frame.setVisible(false);
+    }//GEN-LAST:event_okButtonActionPerformed
+
+    private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
+        frame.setVisible(false);
+    }//GEN-LAST:event_cancelButtonActionPerformed
+
+    private void transportPopStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_transportPopStateChanged
+        changePopulationLabel();
+    }//GEN-LAST:event_transportPopStateChanged
+
+    private void transportMaxPercentStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_transportMaxPercentStateChanged
+        changePopulationLabel();
+    }//GEN-LAST:event_transportMaxPercentStateChanged
+
+    private void changePopulationLabel() {
+        int pop = (int)this.transportPop.getValue();
+        int maxPercent = (int)this.transportMaxPercent.getValue();
+        int size = pop * 100 / maxPercent;
+        String msg = String.format("Only planets size %d and above will transport population", size);
+        transportSizeLabel.setText(msg);
+    }
+    private static void mouseWheel(JSpinner spinner, java.awt.event.MouseWheelEvent evt) {
+        if (evt.getScrollType() != MouseWheelEvent.WHEEL_UNIT_SCROLL) {
+            return;
+        }
+        SpinnerNumberModel model = (SpinnerNumberModel) spinner.getModel();
+        int value = (int) model.getValue();
+        // always scroll integers by 1
+        value -= Math.signum(evt.getUnitsToScroll()) * model.getStepSize().intValue();
+        int minimum = ((Number)model.getMinimum()).intValue();
+        int maximum = ((Number)model.getMaximum()).intValue();
+        if (value < minimum) {
+            value = minimum;
+        }
+        if (value > maximum) {
+            value = maximum;
+        }
+        spinner.setValue(value);
     }
 
-    // for testing
-    public static void main(String[] args) {
-        //Schedule a job for the event-dispatching thread:
-        //creating and showing this application's GUI.
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton allGovernorsOff;
+    private javax.swing.JButton allGovernorsOn;
+    private javax.swing.JCheckBox autotransport;
+    private javax.swing.JButton cancelButton;
+    private javax.swing.JCheckBox governorDefault;
+    private javax.swing.JButton okButton;
+    private javax.swing.JRadioButton stargateOff;
+    private javax.swing.JRadioButton stargateOn;
+    private javax.swing.ButtonGroup stargateOptions;
+    private javax.swing.JRadioButton stargateRich;
+    private javax.swing.JSpinner transportMaxPercent;
+    private javax.swing.JSpinner transportMaxTurns;
+    private javax.swing.JSpinner transportPop;
+    private javax.swing.JLabel transportSizeLabel;
+    // End of variables declaration//GEN-END:variables
+
+    // Just test the layout
+    public static void main(String arg[]) {
+        // initialize everything
+        RotPUI.instance();
+
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 JFrame frame = new JFrame("GovernorOptions");
@@ -141,13 +412,14 @@ public class GovernorOptionsPanel {
 
                 //Create and set up the content pane.
                 GovernorOptionsPanel newContentPane = new GovernorOptionsPanel(frame);
-                newContentPane.getPanel().setOpaque(true); //content panes must be opaque
-                frame.setContentPane(newContentPane.getPanel());
+                newContentPane.setOpaque(true); //content panes must be opaque
+                frame.setContentPane(newContentPane);
 
                 //Display the window.
                 frame.pack();
                 frame.setVisible(true);
             }
         });
+
     }
 }
