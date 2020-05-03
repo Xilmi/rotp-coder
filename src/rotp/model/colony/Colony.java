@@ -760,12 +760,10 @@ public final class Colony implements Base, IMappedObject, Serializable {
         StarSystem oldDest = transport().destination();
         transport().reset(empire);
         // recalculate destination and this colony if applicable
-        if (oldDest != null && !oldDest.colony().isAutopilot() && oldDest.colony().isGovernor()) {
-            oldDest.colony().govern();
+        if (oldDest != null) {
+            oldDest.colony().governIfNeeded();
         }
-        if (!this.isAutopilot() && this.isGovernor()) {
-            govern();
-        }
+        governIfNeeded();
     }
     public int maxTransportsAllowed() {
         if (quarantined())
@@ -803,8 +801,8 @@ public final class Colony implements Base, IMappedObject, Serializable {
             transport().size(pop);
             transport().setDest(dest);
             transport().setDefaultTravelSpeed();
-            if (oldDest != null && oldDest != dest && !oldDest.colony().isAutopilot() && oldDest.colony().isGovernor()) {
-                oldDest.colony().govern();
+            if (oldDest != null && oldDest != dest) {
+                oldDest.colony().governIfNeeded();
             }
         }
 
@@ -813,13 +811,10 @@ public final class Colony implements Base, IMappedObject, Serializable {
             empire.setVisibleShips();
 
         // recalculate governor if transports are sent
-        if (!this.isAutopilot() && this.isGovernor()) {
-            govern();
-        }
+        governIfNeeded();
+
         // recalculate destination colony
-        if (!dest.colony().isAutopilot() && dest.colony().isGovernor()) {
-            dest.colony().govern();
-        }
+        dest.colony().governIfNeeded();
     }
     public void acceptTransport(Transport t) {
         setPopulation(min(planet.currentSize(), (population() + t.size())));
