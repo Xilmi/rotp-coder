@@ -1347,7 +1347,7 @@ public class ShipBattleUI extends FadeInPanel implements Base, MouseListener, Mo
         if (mode != Display.INTRO)
             return;
         mgr.toggleAutoComplete();
-        repaintButtonArea();
+        paintAllImmediately();
     }
     private void nextStack() {
         if (mode != Display.INTRO)
@@ -1605,7 +1605,8 @@ public class ShipBattleUI extends FadeInPanel implements Base, MouseListener, Mo
             currentGrid = null;
         }
         else if (!shipActionButtons.isEmpty()) {
-            for (Rectangle butt : shipActionButtons) {
+            List<Rectangle> buttons = new ArrayList<>(shipActionButtons);
+            for (Rectangle butt : buttons) {
                 if (butt.contains(x, y))
                     hoverBox = butt;
             }
