@@ -1172,11 +1172,17 @@ public final class Colony implements Base, IMappedObject, Serializable {
         // start from scratch
         clearSpending();
 
+        /* I took this out with the new autotransport logic.  If you want to slow down autotransports,
+         * then change it back to something like this that will leave 2 population to grow naturally.
+         * Leaving it at always balanceEcoAndInd(1) will enable rapid growth and much more spending on
+         * population growth.
         // Leave some room for normal population growth if we're auto transporting
         if (session().getGovernorOptions().isAutotransport())
             balanceEcoAndInd(1 - Math.max(normalPopGrowth(), 2) / maxSize());
         else
             balanceEcoAndInd(1);
+        */
+        balanceEcoAndInd(1);
 
         // add maximum defence
         // don't allocate just for "upgrades" if there are no bases
