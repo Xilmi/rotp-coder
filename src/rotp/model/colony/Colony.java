@@ -1179,7 +1179,8 @@ public final class Colony implements Base, IMappedObject, Serializable {
             balanceEcoAndInd(1);
 
         // add maximum defence
-        if (!defense().isCompleted()) {
+        // don't allocate just for "upgrades" if there are no bases
+        if (!defense().isCompleted() && (defense().maxBases() > 0 || !defense().shieldAtMaxLevel())) {
             moveSlider(Colony.DEFENSE, null, text(ColonySpendingCategory.reserveText));
         }
 
@@ -1244,7 +1245,10 @@ public final class Colony implements Base, IMappedObject, Serializable {
         // Factor for industry spending based on planet adjustmen (rich, poor, etc.).  Reserve
         // spending doesn't get adjusted, so we calculate an overall factor here.
         float indFactor = totalIncome() / (maxReserveIncome() + totalProductionIncome() * planet.productionAdj());
-        float maxIndBC = industry().maxSpendingNeeded() * indFactor;
+        float maxIndBC = industry().maxSpendingNeeded();
+        // check if it's adjusted or not, then fix if not
+        if (Math.ceil(Math.min(1, maxIndBC / totalBC) * MAX_TICKS) != maxIndAll)
+            maxIndBC *= indFactor;
         float remainingBC = Math.max(totalBC - cleanupCost, 0);  // BC remaining to allocate
         float popCost = tech().populationCost();
         float factoryCost = industry().newFactoryCost() * indFactor;
