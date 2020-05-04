@@ -7,6 +7,7 @@ import javax.swing.SpinnerNumberModel;
 import rotp.model.galaxy.StarSystem;
 import rotp.model.game.GameSession;
 import rotp.model.game.GovernorOptions;
+import rotp.model.game.GovernorOptions2;
 import rotp.ui.RotPUI;
 
 /**
@@ -19,11 +20,12 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         initComponents();
         // initial values
         GovernorOptions options = GameSession.instance().getGovernorOptions();
+        GovernorOptions2 options2 = GameSession.instance().getGovernorOptions2();
         this.governorDefault.setSelected(options.isGovernorOnByDefault());
         this.autotransport.setSelected(options.isAutotransport());
-        this.transportPop.setValue(options.getTransportPopulation());
-        this.transportMaxPercent.setValue(options.getTransportMaxPercent());
-        this.transportMaxTurns.setValue(options.getTransportMaxTurns());
+        this.transportPop.setValue(options2.getTransportPopulation());
+        this.transportMaxPercent.setValue(options2.getTransportMaxPercent());
+        this.transportMaxTurns.setValue(options2.getTransportMaxTurns());
         changePopulationLabel();
         switch (GameSession.instance().getGovernorOptions().getGates()) {
             case None:
@@ -329,11 +331,12 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
 
     private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
         GovernorOptions options = GameSession.instance().getGovernorOptions();
+        GovernorOptions2 options2 = GameSession.instance().getGovernorOptions2();
         options.setGovernorOnByDefault(governorDefault.isSelected());
         options.setAutotransport(autotransport.isSelected());
-        options.setTransportPopulation((Integer)transportPop.getValue());
-        options.setTransportMaxPercent((Integer)transportMaxPercent.getValue());
-        options.setTransportMaxTurns((Integer)transportMaxTurns.getValue());
+        options2.setTransportPopulation((Integer)transportPop.getValue());
+        options2.setTransportMaxPercent((Integer)transportMaxPercent.getValue());
+        options2.setTransportMaxTurns((Integer)transportMaxTurns.getValue());
 
         if (stargateOff.isSelected()) {
             options.setGates(GovernorOptions.GatesGovernor.None);

@@ -795,6 +795,8 @@ public final class GameSession implements Base, Serializable {
     }
 
     private GovernorOptions governorOptions = new GovernorOptions();
+    @Deprecated
+    private GovernorOptions2 governorOptions2 = new GovernorOptions2();
 
     public GovernorOptions getGovernorOptions() {
         // can happen on deserialized stock save game
@@ -802,5 +804,13 @@ public final class GameSession implements Base, Serializable {
             governorOptions = new GovernorOptions();
         }
         return governorOptions;
+    }
+    @Deprecated
+    public GovernorOptions2 getGovernorOptions2() {
+        // can happen on deserialized stock save game
+        if (governorOptions2 == null) {
+            governorOptions2 = new GovernorOptions2();
+        }
+        return governorOptions2;
     }
 }

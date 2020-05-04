@@ -1,12 +1,12 @@
 /*
  * Copyright 2015-2020 Ray Fowler
- * 
+ *
  * Licensed under the GNU General Public License, Version 3 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.gnu.org/licenses/gpl-3.0.html
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,6 +30,7 @@ import rotp.model.galaxy.StarSystem;
 import rotp.model.galaxy.Transport;
 import rotp.model.game.GameSession;
 import rotp.model.game.GovernorOptions;
+import rotp.model.game.GovernorOptions2;
 import rotp.model.incidents.ColonyCapturedIncident;
 import rotp.model.incidents.ColonyInvadedIncident;
 import rotp.model.planet.Planet;
@@ -149,7 +150,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         float factories = min(maxFactories, industry().factories());
         float pop = population();
         float maxPop = planet().maxSize();
-        
+
         float workerProd = empire.workerProductivity();
         float maxProd = maxFactories + (maxPop * workerProd);
         float currProd = factories + (pop*workerProd);
@@ -307,7 +308,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
             return;
         if (starSystem().inNebula() && order == Orders.SHIELD)
             return;
-        
+
         float existingAmt = orders.containsKey(order) ? orders.get(order) : 0;
 
         if (amt <= existingAmt)
@@ -417,7 +418,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
 
         // after turn is over, we may need to reset ECO spending to adjust for cleanup
         keepEcoLockedToClean = !locked[ECOLOGY] && empire().isPlayer() && (allocation[ECOLOGY] == cleanupAllocation());
-        
+
         // make sure that the colony's expenses aren't too high
         empire().governorAI().lowerExpenses(this);
 
@@ -461,7 +462,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         industry().assessTurn();
         ecology().assessTurn();
         research().assessTurn();
-        
+
         if (keepEcoLockedToClean) {
             int newAlloc = ecology().cleanupAllocationNeeded();
             if (allocation[ECOLOGY] != newAlloc) {
@@ -701,7 +702,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
     public float wasteCleanupCost() {
         if (empire.race().ignoresPlanetEnvironment())
             return 0;
-        
+
         float mod = empire().isPlayer() ? 1.0f : options().aiWasteModifier();
         return mod*(min(planet.maxWaste(), planet.waste() + newWaste())) / tech().wasteElimination();
     }
@@ -910,9 +911,9 @@ public final class Colony implements Base, IMappedObject, Serializable {
         // player notification only.
         if (tr.size() == 0) {
             log(concat(str(tr.originalSize()), " ", tr.empire().raceName(), " transports perished at ", name()));
-            if (tr.empire().isPlayer()) 
+            if (tr.empire().isPlayer())
                 TransportsKilledAlert.create(empire(), starSystem(), tr.originalSize());
-            else if (empire().isPlayer()) 
+            else if (empire().isPlayer())
                 InvadersKilledAlert.create(tr.empire(), starSystem(), tr.originalSize());
             return;
         }
@@ -966,7 +967,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         Empire loser = empire();
         if (isCapital())
             loser.chooseNewCapital();
-        
+
         loser.lastAttacker(tr.empire());
         starSystem().addEvent(new SystemCapturedEvent(tr.empId()));
         tr.empire().lastAttacker(loser);
@@ -1075,7 +1076,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
     public void destroy() {
         if (isCapital())
             empire.chooseNewCapital();
-        
+
         StarSystem sys = starSystem();
         sys.addEvent(new SystemDestroyedEvent(empire.lastAttacker()));
 
@@ -1093,12 +1094,12 @@ public final class Colony implements Base, IMappedObject, Serializable {
         // update system views of civs that would notice
         empire.sv.refreshFullScan(sys.id);
         List<ShipFleet> fleets = sys.orbitingFleets();
-        for (ShipFleet fl : fleets) 
+        for (ShipFleet fl : fleets)
             fl.empire().sv.refreshFullScan(sys.id);
-        
+
         for (Empire emp: galaxy().empires()) {
-            if (emp.knowsOf(empire) && !emp.sv.name(sys.id).isEmpty()) 
-                emp.sv.view(sys.id).setEmpire();                   
+            if (emp.knowsOf(empire) && !emp.sv.name(sys.id).isEmpty())
+                emp.sv.view(sys.id).setEmpire();
         }
     }
 
@@ -1424,7 +1425,8 @@ public final class Colony implements Base, IMappedObject, Serializable {
         }
         // don't calculate excess. Just check if this colony is the right size.
         GovernorOptions options = session().getGovernorOptions();
-        int size = options.getTransportPopulation() * 100 / options.getTransportMaxPercent();
+        GovernorOptions2 options2 = session().getGovernorOptions2();
+        int size = options2.getTransportPopulation() * 100 / options2.getTransportMaxPercent();
         if (planet.currentSize() < size) {
             return;
         }
@@ -1443,7 +1445,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
             }
             float transportTime = ss.travelTime(this, ss, this.empire().tech().transportSpeed());
             // limit max transport time
-            double maxTime = ss.inNebula() ? options.getTransportMaxTurns() * 1.5 : options.getTransportMaxTurns();
+            double maxTime = ss.inNebula() ? options2.getTransportMaxTurns() * 1.5 : options2.getTransportMaxTurns();
             if (transportTime > maxTime) {
                 continue;
             }
@@ -1488,7 +1490,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
 //            System.out.println("autotransport target from "+this.name()+" to "+ss.name()+" rank "+ranks.get(ss));
 //        }
         // round excess down
-        int toTransport = options.getTransportPopulation();
+        int toTransport = options2.getTransportPopulation();
         // let's make sure we don't trigger governor in scheduleTransportsToSystem, otherwise we get endless recursion
         governor = false;
         scheduleTransportsToSystem(targets.get(0), toTransport);
