@@ -289,13 +289,17 @@ GAME_MUSIC_ON                     | Music: %1/10
 GAME_MUSIC_OFF                    | Music: MUTED
 GAME_TEXTURES_ON                  | Textures: ON
 GAME_TEXTURES_OFF                 | Textures: OFF
-GAME_ANIMATIONS_ON                | Animations: ON
-GAME_ANIMATIONS_OFF               | Animations: OFF
-GAME_ANIMATIONS_DISABLED          | Animations: DISABLED
+GAME_GRAPHICS_NORMAL              | Graphics: NORMAL
+GAME_GRAPHICS_MEDIUM              | Graphics: MEDIUM
+GAME_GRAPHICS_LOW                 | Graphics: LOW
+GAME_GRAPHICS_MEDIUM_HOVER        | Graphics: MEDIUM - Anti-Aliasing is OFF.
+GAME_GRAPHICS_LOW_HOVER           | Graphics: LOW - Anti-Aliasing is OFF. Animations are OFF.
 GAME_SHRINK                       | Shrink -
 GAME_ENLARGE                      | Expand
 GAME_MEMORY_SHOW                  | Memory Use: SHOW
 GAME_MEMORY_HIDE                  | Memory Use: HIDE
+GAME_RANDOM_EVENTS_ON             | Random Events: ON
+GAME_RANDOM_EVENTS_OFF            | Random Events: OFF
 
 // Load Game UI
 LOAD_GAME_TITLE                   | Load Game
@@ -342,6 +346,7 @@ MAIN_PLANET_SIZE+                 | Size %1+
 MAIN_PLANET_POP                   | Pop %1
 MAIN_PLANET_POP_SIZE              | Pop %1/%2
 MAIN_PLANET_REBELLION             | In Rebellion
+MAIN_PLANET_QUARANTINE            | In Quarantine
 MAIN_PLANET_EVENT_COMET           | Comet
 MAIN_PLANET_EVENT_PIRACY          | Piracy
 MAIN_PLANET_EVENT_PLAGUE          | Plague
