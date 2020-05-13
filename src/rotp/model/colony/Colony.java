@@ -1166,6 +1166,12 @@ public final class Colony implements Base, IMappedObject, Serializable {
         if (session().getGovernorOptions().isAutotransport()) {
             autotransport();
         }
+        // Set max missile bases if minimum is set
+        if (session().getGovernorOptions2().getMinimumMissileBases() > 0) {
+            if (defense().maxBases() < session().getGovernorOptions2().getMinimumMissileBases()) {
+                defense().maxBases(session().getGovernorOptions2().getMinimumMissileBases());
+            }
+        }
         // unlock all sliders
         for (int i = 0; i <= 4; i++) {
             locked(i, false);

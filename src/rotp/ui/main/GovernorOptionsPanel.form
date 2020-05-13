@@ -31,12 +31,30 @@
                       <Component id="cancelButton" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" attributes="0">
-                      <Group type="103" groupAlignment="0" attributes="0">
+                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
                           <Component id="governorDefault" min="-2" max="-2" attributes="0"/>
                           <Group type="102" alignment="0" attributes="0">
                               <Component id="allGovernorsOn" min="-2" max="-2" attributes="0"/>
                               <EmptySpace min="-2" pref="143" max="-2" attributes="0"/>
                               <Component id="allGovernorsOff" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Group type="102" attributes="0">
+                                      <Component id="missileBases" min="-2" pref="50" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="missileBasesLabel" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Component id="autospend" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="32767" attributes="0"/>
+                                      <Component id="reserve" min="-2" pref="90" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="resrveLabel" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
+                                  </Group>
+                              </Group>
                           </Group>
                       </Group>
                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
@@ -60,6 +78,17 @@
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="stargatePanel" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="missileBases" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="missileBasesLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="autospend" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="reserve" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="resrveLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="okButton" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -102,8 +131,8 @@
                       <Component id="autotransport" min="-2" max="-2" attributes="0"/>
                       <Group type="102" alignment="0" attributes="0">
                           <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                              <Component id="transportMaxPercent" pref="50" max="32767" attributes="0"/>
-                              <Component id="transportPop" max="32767" attributes="0"/>
+                              <Component id="transportPop" pref="50" max="32767" attributes="0"/>
+                              <Component id="transportMaxPercent" max="32767" attributes="0"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
@@ -290,7 +319,6 @@
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
-                  <EmptySpace max="32767" attributes="0"/>
                   <Component id="stargateOff" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Component id="stargateRich" min="-2" max="-2" attributes="0"/>
@@ -342,6 +370,41 @@
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cancelButtonActionPerformed"/>
       </Events>
+    </Component>
+    <Component class="javax.swing.JSpinner" name="missileBases">
+      <Properties>
+        <Property name="model" type="javax.swing.SpinnerModel" editor="org.netbeans.modules.form.editors2.SpinnerModelEditor">
+          <SpinnerModel initial="0" maximum="20" minimum="0" numberType="java.lang.Integer" stepSize="1" type="number"/>
+        </Property>
+      </Properties>
+      <Events>
+        <EventHandler event="mouseWheelMoved" listener="java.awt.event.MouseWheelListener" parameters="java.awt.event.MouseWheelEvent" handler="missileBasesMouseWheelMoved"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JLabel" name="missileBasesLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Minimum missile bases"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JCheckBox" name="autospend">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Autospend"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JSpinner" name="reserve">
+      <Properties>
+        <Property name="model" type="javax.swing.SpinnerModel" editor="org.netbeans.modules.form.editors2.SpinnerModelEditor">
+          <SpinnerModel initial="1000" maximum="100000" minimum="0" numberType="java.lang.Integer" stepSize="10" type="number"/>
+        </Property>
+      </Properties>
+      <Events>
+        <EventHandler event="mouseWheelMoved" listener="java.awt.event.MouseWheelListener" parameters="java.awt.event.MouseWheelEvent" handler="reserveMouseWheelMoved"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JLabel" name="resrveLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Keep in reserve"/>
+      </Properties>
     </Component>
   </SubComponents>
 </Form>

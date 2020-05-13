@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import rotp.model.ai.AI;
@@ -46,6 +48,7 @@ import rotp.model.galaxy.Ship;
 import rotp.model.galaxy.ShipFleet;
 import rotp.model.galaxy.StarSystem;
 import rotp.model.galaxy.Transport;
+import rotp.model.game.GovernorOptions2;
 import rotp.model.incidents.GenocideIncident;
 import rotp.model.planet.Planet;
 import rotp.model.planet.PlanetType;
@@ -760,6 +763,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         NoticeMessage.setSubstatus(text("TURN_COLONY_SPENDING"));
         setAllocations();
 
+        autospend();
         // If planets are governed, redo allocations now
         for (int i = 0; i < this.sv.count(); ++i) {
             if (this.sv.empire(i) == this && this.sv.isColonized(i)) {
@@ -770,6 +774,71 @@ public final class Empire implements Base, NamedObject, Serializable {
         //long tm3 = System.currentTimeMillis();
         //log("remainder: "+(tm3-tm2)+"ms");
     }
+    /**
+     * Spend reserve automatically (if enabled).
+     * 
+     * Spend only on planets with production &lt; 30% average
+     * Spend only the amount planet can consume this turn
+     * Start with planet with lowest production, and end when money runs out
+     * or no suitable planets are available.
+     * Spend only on planets with governor on.
+     * Spend only if industry and ecology are not complete.
+     * 
+     */
+    public void autospend() {
+        GovernorOptions2 options = session().getGovernorOptions2();
+        if (isAIControlled() || !options.isAutospend()) {
+            return;
+        }
+        // if reserve is low, don't even attempt to spend money
+        if ((int)this.totalReserve() <= options.getReserve()) {
+            return;
+        }
+        
+        List<Colony> colonies = new LinkedList<>();
+        float productionSum = 0;
+        int colonyCount = 0;
+        for (int i = 0; i < this.sv.count(); ++i) {
+            if (this.sv.empire(i) == this && this.sv.isColonized(i)) {
+                Colony c = this.sv.colony(i);
+                productionSum += c.production();
+                colonyCount++;
+                if (c.isGovernor() && c.maxReserveNeeded() >= 1) {
+                    if (!c.industry().isCompleted() || !c.ecology().isCompleted()) {
+                        colonies.add(this.sv.colony(i));
+                    }
+                }
+            }
+        }
+        float avgProduction = productionSum / colonyCount;
+        // filter out colonies that produce 30% average production
+        for (Iterator<Colony> it = colonies.iterator(); it.hasNext(); ) {
+            Colony c = it.next();
+            if (c.production() >= avgProduction * 0.30) {
+                it.remove();
+            }
+        }
+        Collections.sort(colonies, 
+                (Colony o1, Colony o2) -> (int)Math.signum(o1.production() - o2.production()));
+//        for (Colony c: colonies) {
+//            System.out.println("Autospend "+c.production()+" "+c.name());
+//        }
+        // spend money
+        for (Colony c: colonies) {
+            if (c.maxReserveNeeded() <= 0) {
+                continue;
+            }
+            float available = totalReserve() - options.getReserve();
+            if (available <= 1) {
+                break;
+            }
+            // overallocate by 1 BC to speed up fractional spending
+            int bcToSpend = (int)Math.ceil(Math.min(available, c.maxReserveNeeded()));
+            allocateReserve(c, bcToSpend);
+//            System.out.format("Autospend allocated %d bs to %s%n", bcToSpend, c.name());
+        }
+    }
+    
     public String decode(String s, Empire listener) {
         String s1 = this.replaceTokens(s, "my");
         s1 = listener.replaceTokens(s1, "your");

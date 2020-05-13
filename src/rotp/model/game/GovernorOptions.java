@@ -6,6 +6,8 @@ import java.io.Serializable;
  * Governor options.
  */
 public class GovernorOptions implements Serializable {
+    // TODO: Add serialVersionUID and merge with GovernorOptions when we can 
+    // break save game compatibility
     public enum GatesGovernor {
         None,
         Rich,

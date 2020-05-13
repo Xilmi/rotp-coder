@@ -24,8 +24,11 @@ import javax.swing.*;
  * to get more memory it uses the right jar file name.
  */
 public class RotpGovernor {
-    static String governorVersion = "1.10.1";
-    static String expectedROTPVersion = "Beta 1.10";
+    // minified versions will use WebP images and Ogg sounds.
+    static boolean minified = false;
+
+    static String governorVersion = "1.11";
+    static String expectedROTPVersion = "Beta 1.11";
 
     public static void main(String[] args) {
         String jarFilename = "ROTP-" + governorVersion + "-governor.jar";
