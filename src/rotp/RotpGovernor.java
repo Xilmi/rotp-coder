@@ -25,7 +25,7 @@ import javax.swing.*;
  */
 public class RotpGovernor {
     // minified versions will use WebP images and Ogg sounds.
-    static boolean minified = false;
+    public static boolean minified = false;
 
     static String governorVersion = "1.11";
     static String expectedROTPVersion = "Beta 1.11";
