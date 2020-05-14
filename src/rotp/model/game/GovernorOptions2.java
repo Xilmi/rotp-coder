@@ -15,6 +15,10 @@ public class GovernorOptions2 implements Serializable {
     // 1.5x for destinations inside nebulae
     private int transportMaxTurns = 5;
 
+    private int minimumMissileBases = 0;
+    private boolean autospend = false;
+    private int reserve = 1000;
+    
     public GovernorOptions2() {
     }
 
@@ -41,4 +45,30 @@ public class GovernorOptions2 implements Serializable {
     public void setTransportMaxTurns(int transportMaxTurns) {
         this.transportMaxTurns = transportMaxTurns;
     }
+
+    public int getMinimumMissileBases() {
+        return minimumMissileBases;
+    }
+
+    public void setMinimumMissileBases(int minimumMissileBases) {
+        this.minimumMissileBases = minimumMissileBases;
+    }
+
+    public boolean isAutospend() {
+        return autospend;
+    }
+
+    public void setAutospend(boolean autospend) {
+        this.autospend = autospend;
+    }
+
+    public int getReserve() {
+        return reserve;
+    }
+
+    public void setReserve(int reserve) {
+        this.reserve = reserve;
+    }
+    
+    
 }

@@ -38,6 +38,9 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
                 this.stargateOn.setSelected(true);
                 break;
         }
+        this.missileBases.setValue(options2.getMinimumMissileBases());
+        this.autospend.setSelected(options2.isAutospend());
+        this.reserve.setValue(options2.getReserve());
     }
 
     /**
@@ -69,6 +72,11 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         stargateOn = new javax.swing.JRadioButton();
         okButton = new javax.swing.JButton();
         cancelButton = new javax.swing.JButton();
+        missileBases = new javax.swing.JSpinner();
+        missileBasesLabel = new javax.swing.JLabel();
+        autospend = new javax.swing.JCheckBox();
+        reserve = new javax.swing.JSpinner();
+        resrveLabel = new javax.swing.JLabel();
 
         governorDefault.setText("Governor is on by default");
 
@@ -142,8 +150,8 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
                     .addComponent(autotransport)
                     .addGroup(autotransportPanelLayout.createSequentialGroup()
                         .addGroup(autotransportPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(transportMaxPercent, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
-                            .addComponent(transportPop))
+                            .addComponent(transportPop, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
+                            .addComponent(transportMaxPercent))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(autotransportPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(transportPopLabel)
@@ -218,7 +226,6 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         stargatePanelLayout.setVerticalGroup(
             stargatePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(stargatePanelLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(stargateOff)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(stargateRich)
@@ -240,6 +247,26 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
             }
         });
 
+        missileBases.setModel(new javax.swing.SpinnerNumberModel(0, 0, 20, 1));
+        missileBases.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                missileBasesMouseWheelMoved(evt);
+            }
+        });
+
+        missileBasesLabel.setText("Minimum missile bases");
+
+        autospend.setText("Autospend");
+
+        reserve.setModel(new javax.swing.SpinnerNumberModel(1000, 0, 100000, 10));
+        reserve.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                reserveMouseWheelMoved(evt);
+            }
+        });
+
+        resrveLabel.setText("Keep in reserve");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -254,12 +281,26 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(cancelButton))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(governorDefault)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(allGovernorsOn)
                                 .addGap(143, 143, 143)
-                                .addComponent(allGovernorsOff)))
+                                .addComponent(allGovernorsOff))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(12, 12, 12)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(missileBases, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(missileBasesLabel))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(autospend)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(reserve, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(resrveLabel)
+                                        .addGap(20, 20, 20)))))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -276,6 +317,15 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
                     .addComponent(allGovernorsOff))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(stargatePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(missileBases, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(missileBasesLabel))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(autospend)
+                    .addComponent(reserve, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(resrveLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(okButton)
@@ -345,6 +395,9 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         } else if (stargateOn.isSelected()) {
             options.setGates(GovernorOptions.GatesGovernor.All);
         }
+        options2.setMinimumMissileBases((Integer)missileBases.getValue());
+        options2.setAutospend(autospend.isSelected());
+        options2.setReserve((Integer)reserve.getValue());
         frame.setVisible(false);
     }//GEN-LAST:event_okButtonActionPerformed
 
@@ -359,6 +412,14 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
     private void transportMaxPercentStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_transportMaxPercentStateChanged
         changePopulationLabel();
     }//GEN-LAST:event_transportMaxPercentStateChanged
+
+    private void missileBasesMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_missileBasesMouseWheelMoved
+        mouseWheel(missileBases, evt);
+    }//GEN-LAST:event_missileBasesMouseWheelMoved
+
+    private void reserveMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_reserveMouseWheelMoved
+        mouseWheel(reserve, evt);
+    }//GEN-LAST:event_reserveMouseWheelMoved
 
     private void changePopulationLabel() {
         int pop = (int)this.transportPop.getValue();
@@ -389,10 +450,15 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton allGovernorsOff;
     private javax.swing.JButton allGovernorsOn;
+    private javax.swing.JCheckBox autospend;
     private javax.swing.JCheckBox autotransport;
     private javax.swing.JButton cancelButton;
     private javax.swing.JCheckBox governorDefault;
+    private javax.swing.JSpinner missileBases;
+    private javax.swing.JLabel missileBasesLabel;
     private javax.swing.JButton okButton;
+    private javax.swing.JSpinner reserve;
+    private javax.swing.JLabel resrveLabel;
     private javax.swing.JRadioButton stargateOff;
     private javax.swing.JRadioButton stargateOn;
     private javax.swing.ButtonGroup stargateOptions;

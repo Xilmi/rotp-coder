@@ -33,22 +33,31 @@ amount of micromanagement needed drastically.
 
 To run the mod:
 
-* Download my distribution of ROTP-1.10.1.jar (large file) and run that instead of 
-original game. You are also welcome to try ROTP-mini-1.10.1.jar which is smaller
+* Download my distribution of ROTP-1.11.jar (large file) and run that instead of 
+original game. You are also welcome to try ROTP-mini-1.11.jar which is smaller
 as it uses better compression for game assets. 
 
 or
 
-* Download only the ROTP-1.10.1-governor.jar
+* Download only the ROTP-1.11-governor.jar
 * Place it in same directory that contains original Remnants.jar version Beta 1.4
-* Run ROTP-1.10.1-governor.jar
+* Run ROTP-1.11-governor.jar
 
 To enable governor, use 'q' key on keyboard, or else click "Allocate Spending"
-text in the planetary spending screen. Since version 1.10.1 Governor is on by default.
+text in the planetary spending screen. Since version 1.11 Governor is on by default.
 
 ---
 
 Additional features.
+
+* Added default missile base number configuration. Added automated reserve spending.
+It will spend only on planets that have <30% average production. It will only spend
+the amount planet can use this turn. You can set a reserve it autospend will keep
+unspent. Autospend will only spend on planets that have IND or ECO unfinished. It will
+spend on planets with lowest production first.
+
+* Save game compatibility fixed in 1.10.1. (it was broken in 1.10). /u/sarlok contributed 
+improvements to Governor eco/industry assignments in and more.
 
 * Population transport is now modernized to comply with the rule changes in 1.9.
 Governor Options dialog is now better and has more options for population transport.
@@ -60,7 +69,7 @@ maximum population reached message should not be shown for governed planets and
 governor won't spend production on population growth if only 1-3 population remains 
 until limit. Also, my email is shown in case of error.
 
-* ROTP-1.10.1-mini.jar is now provided. It uses WebP images and Ooo Vorbis sounds.
+* ROTP-1.11-mini.jar is now provided. It uses WebP images and Ooo Vorbis sounds.
 It should have all the same features as ROTP but take up less space (~193 MB). Since
 WebP library uses native parts, this will only work on Windows (32 and 64 bit),
 Mac OSX 64 bit, Linux 64 bit. If you have a different system, use full-size ROTP.
