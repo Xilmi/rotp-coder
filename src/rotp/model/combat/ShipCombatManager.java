@@ -111,6 +111,8 @@ public class ShipCombatManager implements Base {
             ShipFleet fleet2 = sys.orbitingFleetForEmpire(emp2);
             boolean fleet1Armed = (fleet1 != null) && fleet1.isArmed(sys);
             boolean fleet2Armed = (fleet2 != null) && fleet2.isArmed(sys);
+            boolean fleet1ArmedForShips = (fleet1 != null) && fleet1.isArmedForShipCombat();
+            boolean fleet2ArmedForShips = (fleet2 != null) && fleet2.isArmedForShipCombat();
             Empire homeEmpire = sys.empire();
             boolean startCombat = false;
             // if both fleets are armed, we always have combat
@@ -132,7 +134,8 @@ public class ShipCombatManager implements Base {
                }
             }
             // else there is no colony in combat.. start battle if at least one fleet is armed
-            else if (fleet1Armed || fleet2Armed)
+            // for ship combat (i.e. no bombers vs bombers)
+            else if (fleet1ArmedForShips || fleet2ArmedForShips)
                 startCombat = true;
             // if any of those choices matched, begin combat
             if (startCombat) {
@@ -573,7 +576,7 @@ public class ShipCombatManager implements Base {
             int num = 0;
             for (int y=0;y<=maxY;y++) {
                 asteroidMap[x][y] = false;
-                if ((num < 4) && (random() < 0.375)) {
+                if ((num < 3) && (random() < 0.375)) {
                     num++;
                     asteroidMap[x][y] = true;
                 }
@@ -583,7 +586,7 @@ public class ShipCombatManager implements Base {
     private void trimAsteroids() {
         for (int x=0; x<=maxX; x++) {
             for (int y=0;y<=maxY; y++) {
-                if (asteroidMap[x][y] && (random() < .03)) {
+                if (asteroidMap[x][y] && (random() < .05)) {
                     asteroidMap[x][y] = false;
                     redrawMap = true;
                     break;
