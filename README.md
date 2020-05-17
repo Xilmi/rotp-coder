@@ -33,18 +33,18 @@ amount of micromanagement needed drastically.
 
 To run the mod:
 
-* Download my distribution of ROTP-1.11.jar (large file) and run that instead of 
-original game. You are also welcome to try ROTP-mini-1.11.jar which is smaller
+* Download my distribution of ROTP-1.12.jar (large file) and run that instead of 
+original game. You are also welcome to try ROTP-mini-1.12.jar which is smaller
 as it uses better compression for game assets. 
 
 or
 
-* Download only the ROTP-1.11-governor.jar
+* Download only the ROTP-1.12-governor.jar
 * Place it in same directory that contains original Remnants.jar version Beta 1.4
-* Run ROTP-1.11-governor.jar
+* Run ROTP-1.12-governor.jar
 
 To enable governor, use 'q' key on keyboard, or else click "Allocate Spending"
-text in the planetary spending screen. Since version 1.11 Governor is on by default.
+text in the planetary spending screen. Since version 1.8 Governor is on by default.
 
 ---
 
