@@ -167,6 +167,9 @@ public class ShipDesignLab implements Base, Serializable {
         // update opp shield level (for fighter designs)
         bestEnemyShieldLevel = empire.bestEnemyShieldLevel();
         bestEnemyPlanetaryShieldLevel = empire.bestEnemyPlanetaryShieldLevel();
+        for (ShipDesign d : designs) {
+            d.recalculateCost();
+        }
     }
     public void recordConstruction(Design d, int num) {
         ShipView sv = shipViewFor((ShipDesign)d);

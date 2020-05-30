@@ -321,10 +321,16 @@ public class ShipBattleUI extends FadeInPanel implements Base, MouseListener, Mo
         paintImmediately(ptX[x], ptY[y], boxW, boxH);
     }
     public void paintCellsImmediately(int x0, int x1, int y0, int y1) {
-        int x = min(ptX[min(x0,x1)]);
-        int w = abs(ptX[x0]-ptX[x1])+boxW;
-        int y = min(ptY[min(y0,y1)]);
-        int h = abs(ptY[y0]-ptY[y1])+boxH;
+        // need to bounds-check the input
+        int x0a = max(0,min(x0,ptX.length-1));
+        int x1a = max(0,min(x1,ptX.length-1));
+        int y0a = max(0,min(y0,ptY.length-1));
+        int y1a = max(0,min(y1,ptY.length-1));
+        
+        int x = ptX[min(x0a,x1a)];
+        int w = abs(ptX[x0a]-ptX[x1a])+boxW;
+        int y = ptY[min(y0a,y1a)];
+        int h = abs(ptY[y0a]-ptY[y1a])+boxH;
         paintImmediately(x,y,w,h);
     }
     public void repaintButtonArea() {
@@ -959,12 +965,15 @@ public class ShipBattleUI extends FadeInPanel implements Base, MouseListener, Mo
             g.setColor(textColor);
             g.drawString(lbl1, x1a,y2+s12);
             List<ShipWeapon> wpns = view.weapons();
-            for (int i=0; i<wpns.size(); i++) {
-                ShipWeapon wpn = wpns.get(i);
-                val2 = text("SHIP_COMBAT_SCAN_WEAPON_CNT", str(view.wpnCount(i)), wpn.name());
-                sw2 = g.getFontMetrics().stringWidth(val2);
-                g.drawString(val2, x1+w1-sw2-s5, y2+s12);
-                y2 += s13;
+            for (int i=0; i<ShipDesign.maxWeapons(); i++) {
+                int num = view.wpnCount(i);
+                if (num > 0) {
+                    ShipWeapon wpn = view.weapon(i);
+                    val2 = text("SHIP_COMBAT_SCAN_WEAPON_CNT", str(num), wpn.name());
+                    sw2 = g.getFontMetrics().stringWidth(val2);
+                    g.drawString(val2, x1+w1-sw2-s5, y2+s12);
+                    y2 += s13;
+                }
             }
             y2 += s5;
             g.setColor(lineColor);
@@ -1396,6 +1405,8 @@ public class ShipBattleUI extends FadeInPanel implements Base, MouseListener, Mo
         repaint();
     }
     private void retreatStack(CombatStack stack) {
+        if (mgr.combatIsFinished() || mgr.autoResolve)
+            return; 
         if (!stack.canRetreat() || !stack.empire.isPlayer())
             return;
         StarSystem dest = player().ai().shipCaptain().retreatSystem(mgr.system());

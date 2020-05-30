@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package rotp.model.ai;
+package rotp.model.ai.community;
 
 import java.util.ArrayList;
 import java.util.List;
+import rotp.model.ai.EnemyColonyTarget;
 import rotp.model.ai.interfaces.ShipDesigner;
 import rotp.model.empires.Empire;
 import rotp.model.empires.EmpireView;
@@ -31,9 +32,9 @@ import rotp.model.ships.ShipWeapon;
 import rotp.model.tech.Tech;
 import rotp.util.Base;
 
-public class ShipBomberTemplate implements Base {
+public class ShipBomberTemplateC implements Base {
     private static final List<DesignDamageSpec> dmgSpecs = new ArrayList<>();
-    private static final ShipBomberTemplate instance = new ShipBomberTemplate();
+    private static final ShipBomberTemplateC instance = new ShipBomberTemplateC();
     private static final ShipDesign mockDesign = new ShipDesign();
 
     public static ShipDesign newDesign(ShipDesigner ai) {
@@ -85,9 +86,10 @@ public class ShipBomberTemplate implements Base {
         ShipDesign d = ai.lab().newBlankDesign(size);
         setFastestEngine(ai, d);
         float totalSpace = d.availableSpace();
-        setBestBattleComputer(ai, d);
+        set2ndBestBattleComputer(ai, d); // give bombers 2nd best battle computer
         setBestCombatSpeed(ai, d);
         boolean missileDef = upgradeMissileDefenseSpecial(ai, d);
+        set2ndBestECMJammer(ai, d); // give bombers 2nd best ECM, even with anti-missile
         if (!missileDef)
             setBestECMJammer(ai, d);
         setBestManeuverSpecial(ai, d, targets);
@@ -103,8 +105,8 @@ public class ShipBomberTemplate implements Base {
             return d;
         }
         
-        setShipCombatWeapon(ai, d);
         setOptimalBombardmentWeapon(ai, d, targets);
+        setShipCombatWeapon(ai, d);
 
         ai.lab().nameDesign(d);
         ai.lab().iconifyDesign(d);
@@ -131,9 +133,27 @@ public class ShipBomberTemplate implements Base {
                 return;
         }
     }
+ // add 2nd best battle computer option
+    private void set2ndBestBattleComputer(ShipDesigner ai, ShipDesign d) {
+        List<ShipComputer> comps = ai.lab().computers();
+        for (int i=comps.size()-2; i >=0; i--) {
+            d.computer(comps.get(i));
+            if (d.availableSpace() >= 0)
+                return;
+        }
+    }
     private void setBestECMJammer(ShipDesigner ai, ShipDesign d) {
         List<ShipECM> comps = ai.lab().ecms();
         for (int i=comps.size()-1; i >=0; i--) {
+            d.ecm(comps.get(i));
+            if (d.availableSpace() >= 0)
+                return;
+        }
+    }
+ // add 2nd best ECM option
+    private void set2ndBestECMJammer(ShipDesigner ai, ShipDesign d) {
+        List<ShipECM> comps = ai.lab().ecms();
+        for (int i=comps.size()-2; i >=0; i--) {
             d.ecm(comps.get(i));
             if (d.availableSpace() >= 0)
                 return;

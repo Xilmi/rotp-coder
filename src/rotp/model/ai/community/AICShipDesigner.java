@@ -17,19 +17,12 @@ package rotp.model.ai.community;
 
 import java.util.ArrayList;
 import java.util.List;
-import rotp.model.ai.ShipBomberTemplate;
-import rotp.model.ai.ShipDestroyerTemplate;
-import rotp.model.ai.ShipFighterTemplate;
 import rotp.model.ai.interfaces.ShipDesigner;
 import rotp.model.empires.Empire;
 import rotp.model.galaxy.ShipFleet;
 import rotp.model.galaxy.StarSystem;
-import rotp.model.ships.ShipComputer;
 import rotp.model.ships.ShipDesign;
 import rotp.model.ships.ShipDesignLab;
-import rotp.model.ships.ShipECM;
-import rotp.model.ships.ShipManeuver;
-import rotp.model.ships.ShipShield;
 import rotp.model.ships.ShipSpecial;
 import rotp.model.ships.ShipSpecialColony;
 import rotp.model.ships.ShipWeapon;
@@ -82,7 +75,7 @@ public class AICShipDesigner implements Base, ShipDesigner {
                 if (empire.race().ignoresPlanetEnvironment()
                 || (special.tech().canColonize(sys.planet())) ) {
                     if ((bestDesign == null)
-                    || (design.engine().warp() < bestDesign.engine().warp()))
+                    || (design.engine().warp() > bestDesign.engine().warp()))
                         bestDesign = design;
                     else if (design.engine().warp() == bestDesign.engine().warp()) {
                         if (special.tech().environment() > bestDesign.colonySpecial().tech().environment())
@@ -137,12 +130,9 @@ public class AICShipDesigner implements Base, ShipDesigner {
         ShipDesign currDesign = lab.colonyDesign();
         int currSlot = currDesign.id();
         
-        // weapons needed on colony ships if we've made AI contact
-        boolean weaponsNeeded = !empire.contactedEmpires().isEmpty();
-        // current design is "properlyArmed" if it is armed &weapons needed or unarmed & weapons unneeded
-        boolean extendedFuelNeeded = !lab.needColonyShips && lab.needExtendedColonyShips;
-
-        ShipDesign newDesign = newColonyDesign(weaponsNeeded, extendedFuelNeeded);
+        // weapons desirable on colony ships if we've made AI contact
+        boolean weaponsWanted = !empire.contactedEmpires().isEmpty();
+        ShipDesign newDesign = newColonyDesign(weaponsWanted, lab.needColonyShips, lab.needExtendedColonyShips);
 
         // if currDesign is obsolete, replace it immediately with new design
         if (currDesign.obsolete() && (currDesign.remainingLife() < 1)) {
@@ -194,7 +184,7 @@ public class AICShipDesigner implements Base, ShipDesigner {
 
         float oppShield = lab.bestEnemyPlanetaryShieldLevel();
         float bcValue = currDesign.cost()*shipCounts[currDesign.id()];
-        boolean easyToReplace = bcValue <= 100;
+        boolean easyToReplace = bcValue <= 500; // scrap easier, change from 100
         
         if (easyToReplace) {
             newDesign.name(currDesign.name());
@@ -251,7 +241,7 @@ public class AICShipDesigner implements Base, ShipDesigner {
         // recalculate current design's damage vs. current targets
         ShipDesign currDesign = lab.fighterDesign();
         int currSlot = currDesign.id();
-        ShipFighterTemplate.setPerTurnDamage(currDesign, empire());
+        ShipFighterTemplateC.setPerTurnDamage(currDesign, empire());
 
         // find best hypothetical design vs current targets
         ShipDesign newDesign = newFighterDesign(currDesign.size());
@@ -269,7 +259,7 @@ public class AICShipDesigner implements Base, ShipDesigner {
         // if we have very few fighters actually in use, go ahead and
         // scrap/replace now
         float bcValue = currDesign.cost()*shipCounts[currDesign.id()];
-        boolean easyToReplace = bcValue <= 100;
+        boolean easyToReplace = bcValue <= 500; // scrap easier, change from 100
         
         if (easyToReplace) {
             newDesign.name(currDesign.name());
@@ -324,7 +314,7 @@ public class AICShipDesigner implements Base, ShipDesigner {
         // recalculate current design's damage vs. current targets
         ShipDesign currDesign = lab.destroyerDesign();
         int currSlot = currDesign.id();
-        ShipDestroyerTemplate.setPerTurnDamage(currDesign, empire());
+        ShipDestroyerTemplateC.setPerTurnDamage(currDesign, empire());
 
         // find best hypothetical design vs current targets
         ShipDesign newDesign = newDestroyerDesign(currDesign.size());
@@ -343,7 +333,7 @@ public class AICShipDesigner implements Base, ShipDesigner {
         // if we have very few destroyers actually in use, go ahead and
         // scrap/replace now
         float bcValue = currDesign.cost()*shipCounts[currDesign.id()];
-        boolean easyToReplace = bcValue <= 1000;
+        boolean easyToReplace = bcValue <= 2000; // scrap easier, change from 1000
         
         if (easyToReplace) {
             newDesign.name(currDesign.name());
@@ -405,34 +395,34 @@ public class AICShipDesigner implements Base, ShipDesigner {
         lab.iconifyDesign(design);
         return design;
     }
-    public ShipDesign newColonyDesign() {
-        return newColonyDesign(!empire.contactedEmpires().isEmpty(), false);
-    }
-    public ShipDesign newColonyDesign(boolean weaponNeeded, boolean extendedRangeNeeded) {
+    public ShipDesign newColonyDesign(boolean weaponDesired, boolean regularRangeNeeded, boolean extendedRangeNeeded) {
         ShipDesignLab lab = lab();
         ShipDesign design = lab.newBlankDesign(ShipDesign.LARGE);
         design.special(0, bestColonySpecial());
         design.engine(lab.fastestEngine());
         design.mission(ShipDesign.COLONY);
         design.maxUnusedTurns(OBS_COLONY_TURNS);
+        design.setSmallestSize();
+        int standardSize = design.size();
+
+        // Try to fit extended range it
+        if (extendedRangeNeeded) {
+            ShipSpecial extRangeSpecial = lab.specialReserveFuel();
+            design.special(1, extRangeSpecial);
+            design.setSmallestSize();
+            // Cancel that if we made the ship bigger, unless the only candidate planets require it
+            boolean desperateForRange = !regularRangeNeeded && extendedRangeNeeded;
+            if (design.size() > standardSize && !desperateForRange) 
+                design.special(1, lab.noSpecial());            	
+        }
 
         // AIs will always put 1 beam weapon on their colony ships if AI contact made
-        if (weaponNeeded) {
+        if (weaponDesired) {
             ShipWeapon bestWpn = lab.bestUnlimitedShotWeapon(design, 1);
-            if (bestWpn != null)
+            if (bestWpn != null) 
                 design.addWeapon(bestWpn, 1);
         }
-
-        // if we don't need regular-range colony shi[
-        if (extendedRangeNeeded) {
-            ShipSpecial prevSpecial = design.special(1);
-            ShipSpecial special = lab.specialReserveFuel();
-            design.special(1, special);
-            design.setSmallestSize();
-            if (design.size() > ShipDesign.LARGE)
-                design.special(1, prevSpecial);
-        }
-
+        
         design.setSmallestSize();
         lab.nameDesign(design);
         lab.iconifyDesign(design);
@@ -452,9 +442,9 @@ public class AICShipDesigner implements Base, ShipDesigner {
         int maxSize = ShipDesign.SMALL;
         if (maxProd >= 1500)
             maxSize = ShipDesign.HUGE;
-        else if (maxProd >= 300)
+        else if (maxProd >= 700) // change from 300, keep fighters smaller
             maxSize = ShipDesign.LARGE;
-        else if (maxProd >= 60)
+        else if (maxProd >= 300) // change from 60 (!), keep fighters smaller
             maxSize = ShipDesign.MEDIUM;
         return min(preferredSize, maxSize);
     }
@@ -470,9 +460,9 @@ public class AICShipDesigner implements Base, ShipDesigner {
             maxProd = max(sys.colony().production(), maxProd);
 
         int maxSize = ShipDesign.MEDIUM;
-        if (maxProd >= 1000)
+        if (maxProd >= 1500) // change from 1000, keep pure bombers smaller
             maxSize = ShipDesign.HUGE;
-        else if (maxProd >= 200)
+        else if (maxProd >= 450) // change from 200, keep pure bombers smaller
             maxSize = ShipDesign.LARGE;
         return min(preferredSize, maxSize);
     }
@@ -488,29 +478,29 @@ public class AICShipDesigner implements Base, ShipDesigner {
             maxProd = max(sys.colony().production(), maxProd);
 
         int maxSize = ShipDesign.MEDIUM;
-        if (maxProd >= 1000)
+        if (maxProd >= 800) // change from 1000, pump out HUGE destroyers sooner, 800 is around soil/terraform+40/robo-4
             maxSize = ShipDesign.HUGE;
-        else if (maxProd >= 200)
+        else if (maxProd >= 350) // change from 200, keep destroyer smaller in beginning
             maxSize = ShipDesign.LARGE;
         return min(preferredSize, maxSize);
     }
     @Override
     public ShipDesign newFighterDesign(int size) {
-        ShipDesign design = ShipFighterTemplate.newDesign(this);
+        ShipDesign design = ShipFighterTemplateC.newDesign(this);
         design.mission(ShipDesign.FIGHTER);
         design.maxUnusedTurns(OBS_FIGHTER_TURNS);
         return design;
     }
     @Override
     public ShipDesign newBomberDesign(int size) {
-        ShipDesign design = ShipBomberTemplate.newDesign(this);
+        ShipDesign design = ShipBomberTemplateC.newDesign(this);
         design.mission(ShipDesign.BOMBER);
         design.maxUnusedTurns(OBS_BOMBER_TURNS);
         return design;
     }
     @Override
     public ShipDesign newDestroyerDesign(int size) {
-        ShipDesign design = ShipDestroyerTemplate.newDesign(this);
+        ShipDesign design = ShipDestroyerTemplateC.newDesign(this);
         design.mission(ShipDesign.DESTROYER);
         design.maxUnusedTurns(OBS_DESTROYER_TURNS);
         return design;

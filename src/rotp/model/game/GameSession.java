@@ -76,7 +76,7 @@ public final class GameSession implements Base, Serializable {
 
     private static final int MINIMUM_NEXT_TURN_TIME = 500;
     private static Thread nextTurnThread;
-    private static boolean suspendNextTurn = false;
+    private static volatile boolean suspendNextTurn = false;
     private static final ThreadFactory minThreadFactory = GameSession.minThreadFactory();
     private static ExecutorService smallSphereService = Executors.newSingleThreadExecutor(minThreadFactory);
 
@@ -303,14 +303,10 @@ public final class GameSession implements Base, Serializable {
                 
                 gal.events().nextTurn();
                 
-                //startGroundCombat();
-                //startShipCombat();
-                //startShipCombat2();
-                //startHighTechShipCombat();
-                
                 gal.council().nextTurn();
                 GNNRankingNoticeCheck.nextTurn();
                 GNNExpansionEvent.nextTurn();
+                gal.refreshAllEmpireViews();
                 gal.nextEmpireTurns();
                 
                 // test game over conditions
@@ -319,15 +315,6 @@ public final class GameSession implements Base, Serializable {
                 if (!inProgress())
                     return;
                 
-                //Code to easily test espionage/framing
-                //formAllianceWithRandomContact();
-                //formAlliancesWithContacts();
-                //startGalacticCouncil();
-                //randomlyStealATech();
-                //randomlyCommitSabotage();
-                //randomlyLearnTechs();
-                //startGNNNotification();
-                
                 if (processNotifications()) {
                     log("Notifications processed 1 - back to MainPanel");
                     //RotPUI.instance().selectMainPanel();
@@ -335,12 +322,13 @@ public final class GameSession implements Base, Serializable {
                 gal.postNextTurn1();
                 if (!inProgress())
                     return;
-                if (processNotifications()) {
-                    //RotPUI.instance().selectMainPanel();
-                }
+                
+                processNotifications();
+                
                 RotPUI.instance().selectMainPanel();
                 log("Notifications processed 2 - back to MainPanel");
                 gal.postNextTurn2();
+                
                 if (!inProgress())
                     return;
                 if (processNotifications()) {
@@ -349,19 +337,25 @@ public final class GameSession implements Base, Serializable {
                 }
                 // all diplomatic fallout: praise, warnings, treaty offers, war declarations
                 gal.assessTurn();
+                
                 processNotifications();
+                gal.refreshAllEmpireViews();
+
                 gal.makeNextTurnDecisions();
+                
                 if (!systemsToAllocate().isEmpty())
                     gameListeners.forEach(l -> l.allocateSystems());
 
                 log("Refreshing Player Views");
                 NoticeMessage.resetSubstatus(text("TURN_REFRESHING"));
                 validate();
-                player().refreshViews();
+                gal.refreshEmpireViews(player());
+                
                 log("Autosaving post-turn");
                 log("NEXT TURN PROCESSING TIME: ", str(timeMs()-startMs));
                 NoticeMessage.resetSubstatus(text("TURN_SAVING"));
                 instance.saveRecentSession(true);
+                
                 log("Reselecting main panel");
                 RotPUI.instance().mainUI().showDisplayPanel();
                 RotPUI.instance().selectMainPanel();
@@ -782,6 +776,7 @@ public final class GameSession implements Base, Serializable {
         minY = max(0,minY-r);
         maxY = min(gal.height(), maxY+r);
         pl.setBounds(minX, maxX, minY, maxY);
+        pl.setVisibleShips();
     }
     static ThreadFactory minThreadFactory() {
         return (Runnable r) -> {

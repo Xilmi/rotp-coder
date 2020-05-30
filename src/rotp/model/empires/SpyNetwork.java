@@ -210,6 +210,9 @@ public final class SpyNetwork implements Base, Serializable {
     public void nextTurn(float prod) {
         Collections.sort(shipViews, ShipView.VIEW_DATE);
 
+        if (!view().inEconomicRange())
+            return;
+        
         // auto-update everything at no cost if unity 
         if (view.embassy().unity()) {
             lastSpyDate = galaxy().currentYear();
@@ -344,7 +347,7 @@ public final class SpyNetwork implements Base, Serializable {
         EspionageMission eMission = new EspionageMission(this, spy, techs, randomSystem);
 
         // ai will choose now.. player choice is deferred until UI is displayed
-        if (owner().isAI ()) {
+        if (owner().isAIControlled()) {
             eMission.stealTech(owner().ai().scientist().mostDesirableTech(techs));
             if (eMission.canFrame())
                 eMission.frameEmpire(owner().spyMasterAI().suggestToFrame(eMission.empiresToFrame()));

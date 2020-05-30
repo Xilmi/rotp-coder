@@ -1,12 +1,12 @@
 /*
  * Copyright 2015-2020 Ray Fowler
- *
+ * 
  * Licensed under the GNU General Public License, Version 3 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *     https://www.gnu.org/licenses/gpl-3.0.html
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,8 +16,12 @@
 package rotp.model.colony;
 
 import java.io.Serializable;
-import java.util.*;
-
+import java.util.EnumMap;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Collections;
 import static rotp.model.colony.ColonySpendingCategory.MAX_TICKS;
 import rotp.model.empires.Empire;
 import rotp.model.empires.EmpireView;
@@ -150,7 +154,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         float factories = min(maxFactories, industry().factories());
         float pop = population();
         float maxPop = planet().maxSize();
-
+        
         float workerProd = empire.workerProductivity();
         float maxProd = maxFactories + (maxPop * workerProd);
         float currProd = factories + (pop*workerProd);
@@ -184,6 +188,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         setPopulation(2);
         shipyard().goToNextDesign();
         defense().updateMissileBase();
+        cleanupAllocation = -1;
     }
     public boolean isBuildingShip() { return shipyard().design() instanceof ShipDesign; }
     private void buildFortress()    { fortressNum = empire.race().randomFortress(); }
@@ -308,7 +313,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
             return;
         if (starSystem().inNebula() && order == Orders.SHIELD)
             return;
-
+        
         float existingAmt = orders.containsKey(order) ? orders.get(order) : 0;
 
         if (amt <= existingAmt)
@@ -418,7 +423,6 @@ public final class Colony implements Base, IMappedObject, Serializable {
 
         // after turn is over, we may need to reset ECO spending to adjust for cleanup
         keepEcoLockedToClean = !locked[ECOLOGY] && empire().isPlayer() && (allocation[ECOLOGY] == cleanupAllocation());
-
         // make sure that the colony's expenses aren't too high
         empire().governorAI().lowerExpenses(this);
 
@@ -443,6 +447,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         ecology().commitTurn();
         research().commitTurn();
 
+        planet().removeExcessWaste();
         adjustReserveIncome(-usedReserve);
 
         if ((shipyard().allocation() < 0) || (defense().allocation() < 0) || (industry().allocation() < 0)
@@ -462,7 +467,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         industry().assessTurn();
         ecology().assessTurn();
         research().assessTurn();
-
+        
         if (keepEcoLockedToClean) {
             int newAlloc = ecology().cleanupAllocationNeeded();
             if (allocation[ECOLOGY] != newAlloc) {
@@ -702,9 +707,9 @@ public final class Colony implements Base, IMappedObject, Serializable {
     public float wasteCleanupCost() {
         if (empire.race().ignoresPlanetEnvironment())
             return 0;
-
+        
         float mod = empire().isPlayer() ? 1.0f : options().aiWasteModifier();
-        return mod*(min(planet.maxWaste(), planet.waste() + newWaste())) / tech().wasteElimination();
+        return mod*(min(planet.maxWaste(), planet.waste()) + newWaste()) / tech().wasteElimination();
     }
     public float minimumCleanupCost() {
         return min(wasteCleanupCost(), totalIncome());
@@ -911,16 +916,16 @@ public final class Colony implements Base, IMappedObject, Serializable {
         // player notification only.
         if (tr.size() == 0) {
             log(concat(str(tr.originalSize()), " ", tr.empire().raceName(), " transports perished at ", name()));
-            if (tr.empire().isPlayer())
+            if (tr.empire().isPlayer()) 
                 TransportsKilledAlert.create(empire(), starSystem(), tr.originalSize());
-            else if (empire().isPlayer())
+            else if (empire().isPlayer()) 
                 InvadersKilledAlert.create(tr.empire(), starSystem(), tr.originalSize());
             return;
         }
 
         float startingPop = population();
         if (population() > 0) {
-            if (empire.isPlayer() || tr.empire().isPlayer())
+            if (empire.isPlayerControlled() || tr.empire().isPlayerControlled())
                 RotPUI.instance().selectGroundBattlePanel(this, tr);
             else
                 completeDefenseAgainstTransports(tr);
@@ -967,7 +972,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         Empire loser = empire();
         if (isCapital())
             loser.chooseNewCapital();
-
+        
         loser.lastAttacker(tr.empire());
         starSystem().addEvent(new SystemCapturedEvent(tr.empId()));
         tr.empire().lastAttacker(loser);
@@ -976,7 +981,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
             return;
         }
         Empire pl = player();
-        if (tr.empire() == pl)
+        if (tr.empire().isPlayerControlled())
             session().addSystemToAllocate(starSystem(), text("MAIN_ALLOCATE_COLONY_CAPTURED", pl.sv.name(starSystem().id), pl.raceName()));
 
         // list of possible techs that could be recovered from factories
@@ -1069,6 +1074,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
 
         float newWaste = popLost * 10;
         ecology().addWaste(newWaste);
+        planet().removeExcessWaste();
 
         if (population() <= 0)
             destroy();
@@ -1076,7 +1082,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
     public void destroy() {
         if (isCapital())
             empire.chooseNewCapital();
-
+        
         StarSystem sys = starSystem();
         sys.addEvent(new SystemDestroyedEvent(empire.lastAttacker()));
 
@@ -1094,12 +1100,12 @@ public final class Colony implements Base, IMappedObject, Serializable {
         // update system views of civs that would notice
         empire.sv.refreshFullScan(sys.id);
         List<ShipFleet> fleets = sys.orbitingFleets();
-        for (ShipFleet fl : fleets)
+        for (ShipFleet fl : fleets) 
             fl.empire().sv.refreshFullScan(sys.id);
-
+        
         for (Empire emp: galaxy().empires()) {
-            if (emp.knowsOf(empire) && !emp.sv.name(sys.id).isEmpty())
-                emp.sv.view(sys.id).setEmpire();
+            if (emp.knowsOf(empire) && !emp.sv.name(sys.id).isEmpty()) 
+                emp.sv.view(sys.id).setEmpire();                   
         }
     }
 

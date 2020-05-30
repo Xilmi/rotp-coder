@@ -250,7 +250,7 @@ public class MapOverlayNone extends MapOverlay {
                 }
                 break;
             case KeyEvent.VK_F7:
-                systems = player().orderedUnderAttackSystems();
+                systems = player().orderedUnderAttackSystems(parent.map().showUnarmedShips(), !parent.map().showFleetsOnly());
                 currSys = null;
                 if (systems.isEmpty())
                     misClick();
@@ -274,7 +274,7 @@ public class MapOverlayNone extends MapOverlay {
                 }
                 break;
             case KeyEvent.VK_F8:
-                systems = player().orderedUnderAttackSystems();
+                systems = player().orderedUnderAttackSystems(parent.map().showUnarmedShips(), !parent.map().showFleetsOnly());
                 currSys = null;
                 if (systems.isEmpty())
                     misClick();
@@ -308,7 +308,7 @@ public class MapOverlayNone extends MapOverlay {
                     index = fleets.indexOf(currFleet)+1;
                     if (index == fleets.size())
                         index = 0;
-                    parent.clickedSprite(fleets.get(index));
+                    parent.clickingOnSprite(fleets.get(index), 1, false, true);
                     parent.map().recenterMapOn(fleets.get(index));
                     parent.repaint();
                 }
@@ -325,7 +325,7 @@ public class MapOverlayNone extends MapOverlay {
                     index = fleets.indexOf(currFleet)-1;
                     if (index < 0)
                         index = fleets.size()-1;
-                    parent.clickedSprite(fleets.get(index));
+                    parent.clickingOnSprite(fleets.get(index), 1, false, true);
                     parent.map().recenterMapOn(fleets.get(index));
                     parent.repaint();
                 }
@@ -342,7 +342,7 @@ public class MapOverlayNone extends MapOverlay {
                     index = fleets.indexOf(currFleet)+1;
                     if (index == fleets.size())
                         index = 0;
-                    parent.clickedSprite(fleets.get(index));
+                    parent.clickingOnSprite(fleets.get(index), 1, false, true);
                     parent.map().recenterMapOn(fleets.get(index));
                     parent.repaint();
                 }
@@ -359,7 +359,7 @@ public class MapOverlayNone extends MapOverlay {
                     index = fleets.indexOf(currFleet)-1;
                     if (index < 0)
                         index = fleets.size()-1;
-                    parent.clickedSprite(fleets.get(index));
+                    parent.clickingOnSprite(fleets.get(index), 1, false, true);
                     parent.map().recenterMapOn(fleets.get(index));
                     parent.repaint();
                 }

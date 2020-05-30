@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package rotp.model.ai;
+package rotp.model.ai.base;
 
 import java.util.ArrayList;
 import java.util.List;
+import rotp.model.ai.EnemyShipTarget;
 import rotp.model.ai.interfaces.ShipDesigner;
 import rotp.model.empires.Empire;
 import rotp.model.empires.EmpireView;

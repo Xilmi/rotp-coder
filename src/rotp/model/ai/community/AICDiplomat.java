@@ -526,7 +526,19 @@ public class AICDiplomat implements Base, Diplomat {
     //-----------------------------------
     //  PACT
     //-----------------------------------
-    public boolean canOfferPact(Empire e)         { return diplomats(id(e)) && empire.hasTradeWith(e) && !empire.atWarWith(id(e)) && !empire.pactWith(id(e)) && !empire.alliedWith(id(e)); }
+    public boolean canOfferPact(Empire e){ 
+        if (!diplomats(id(e)))
+            return false;
+        if (!empire.inEconomicRange(id(e)))
+            return false; 
+        if (empire.atWarWith(id(e)))
+            return false;
+        if (!empire.hasTradeWith(e))
+            return false;
+        if (empire.pactWith(id(e)) || empire.alliedWith(id(e)))
+            return false;
+        return true;
+   }
 
     @Override
     public DiplomaticReply receiveOfferPact(Empire requestor) {
@@ -592,7 +604,19 @@ public class AICDiplomat implements Base, Diplomat {
     //-----------------------------------
     //  ALLIANCE
     //-----------------------------------
-    public boolean canOfferAlliance(Empire e)              { return diplomats(id(e)) && empire.hasTradeWith(e) && !empire.atWarWith(id(e)) && !empire.alliedWith(id(e)); }
+    public boolean canOfferAlliance(Empire e) { 
+        if (!diplomats(id(e)))
+            return false;
+        if (!empire.inEconomicRange(id(e)))
+            return false; 
+        if (empire.atWarWith(id(e)))
+            return false;
+        if (!empire.hasTradeWith(e))
+            return false;
+        if (empire.alliedWith(id(e)))
+            return false;
+        return true;
+    }
     @Override
     public DiplomaticReply receiveOfferAlliance(Empire requestor) {
         log(empire.name(), " receiving offer of Alliance from: ", requestor.name());
@@ -1132,7 +1156,13 @@ public class AICDiplomat implements Base, Diplomat {
         // 4 fighters and you have 1.
         int basePower = 500;
         
-        float otherPower = basePower+v.owner().militaryPowerLevel(v.empire());
+        // the defender's advantage is particularly high in the early game, where
+       // our ships take forever to get there and the entire combat can be swayed
+        // by a single large ship, so add a constant defender bonus (it'll matter
+        // less as the game goes on)
+        int defendersAdvantage = 500;
+
+        float otherPower = basePower+v.owner().militaryPowerLevel(v.empire()) + defendersAdvantage;
         float myPower = basePower+v.owner().militaryPowerLevel();
         
         
@@ -1189,11 +1219,11 @@ public class AICDiplomat implements Base, Diplomat {
         if (cv2.embassy().alliance() && !cv1.embassy().alliance())
             return castVoteFor(civ2);
 
-        // if at war with one, vote for other if pact/ally, else abstain
+        // if at war with one, vote for other
         if (cv1.embassy().anyWar() && !cv2.embassy().anyWar())
-            return conditionallyCastVoteFor(cv2);
+            return castVoteFor(civ2);
         if (cv2.embassy().anyWar() && !cv1.embassy().anyWar())
-            return conditionallyCastVoteFor(cv1);
+            return castVoteFor(civ1);
 
         // decide to vote for/against civ1
         pct = cv1.embassy().relations() + civ1.race().councilBonus() + civ1.orionCouncilBonus() + previousVoteBonus(civ1);

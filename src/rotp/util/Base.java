@@ -48,6 +48,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import javax.swing.BorderFactory;
@@ -217,15 +218,11 @@ public interface Base {
         String output = concat(text);
         try {
             System.out.println(output);
-            if (RotPUI.useDebugFile) {
-                PrintWriter debugFile = RotPUI.debugFile();
-                if (debugFile != null) {
-                    debugFile.println(output);
-                    debugFile.flush();
-                }
+            if (Logger.logListener != null) {
+                Logger.logListener.accept(output);
             }
         }
-        catch(Exception e) { }
+        catch(Exception e) { e.printStackTrace(); }
     }
     public default int maximumSystems()                { return (int) (240*(Rotp.maxHeapMemory-250)); }
     public default boolean veryLowMemory() {

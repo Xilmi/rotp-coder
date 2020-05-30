@@ -469,6 +469,16 @@ public class Ships implements Base, Serializable {
         List<ShipFleet> fleets = new ArrayList<>();
         return fleets;
     }
+    public List<ShipFleet> allFleetsAtSystem(int sysId) {
+        List<ShipFleet> fleetsAll = allFleetsCopy();
+        List<ShipFleet> fleets = new ArrayList<>();
+        
+        for (ShipFleet fl: fleetsAll) {
+            if ((fl.sysId() == sysId))
+                fleets.add(fl);
+        }
+        return fleets;
+    }
     public ShipFleet anyFleetAtSystem(int empId, int sysId) {
         List<ShipFleet> fleetsAll = allFleetsCopy();
         
@@ -530,7 +540,7 @@ public class Ships implements Base, Serializable {
             // unsure how this is possible since allFleets var is private with no accessor
             // all allFleets.add() calls are in this class and only add new ShipFleet().
             if (fl != null) {
-                if ((id(fl.system()) == sysId) && fl.isOrbiting())
+                if ((fl.sysId() == sysId) && fl.isOrbiting())
                     fleets.add(fl);
             }
         }
@@ -541,8 +551,10 @@ public class Ships implements Base, Serializable {
         List<ShipFleet> fleetsAll = allFleetsCopy();
         
         for (ShipFleet fl: fleetsAll) {
-            if ((id(fl.system()) == sysId) && fl.isDeployed())
-                fleets.add(fl);
+            if (fl != null) {
+                if ((fl.sysId() == sysId) && fl.isDeployed())
+                    fleets.add(fl);
+            }
         }
         return fleets;
     }

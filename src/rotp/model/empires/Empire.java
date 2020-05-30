@@ -16,6 +16,8 @@
 package rotp.model.empires;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Polygon;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -78,6 +80,8 @@ public final class Empire implements Base, NamedObject, Serializable {
 
     public static Empire thePlayer() { return Galaxy.current().player(); }
 
+    public static long[] times = new long[6];
+
     public final int id;
     private Leader leader;
     private final String raceKey;
@@ -127,6 +131,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     private transient Color shipBorderColor;
     private transient Color scoutBorderColor;
     private transient Color empireRangeColor;
+    private transient float totalEmpireProduction;
 
     public AI ai()                                {
         if (ai == null)
@@ -198,7 +203,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     public float minY()                           { return minY; }
     public float maxY()                           { return maxY; }
     
-    private boolean canSeeShips(int empId) {
+    public boolean canSeeShips(int empId) {
         if (canSeeShips == null) {
             canSeeShips = new boolean[galaxy().numEmpires()];
             for (int i=0;i<canSeeShips.length;i++) 
@@ -679,13 +684,13 @@ public final class Empire implements Base, NamedObject, Serializable {
         log(this + ": NextTurn");
         shipBuildingSystems.clear();
         newSystems.clear();
+        recalcPlanetaryProduction();
 
         for (ShipDesign d : shipLab.designs()) {
             if (d != null)
                 d.preNextTurn();
         }
-        
-        refreshViews();
+
         List<StarSystem> allColonies = allColonizedSystems();
         List<Transport> transports = transports();
 
@@ -702,6 +707,7 @@ public final class Empire implements Base, NamedObject, Serializable {
             addReserve(col.production() * empireTaxPct());
             col.nextTurn();
         }
+        recalcPlanetaryProduction();
     }
     public void postNextTurn() {
         log(this + ": postNextTurn");
@@ -715,6 +721,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     }
     public void assessTurn() {
         log(this + ": AssessTurn");
+        recalcPlanetaryProduction();
 
         if (status() != null)
             status().assessTurn();
@@ -738,52 +745,57 @@ public final class Empire implements Base, NamedObject, Serializable {
         tech.acquireTradedTechs();
     }
     public void makeNextTurnDecisions() {
-        //long tm0 = System.currentTimeMillis();
+        recalcPlanetaryProduction();
+
         log(this + ": make NextTurnDecisions");
-        if (recalcDistances) {
-            NoticeMessage.setSubstatus(text("TURN_RECALC_DISTANCES"));
-            sv.calculateSystemDistances();
-            recalcDistances = false;
-            //long tm1 = System.currentTimeMillis();
-            //log("recalcDistances: "+(tm1-tm0)+"ms");
-            //tm0 = tm1;
-        }
-
-        NoticeMessage.setSubstatus(text("TURN_REFRESHING"));
-        refreshViews();
-        //long tm2 = System.currentTimeMillis();
-        //log("refreshViews: "+(tm2-tm0)+"ms");
-
         NoticeMessage.setSubstatus(text("TURN_SCRAP_SHIPS"));
         shipLab.nextTurn();
 
-        fleetCommanderAI().nextTurn();
-        NoticeMessage.setSubstatus(text("TURN_DESIGN_SHIPS"));
-        shipDesignerAI().nextTurn();
-        NoticeMessage.setSubstatus(text("TURN_COLONY_SPENDING"));
-        setAllocations();
-
-        autospend();
-        // If planets are governed, redo allocations now
-        for (int i = 0; i < this.sv.count(); ++i) {
-            if (this.sv.empire(i) == this && this.sv.isColonized(i)) {
-                this.sv.colony(i).governIfNeeded();
-            }
+        // empire settings
+        if (isAIControlled()) {
+            scientistAI().setTechTreeAllocations();
+            securityAllocation = spyMasterAI().suggestedInternalSecurityLevel();
+            empireTaxLevel = governorAI().suggestedEmpireTaxLevel();
+            fleetCommanderAI().nextTurn();
+            NoticeMessage.setSubstatus(text("TURN_DESIGN_SHIPS"));
+            shipDesignerAI().nextTurn();
+            ai().sendTransports();
         }
 
-        //long tm3 = System.currentTimeMillis();
-        //log("remainder: "+(tm3-tm2)+"ms");
+        // colony development (sometimes done for player if auto-pilot)
+        NoticeMessage.setSubstatus(text("TURN_COLONY_SPENDING"));
+        for (int n=0; n<sv.count(); n++) {
+            if (sv.empId(n) == id)
+                governorAI().setColonyAllocations(sv.colony(n));
+        }
+
+        if (isAIControlled()) {
+            ai().treasurer().allocateReserve();
+            // diplomatic activities
+            for (EmpireView ev : empireViews()) {
+                if ((ev != null) && ev.embassy().contact())
+                    ev.setSuggestedAllocations();
+            }
+        } else {
+            autospend();
+            // If planets are governed, redo allocations now
+            for (int i = 0; i < this.sv.count(); ++i) {
+                if (this.sv.empire(i) == this && this.sv.isColonized(i)) {
+                    this.sv.colony(i).governIfNeeded();
+                }
+            }
+        }
     }
     /**
      * Spend reserve automatically (if enabled).
-     * 
+     *
      * Spend only on planets with production &lt; 30% average
      * Spend only the amount planet can consume this turn
      * Start with planet with lowest production, and end when money runs out
      * or no suitable planets are available.
      * Spend only on planets with governor on.
      * Spend only if industry and ecology are not complete.
-     * 
+     *
      */
     public void autospend() {
         GovernorOptions2 options = session().getGovernorOptions2();
@@ -794,7 +806,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         if ((int)this.totalReserve() <= options.getReserve()) {
             return;
         }
-        
+
         List<Colony> colonies = new LinkedList<>();
         float productionSum = 0;
         int colonyCount = 0;
@@ -818,7 +830,7 @@ public final class Empire implements Base, NamedObject, Serializable {
                 it.remove();
             }
         }
-        Collections.sort(colonies, 
+        Collections.sort(colonies,
                 (Colony o1, Colony o2) -> (int)Math.signum(o1.production() - o2.production()));
 //        for (Colony c: colonies) {
 //            System.out.println("Autospend "+c.production()+" "+c.name());
@@ -838,7 +850,7 @@ public final class Empire implements Base, NamedObject, Serializable {
 //            System.out.format("Autospend allocated %d bs to %s%n", bcToSpend, c.name());
         }
     }
-    
+
     public String decode(String s, Empire listener) {
         String s1 = this.replaceTokens(s, "my");
         s1 = listener.replaceTokens(s1, "your");
@@ -873,30 +885,6 @@ public final class Empire implements Base, NamedObject, Serializable {
         float time = fr.travelTime(fr, to, tech().transportSpeed());
         float dist = fr.distanceTo(to);
         return dist/time;
-    }
-    private void setAllocations() {
-        if (isAIControlled())
-            ai().sendTransports();
-
-        // colony development (sometimes done for player if auto-pilot)
-        for (int n=0; n<sv.count(); n++) {
-            if (sv.empId(n) == id)
-                governorAI().setColonyAllocations(sv.colony(n));
-        }
-
-        if (!isAIControlled())
-            return;
-
-        ai().treasurer().allocateReserve();
-        // diplomatic activities
-        for (EmpireView ev : empireViews()) {
-            if ((ev != null) && ev.embassy().contact())
-                ev.setSuggestedAllocations();
-        }
-        // empire settings
-        ai().scientist().setTechTreeAllocations();
-        securityAllocation = spyMasterAI().suggestedInternalSecurityLevel();
-        empireTaxLevel = governorAI().suggestedEmpireTaxLevel();
     }
     public void checkForRebellionSpread() {
         if (extinct)
@@ -993,7 +981,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         return 0;
     }
     public void addVisibleShip(Ship sh) {
-        if (!visibleShips.contains(sh))
+        if (sh.visibleTo(id) && !visibleShips.contains(sh))
             visibleShips.add(sh);
     }
     public void addVisibleShips(List<? extends Ship> ships) {
@@ -1015,10 +1003,18 @@ public final class Empire implements Base, NamedObject, Serializable {
     }
     public void startGame() {
         refreshViews();
+        setVisibleShips();
         StarSystem home = galaxy().system(homeSysId);
         governorAI().setInitialAllocations(home.colony());
     }
     public void refreshViews() {
+        log(this + ": refresh views");
+        if (recalcDistances) {
+            NoticeMessage.setSubstatus(text("TURN_RECALC_DISTANCES"));
+            sv.calculateSystemDistances();
+            recalcDistances = false;
+        }
+
         Galaxy gal = galaxy();
         for (int i=0;i<sv.count();i++) {
             StarSystem sys = gal.system(i);
@@ -1043,7 +1039,6 @@ public final class Empire implements Base, NamedObject, Serializable {
         for (int n=0;n<sv.count();n++)
             sv.resetSystemData(n);
 
-        setVisibleShips();
     }
     public void setVisibleShips(int sysId) {
         addVisibleShips(sv.orbitingFleets(sysId));
@@ -1054,34 +1049,42 @@ public final class Empire implements Base, NamedObject, Serializable {
         visibleShips.clear();
         
         float scanRange = planetScanningRange();
-        int numEmps = gal.numEmpires();
         // get ships orbiting visible systems
+
         for (int sysId=0;sysId<sv.count();sysId++) {
-            StarSystem sys = sv.system(sysId);
+            // is the system in scanning range?
             boolean canScan = sv.withinRange(sysId, scanRange);
+            List<ShipFleet> systemFleets = gal.ships.allFleetsAtSystem(sysId);
+            // if not, see if we own or are unity with any ships
+            // currently in the system. If so, we can see all ships here
             if (!canScan)  {
-                for (int empId=0;empId<numEmps;empId++) {
-                    if (!canScan && canSeeShips(empId) && (gal.ships.anyFleetAtSystem(empId,sysId) != null))
+                for (ShipFleet fl: systemFleets) {
+                    if (canSeeShips(fl.empId))
                         canScan = true;
                 }
             }
             if (canScan) {
-                addVisibleShips(sys.orbitingFleets());
-                addVisibleShips(sys.exitingFleets());
+                for (ShipFleet fl: systemFleets) {
+                    if (fl.visibleTo(this))
+                        visibleShips.add(fl);
+                }
             }
         }
+
+        List<ShipFleet> myShips = galaxy().ships.allFleets(id);
+        List<StarSystem> mySystems = this.allColonizedSystems();
 
         // get transports in transit
         for (Transport tr : gal.transports()) {
             if (canSeeShips(tr.empId())
-            || (tr.visibleTo(id) && canScanTo(tr) ))
+            || (tr.visibleTo(id) && canScanTo(tr, mySystems, myShips) ))
                 addVisibleShip(tr);
         }
 
         // get fleets in transit
         for (ShipFleet sh : gal.ships.inTransitFleets()) {
             if (canSeeShips(sh.empId())
-            || (sh.visibleTo(id) && canScanTo(sh) ))
+            || (sh.visibleTo(id) && canScanTo(sh, mySystems, myShips) ))
                 addVisibleShip(sh);
         }
 
@@ -1102,6 +1105,24 @@ public final class Empire implements Base, NamedObject, Serializable {
         for (int i=0; i<sv.count(); i++) {
             if ((sv.empire(i) == this) && (gal.system(i).distanceTo(loc) <= planetScanningRange()))
                 return true;
+        }
+        return false;
+    }
+    public boolean canScanTo(IMappedObject loc, List<StarSystem> systems, List<ShipFleet> ships) {
+        float planetRange = planetScanningRange();
+        if (planetRange > 0) {
+            for (StarSystem sys: systems) {
+                if (sys.distanceTo(loc) <= planetRange)
+                    return true;
+            }
+        }
+
+        float shipRange = shipScanningRange();
+        if (shipRange > 0) {
+            for (Ship sh: ships) {
+                if (sh.distanceTo(loc) <= shipRange)
+                    return true;
+            }
         }
         return false;
     }
@@ -1715,6 +1736,16 @@ public final class Empire implements Base, NamedObject, Serializable {
         }
         return systems;
     }
+    public List<StarSystem> uncolonizedPlanetsInRange(int range) {
+        Galaxy gal = galaxy();
+        List<StarSystem> systems = new ArrayList<>();
+        for (int i=0;i<sv.count();i++) {
+            StarSystem sys = gal.system(i);
+            if (sv.isScouted(i) && (sv.distance(i) <= range) && canColonize(sys.planet()))
+                systems.add(sys);
+        }
+        return systems;
+    }
     public PlanetType minUncolonizedPlanetTypeInShipRange(boolean checkHabitable) {
         // of all uncolonized planets in range that we can colonize
         // find the most hostile type... this guides the colony ship design
@@ -1825,7 +1856,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     }
     public void learnTech(String techId) {
         boolean newTech = tech().learnTech(techId);
-        if (newTech && isPlayer()) {
+        if (newTech && isPlayerControlled()) {
             log("Tech: ", techId, " researched");
             DiscoverTechNotification.create(techId);
         }
@@ -2012,12 +2043,18 @@ public final class Empire implements Base, NamedObject, Serializable {
         }
         return totalProductionBC;
     }
+    public void recalcPlanetaryProduction() {
+        totalEmpireProduction = -999;
+    }
     public Float totalPlanetaryProduction() {
-        float totalProductionBC = 0;
-        List<StarSystem> systems = new ArrayList<>(allColonizedSystems());
-        for (StarSystem sys: systems)
-            totalProductionBC += sys.colony().production();
-        return totalProductionBC;
+        if (totalEmpireProduction <= 0) {
+            float totalProductionBC = 0;
+            List<StarSystem> systems = new ArrayList<>(allColonizedSystems());
+            for (StarSystem sys: systems)
+                totalProductionBC += sys.colony().production();
+            totalEmpireProduction = totalProductionBC;
+        }
+        return totalEmpireProduction;
     }
     public float totalPlanetaryProduction(Empire emp) {
         if (emp == this)
@@ -2155,6 +2192,39 @@ public final class Empire implements Base, NamedObject, Serializable {
                 cv.spies().detectShip(fl.empire().shipLab().design(i));
         }
     }
+    public void drawShape(Graphics2D g, int x, int y, int w, int h) {
+        Color c = this.color();
+        Color c1 = new Color(c.getRed(),c.getGreen(),c.getBlue(),192);
+        g.setColor(c);
+        int m = w/10;
+        switch(shape()) {
+            case Empire.SHAPE_SQUARE:
+                g.fillRect(x+m,y+m,w-m-m,h-m-m); break;
+            case Empire.SHAPE_DIAMOND:
+                Polygon p = new Polygon();
+                p.addPoint(x, y+h/2);
+                p.addPoint(x+w/2, y);
+                p.addPoint(x+w, y+h/2);
+                p.addPoint(x+w/2, y+h);
+                g.fill(p); break;
+            case Empire.SHAPE_TRIANGLE1:
+                Polygon p1 = new Polygon();
+                p1.addPoint(x+w/2, y);
+                p1.addPoint(x, y+h);
+                p1.addPoint(x+w,y+h);
+                g.fill(p1); break;
+            case Empire.SHAPE_TRIANGLE2:
+                Polygon p2 = new Polygon();
+                p2.addPoint(x+w/2, y+h);
+                p2.addPoint(x, y);
+                p2.addPoint(x+w,y);
+                g.fill(p2);
+                break;
+            case Empire.SHAPE_CIRCLE:
+            default:
+                g.fillOval(x,y,w,h); break;
+        }
+    }
     public void encounterFleet(ShipFleet fl) {
         if (fl == null)
             return;
@@ -2237,7 +2307,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         Collections.sort(list, IMappedObject.MAP_ORDER);
         return list;
     }
-    public List<StarSystem> orderedUnderAttackSystems() {
+    public List<StarSystem> orderedUnderAttackSystems(boolean showUnarmed, boolean showTransports) {
         List<StarSystem> list = new ArrayList<>();
         Galaxy g = galaxy();
         Empire pl = player();
@@ -2246,32 +2316,27 @@ public final class Empire implements Base, NamedObject, Serializable {
                 list.add(sys);
         }
         if (knowShipETA) {
-            List<Transport> ships = g.transports();
-            for (Transport ship: ships) {
-                if (ship.empId() != pl.id) { // don't care about player ships
-                    StarSystem sys = g.system(ship.destSysId());
-                    // don't care about ships going to already-added systems or AI systems
-                    if (!list.contains(sys) && (sys.empire() == pl)) { 
-                        Empire emp = g.empire(ship.empId());
-                        // add if incoming fleet is hostile to player
-                        if (emp.aggressiveWith(pl.id))
-                            list.add(sys);
-                    }
-                }
-            }
-            for (ShipFleet ship: g.ships.inTransitFleets()) {
-                if (ship.empId() != pl.id) { // don't care about player ships
-                    StarSystem sys = g.system(ship.destSysId());
-                    // don't care about ships going to already-added systems or AI systems
-                    if (!list.contains(sys) && (sys.empire() == pl)) { 
-                        Empire emp = g.empire(ship.empId());
-                        // add if incoming fleet is hostile to player
-                        if (emp.aggressiveWith(pl.id))
-                            list.add(sys);
+            List<Ship> vShips = player().visibleShips();
+            for (Ship sh: vShips) {
+                if (sh.empId() != pl.id) {
+                    StarSystem sys = g.system(sh.destSysId());
+                    if (sys != null) {
+                        // don't care about ships going to already-added systems or AI systems
+                        if (!list.contains(sys) && (sys.empire() == pl)) {
+                            Empire emp = g.empire(sh.empId());
+                            // add if incoming fleet is hostile to player
+                            if (emp.aggressiveWith(pl.id)) {
+                                boolean showShip = showUnarmed
+                                        || (showTransports && (sh instanceof Transport)) || sh.isPotentiallyArmed(pl);
+                                if (showShip)
+                                    list.add(sys);
+                            }
+                        }
                     }
                 }
             }
         }
+        Collections.sort(list, IMappedObject.MAP_ORDER);
         return list;
     }
     public static Set<Empire> allContacts(Empire e1, Empire e2) {
