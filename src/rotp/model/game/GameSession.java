@@ -93,9 +93,17 @@ public final class GameSession implements Base, Serializable {
     private Galaxy galaxy;
     private final GameStatus status = new GameStatus();
     private long id;
+    private transient List<GameListener> gameListeners = new ArrayList<>();
     public GameStatus status()                   { return status; }
     public long id()                             { return id; }
     public ExecutorService smallSphereService()  { return smallSphereService; }
+
+    public void addGameListener(GameListener gameListener) {
+        gameListeners.add(gameListener);
+    }
+    public void removeGameListener(GameListener gameListener) {
+        gameListeners.remove(gameListener);
+    }
 
     public void pauseNextTurnProcessing(String s)   {
         log("Pausing Next Turn: ", s);
@@ -213,14 +221,12 @@ public final class GameSession implements Base, Serializable {
             galaxy().startGame();
             saveRecentSession(false);
         }
-        RotPUI.instance().mainUI().checkMapInitialized();
-        RotPUI.instance().selectIntroPanel();
     }
     private void  startExecutors() {
         smallSphereService = Executors.newSingleThreadExecutor();
     }
     private void stopCurrentGame() {
-        RotPUI.instance().mainUI().clearAdvice();
+        gameListeners.forEach(gl -> gl.clearAdvice());
         vars().clear();
         clearAlerts();
         // shut down any threads running from previous game
@@ -346,8 +352,8 @@ public final class GameSession implements Base, Serializable {
                 processNotifications();
                 gal.makeNextTurnDecisions();
                 if (!systemsToAllocate().isEmpty())
-                    RotPUI.instance().allocateSystems();
-                
+                    gameListeners.forEach(l -> l.allocateSystems());
+
                 log("Refreshing Player Views");
                 NoticeMessage.resetSubstatus(text("TURN_REFRESHING"));
                 validate();
@@ -389,23 +395,14 @@ public final class GameSession implements Base, Serializable {
         if (!session().systemsScouted().isEmpty()) 
             session().addTurnNotification(new SystemsScoutedNotification());
 
-        boolean prevNotice = RotPUI.drawNextTurnNotice;
-        waitUntilNextTurnCanProceed();
-        boolean notificationsHandled = false;
         // received a concurrent modification here... iterate over temp array
         List<TurnNotification> notifs = new ArrayList<>(notifications());
         Collections.sort(notifs);
         notifications().clear();
-        for (TurnNotification notif: notifs) {
-            RotPUI.drawNextTurnNotice = false;
-            log("Notifying player: ", notif.toString());
-            notificationsHandled = true;
-            notif.notifyPlayer();
-            waitUntilNextTurnCanProceed();
-        }
-        RotPUI.drawNextTurnNotice = prevNotice;
+
+        gameListeners.forEach(l -> l.processNotifications(notifs));
         systemsScouted().clear();
-        return notificationsHandled;
+        return true;
     }
     public void startGroundCombat() {
         for (EmpireView v : player().empireViews()) {
@@ -812,5 +809,12 @@ public final class GameSession implements Base, Serializable {
             governorOptions2 = new GovernorOptions2();
         }
         return governorOptions2;
+    }
+
+    private void readObject(ObjectInputStream ois)
+            throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        // for compatibility with older save game files
+        gameListeners = new ArrayList<>();
     }
 }
