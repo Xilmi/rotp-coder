@@ -18,6 +18,7 @@ public class GovernorOptions2 implements Serializable {
     private int minimumMissileBases = 0;
     private boolean autospend = false;
     private int reserve = 1000;
+    private boolean shipbuilding = false;
     
     public GovernorOptions2() {
     }
@@ -68,6 +69,14 @@ public class GovernorOptions2 implements Serializable {
 
     public void setReserve(int reserve) {
         this.reserve = reserve;
+    }
+
+    public boolean isShipbuilding() {
+        return shipbuilding;
+    }
+
+    public void setShipbuilding(boolean shipbuilding) {
+        this.shipbuilding = shipbuilding;
     }
     
     

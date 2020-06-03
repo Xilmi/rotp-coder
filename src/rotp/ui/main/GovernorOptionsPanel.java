@@ -41,6 +41,7 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         this.missileBases.setValue(options2.getMinimumMissileBases());
         this.autospend.setSelected(options2.isAutospend());
         this.reserve.setValue(options2.getReserve());
+        this.shipbuilding.setSelected(options2.isShipbuilding());
     }
 
     /**
@@ -77,6 +78,7 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         autospend = new javax.swing.JCheckBox();
         reserve = new javax.swing.JSpinner();
         resrveLabel = new javax.swing.JLabel();
+        shipbuilding = new javax.swing.JCheckBox();
 
         governorDefault.setText("Governor is on by default");
 
@@ -257,6 +259,7 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         missileBasesLabel.setText("Minimum missile bases");
 
         autospend.setText("Autospend");
+        autospend.setToolTipText("Automatically spend reserve on planets with lowest production");
 
         reserve.setModel(new javax.swing.SpinnerNumberModel(1000, 0, 100000, 10));
         reserve.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
@@ -267,6 +270,9 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
 
         resrveLabel.setText("Keep in reserve");
 
+        shipbuilding.setText("Shipbuilding with Governor enabled");
+        shipbuilding.setToolTipText("Divert resources into shipbuilding and not research if planet is already building ships");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -276,32 +282,35 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(autotransportPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(stargatePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(okButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(cancelButton))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(governorDefault)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(allGovernorsOn)
-                                .addGap(143, 143, 143)
-                                .addComponent(allGovernorsOff))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(12, 12, 12)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(missileBases, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(missileBasesLabel))
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(autospend)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(reserve, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(resrveLabel)
-                                        .addGap(20, 20, 20)))))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(governorDefault)
+                                .addGroup(layout.createSequentialGroup()
+                                    .addComponent(allGovernorsOn)
+                                    .addGap(143, 143, 143)
+                                    .addComponent(allGovernorsOff))
+                                .addGroup(layout.createSequentialGroup()
+                                    .addGap(12, 12, 12)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(shipbuilding)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addComponent(missileBases, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(missileBasesLabel))
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addComponent(autospend)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(reserve, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(resrveLabel)
+                                                .addGap(20, 20, 20))))))
+                            .addGap(0, 0, Short.MAX_VALUE))
+                        .addGroup(layout.createSequentialGroup()
+                            .addComponent(okButton)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(cancelButton))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -326,6 +335,8 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
                     .addComponent(autospend)
                     .addComponent(reserve, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(resrveLabel))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(shipbuilding)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(okButton)
@@ -398,6 +409,7 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         options2.setMinimumMissileBases((Integer)missileBases.getValue());
         options2.setAutospend(autospend.isSelected());
         options2.setReserve((Integer)reserve.getValue());
+        options2.setShipbuilding(shipbuilding.isSelected());
         frame.setVisible(false);
     }//GEN-LAST:event_okButtonActionPerformed
 
@@ -459,6 +471,7 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
     private javax.swing.JButton okButton;
     private javax.swing.JSpinner reserve;
     private javax.swing.JLabel resrveLabel;
+    private javax.swing.JCheckBox shipbuilding;
     private javax.swing.JRadioButton stargateOff;
     private javax.swing.JRadioButton stargateOn;
     private javax.swing.ButtonGroup stargateOptions;

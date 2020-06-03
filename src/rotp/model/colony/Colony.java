@@ -1182,8 +1182,16 @@ public final class Colony implements Base, IMappedObject, Serializable {
         for (int i = 0; i <= 4; i++) {
             locked(i, false);
         }
+        // remember if this planet was building ships. Stargate doesn't count
+        boolean buildingShips = allocation[SHIP] > 0 && !shipyard().design().equals(empire.shipLab().stargateDesign());
         // start from scratch
         clearSpending();
+        // if we were building ships, keep 1 tick in shipbuilding
+        if (buildingShips && session().getGovernorOptions2().isShipbuilding()) {
+            increment(SHIP, 1);
+        }
+        // lock ship slider while we allocate spending elsewhere
+        locked(SHIP, true);
 
         /* I took this out with the new autotransport logic.  If you want to slow down autotransports,
          * then change it back to something like this that will leave 2 population to grow naturally.
@@ -1201,10 +1209,14 @@ public final class Colony implements Base, IMappedObject, Serializable {
         // don't allocate just for "upgrades" if there are no bases
         if (!defense().isCompleted() && (defense().maxBases() > 0 || !defense().shieldAtMaxLevel())) {
             moveSlider(Colony.DEFENSE, null, text(ColonySpendingCategory.reserveText));
+            locked(DEFENSE, true);
         }
 
         // Build gate if tech is available. Also add a system property to turn it off.
-        buildStargate();
+        // Don't build gate if shipbuilding on governor is enabled, and planet is alrady building ships
+        if (!buildingShips || !session().getGovernorOptions2().isShipbuilding()) {
+            buildStargate();
+        }
 
         // if all sliders are set to 0, increase research.
         boolean noSpending = true;
@@ -1218,8 +1230,16 @@ public final class Colony implements Base, IMappedObject, Serializable {
 //            System.out.println("NO SPENDING "+this.name());
             moveSlider(Colony.RESEARCH, null, text(ColonySpendingCategory.reserveText));
         }
-        // unlock industry slider. Thanks DM666a
-        locked(Colony.INDUSTRY, false);
+        if (buildingShips && session().getGovernorOptions2().isShipbuilding() && allocation[RESEARCH] > 0) {
+            // if we were building ships, push all research into shipbuilding.
+            locked(Colony.SHIP, false);
+            increment(Colony.SHIP, allocation[RESEARCH]);
+        }
+        // unlock all sliders except for ECO. Thanks DM666a
+        for (int i = 0; i <= 4; i++) {
+            locked(i, false);
+        }
+        locked(Colony.ECOLOGY, true);
     }
 
     /**

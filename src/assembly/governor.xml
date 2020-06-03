@@ -5,24 +5,14 @@
         <format>jar</format>
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
+    <!-- Don't try to cherry pick class files, just get them all -->
+    <!-- too much divergence from upstream to cherry pick -->
     <fileSets>
         <fileSet>
             <directory>${basedir}/target/classes</directory>
             <includes>
-                <include>**/RotpGovernor.class</include>
-                <include>**/Colony.class</include>
-                <include>**/Empire.class</include>
-                <include>**/EmpireColonySpendingPane*.class</include>
-                <include>**/EmpireSystemPanel*.class</include>
-                <include>**/PlanetsUI*.class</include>
-                <include>**/GameSession*.class</include>
-                <include>**/GovernorOptions*.class</include>
-                <include>**/GovernorOptionsPanel*.class</include>
-                <include>**/Galaxy*.class</include>
-                <include>**/AIGovernor*.class</include>
-                <include>**/SystemListingUI*.class</include>
-                <include>**/ErrorUI*.class</include>
-                <include>**/en/labels.txt</include>
+                <include>**/*.class</include>
+                <include>**/*.txt</include>
             </includes>
             <outputDirectory>/</outputDirectory>
         </fileSet>
