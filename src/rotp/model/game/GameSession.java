@@ -93,16 +93,21 @@ public final class GameSession implements Base, Serializable {
     private Galaxy galaxy;
     private final GameStatus status = new GameStatus();
     private long id;
-    private transient List<GameListener> gameListeners = new ArrayList<>();
+    private transient List<GameListener> gameListeners;
     public GameStatus status()                   { return status; }
     public long id()                             { return id; }
     public ExecutorService smallSphereService()  { return smallSphereService; }
 
+    public List<GameListener> gameListeners() {
+        if (gameListeners == null)
+            gameListeners = new ArrayList<>();
+        return gameListeners;
+    }
     public void addGameListener(GameListener gameListener) {
-        gameListeners.add(gameListener);
+        gameListeners().add(gameListener);
     }
     public void removeGameListener(GameListener gameListener) {
-        gameListeners.remove(gameListener);
+        gameListeners().remove(gameListener);
     }
 
     public void pauseNextTurnProcessing(String s)   {
@@ -226,7 +231,7 @@ public final class GameSession implements Base, Serializable {
         smallSphereService = Executors.newSingleThreadExecutor();
     }
     private void stopCurrentGame() {
-        gameListeners.forEach(gl -> gl.clearAdvice());
+        gameListeners().forEach(gl -> gl.clearAdvice());
         vars().clear();
         clearAlerts();
         // shut down any threads running from previous game
@@ -302,7 +307,7 @@ public final class GameSession implements Base, Serializable {
                 gal.moveShipsInTransit();
                 
                 gal.events().nextTurn();
-                
+
                 gal.council().nextTurn();
                 GNNRankingNoticeCheck.nextTurn();
                 GNNExpansionEvent.nextTurn();
@@ -314,7 +319,7 @@ public final class GameSession implements Base, Serializable {
                 
                 if (!inProgress())
                     return;
-                
+
                 if (processNotifications()) {
                     log("Notifications processed 1 - back to MainPanel");
                     //RotPUI.instance().selectMainPanel();
@@ -322,13 +327,13 @@ public final class GameSession implements Base, Serializable {
                 gal.postNextTurn1();
                 if (!inProgress())
                     return;
-                
+
                 processNotifications();
-                
+
                 RotPUI.instance().selectMainPanel();
                 log("Notifications processed 2 - back to MainPanel");
                 gal.postNextTurn2();
-                
+
                 if (!inProgress())
                     return;
                 if (processNotifications()) {
@@ -337,25 +342,25 @@ public final class GameSession implements Base, Serializable {
                 }
                 // all diplomatic fallout: praise, warnings, treaty offers, war declarations
                 gal.assessTurn();
-                
+
                 processNotifications();
                 gal.refreshAllEmpireViews();
 
                 gal.makeNextTurnDecisions();
-                
+
                 if (!systemsToAllocate().isEmpty())
-                    gameListeners.forEach(l -> l.allocateSystems());
+                    gameListeners().forEach(l -> l.allocateSystems());
 
                 log("Refreshing Player Views");
                 NoticeMessage.resetSubstatus(text("TURN_REFRESHING"));
                 validate();
                 gal.refreshEmpireViews(player());
-                
+
                 log("Autosaving post-turn");
                 log("NEXT TURN PROCESSING TIME: ", str(timeMs()-startMs));
                 NoticeMessage.resetSubstatus(text("TURN_SAVING"));
                 instance.saveRecentSession(true);
-                
+
                 log("Reselecting main panel");
                 RotPUI.instance().mainUI().showDisplayPanel();
                 RotPUI.instance().selectMainPanel();
@@ -394,7 +399,7 @@ public final class GameSession implements Base, Serializable {
         Collections.sort(notifs);
         notifications().clear();
 
-        gameListeners.forEach(l -> l.processNotifications(notifs));
+        gameListeners().forEach(l -> l.processNotifications(notifs));
         systemsScouted().clear();
         return true;
     }
@@ -804,12 +809,5 @@ public final class GameSession implements Base, Serializable {
             governorOptions2 = new GovernorOptions2();
         }
         return governorOptions2;
-    }
-
-    private void readObject(ObjectInputStream ois)
-            throws ClassNotFoundException, IOException {
-        ois.defaultReadObject();
-        // for compatibility with older save game files
-        gameListeners = new ArrayList<>();
     }
 }
