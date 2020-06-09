@@ -1267,7 +1267,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
     public void balanceEcoAndInd(float targetPopPercent) {
         targetPopPercent = Math.min(Math.max(targetPopPercent, 0), 1);
         // new pop next turn before spending
-        float baseNewPop = workingPopulation() + normalPopGrowth() + incomingTransportsNextTurn();
+        float baseNewPop = Math.min(planet.currentSize(), workingPopulation() + normalPopGrowth() + incomingTransportsNextTurn());
         // transports coming after next turn; use to limit pop growth spending
         float additionalTransports = Math.max(incomingTransports() - incomingTransportsNextTurn(), 0);
         // population target for growth spending
