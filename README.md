@@ -33,15 +33,15 @@ amount of micromanagement needed drastically.
 
 To run the mod:
 
-* Download my distribution of ROTP-1.13.3.jar (large file) and run that instead of 
-original game. You are also welcome to try ROTP-mini-1.13.3.jar which is smaller
+* Download my distribution of ROTP-1.13.4.jar (large file) and run that instead of 
+original game. You are also welcome to try ROTP-mini-1.13.4.jar which is smaller
 as it uses better compression for game assets. 
 
 or
 
-* Download only the ROTP-1.13.3-governor.jar
+* Download only the ROTP-1.13.4-governor.jar
 * Place it in same directory that contains original Remnants.jar version Beta 1.4
-* Run ROTP-1.13.3-governor.jar
+* Run ROTP-1.13.4-governor.jar
 
 To enable governor, use 'q' key on keyboard, or else click "Allocate Spending"
 text in the planetary spending screen. Since version 1.8 Governor is on by default.
@@ -49,6 +49,9 @@ text in the planetary spending screen. Since version 1.8 Governor is on by defau
 ---
 
 Additional features / changelog
+
+* 1.13.4. Bugfix release- fix the "continue" to work correctly. Start work on savegame
+to JSON conversion (not yet ready).
 
 * 1.13.3. Added shipbuilding option. If it's turned on, governor remembers that planet was building
 ships (keeps 1 tick in shipbuilding), and will resume building ships once it finishes all
