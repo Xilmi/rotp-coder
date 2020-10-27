@@ -1110,6 +1110,8 @@ public final class Colony implements Base, IMappedObject, Serializable {
     }
 
     private boolean governor = GameSession.instance().getGovernorOptions().isGovernorOnByDefault();
+//  TODO: For future use, flag allowing this colony to autobuild ships
+    private boolean autoShips = GameSession.instance().getGovernorOptions2().isAutoShipsByDefault();
 
     public boolean isGovernor() {
         return governor;
@@ -1117,6 +1119,14 @@ public final class Colony implements Base, IMappedObject, Serializable {
 
     public void setGovernor(boolean governor) {
         this.governor = governor;
+    }
+
+    public boolean isAutoShips() {
+        return autoShips;
+    }
+
+    public void setAutoShips(boolean autoShips) {
+        this.autoShips = autoShips;
     }
 
     /**
@@ -1169,9 +1179,6 @@ public final class Colony implements Base, IMappedObject, Serializable {
             if (spending[i] == null || spending[i].colony() == null)
                 return;
 
-        if (session().getGovernorOptions().isAutotransport()) {
-            autotransport();
-        }
         // Set max missile bases if minimum is set
         if (session().getGovernorOptions2().getMinimumMissileBases() > 0) {
             if (defense().maxBases() < session().getGovernorOptions2().getMinimumMissileBases()) {
@@ -1441,93 +1448,8 @@ public final class Colony implements Base, IMappedObject, Serializable {
     // We only transport limited distance.
     // Should we transport from hostile planets (?)
     // We chose targets more carefully.
-    private void autotransport() {
-        if (transporting() || !canTransport() || maxTransportsAllowed() <= 0) {
-            return;
-        }
-        // we don't have excess population
-        if (expectedPopulation() < planet.currentSize()) {
-            return;
-        }
-        if (!this.ecology().isCompleted()) {
-            return;
-        }
-        if (!this.industry().isCompleted()) {
-            return;
-        }
-        // don't calculate excess. Just check if this colony is the right size.
-        GovernorOptions options = session().getGovernorOptions();
-        GovernorOptions2 options2 = session().getGovernorOptions2();
-        int size = options2.getTransportPopulation() * 100 / options2.getTransportMaxPercent();
-        if (planet.currentSize() < size) {
-            return;
-        }
-        // find a suitable target. Closest colony that needs population
-        List<StarSystem> targets = new ArrayList<>(empire().allColonizedSystems().size());
-        Map<StarSystem, Float> transportTimes = new HashMap<>();
-        Map<StarSystem, Float> populationFractions = new HashMap<>();
-        for (StarSystem ss: empire().allColonizedSystems()) {
-            // don't transport to self
-            if (ss.colony() == this) {
-                continue;
-            }
-            // don't transport to systems that have 70% population already
-            if (ss.colony().expectedPopulation() >= ss.planet().currentSize()*0.7) {
-                continue;
-            }
-            float transportTime = ss.travelTime(this, ss, this.empire().tech().transportSpeed());
-            // limit max transport time
-            double maxTime = ss.inNebula() ? options2.getTransportMaxTurns() * 1.5 : options2.getTransportMaxTurns();
-            if (transportTime > maxTime) {
-                continue;
-            }
-            double expectedPopAtTransportTime = ss.colony().population() +
-                    Math.pow(1+ss.colony().normalPopGrowth() / ss.colony().population(), transportTime);
-            float popFraction = ss.colony().population() / ss.planet().currentSize();
-//            System.out.println("autotransport "+this.name()+" to "+ss.name()+" time "+transportTime+" exp growth "+expectedPopAtTransportTime+" pop % "+popFraction);
-            if (expectedPopAtTransportTime >= ss.planet().currentSize()*0.9) {
-                continue;
-            }
-            targets.add(ss);
-            transportTimes.put(ss, transportTime);
-            populationFractions.put(ss, popFraction);
-        }
-        // no viable targets for pop transport
-        if (targets.isEmpty()) {
-            return;
-        }
+    // Autotransport was Moved to Empire.autotransport()
 
-        // Turn distance into relative distance (% of distance to furthest possible target).
-
-        // Turn distance % and population size % into rank.
-        // Lets use distance% linear and pop% linear
-        float maxTransportTime = transportTimes.values().stream().max(Float::compare).get();
-        Map<StarSystem, Float> ranks = new HashMap<>();
-        for (StarSystem ss: transportTimes.keySet()) {
-            float absolute = transportTimes.get(ss);
-            float relativeTransportTime = absolute / maxTransportTime;
-
-            float populationFraction = populationFractions.get(ss);
-
-            float rank = relativeTransportTime + populationFraction;
-            ranks.put(ss, rank);
-        }
-
-        Collections.sort(targets, (o1, o2) -> {
-            float rank1 = ranks.get(o1);
-            float rank2 = ranks.get(o2);
-            return (int) Math.signum(rank1-rank2);
-        });
-//        for (StarSystem ss: targets) {
-//            System.out.println("autotransport target from "+this.name()+" to "+ss.name()+" rank "+ranks.get(ss));
-//        }
-        // round excess down
-        int toTransport = options2.getTransportPopulation();
-        // let's make sure we don't trigger governor in scheduleTransportsToSystem, otherwise we get endless recursion
-        governor = false;
-        scheduleTransportsToSystem(targets.get(0), toTransport);
-        governor = true;
-    }
     private int incomingTransportsNextTurn() {
         return galaxy().friendlyPopApproachingSystemNextTurn(starSystem());
     }

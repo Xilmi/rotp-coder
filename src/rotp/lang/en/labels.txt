@@ -986,6 +986,8 @@ SHIP_DESIGN_DEPLOY_OK             | Deploy
 SHIP_DESIGN_RENAME_OK             | Rename
 SHIP_DESIGN_UNNAMED_DESIGN        | Unnamed
 SHIP_DESIGN_COMPONENT_NONE        | None
+SHIP_DESIGN_AUTO_SCOUT            | Auto Scout
+SHIP_DESIGN_AUTO_COLONIZE         | Auto Colonize
 
 
 // ship design selection dialogs

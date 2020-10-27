@@ -1,19 +1,18 @@
 package rotp;
 
+import rotp.model.galaxy.Ships;
 import rotp.model.game.GameSession;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
-public class SaveToJSON {
+public class SaveToJSONShips {
     static {
         // highlights problems
         System.setProperty("java.awt.headless", "true");
     }
 
     public static void main(String arg[]) throws IOException, ClassNotFoundException {
-        int chars[] = { 0x1F66D };
-        System.out.println("SPACESHIP "+new String(chars, 0, 1));
         if (arg.length != 2) {
             System.out.println("SaveToJSON input.rotp output.json");
             System.exit(2);
@@ -31,14 +30,17 @@ public class SaveToJSON {
         GameSession newSession = (GameSession) input.readObject();
         RotpJSON.setStaticField(GameSession.class, "instance", newSession);
 
-        String json = RotpJSON.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(newSession);
+        Ships ships = newSession.galaxy().ships;
+
+
+        String json = RotpJSON.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(ships);
         System.out.println("json=" + json);
 
         try (FileOutputStream fos = new FileOutputStream(outputFile)) {
             fos.write(json.getBytes(StandardCharsets.UTF_8));
         }
 
-        GameSession session = RotpJSON.objectMapper.readValue(outputFile, GameSession.class);
-        System.out.println("session="+session);
+        Ships ships2 = RotpJSON.objectMapper.readValue(outputFile, Ships.class);
+        System.out.println("ships="+ships2);
     }
 }

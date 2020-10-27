@@ -67,6 +67,10 @@ public class DesignUI extends BasePanel {
     private LinearGradientPaint clearBackground;
     private LinearGradientPaint renameBackground;
     private LinearGradientPaint scrapBackground;
+    private LinearGradientPaint scoutBackgroundOn;
+    private LinearGradientPaint scoutBackgroundOff;
+    private LinearGradientPaint colonizeBackgroundOn;
+    private LinearGradientPaint colonizeBackgroundOff;
     private LinearGradientPaint createBackground;
     private LinearGradientPaint copyBackground;
     List<BufferedImage> shipImages = new ArrayList<>();
@@ -75,6 +79,8 @@ public class DesignUI extends BasePanel {
     private final Rectangle clearButtonArea = new Rectangle();
     private final Rectangle renameButtonArea = new Rectangle();
     private final Rectangle scrapButtonArea = new Rectangle();
+    private final Rectangle scoutButtonArea = new Rectangle();
+    private final Rectangle colonizeButtonArea = new Rectangle();
     private final Rectangle createButtonArea = new Rectangle();
     private final Rectangle[] copyButtonArea = new Rectangle[ShipDesignLab.MAX_DESIGNS];
     private final Rectangle shipImageArea = new Rectangle();
@@ -717,6 +723,55 @@ public class DesignUI extends BasePanel {
                 g.setColor(errorRedC);
             g.drawString(text("SHIP_DESIGN_AVAIL_SPACE_LABEL"), x1, y6);
 
+            {
+                scoutButtonArea.setBounds(0,0,0,0);
+                if (shipDesign().active()) {
+                    g.setColor(Color.black);
+                    int y7 = y6 + rowH;
+                    String str = text("SHIP_DESIGN_AUTO_SCOUT");
+                    int sw = g.getFontMetrics().stringWidth(str);
+                    int buttonW = sw + s40;
+                    int buttonH = rowH;
+                    int buttonX = x1;
+                    int buttonY = y7 - rowH / 2 - s3;
+                    scoutButtonArea.setBounds(buttonX, buttonY, buttonW, buttonH);
+
+                    boolean hovering = hoverTarget == scoutButtonArea;
+
+                    LinearGradientPaint scoutBackground;
+                    if (shipDesign().isAutoScout()) {
+                        if (scoutBackgroundOn == null) {
+                            float[] dist = {0.0f, 0.5f, 1.0f};
+                            Point2D ptStart = new Point2D.Float(buttonX, 0);
+                            Point2D ptEnd = new Point2D.Float(buttonX + buttonW, 0);
+                            Color[] yesColors = {greenEdgeC, greenMidC, greenEdgeC};
+                            scoutBackgroundOn = new LinearGradientPaint(ptStart, ptEnd, dist, yesColors);
+                        }
+                        scoutBackground = scoutBackgroundOn;
+                    } else {
+                        if (scoutBackgroundOff == null) {
+                            float[] dist = {0.0f, 0.5f, 1.0f};
+                            Point2D ptStart = new Point2D.Float(buttonX, 0);
+                            Point2D ptEnd = new Point2D.Float(buttonX + buttonW, 0);
+                            Color[] yesColors = {brownEdgeC, brownMidC, brownEdgeC};
+                            scoutBackgroundOff = new LinearGradientPaint(ptStart, ptEnd, dist, yesColors);
+                        }
+                        scoutBackground = scoutBackgroundOff;
+                    }
+
+                    g.setPaint(scoutBackground);
+                    g.fillRoundRect(buttonX, buttonY, buttonW, buttonH, s3, s3);
+                    Color c0 = hovering ? SystemPanel.yellowText : SystemPanel.whiteText;
+                    g.setColor(c0);
+                    Stroke prevStr = g.getStroke();
+                    g.setStroke(BasePanel.stroke1);
+                    g.drawRoundRect(buttonX, buttonY, buttonW, buttonH, s3, s3);
+                    g.setStroke(prevStr);
+                    int x2a = buttonX + ((buttonW - sw) / 2);
+                    drawBorderedString(g, str, x2a, buttonY + buttonH - s5, SystemPanel.textShadowC, c0);
+                }
+            }
+
             g.setFont(narrowFont(22));
             drawShadowedString(g, text("SHIP_DESIGN_COMBAT_STATS_TITLE"),3,x2+s5,y1,SystemPanel.textShadowC, SystemPanel.whiteText);
 
@@ -794,6 +849,55 @@ public class DesignUI extends BasePanel {
             g.drawString(text("SHIP_DESIGN_BEAM_DEF_LABEL"), x2+s10, y4);
             g.drawString(text("SHIP_DESIGN_ATTACK_LEVEL_LABEL"), x2+s10, y5);
             g.drawString(text("SHIP_DESIGN_COMBAT_SPEED_LABEL"), x2+s10, y6);
+
+            {
+                colonizeButtonArea.setBounds(0,0,0,0);
+                if (shipDesign().active() && shipDesign().isColonyShip()) {
+                    g.setColor(Color.black);
+                    int y7 = y6 + rowH;
+                    str = text("SHIP_DESIGN_AUTO_COLONIZE");
+                    sw = g.getFontMetrics().stringWidth(str);
+                    int buttonW = sw + s40;
+                    int buttonH = rowH;
+                    int buttonX = x2;
+                    int buttonY = y7 - rowH / 2 - s3;
+                    colonizeButtonArea.setBounds(buttonX, buttonY, buttonW, buttonH);
+
+                    boolean hovering = hoverTarget == colonizeButtonArea;
+
+                    LinearGradientPaint colonizeBackground;
+                    if (shipDesign().isAutoColonize()) {
+                        if (colonizeBackgroundOn == null) {
+                            float[] dist = {0.0f, 0.5f, 1.0f};
+                            Point2D ptStart = new Point2D.Float(buttonX, 0);
+                            Point2D ptEnd = new Point2D.Float(buttonX + buttonW, 0);
+                            Color[] yesColors = {greenEdgeC, greenMidC, greenEdgeC};
+                            colonizeBackgroundOn = new LinearGradientPaint(ptStart, ptEnd, dist, yesColors);
+                        }
+                        colonizeBackground = colonizeBackgroundOn;
+                    } else {
+                        if (colonizeBackgroundOff == null) {
+                            float[] dist = {0.0f, 0.5f, 1.0f};
+                            Point2D ptStart = new Point2D.Float(buttonX, 0);
+                            Point2D ptEnd = new Point2D.Float(buttonX + buttonW, 0);
+                            Color[] yesColors = {brownEdgeC, brownMidC, brownEdgeC};
+                            colonizeBackgroundOff = new LinearGradientPaint(ptStart, ptEnd, dist, yesColors);
+                        }
+                        colonizeBackground = colonizeBackgroundOff;
+                    }
+
+                    g.setPaint(colonizeBackground);
+                    g.fillRoundRect(buttonX, buttonY, buttonW, buttonH, s3, s3);
+                    Color c0 = hovering ? SystemPanel.yellowText : SystemPanel.whiteText;
+                    g.setColor(c0);
+                    Stroke prevStr = g.getStroke();
+                    g.setStroke(BasePanel.stroke1);
+                    g.drawRoundRect(buttonX, buttonY, buttonW, buttonH, s3, s3);
+                    g.setStroke(prevStr);
+                    int x2a = buttonX + ((buttonW - sw) / 2);
+                    drawBorderedString(g, str, x2a, buttonY + buttonH - s5, SystemPanel.textShadowC, c0);
+                }
+            }
 
             // draw right side values
             int x3 = x+w-s20;
@@ -2036,7 +2140,11 @@ public class DesignUI extends BasePanel {
                 hoverTarget = renameButtonArea;
             else if (clearButtonArea.contains(x,y))
                 hoverTarget = clearButtonArea;
-            
+            else if (scoutButtonArea.contains(x,y))
+                hoverTarget = scoutButtonArea;
+            else if (colonizeButtonArea.contains(x,y))
+                hoverTarget = colonizeButtonArea;
+
             if (shipDesign().active())
                 return;
             
@@ -2154,8 +2262,26 @@ public class DesignUI extends BasePanel {
             }
             else if (hoverTarget == clearButtonArea) {
                 softClick(); clearDesign(); return;
+            } else if (hoverTarget == scoutButtonArea) {
+                softClick();
+                shipDesign().setAutoScout(!shipDesign().isAutoScout());
+                repaint();
+                return;
+            } else if (hoverTarget == colonizeButtonArea) {
+                softClick();
+                if (shipDesign().isAutoColonize()) {
+                    shipDesign().setAutoColonize(false);
+                    repaint();
+                } else {
+                    // don't set autocolonize to true for non-colony ships
+                    if (shipDesign().isColonyShip()) {
+                        shipDesign().setAutoColonize(true);
+                        repaint();
+                    }
+                }
+                return;
             }
-            
+
             if (shipDesign().active())
                 return;
             

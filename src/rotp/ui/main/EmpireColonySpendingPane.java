@@ -127,9 +127,15 @@ public class EmpireColonySpendingPane extends BasePanel {
                     case 2: researchSlider.toggleLock();    break;
                     default:  break;
                 }
+                return;
             case KeyEvent.VK_Q:
             {
                 toggleGovernor();
+                break;
+            }
+            case KeyEvent.VK_W:
+            {
+                toggleAutoShips();
                 break;
             }
         }
@@ -186,6 +192,17 @@ public class EmpireColonySpendingPane extends BasePanel {
                 int titleY = getHeight() - s6;
                 drawShadowedString(g, titleText, 2, s5, titleY, color, textC);
 
+                // crappy ASCII art. Should be something else.
+                // TODO: for future use
+                if (1 == 0) {
+                    if (colony.isAutoShips()) {
+                        color = Color.green;
+                    } else {
+                        color = MainUI.shadeBorderC();
+                    }
+                    String shipAutomateText = "]=>";
+                    drawShadowedString(g, shipAutomateText, 2, w - s95, titleY, color, textC);
+                }
                 String governorOptionsText = text("GOVERNOR_OPTIONS");
                 drawShadowedString(g, governorOptionsText, 2, w-s60, titleY, MainUI.shadeBorderC(), textC);
                 return;
@@ -382,6 +399,11 @@ public class EmpireColonySpendingPane extends BasePanel {
                 increment(true);
             else {
                 if (this.category < 0) {
+// TODO: for future use
+//                    if (x < EmpireColonySpendingPane.this.getWidth() - s95) {
+//                        toggleGovernor();
+//                    } else if (x < EmpireColonySpendingPane.this.getWidth() - s60) {
+//                        toggleAutoShips();
                     if (x < EmpireColonySpendingPane.this.getWidth() - s60) {
                         toggleGovernor();
                     } else {
@@ -478,6 +500,13 @@ public class EmpireColonySpendingPane extends BasePanel {
             if (colony.isGovernor()) {
                 colony.govern();
             }
+            parent.repaint();
+        }
+    }
+    private void toggleAutoShips() {
+        if (parent.systemViewToDisplay() != null && parent.systemViewToDisplay().colony() != null) {
+            Colony colony = parent.systemViewToDisplay().colony();
+            colony.setAutoShips(!colony.isAutoShips());
             parent.repaint();
         }
     }

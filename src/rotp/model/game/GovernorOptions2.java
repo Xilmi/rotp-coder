@@ -19,7 +19,21 @@ public class GovernorOptions2 implements Serializable {
     private boolean autospend = false;
     private int reserve = 1000;
     private boolean shipbuilding = false;
-    
+
+    // if true, new colonies will have auto ship building set to "on"
+    // TODO: for future use
+    private boolean autoShipsByDefault = true;
+    // if true, automatically scout new planets
+    private boolean autoScout = true;
+    // if true, automatically colonize new planets
+    private boolean autoColonize = true;
+    // Scout name prefix
+    @Deprecated
+    private String scoutPrefix = "Scout";
+    // Colony ship name prefix
+    @Deprecated
+    private String colonyPrefix = "Col";
+
     public GovernorOptions2() {
     }
 
@@ -78,6 +92,28 @@ public class GovernorOptions2 implements Serializable {
     public void setShipbuilding(boolean shipbuilding) {
         this.shipbuilding = shipbuilding;
     }
-    
-    
+
+    public boolean isAutoShipsByDefault() {
+        return autoShipsByDefault;
+    }
+
+    public void setAutoShipsByDefault(boolean autoShipsByDefault) {
+        this.autoShipsByDefault = autoShipsByDefault;
+    }
+
+    public boolean isAutoScout() {
+        return autoScout;
+    }
+
+    public void setAutoScout(boolean autoScout) {
+        this.autoScout = autoScout;
+    }
+
+    public boolean isAutoColonize() {
+        return autoColonize;
+    }
+
+    public void setAutoColonize(boolean autoColonize) {
+        this.autoColonize = autoColonize;
+    }
 }

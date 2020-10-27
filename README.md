@@ -50,6 +50,10 @@ text in the planetary spending screen. Since version 1.8 Governor is on by defau
 
 Additional features / changelog
 
+* 1.13.5. Implemented automated scouting and automated colonization. Some fixes to automated
+population transport to make it more efficient and less buggy. Small fixes. Some improvements to
+JSON conversion (still nowhere near finished).
+
 * 1.13.4. Bugfix release- fix the "continue" to work correctly. Start work on savegame
 to JSON conversion (not yet ready).
 
