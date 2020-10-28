@@ -1081,14 +1081,9 @@ public final class Empire implements Base, NamedObject, Serializable {
                 }
 
                 for (ShipDesign sd: scoutDesigns) {
-                    int count = sf.num(sd.id());
-                    System.out.println("We have "+count+" scouts of design "+sd.name());
-                    if (count <= 0) {
-                        continue;
-                    }
                     int[] counts = new int[ShipDesignLab.MAX_DESIGNS];
                     counts[sd.id()] = 1;
-                    for (Iterator<Integer> it = toScout.iterator(); it.hasNext(); ) {
+                    for (Iterator<Integer> it = toScout.iterator(); it.hasNext() && sf.num(sd.id()) > 0; ) {
                         int si = it.next();
                         // first try to deploy non-extended designs
                         if (!sd.isExtendedRange() && sv.inShipRange(si)) {
@@ -1098,7 +1093,6 @@ public final class Empire implements Base, NamedObject, Serializable {
                                 System.out.println("Deployed normal 1 scout to "+sv.system(si).name());
                                 // remove this system as it has scout assigned already
                                 it.remove();
-                                break;
                             }
                         } else if (sd.isExtendedRange() && sv.inScoutRange(si)) {
                             // it's in long range, and scout is long range, send the scout
@@ -1107,7 +1101,6 @@ public final class Empire implements Base, NamedObject, Serializable {
                                 System.out.println("Deployed extended 1 scout to "+sv.system(si).name());
                                 // remove this system as it has scout assigned already
                                 it.remove();
-                                break;
                             }
                         }
                     }
@@ -1272,14 +1265,10 @@ public final class Empire implements Base, NamedObject, Serializable {
             }
 
             for (ShipDesign sd: colonyDesigns) {
-                int count = sf.num(sd.id());
-                System.out.println("We have "+count+" colony ships of design "+sd.name());
-                if (count <= 0) {
-                    continue;
-                }
                 int[] counts = new int[ShipDesignLab.MAX_DESIGNS];
                 counts[sd.id()] = 1;
-                for (Iterator<Integer> it = toColonize.iterator(); it.hasNext(); ) {
+                for (Iterator<Integer> it = toColonize.iterator(); it.hasNext() && sf.num(sd.id()) > 0;  ) {
+//                    System.out.println("We have "+sf.num(sd.id())+" colony ships of design "+sd.name());
                     int si = it.next();
 
                     if (!sd.colonySpecial().canColonize(sv.system(si).planet())) {
@@ -1293,7 +1282,6 @@ public final class Empire implements Base, NamedObject, Serializable {
                         if (success) {
                             // remove this system as it has scout assigned already
                             it.remove();
-                            break;
                         }
                     } else if (sd.isExtendedRange() && sv.inScoutRange(si)) {
                         // it's in long range, and scout is long range, send the scout
@@ -1301,7 +1289,6 @@ public final class Empire implements Base, NamedObject, Serializable {
                         if (success) {
                             // remove this system as it has scout assigned already
                             it.remove();
-                            break;
                         }
                     }
                 }
