@@ -959,8 +959,16 @@ public final class Empire implements Base, NamedObject, Serializable {
             }
         }
         int warpSpeed = minWarpSpeed;
-        // sort scouts fastest to slowest, send out fastest scouts first
-        scoutDesigns.sort((d1, d2) -> d2.warpSpeed() - d1.warpSpeed() );
+        // sort extended range vs normal range. Send out normal range first.
+        // sort scouts fastest to slowest, send out fastest scouts first.
+        scoutDesigns.sort((d1, d2) -> {
+            int rangeDiff = Boolean.compare(d1.isExtendedRange(), d2.isExtendedRange() );
+            if (rangeDiff != 0) {
+                return rangeDiff;
+            } else {
+                return d2.warpSpeed() - d1.warpSpeed();
+            }
+        } );
 
         // no scout ship designs
         if (scoutDesigns.isEmpty()) {
@@ -1083,7 +1091,11 @@ public final class Empire implements Base, NamedObject, Serializable {
                 for (ShipDesign sd: scoutDesigns) {
                     int[] counts = new int[ShipDesignLab.MAX_DESIGNS];
                     counts[sd.id()] = 1;
-                    for (Iterator<Integer> it = toScout.iterator(); it.hasNext() && sf.num(sd.id()) > 0; ) {
+                    // we have to save this number. That's because if we invoke deploySubfleet on a fleet of 1 ship
+                    // entire fleet gets redirected and it will keep returning 1 ship available as it's the same fleet
+                    // with same 1 ship, resulting in continued loop.
+                    int numShipsAvailable = sf.num(sd.id());
+                    for (Iterator<Integer> it = toScout.iterator(); it.hasNext() && numShipsAvailable > 0; ) {
                         int si = it.next();
                         // first try to deploy non-extended designs
                         if (!sd.isExtendedRange() && sv.inShipRange(si)) {
@@ -1091,6 +1103,7 @@ public final class Empire implements Base, NamedObject, Serializable {
                             boolean success = galaxy().ships.deploySubfleet(sf, counts, sv.system(si).id);
                             if (success) {
                                 System.out.println("Deployed normal 1 scout to "+sv.system(si).name());
+                                numShipsAvailable--;
                                 // remove this system as it has scout assigned already
                                 it.remove();
                             }
@@ -1100,6 +1113,7 @@ public final class Empire implements Base, NamedObject, Serializable {
                             if (success) {
                                 System.out.println("Deployed extended 1 scout to "+sv.system(si).name());
                                 // remove this system as it has scout assigned already
+                                numShipsAvailable--;
                                 it.remove();
                             }
                         }
@@ -1167,7 +1181,8 @@ public final class Empire implements Base, NamedObject, Serializable {
         for (ShipDesign sd: shipLab().designs()) {
             if (sd.isAutoColonize()) {
                 // ignore design if name matches if it's not a colony ship
-                if (!sd.isColonyShip()) {
+
+                if (!sd.hasColonySpecial()) {
                     continue;
                 }
                 if (sd.isExtendedRange()) {
@@ -1178,8 +1193,21 @@ public final class Empire implements Base, NamedObject, Serializable {
             }
         }
         int warpSpeed = minWarpSpeed;
-        // sort scouts fastest to slowest, send out fastest scouts first
-        colonyDesigns.sort((d1, d2) -> d2.warpSpeed() - d1.warpSpeed() );
+        // non-extended range to extended range
+        // least hostile to most hostile colony bases, send out least hostile colony bases first
+        // sort ships fastest to slowest, send out fastest colony ships first
+        colonyDesigns.sort((d1, d2) -> {
+            int rangeDiff = Boolean.compare(d1.isExtendedRange(), d2.isExtendedRange() );
+            // desc order
+            int envDiff = d1.colonySpecial().tech().environment() - d2.colonySpecial().tech().environment();
+            if (rangeDiff != 0) {
+                return rangeDiff;
+            } else if (envDiff != 0) {
+                return envDiff;
+            } else {
+                return d2.warpSpeed() - d1.warpSpeed();
+            }
+        } );
 
         // no colony ship designs
         if (colonyDesigns.isEmpty()) {
@@ -1267,7 +1295,11 @@ public final class Empire implements Base, NamedObject, Serializable {
             for (ShipDesign sd: colonyDesigns) {
                 int[] counts = new int[ShipDesignLab.MAX_DESIGNS];
                 counts[sd.id()] = 1;
-                for (Iterator<Integer> it = toColonize.iterator(); it.hasNext() && sf.num(sd.id()) > 0;  ) {
+                // we have to save this number. That's because if we invoke deploySubfleet on a fleet of 1 ship
+                // entire fleet gets redirected and it will keep returning 1 ship available as it's the same fleet
+                // with same 1 ship, resulting in continued loop.
+                int numShipsAvailable = sf.num(sd.id());
+                for (Iterator<Integer> it = toColonize.iterator(); it.hasNext() && numShipsAvailable > 0;  ) {
 //                    System.out.println("We have "+sf.num(sd.id())+" colony ships of design "+sd.name());
                     int si = it.next();
 
@@ -1281,6 +1313,7 @@ public final class Empire implements Base, NamedObject, Serializable {
                         boolean success = galaxy().ships.deploySubfleet(sf, counts, sv.system(si).id);
                         if (success) {
                             // remove this system as it has scout assigned already
+                            numShipsAvailable--;
                             it.remove();
                         }
                     } else if (sd.isExtendedRange() && sv.inScoutRange(si)) {
@@ -1288,6 +1321,7 @@ public final class Empire implements Base, NamedObject, Serializable {
                         boolean success = galaxy().ships.deploySubfleet(sf, counts, sv.system(si).id);
                         if (success) {
                             // remove this system as it has scout assigned already
+                            numShipsAvailable--;
                             it.remove();
                         }
                     }

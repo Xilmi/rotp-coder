@@ -852,7 +852,7 @@ public class DesignUI extends BasePanel {
 
             {
                 colonizeButtonArea.setBounds(0,0,0,0);
-                if (shipDesign().active() && shipDesign().isColonyShip()) {
+                if (shipDesign().active() && shipDesign().hasColonySpecial()) {
                     g.setColor(Color.black);
                     int y7 = y6 + rowH;
                     str = text("SHIP_DESIGN_AUTO_COLONIZE");
@@ -2274,7 +2274,7 @@ public class DesignUI extends BasePanel {
                     repaint();
                 } else {
                     // don't set autocolonize to true for non-colony ships
-                    if (shipDesign().isColonyShip()) {
+                    if (shipDesign().hasColonySpecial()) {
                         shipDesign().setAutoColonize(true);
                         repaint();
                     }
