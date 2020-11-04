@@ -1046,25 +1046,22 @@ public final class Empire implements Base, NamedObject, Serializable {
             System.out.println("ToScout "+i+" "+sv.name(i) + " "+sv.descriptiveName(i)+" "+sv.view(i).scouted()+" "+sv.inScoutRange(i)+" "+sv.inShipRange(i)+" colonized="+sv.view(i).isColonized()+" bases="+sv.view(i).bases());
         }
         // find fleets that are able of scouting
-        List<ShipFleet> fleets = galaxy().ships.notInTransitFleets(id);
+        List<ShipFleet> fleets = new ArrayList<>();
+        List<ShipFleet> allFleets = galaxy().ships.notInTransitFleets(id);
         // number of scout ships that we have
         int scoutCount = 0;
-        for (Iterator<ShipFleet> it = fleets.iterator(); it.hasNext(); ) {
+        for (Iterator<ShipFleet> it = allFleets.iterator(); it.hasNext(); ) {
             ShipFleet sf = it.next();
             if (!sf.isOrbiting() || !sf.canSend()) {
                 // we only use idle (orbiting) fleets
                 continue;
             }
-            boolean hasScout = false;
             for (ShipDesign sd: scoutDesigns) {
                 if (sf.hasShip(sd)) {
-                    hasScout = true;
                     scoutCount += sf.num(sd.id());
+                    fleets.add(sf);
+                    break;
                 }
-            }
-            if (!hasScout) {
-                // no scout designs in this fleet, don't consider it.
-                it.remove();
             }
         }
         if (fleets.isEmpty()) {
@@ -1135,6 +1132,10 @@ public final class Empire implements Base, NamedObject, Serializable {
                 }
 
                 for (ShipFleet sf: fleets) {
+                    // if fleet was sent elsewhere during previous iteration, don't redirect it again
+                    if (!sf.inOrbit()) {
+                        continue;
+                    }
                     for (ShipDesign sd : scoutDesigns) {
                         int count = sf.num(sd.id());
                         System.out.println("We have " + count + " scouts of design " + sd.name());
@@ -1220,24 +1221,20 @@ public final class Empire implements Base, NamedObject, Serializable {
         }
 
         // find fleets that are able of colonizing
-        List<ShipFleet> fleets = galaxy().ships.notInTransitFleets(id);
+        List<ShipFleet> fleets = new ArrayList<>();
+        List<ShipFleet> allFleets = galaxy().ships.notInTransitFleets(id);
         // number of scout ships that we have
-        for (Iterator<ShipFleet> it = fleets.iterator(); it.hasNext(); ) {
+        for (Iterator<ShipFleet> it = allFleets.iterator(); it.hasNext(); ) {
             ShipFleet sf = it.next();
             if (!sf.isOrbiting() || !sf.canSend()) {
                 // we only use idle (orbiting) fleets
                 continue;
             }
-            boolean hasColonyShips = false;
             for (ShipDesign sd: colonyDesigns) {
                 if (sf.hasShip(sd)) {
-                    hasColonyShips = true;
+                    fleets.add(sf);
                     break;
                 }
-            }
-            if (!hasColonyShips) {
-                // no scout designs in this fleet, don't consider it.
-                it.remove();
             }
         }
         if (fleets.isEmpty()) {
@@ -1262,7 +1259,7 @@ public final class Empire implements Base, NamedObject, Serializable {
                 if (!inRange) {
                     continue;
                 }
-                // colony already on route- no need to scout
+                // colony ship already on route- no need to send more
                 for (ShipFleet sf: this.ownFleetsTargetingSystem(sv.system(i))) {
                     if (sf.numColonies() > 0) {
                         System.out.println("System "+sv.name(i)+" already has colony ships going there");
@@ -1286,10 +1283,17 @@ public final class Empire implements Base, NamedObject, Serializable {
         // Use min(speed) from all scout designs to measure scout travel time
         for (ShipFleet sf: fleets) {
 
-            toColonize.sort((s1, s2) ->
-                    (int)Math.signum(sf.travelTime(sv.system(s1), warpSpeed) - sf.travelTime(sv.system(s2), warpSpeed)) );
+            toColonize.sort((s1, s2) -> {
+                float travelDiff = sf.travelTime(sv.system(s1), warpSpeed) - sf.travelTime(sv.system(s2), warpSpeed);
+                if (Math.abs(travelDiff) < 1) {
+                    // same travel time, sort on planet size, biggest first
+                    return (int) Math.signum(sv.system(s2).planet().currentSize() - sv.system(s1).planet().currentSize());
+                } else {
+                    return (int) Math.signum(travelDiff);
+                }
+            });
             for (int si: toColonize) {
-                System.out.println("toColonize System "+sv.name(si)+" travel "+sf.travelTime(sv.system(si), warpSpeed)+" id="+si+" xid="+sv.system(si).id);
+                System.out.println("toColonize System "+sv.name(si)+" travel "+sf.travelTime(sv.system(si), warpSpeed)+" id="+si+" size="+sv.system(si).planet().currentSize());
             }
 
             for (ShipDesign sd: colonyDesigns) {
@@ -1307,6 +1311,13 @@ public final class Empire implements Base, NamedObject, Serializable {
                         continue;
                     }
 
+                    // already orbiting the planet we need to colonize, don't send the ship anywhere.
+                    if (sf.system().id == si) {
+                        // remove this system as it has scout assigned already
+                        numShipsAvailable--;
+                        it.remove();
+                        continue;
+                    }
                     // first try to deploy non-extended designs
                     if (!sd.isExtendedRange() && sv.inShipRange(si)) {
                         // it's in short range, and scout is short range, send the scout
