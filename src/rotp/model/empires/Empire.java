@@ -42,6 +42,7 @@ import rotp.model.empires.SpyNetwork.FleetView;
 import rotp.model.events.SystemColonizedEvent;
 import rotp.model.events.SystemHomeworldEvent;
 import rotp.model.game.GovernorOptions;
+import rotp.model.ships.ShipSpecialColony;
 import rotp.ui.notifications.*;
 import rotp.model.galaxy.Galaxy;
 import rotp.model.galaxy.IMappedObject;
@@ -1231,6 +1232,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         List<ShipFleet> fleets = new ArrayList<>();
         List<ShipFleet> allFleets = galaxy().ships.notInTransitFleets(id);
         // number of scout ships that we have
+        ShipSpecialColony bestColonyShip = null;
         for (Iterator<ShipFleet> it = allFleets.iterator(); it.hasNext(); ) {
             ShipFleet sf = it.next();
             if (!sf.isOrbiting() || !sf.canSend()) {
@@ -1239,6 +1241,9 @@ public final class Empire implements Base, NamedObject, Serializable {
             }
             for (ShipDesign sd: colonyDesigns) {
                 if (sf.hasShip(sd)) {
+                    if (bestColonyShip == null || bestColonyShip.tech().environment() < sd.colonySpecial().tech().environment()) {
+                        bestColonyShip = sd.colonySpecial();
+                    }
                     fleets.add(sf);
                     break;
                 }
@@ -1248,7 +1253,7 @@ public final class Empire implements Base, NamedObject, Serializable {
             System.out.println("No idle colony ships");
             return;
         }
-
+        System.out.println("Best colony ship special "+bestColonyShip.tech().name());
         List<Integer> toColonize = new LinkedList<>();
         toColonize:
         for (int i = 0; i < this.sv.count(); ++i) {
@@ -1257,6 +1262,11 @@ public final class Empire implements Base, NamedObject, Serializable {
             // TODO: Exclude systems that have enemy fleets orbiting?
             if (!sv.view(i).isColonized() && sv.view(i).scouted() && !PlanetType.NONE.equals(sv.view(i).planetType().key())
                     && !sv.isGuarded(i) && sv.view(i).empire() == null ) {
+                // if we don't have tech or ships to colonize this planet, ignore it.
+                if (!bestColonyShip.canColonize(sv.system(i).planet())) {
+                    continue;
+                }
+
                 boolean inRange;
                 if (colonyHasResrerveFuel) {
                     inRange = sv.inScoutRange(i);
