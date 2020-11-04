@@ -1042,6 +1042,11 @@ public final class Empire implements Base, NamedObject, Serializable {
         if (toScout.isEmpty()) {
             return;
         }
+        // shuffle toScout list. This is to prevent colony ship with autoscouting on from going directly to the habitable planet.
+        // That's because AFAIK map generation sets one of the 2 nearby planets to be habitable, and it's always first one in the list
+        // So if we keep default order, that's cheating
+        Collections.shuffle(toScout);
+
         for (Integer i: toScout) {
             System.out.println("ToScout "+i+" "+sv.name(i) + " "+sv.descriptiveName(i)+" "+sv.view(i).scouted()+" "+sv.inScoutRange(i)+" "+sv.inShipRange(i)+" colonized="+sv.view(i).isColonized()+" bases="+sv.view(i).bases());
         }
@@ -1078,6 +1083,9 @@ public final class Empire implements Base, NamedObject, Serializable {
             // we have more stars to explore than we have ships, so
             // we take ships and send them to closest systems.
             for (ShipFleet sf: fleets) {
+                if (toScout.isEmpty()) {
+                    break;
+                }
                 System.out.println("Deploying scouts from Fleet "+sf+" "+sf.system().name());
                 toScout.sort((s1, s2) ->
                         (int)Math.signum(sf.travelTime(sv.system(s1), warpSpeed) - sf.travelTime(sv.system(s2), warpSpeed)) );
@@ -1170,7 +1178,6 @@ public final class Empire implements Base, NamedObject, Serializable {
     public void autocolonize() {
         GovernorOptions options = session().getGovernorOptions();
         GovernorOptions2 options2 = session().getGovernorOptions2();
-//        System.out.println("autocolonize ="+options2.isAutoColonize()+" ai="+isAIControlled());
         if (isAIControlled() || !options2.isAutoColonize()) {
             return;
         }
@@ -1279,22 +1286,12 @@ public final class Empire implements Base, NamedObject, Serializable {
         for (ShipFleet sf: fleets) {
             System.out.println("Fleet with Colony ships "+sf);
         }
-
         // Use min(speed) from all scout designs to measure scout travel time
         for (ShipFleet sf: fleets) {
-
-            toColonize.sort((s1, s2) -> {
-                float travelDiff = sf.travelTime(sv.system(s1), warpSpeed) - sf.travelTime(sv.system(s2), warpSpeed);
-                if (Math.abs(travelDiff) < 1) {
-                    // same travel time, sort on planet size, biggest first
-                    return (int) Math.signum(sv.system(s2).planet().currentSize() - sv.system(s1).planet().currentSize());
-                } else {
-                    return (int) Math.signum(travelDiff);
-                }
-            });
-            for (int si: toColonize) {
-                System.out.println("toColonize System "+sv.name(si)+" travel "+sf.travelTime(sv.system(si), warpSpeed)+" id="+si+" size="+sv.system(si).planet().currentSize());
+            if (toColonize.isEmpty()) {
+                break;
             }
+            sortByPriority(sf, toColonize, warpSpeed);
 
             for (ShipDesign sd: colonyDesigns) {
                 int[] counts = new int[ShipDesignLab.MAX_DESIGNS];
@@ -1339,6 +1336,81 @@ public final class Empire implements Base, NamedObject, Serializable {
                 }
             }
         }
+    }
+
+    private void sortByPriority(ShipFleet sf, List<Integer> toColonize, int warpSpeed) {
+        // ok, let's use both distance and value of planet to prioritize colonization, 50% and 50%
+        float maxDistance = -1;
+        float maxValue = -1;
+        for (int sid: toColonize) {
+            float value = planetValue(sid);
+            if (maxValue < 0 || maxValue < value) {
+                maxValue = value;
+            }
+            float distance = sf.travelTime(sv.system(sid), warpSpeed);
+            if (maxDistance < 0 || maxDistance < distance) {
+                maxDistance = distance;
+            }
+        }
+        // could happen if we only have 1 colony ship already orbiting the only remaining colonizable planet
+        if (Math.abs(maxDistance) <= 0.1) {
+            maxDistance = 1;
+        }
+        System.out.println("Autocolonize maxDistance ="+maxDistance+" maxValue="+maxValue);
+
+        float maxDistance1 = maxDistance;
+        float maxValue1 = maxValue;
+        // planets with lowest weight are most desirable (closest/best)
+        toColonize.sort((s1, s2) -> (int)Math.signum(autocolonizeWeight(sf, s1, maxDistance1, maxValue1, warpSpeed)
+                - autocolonizeWeight(sf, s2, maxDistance1, maxValue1, warpSpeed)));
+        for (int si: toColonize) {
+            double weight = autocolonizeWeight(sf, si, maxDistance, maxValue, warpSpeed);
+            System.out.format("toColonize System %d %s travel=%.1f value=%.1f weight=%.2f%n",
+                    si, sv.name(si), sf.travelTime(sv.system(si), warpSpeed),
+                    planetValue(si), weight);
+        }
+    }
+
+    public double autocolonizeWeight(ShipFleet sf, int sid, float maxDistance, float maxValue, int warpSpeed) {
+        // let's flip value percent and sort by descending order. That's because in rare cases distancePercent could be
+        // greater than 1
+        float valuePercent = 1 - planetValue(sid) / maxValue;
+        float distancePercent = sf.travelTime(sv.system(sid), warpSpeed) / maxDistance;
+        // so distance is worth 50% of weight, value 50%
+        return valuePercent * 0.5 + distancePercent * 0.5;
+    }
+
+    // taken from AIFleetCommander.setColonyFleetPlan()
+    public float planetValue(int sid) {
+        float value = this.sv.currentSize(sid);
+
+        //increase value by 5 for each of our systems it is near, and
+        //decrease by 2 for alien systems. This is an attempt to encourage
+        //colonization of inner colonies (easier to defend) even if they
+        //are not as good as outer colonies
+        int[] nearbySysIds = this.sv.galaxy().system(sid).nearbySystems();
+        for (int nearSysId : nearbySysIds) {
+            int nearEmpId = this.sv.empId(nearSysId);
+            if (nearEmpId != this.NULL_ID) {
+                if (nearEmpId == this.id)
+                    value += 5;
+                else
+                    value -= 2;
+            }
+        }
+        // assume that we will terraform  the planet
+        value += this.tech().terraformAdj();
+        //multiply *2 for artifacts, *3 for super-artifacts
+        value *= (1 + this.sv.artifactLevel(sid));
+        if (this.sv.isUltraRich(sid))
+            value *= 3;
+        else if (this.sv.isRich(sid))
+            value *= 2;
+        else if (this.sv.isPoor(sid))
+            value /= 2;
+        else if (this.sv.isUltraPoor(sid))
+            value /= 3;
+        return value;
     }
 
     public String decode(String s, Empire listener) {
