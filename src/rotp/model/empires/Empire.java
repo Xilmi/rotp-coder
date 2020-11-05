@@ -1964,7 +1964,21 @@ public final class Empire implements Base, NamedObject, Serializable {
         return (25 + (tech.computer().techLevel()*2)) * race().spyCostMod();
     }
     public float troopKillRatio(StarSystem s) {
-        float killRatio = (50 + tech.troopCombatAdj(false)) / (50 + sv.defenderCombatAdj(s.id));
+		// modnar: this old estimate gives completely wrong results for ground combat
+        //float killRatio = (50 + tech.troopCombatAdj(false)) / (50 + sv.defenderCombatAdj(s.id));
+		
+		// modnar: correct ground combat ratio estimates
+		float killRatio = 1.0f;
+		if (sv.defenderCombatAdj(s.id) >= tech.troopCombatAdj(false)) {
+			float defAdv = sv.defenderCombatAdj(s.id) - tech.troopCombatAdj(false);
+			// killRatio = attackerCasualties / defenderCasualties
+			killRatio = (float) ((Math.pow(100,2) - Math.pow(100-defAdv,2)/2) / (Math.pow(100-defAdv,2)/2));
+		}
+		else {
+			float atkAdv = tech.troopCombatAdj(false) - sv.defenderCombatAdj(s.id);
+			// killRatio = attackerCasualties / defenderCasualties
+			killRatio = (float) ((Math.pow(100-atkAdv,2)/2) / (Math.pow(100,2) - Math.pow(100-atkAdv,2)/2));
+		}
         return killRatio;
     }
     public List<EmpireView> contacts() {
@@ -2240,14 +2254,17 @@ public final class Empire implements Base, NamedObject, Serializable {
         List<StarSystem> closestSystems = new ArrayList<>();
         int minTurns = Integer.MAX_VALUE;
         for (StarSystem stagingPoint: colonies) {
-            int turns = (int) Math.ceil(stagingPoint.travelTimeTo(target, speed));
-            if (turns < minTurns) {
-                closestSystems.clear();
-                closestSystems.add(stagingPoint);
-                minTurns = turns;
-            }
-            else if (turns == minTurns)
-                closestSystems.add(stagingPoint);
+			// modnar: don't allow colonies with enemy fleet in orbit be considered for stagingPoint
+			if (!stagingPoint.enemyShipsInOrbit(stagingPoint.empire())) {
+				int turns = (int) Math.ceil(stagingPoint.travelTimeTo(target, speed));
+				if (turns < minTurns) {
+					closestSystems.clear();
+					closestSystems.add(stagingPoint);
+					minTurns = turns;
+				}
+				else if (turns == minTurns)
+					closestSystems.add(stagingPoint);
+			}
         }
         if (closestSystems.isEmpty())
             return StarSystem.NULL_ID;

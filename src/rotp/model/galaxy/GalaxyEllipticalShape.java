@@ -17,12 +17,16 @@ package rotp.model.galaxy;
 
 import java.awt.Point;
 import java.awt.Shape;
+import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.AffineTransform;
 import rotp.model.game.IGameOptions;
 
 public class GalaxyEllipticalShape extends GalaxyShape {
     private static final long serialVersionUID = 1L;
     Shape ellipse;
+	Area totalArea, ellipseArea;
+	
     public GalaxyEllipticalShape(IGameOptions options) {
         opts = options;
     }
@@ -31,11 +35,63 @@ public class GalaxyEllipticalShape extends GalaxyShape {
     @Override
     public void init(int n) {
         super.init(n);
-        ellipse = new Ellipse2D.Float(0,0,galaxyWidthLY(),galaxyHeightLY());
+		
+		float gE = (float) galaxyEdgeBuffer();
+		float gW = (float) galaxyWidthLY();
+		float gH = (float) galaxyHeightLY();
+		
+		// modnar: different ellipse configurations with setMapOption
+		if (opts.setMapOption() == 1) {
+			// single ellipse
+			// modnar: add galaxyEdgeBuffer() as upper left corner to prevent cutoff
+			ellipse = new Ellipse2D.Float(gE,gE,gW,gH);
+			ellipseArea = new Area(ellipse);
+			totalArea = ellipseArea;
+		}
+		else if (opts.setMapOption() == 2) {
+			// 2 ellipses (x-shape)
+			ellipse = new Ellipse2D.Float(-1.1f*gW/2,-0.4f*gH/2,1.1f*gW,0.4f*gH);
+			// rotate and shift ellipse
+			AffineTransform rotateShape = new AffineTransform();
+			AffineTransform moveShape = new AffineTransform();
+			rotateShape.rotate(0.45);
+			moveShape.translate(gE+gW/2,gE+gH/2);
+			ellipse = rotateShape.createTransformedShape(ellipse);
+			ellipse = moveShape.createTransformedShape(ellipse);
+			ellipseArea = new Area(ellipse);
+			totalArea = ellipseArea;
+			
+			ellipse = new Ellipse2D.Float(-1.1f*gW/2,-0.4f*gH/2,1.1f*gW,0.4f*gH);
+			// rotate and shift ellipse
+			rotateShape.rotate(-0.9);
+			ellipse = rotateShape.createTransformedShape(ellipse);
+			ellipse = moveShape.createTransformedShape(ellipse);
+			ellipseArea = new Area(ellipse);
+			totalArea.add(ellipseArea);
+		}
+		else if (opts.setMapOption() == 3) {
+			// 4 ellipses (upright, side-by-side)
+			ellipse = new Ellipse2D.Float(gE,gE,0.25f*gW,gH);
+			ellipseArea = new Area(ellipse);
+			totalArea = ellipseArea;
+			
+			ellipse = new Ellipse2D.Float(gE+0.25f*gW,gE,0.25f*gW,gH);
+			ellipseArea = new Area(ellipse);
+			totalArea.add(ellipseArea);
+			
+			ellipse = new Ellipse2D.Float(gE+0.5f*gW,gE,0.25f*gW,gH);
+			ellipseArea = new Area(ellipse);
+			totalArea.add(ellipseArea);
+			
+			ellipse = new Ellipse2D.Float(gE+0.75f*gW,gE,0.25f*gW,gH);
+			ellipseArea = new Area(ellipse);
+			totalArea.add(ellipseArea);
+		}
+		
     }
     @Override
     protected int galaxyWidthLY() { 
-        return (int) (sqrt(2*maxStars*adjustedSizeFactor()));
+        return (int) (Math.sqrt(2*maxStars*adjustedSizeFactor()));
     }
     @Override
     protected int galaxyHeightLY() { 
@@ -48,7 +104,7 @@ public class GalaxyEllipticalShape extends GalaxyShape {
     }
     @Override
     public boolean valid(Point.Float pt) {
-        return ellipse.contains(pt.x, pt.y);
+        return totalArea.contains(pt.x, pt.y);
     }
     float randomLocation(float max, float buff) {
         return buff + (random() * (max-buff-buff));

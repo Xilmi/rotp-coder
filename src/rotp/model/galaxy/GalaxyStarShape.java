@@ -17,16 +17,17 @@ package rotp.model.galaxy;
 
 import java.awt.Point;
 import java.awt.Shape;
-import java.awt.geom.Area;
-import java.awt.geom.Ellipse2D;
+import java.awt.geom.Path2D;
+import java.awt.geom.AffineTransform;
 import rotp.model.game.IGameOptions;
 
-public class GalaxyCircularShape extends GalaxyShape {
+// modnar: custom map shape, Star
+public class GalaxyStarShape extends GalaxyShape {
     private static final long serialVersionUID = 1L;
-    Shape circle;
-	Area totalArea, circleArea;
+    private Path2D star;
+	int numPoints = 5;
 	
-    public GalaxyCircularShape(IGameOptions options) {
+    public GalaxyStarShape(IGameOptions options) {
         opts = options;
     }
     @Override
@@ -37,56 +38,63 @@ public class GalaxyCircularShape extends GalaxyShape {
 		float gW = (float) galaxyWidthLY();
 		float gH = (float) galaxyHeightLY();
 		
-		// modnar: different circle configurations with setMapOption
+		float innerRadius = 0.2f*gH;
+		
+		// modnar: choose different number of star points with setMapOption
 		if (opts.setMapOption() == 1) {
-			// single circle
-			// modnar: add galaxyEdgeBuffer() as upper left corner to prevent cutoff
-			circle = new Ellipse2D.Float(gE,gE,gW,gH);
-			circleArea = new Area(circle);
-			totalArea = circleArea;
+			numPoints = 5;
+			innerRadius = 0.2f*gH;
 		}
 		else if (opts.setMapOption() == 2) {
-			// close-packing 3 circles (triangle)
-			circle = new Ellipse2D.Float(gE+0.25f*gW, gE+0.03f*gH, 0.5f*gW, 0.5f*gH);
-			circleArea = new Area(circle);
-			totalArea = circleArea;
-			
-			circle = new Ellipse2D.Float(gE+0.0f*gW, gE+0.465f*gH, 0.5f*gW, 0.5f*gH);
-			circleArea = new Area(circle);
-			totalArea.add(circleArea);
-			
-			circle = new Ellipse2D.Float(gE+0.5f*gW, gE+0.465f*gH, 0.5f*gW, 0.5f*gH);
-			circleArea = new Area(circle);
-			totalArea.add(circleArea);
+			numPoints = 3;
+			innerRadius = 0.12f*gH;
 		}
 		else if (opts.setMapOption() == 3) {
-			// 4 circles (square)
-			circle = new Ellipse2D.Float(gE+0.0f*gW, gE+0.0f*gH, 0.5f*gW, 0.5f*gH);
-			circleArea = new Area(circle);
-			totalArea = circleArea;
-			
-			circle = new Ellipse2D.Float(gE+0.5f*gW, gE+0.0f*gH, 0.5f*gW, 0.5f*gH);
-			circleArea = new Area(circle);
-			totalArea.add(circleArea);
-			
-			circle = new Ellipse2D.Float(gE+0.0f*gW, gE+0.5f*gH, 0.5f*gW, 0.5f*gH);
-			circleArea = new Area(circle);
-			totalArea.add(circleArea);
-			
-			circle = new Ellipse2D.Float(gE+0.5f*gW, gE+0.5f*gH, 0.5f*gW, 0.5f*gH);
-			circleArea = new Area(circle);
-			totalArea.add(circleArea);
+			numPoints = 8;
+			innerRadius = 0.18f*gH;
 		}
+		
+		star = new Path2D.Float();
+		
+		// create star shape, just with points/path
+		float deltaAngle = (float) Math.PI/numPoints;
+		for (int i = 0; i < 2*numPoints; i++)
+        {
+			// offsetAngle, spins star with number of opponents
+			float offsetAngle = (float) (opts.selectedNumberOpponents()*Math.PI/15);
+            float pathX = (float) Math.cos(offsetAngle + i*deltaAngle);
+            float pathY = (float) Math.sin(offsetAngle + i*deltaAngle);
+			
+            if ((i % 2) == 0)
+            {
+                pathX *= 0.5f*gH; // outerRadius
+                pathY *= 0.5f*gH; // outerRadius
+            }
+            else
+            {
+                pathX *= innerRadius;
+                pathY *= innerRadius;
+            }
+            if (i == 0)
+            {
+                star.moveTo(gE + 0.5f*gW + pathX, gE + 0.5f*gH + pathY); // initial start
+            }
+            else
+            {
+                star.lineTo(gE + 0.5f*gW + pathX, gE + 0.5f*gH + pathY);
+            }
+        }
+        star.closePath();
     }
     @Override
     public float maxScaleAdj()               { return 1.1f; }
     @Override
     protected int galaxyWidthLY() { 
-        return (int) (Math.sqrt(maxStars*adjustedSizeFactor()));
+        return (int) (1.3*Math.sqrt(opts.numberStarSystems()*adjustedSizeFactor()));
     }
     @Override
     protected int galaxyHeightLY() { 
-        return (int) (Math.sqrt(maxStars*adjustedSizeFactor()));
+        return (int) (1.3*Math.sqrt(opts.numberStarSystems()*adjustedSizeFactor()));
     }
     @Override
     public void setRandom(Point.Float pt) {
@@ -95,7 +103,7 @@ public class GalaxyCircularShape extends GalaxyShape {
     }
     @Override
     public boolean valid(Point.Float pt) {
-        return totalArea.contains(pt.x, pt.y);
+        return star.contains(pt.x, pt.y);
     }
     float randomLocation(float max, float buff) {
         return buff + (random() * (max-buff-buff));

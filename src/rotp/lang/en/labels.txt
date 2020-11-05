@@ -511,7 +511,7 @@ MAIN_SCOUT_HOSTILE_DESC           | Environment: Hostile - Population growth is 
 MAIN_SCOUT_FERTILE_DESC           | Environment: Fertile - Population growth is +50% normal.
 MAIN_SCOUT_GAIA_DESC              | Environment: Gaia - Population growth is +100% normal.
 MAIN_SCOUT_ARTIFACTS_DESC         | Ancient Ruins: Technology points from research are doubled.
-MAIN_SCOUT_ANCIENTS_DESC          | Ancient Homeworld: Technology points from research are tripled.
+MAIN_SCOUT_ANCIENTS_DESC          | Ancient Homeworld: Technology points from research are quadrupled.
 MAIN_SCOUT_ULTRA_POOR_DESC        | Resources: Ultra-Poor - Output from industry is cut to one-third.
 MAIN_SCOUT_POOR_DESC              | Resources: Poor - Output from industry is halved.
 MAIN_SCOUT_RICH_DESC              | Resources: Rich - Output from industry is doubled.
@@ -851,6 +851,25 @@ SETUP_GALAXY_SHAPE_CIRCULAR       | Circular
 SETUP_GALAXY_SHAPE_RING           | Ring
 SETUP_GALAXY_SHAPE_ELLIPSE        | Ellipse
 SETUP_GALAXY_SHAPE_SPIRAL         | Spiral
+SETUP_GALAXY_SHAPE_STAR           | Star
+SETUP_GALAXY_SHAPE_BARSPIRAL      | Bar Spiral
+SETUP_GALAXY_SHAPE_TEXT           | Text
+SETUP_GALAXY_SHAPE_CLUSTER        | Cluster
+SETUP_GALAXY_SHAPE_SWIRLCLUSTERS  | Swirl Clusters
+SETUP_GALAXY_SHAPE_GRID           | Grid
+SETUP_GALAXY_SHAPE_SPIRALARMS     | Spiral Arms
+SETUP_GALAXY_SHAPE_MAZE           | Maze
+SETUP_GALAXY_SHAPE_VOID           | Void
+SETUP_GALAXY_SHAPE_SHURIKEN       | Shuriken
+SETUP_GALAXY_SHAPE_BULLSEYE       | Bullseye
+SETUP_GALAXY_SHAPE_LORENZ         | Lorenz
+SETUP_GALAXY_SHAPE_LORENZ2        | Lorenz 2
+SETUP_GALAXY_SHAPE_FRACTAL        | Fractal
+SETUP_GALAXY_SHAPE_CHAOSGAME      | Chaos Game
+SETUP_GALAXY_MAP_OPTION_LABEL     | Option
+SETUP_GALAXY_MAP_OPTION_A         | Option A
+SETUP_GALAXY_MAP_OPTION_B         | Option B
+SETUP_GALAXY_MAP_OPTION_C         | Option C
 SETUP_GALAXY_NUMBER_EMPIRES       | Total Empires: %1
 SETUP_GALAXY_NUMBER_SYSTEMS       | Total Systems: %1
 SETUP_GALAXY_MAX_OPPONENTS        | Maximum Opponents: %1

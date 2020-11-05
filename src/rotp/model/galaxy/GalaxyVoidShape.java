@@ -16,14 +16,19 @@
 package rotp.model.galaxy;
 
 import java.awt.Point;
+import java.awt.Shape;
+import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
 import rotp.model.game.IGameOptions;
 
-public class GalaxyRectangularShape extends GalaxyShape {
+// modnar: custom map shape, Void
+public class GalaxyVoidShape extends GalaxyShape {
     private static final long serialVersionUID = 1L;
+	Shape block, circle;
+	Area totalArea, blockArea, circleArea;
 	
-	float adjust_density = 1.0f; // modnar: adjust stellar density
-	
-    public GalaxyRectangularShape(IGameOptions options) {
+    public GalaxyVoidShape(IGameOptions options) {
         opts = options;
     }
     @Override
@@ -32,25 +37,62 @@ public class GalaxyRectangularShape extends GalaxyShape {
 	public void init(int n) {
         super.init(n);
 		
-		// modnar: choose different stellar densities (map areas) with setMapOption
+		float gE = (float) galaxyEdgeBuffer();
+		float gW = (float) galaxyWidthLY();
+		float gH = (float) galaxyHeightLY();
+		
+		block = new Rectangle2D.Float(gE, gE, gW, gH);
+		blockArea = new Area(block);
+		totalArea = blockArea;
+		
+		// modnar: choose void configurations with setMapOption
 		if (opts.setMapOption() == 1) {
-			adjust_density = 1.0f;
+			// single large central void
+			circle = new Ellipse2D.Float(gE+0.5f*gW-0.44f*gH, gE+0.06f*gH, 0.88f*gH, 0.88f*gH);
+			circleArea = new Area(circle);
+			totalArea.subtract(circleArea);
 		}
 		else if (opts.setMapOption() == 2) {
-			adjust_density = 1.5f;
+			// two diagonal voids
+			circle = new Ellipse2D.Float(gE+0.05f*gW, gE+0.05f*gH, 0.45f*gW, 0.45f*gW);
+			circleArea = new Area(circle);
+			totalArea.subtract(circleArea);
+			
+			circle = new Ellipse2D.Float(gE+0.5f*gW, gE+0.95f*gH-0.45f*gW, 0.45f*gW, 0.45f*gW);
+			circleArea = new Area(circle);
+			totalArea.subtract(circleArea);
 		}
 		else if (opts.setMapOption() == 3) {
-			adjust_density = 2.0f;
+			// five separated voids
+			circle = new Ellipse2D.Float(gE+0.26f*gW, gE+0.5f*gH-0.24f*gW, 0.48f*gW, 0.48f*gW);
+			circleArea = new Area(circle);
+			totalArea.subtract(circleArea);
+			
+			circle = new Ellipse2D.Float(gE+0.05f*gW, gE+0.067f*gH, 0.3f*gH, 0.3f*gH);
+			circleArea = new Area(circle);
+			totalArea.subtract(circleArea);
+			
+			circle = new Ellipse2D.Float(gE+0.05f*gW, gE+0.633f*gH, 0.3f*gH, 0.3f*gH);
+			circleArea = new Area(circle);
+			totalArea.subtract(circleArea);
+			
+			circle = new Ellipse2D.Float(gE+0.95f*gW-0.3f*gH, gE+0.067f*gH, 0.3f*gH, 0.3f*gH);
+			circleArea = new Area(circle);
+			totalArea.subtract(circleArea);
+			
+			circle = new Ellipse2D.Float(gE+0.95f*gW-0.3f*gH, gE+0.633f*gH, 0.3f*gH, 0.3f*gH);
+			circleArea = new Area(circle);
+			totalArea.subtract(circleArea);
 		}
     }
 	
     @Override
     protected int galaxyWidthLY() { 
-        return (int) (Math.sqrt(adjust_density*4.0/3.0*opts.numberStarSystems()*adjustedSizeFactor()));
+        return (int) (Math.sqrt(0.8*4.0/3.0*opts.numberStarSystems()*adjustedSizeFactor()));
     }
     @Override
     protected int galaxyHeightLY() { 
-        return (int) (Math.sqrt(adjust_density*3.0/4.0*opts.numberStarSystems()*adjustedSizeFactor()));
+        return (int) (Math.sqrt(0.8*3.0/4.0*opts.numberStarSystems()*adjustedSizeFactor()));
     }
     @Override
     public void setRandom(Point.Float pt) {
@@ -59,7 +101,7 @@ public class GalaxyRectangularShape extends GalaxyShape {
     }
     @Override
     public boolean valid(Point.Float pt) {
-        return true;
+		return totalArea.contains(pt.x, pt.y);
     }
     float randomLocation(float max, float buff) {
         return buff + (random() * (max-buff-buff));

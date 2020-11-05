@@ -27,6 +27,21 @@ import rotp.model.galaxy.GalaxyRectangularShape;
 import rotp.model.galaxy.GalaxyRingShape;
 import rotp.model.galaxy.GalaxyShape;
 import rotp.model.galaxy.GalaxySpiralShape;
+import rotp.model.galaxy.GalaxyStarShape; // modnar, custom shape
+import rotp.model.galaxy.GalaxyBarSpiralShape; // modnar, custom shape
+import rotp.model.galaxy.GalaxyTextShape; // modnar, custom shape
+import rotp.model.galaxy.GalaxyClusterShape; // modnar, custom shape
+import rotp.model.galaxy.GalaxySwirlClustersShape; // modnar, custom shape
+import rotp.model.galaxy.GalaxyGridShape; // modnar, custom shape
+import rotp.model.galaxy.GalaxySpiralArmsShape; // modnar, custom shape
+import rotp.model.galaxy.GalaxyMazeShape; // modnar, custom shape
+import rotp.model.galaxy.GalaxyVoidShape; // modnar, custom shape
+import rotp.model.galaxy.GalaxyShurikenShape; // modnar, custom shape, long generation times
+import rotp.model.galaxy.GalaxyBullseyeShape; // modnar, custom shape, long generation times
+import rotp.model.galaxy.GalaxyLorenzShape; // modnar, custom shape, long generation times
+import rotp.model.galaxy.GalaxyLorenz2Shape; // modnar, custom shape, long generation times
+import rotp.model.galaxy.GalaxyFractalShape; // modnar, custom shape, long generation times
+import rotp.model.galaxy.GalaxyChaosGameShape; // modnar, custom shape, long generation times
 import rotp.model.galaxy.StarSystem;
 import rotp.model.galaxy.StarType;
 import rotp.model.planet.Planet;
@@ -43,6 +58,9 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
 
     private String selectedGalaxySize;
     private String selectedGalaxyShape;
+	// modnar: new map option
+	// selectedMapOption, setMapOption
+	private String selectedMapOption;
     private String selectedGameDifficulty;
     private int selectedNumberOpponents;
     private boolean communityAI = false;
@@ -90,6 +108,13 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
     public String selectedGalaxyShape()          { return selectedGalaxyShape; }
     @Override
     public void selectedGalaxyShape(String s)    { selectedGalaxyShape = s; setGalaxyShape(); generateGalaxy(); }
+	
+	// modnar: selectedMapOption, setMapOption
+	@Override
+	public String selectedMapOption()           { return selectedMapOption; }
+    @Override
+	public void selectedMapOption(String s)    { selectedMapOption = s; setMapOption(); generateGalaxy(); }
+	
     @Override
     public String selectedGameDifficulty()       { return selectedGameDifficulty; }
     @Override
@@ -151,12 +176,70 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
             case SHAPE_SPIRAL:
                 galaxyShape = new GalaxySpiralShape(this);
                 return;
+			// modnar, custom shapes
+			case SHAPE_STAR:
+                galaxyShape = new GalaxyStarShape(this);
+                return;
+			case SHAPE_BARSPIRAL:
+                galaxyShape = new GalaxyBarSpiralShape(this);
+                return;
+			case SHAPE_TEXT:
+                galaxyShape = new GalaxyTextShape(this);
+                return;
+			case SHAPE_CLUSTER:
+                galaxyShape = new GalaxyClusterShape(this);
+                return;
+			case SHAPE_SWIRLCLUSTERS:
+                galaxyShape = new GalaxySwirlClustersShape(this);
+                return;
+			case SHAPE_GRID:
+                galaxyShape = new GalaxyGridShape(this);
+                return;
+			case SHAPE_SPIRALARMS:
+                galaxyShape = new GalaxySpiralArmsShape(this);
+                return;
+			case SHAPE_MAZE:
+                galaxyShape = new GalaxyMazeShape(this);
+                return;
+			case SHAPE_VOID:
+                galaxyShape = new GalaxyVoidShape(this);
+                return;
+			case SHAPE_SHURIKEN:
+                galaxyShape = new GalaxyShurikenShape(this);
+                return;
+			case SHAPE_BULLSEYE:
+                galaxyShape = new GalaxyBullseyeShape(this);
+				return;
+			case SHAPE_LORENZ:
+                galaxyShape = new GalaxyLorenzShape(this);
+                return;
+			case SHAPE_LORENZ2:
+                galaxyShape = new GalaxyLorenz2Shape(this);
+                return;
+			case SHAPE_FRACTAL:
+                galaxyShape = new GalaxyFractalShape(this);
+                return;
+			case SHAPE_CHAOSGAME:
+                galaxyShape = new GalaxyChaosGameShape(this);
+                return;
             case SHAPE_RECTANGLE:
             default:
                 galaxyShape = new GalaxyRectangularShape(this);
                 return;
         }
     }
+	
+	// modnar: setMapOption values
+	@Override
+    public int setMapOption() {
+        switch (selectedMapOption()) {
+            case MAP_OPTION_A:      return 1;
+            case MAP_OPTION_B:      return 2;
+            case MAP_OPTION_C:      return 3;
+			default:                return 1;
+        }
+    }
+	
     @Override
     public int numberStarSystems() {
             // MOO Strategy Guide, Table 3-2, p.50
@@ -352,8 +435,35 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         list.add(SHAPE_RING);
         list.add(SHAPE_ELLIPTICAL);
         list.add(SHAPE_SPIRAL);
+		// modnar, custom shapes
+        list.add(SHAPE_STAR);
+        list.add(SHAPE_BARSPIRAL);
+		list.add(SHAPE_TEXT);
+		list.add(SHAPE_CLUSTER);
+		list.add(SHAPE_SWIRLCLUSTERS);
+		list.add(SHAPE_GRID);
+		list.add(SHAPE_SPIRALARMS);
+		list.add(SHAPE_MAZE);
+		list.add(SHAPE_VOID);
+		list.add(SHAPE_SHURIKEN);
+		list.add(SHAPE_BULLSEYE);
+		list.add(SHAPE_LORENZ);
+		list.add(SHAPE_LORENZ2);
+		list.add(SHAPE_FRACTAL);
+		list.add(SHAPE_CHAOSGAME);
         return list;
     }
+	
+	// modnar: MapOptionOptions
+	@Override
+    public List<String> MapOptionOptions() {
+        List<String> list = new ArrayList<>();
+        list.add(MAP_OPTION_A);
+        list.add(MAP_OPTION_B);
+        list.add(MAP_OPTION_C);
+        return list;
+    }
+	
     @Override
     public List<String> gameDifficultyOptions() {
         List<String> list = new ArrayList<>();
@@ -388,6 +498,8 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
     protected void setDefaultOptionValues() {
         selectedGalaxySize = SIZE_SMALL;
         selectedGalaxyShape = galaxyShapeOptions().get(0);
+		// modnar: selectedMapOption
+		selectedMapOption = MapOptionOptions().get(0);
         selectedGameDifficulty(gameDifficultyOptions().get(0));
         selectedNumberOpponents = maximumOpponentsOptions();
         selectedPlayerRace(random(startingRaceOptions()));
