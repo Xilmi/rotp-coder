@@ -1318,6 +1318,22 @@ public final class Empire implements Base, NamedObject, Serializable {
                         continue;
                     }
 
+                    // if target system already has a colony ship in orbit, don't send colony ships there
+                    ShipFleet orbitingFleet = sv.system(si).orbitingFleetForEmpire(this);
+                    if (orbitingFleet != null) {
+                        boolean colonyShipOrbiting = false;
+                        for (ShipDesign d1: colonyDesigns) {
+                            if (orbitingFleet.hasShip(d1) && d1.colonySpecial().canColonize(sv.system(si).planet())) {
+                                colonyShipOrbiting = true;
+                                break;
+                            }
+                        }
+                        if (colonyShipOrbiting) {
+                            // don't remove from target list, otherwise the ship orbiting the planet will be sent away
+                            continue;
+                        }
+                    }
+
                     // already orbiting the planet we need to colonize, don't send the ship anywhere.
                     if (sf.system().id == si) {
                         // remove this system as it has scout assigned already
