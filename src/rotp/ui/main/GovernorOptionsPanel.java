@@ -88,7 +88,7 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
 
         autotransportPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Autotransport Options"));
 
-        autotransport.setText("Population automatically transported from full colonies");
+        autotransport.setText("Population automatically transported from colonies at max production capacity");
 
         transportPop.setModel(new javax.swing.SpinnerNumberModel(10, 1, 10, 1));
         transportPop.addChangeListener(new javax.swing.event.ChangeListener() {
