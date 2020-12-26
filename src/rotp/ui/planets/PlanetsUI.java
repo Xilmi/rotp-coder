@@ -512,6 +512,7 @@ public class PlanetsUI extends BasePanel implements SystemViewer {
                 else
                     viewSelectionPane.selectPreviousTab();
                 return;
+            case KeyEvent.VK_Q:
             case KeyEvent.VK_UP:     repaint = listingUI.scrollUp(); break;
             case KeyEvent.VK_DOWN:   repaint = listingUI.scrollDown(); break;
             case KeyEvent.VK_1:

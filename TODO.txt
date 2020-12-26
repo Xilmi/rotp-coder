@@ -1,0 +1,19 @@
+TODO:
+
+    Custom serialized for java.awt.Color !!!
+
+    Save to JSON works, fix load from JSON. Test round trip.
+
+    Change approach to JSON serialization, do NOT modify the objects being serialized, only add custom
+    serializers
+=======================
+
+* Artifact, Ultra Rich and Rich don't transport population
+
+* Autotransport slider:
+0% on the slider is "as soon as it is possible"
+50% on the slider is "planet is at 50% population"
+100% on the slider is "planet population is at 100%"
+
+* Stop research once Future Tech X is discoverd, force all
+output to industry (reserve)

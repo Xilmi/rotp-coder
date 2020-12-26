@@ -15,6 +15,7 @@
  */
 package rotp.util;
 
+import org.apache.commons.math3.util.FastMath;
 import rotp.util.sound.SoundManager;
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -55,7 +56,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
 import rotp.Rotp;
-import rotp.apachemath.FastMath;
 import rotp.model.empires.Empire;
 import rotp.model.galaxy.Galaxy;
 import rotp.model.galaxy.StarSystem;
@@ -221,15 +221,11 @@ public interface Base {
         String output = concat(text);
         try {
             System.out.println(output);
-            if (RotPUI.useDebugFile) {
-                PrintWriter debugFile = RotPUI.debugFile();
-                if (debugFile != null) {
-                    debugFile.println(output);
-                    debugFile.flush();
-                }
+            if (Logger.logListener != null) {
+                Logger.logListener.accept(output);
             }
         }
-        catch(Exception e) { }
+        catch(Exception e) { e.printStackTrace(); }
     }
     public default int maximumSystems()                { return (int) (240*(Rotp.maxHeapMemory-250)); }
     public default boolean veryLowMemory() {

@@ -504,6 +504,7 @@ MAIN_COLONY_INDUSTRY              | Ind
 MAIN_COLONY_ECOLOGY               | Eco
 MAIN_COLONY_TECHNOLOGY            | Tech
 MAIN_COLONY_ALLOCATE_SPENDING     | Allocate Spending
+GOVERNOR_OPTIONS                  | Options
 MAIN_COLONY_SPENDING_NONE         | None
 MAIN_COLONY_SPENDING_RESERVE      | Reserve
 MAIN_COLONY_SPENDING_TECH         | Tech
@@ -1195,6 +1196,8 @@ SHIP_DESIGN_DEPLOY_OK             | Deploy
 SHIP_DESIGN_RENAME_OK             | Rename
 SHIP_DESIGN_UNNAMED_DESIGN        | Unnamed
 SHIP_DESIGN_COMPONENT_NONE        | None
+SHIP_DESIGN_AUTO_SCOUT            | Auto Scout
+SHIP_DESIGN_AUTO_COLONIZE         | Auto Colonize
 
 
 // ship design selection dialogs

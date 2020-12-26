@@ -84,6 +84,7 @@ public class EmpireSystemPanel extends SystemPanel {
             case KeyEvent.VK_S:
                 nextShipDesign();
                 return;
+            case KeyEvent.VK_Q:
             case KeyEvent.VK_1:
             case KeyEvent.VK_2:
             case KeyEvent.VK_3:

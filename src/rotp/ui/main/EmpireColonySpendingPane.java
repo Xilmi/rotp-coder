@@ -34,6 +34,8 @@ import rotp.model.galaxy.StarSystem;
 import rotp.ui.BasePanel;
 import rotp.ui.SystemViewer;
 
+import javax.swing.*;
+
 public class EmpireColonySpendingPane extends BasePanel {
     private static final long serialVersionUID = 1L;
     static final Color sliderHighlightColor = new Color(255,255,255);
@@ -125,6 +127,17 @@ public class EmpireColonySpendingPane extends BasePanel {
                     case 2: researchSlider.toggleLock();    break;
                     default:  break;
                 }
+                return;
+            case KeyEvent.VK_Q:
+            {
+                toggleGovernor();
+                break;
+            }
+            case KeyEvent.VK_W:
+            {
+                toggleAutoShips();
+                break;
+            }
         }
     }
     class EmpireSliderPane extends BasePanel implements MouseListener, MouseMotionListener, MouseWheelListener {
@@ -167,10 +180,31 @@ public class EmpireColonySpendingPane extends BasePanel {
             int w = getWidth();
 
             if (category < 0) {
+                Color color;
+                if (colony.isGovernor()) {
+                    color = Color.green;
+                } else {
+                    color = MainUI.shadeBorderC();
+                }
+
                 g.setFont(narrowFont(20));
                 String titleText = text("MAIN_COLONY_ALLOCATE_SPENDING");
                 int titleY = getHeight() - s6;
-                drawShadowedString(g, titleText, 2, s5, titleY, MainUI.shadeBorderC(), textC);
+                drawShadowedString(g, titleText, 2, s5, titleY, color, textC);
+
+                // crappy ASCII art. Should be something else.
+                // TODO: for future use
+                if (1 == 0) {
+                    if (colony.isAutoShips()) {
+                        color = Color.green;
+                    } else {
+                        color = MainUI.shadeBorderC();
+                    }
+                    String shipAutomateText = "]=>";
+                    drawShadowedString(g, shipAutomateText, 2, w - s95, titleY, color, textC);
+                }
+                String governorOptionsText = text("GOVERNOR_OPTIONS");
+                drawShadowedString(g, governorOptionsText, 2, w-s60, titleY, MainUI.shadeBorderC(), textC);
                 return;
             }
             String text = text(Colony.categoryName(category));
@@ -364,6 +398,18 @@ public class EmpireColonySpendingPane extends BasePanel {
             else if (rightArrow.contains(x,y))
                 increment(true);
             else {
+                if (this.category < 0) {
+// TODO: for future use
+//                    if (x < EmpireColonySpendingPane.this.getWidth() - s95) {
+//                        toggleGovernor();
+//                    } else if (x < EmpireColonySpendingPane.this.getWidth() - s60) {
+//                        toggleAutoShips();
+                    if (x < EmpireColonySpendingPane.this.getWidth() - s60) {
+                        toggleGovernor();
+                    } else {
+                        governorOptions();
+                    }
+                }
                 float pct = pctBoxSelected(x,y);
                 if (pct >= 0) {
                     Colony colony = parent.systemViewToDisplay().colony();
@@ -423,6 +469,45 @@ public class EmpireColonySpendingPane extends BasePanel {
             float num = x - minX;
             float den = maxX-minX;
             return num/den;
+        }
+    }
+
+    JFrame governorOptionsFrame = null;
+    private void governorOptions() {
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                if (governorOptionsFrame == null) {
+                    governorOptionsFrame = new JFrame("GovernorOptions");
+                    governorOptionsFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+
+                    //Create and set up the content pane.
+                    GovernorOptionsPanel newContentPane = new GovernorOptionsPanel(governorOptionsFrame);
+                    newContentPane.setOpaque(true); //content panes must be opaque
+                    governorOptionsFrame.setContentPane(newContentPane);
+                }
+                //Display the window.
+                governorOptionsFrame.pack();
+                governorOptionsFrame.setVisible(true);
+
+            }
+        });
+    }
+
+    private void toggleGovernor() {
+        if (parent.systemViewToDisplay() != null && parent.systemViewToDisplay().colony() != null) {
+            Colony colony = parent.systemViewToDisplay().colony();
+            colony.setGovernor(!colony.isGovernor());
+            if (colony.isGovernor()) {
+                colony.govern();
+            }
+            parent.repaint();
+        }
+    }
+    private void toggleAutoShips() {
+        if (parent.systemViewToDisplay() != null && parent.systemViewToDisplay().colony() != null) {
+            Colony colony = parent.systemViewToDisplay().colony();
+            colony.setAutoShips(!colony.isAutoShips());
+            parent.repaint();
         }
     }
 }
