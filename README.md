@@ -50,7 +50,7 @@ text in the planetary spending screen. Since version 1.8 Governor is on by defau
 
 Additional features / changelog
 
-* 1.13.6. Bugfixes for autoscouting, autocolonization, autotransport. Pulled in latest changes from Roy's master 
+* 1.13.6. Bugfixes for autoscouting, autocolonization, autotransport. Pulled in latest changes from Ray's master 
 repo (mostly bugfixes by modnar_hajile). There might be savegame compatibility problems with previous versions.
 
 * 1.13.5. Implemented automated scouting and automated colonization. Some fixes to automated
