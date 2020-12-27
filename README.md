@@ -33,15 +33,15 @@ amount of micromanagement needed drastically.
 
 To run the mod:
 
-* Download my distribution of ROTP-1.13.6.jar (large file) and run that instead of 
-original game. You are also welcome to try ROTP-mini-1.13.6.jar which is smaller
+* Download my distribution of ROTP-2.03.3.jar (large file) and run that instead of 
+original game. You are also welcome to try ROTP-mini-2.03.3.jar which is smaller
 as it uses better compression for game assets. 
 
 or
 
-* Download only the ROTP-1.13.6-governor.jar
+* Download only the ROTP-2.03.3-governor.jar
 * Place it in same directory that contains original Remnants.jar version Beta 1.4
-* Run ROTP-1.13.6-governor.jar
+* Run ROTP-2.03.3-governor.jar
 
 To enable governor, use 'q' key on keyboard, or else click "Allocate Spending"
 text in the planetary spending screen. Since version 1.8 Governor is on by default.
@@ -50,7 +50,9 @@ text in the planetary spending screen. Since version 1.8 Governor is on by defau
 
 Additional features / changelog
 
-* 2.0.1. Merge changes on top of latest Beta2 source. Some small fixes & cleanup.
+* 2.03.1. Merge v2.03 Beta. Fix autocolonize to colonize hostile worlds if player race is silicoids.
+
+* 2.01.1. Merge changes on top of latest Beta2 source. Some small fixes & cleanup.
 
 * 1.13.6. Bugfixes for autoscouting, autocolonization, autotransport. Pulled in latest changes from Ray's master 
 repo (mostly bugfixes by modnar_hajile). There might be savegame compatibility problems with previous versions.

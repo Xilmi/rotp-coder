@@ -487,7 +487,7 @@ public class FleetPanel extends BasePanel implements MapSpriteViewer {
                 drawStar(g, sys.starType(), s80, w/3, s70);
                 sys.planet().draw(g, w, h, s20, s70, s80, 45);
             }
-            boolean contact = pl.hasContacted(fl.empId());
+            boolean contact = fl.empire().isPlayer() || pl.hasContacted(fl.empId());
             // draw ship image
             Image shipImg = contact ? fl.empire().race().transport() : pl.race().transport();
             int imgW = shipImg.getWidth(null);
@@ -508,7 +508,8 @@ public class FleetPanel extends BasePanel implements MapSpriteViewer {
             int y0 = h-s12;
             g.setColor(SystemPanel.whiteText);
             g.setFont(narrowFont(20));
-            if (fl.launched()) {
+            if (fl.launched()
+            || (fl.deployed() && !pl.knowETA(fl))) {
                 if (pl.knowETA(fl) && (fl.hasDestination())) {
                     String dest =  pl.sv.name(fl.destSysId());
                     String str2 = dest.isEmpty() ? text("MAIN_FLEET_DEST_UNSCOUTED") : text("MAIN_FLEET_DESTINATION", dest);
@@ -732,7 +733,7 @@ public class FleetPanel extends BasePanel implements MapSpriteViewer {
                     text = text("MAIN_FLEET_CHOOSE_DEST");
                 }
             }
-            else if (displayFl.isInTransit()) {
+            else if (displayFl.isInTransit() || displayFl.isDeployed()) {
                 if (player().knowETA(displayFl)) {
                     int dist = displayFl.travelTurnsRemaining();
                     if (displayFl.hasDestination()) {
@@ -804,7 +805,7 @@ public class FleetPanel extends BasePanel implements MapSpriteViewer {
             
             boolean sameFleet = (origFl.empId() == displayFl.empId()) && (origFl.sysId() == displayFl.sysId()) && (origFl.destSysId() == displayFl.destSysId());
             boolean showAdjust = canAdjust && sameFleet;
-            boolean contact = player().hasContacted(origFl.empId());
+            boolean contact = origFl.empire().isPlayer() || player().hasContacted(origFl.empId());
             switch(num) {
                 case 0:
                     break;
@@ -872,12 +873,14 @@ public class FleetPanel extends BasePanel implements MapSpriteViewer {
             g.drawImage(img, x1, y1, x1+w1, y1+h1, 0, 0, imgW, imgH, parent);
 
             // draw ship name
-            this.scaledFont(g, d.name(), w-s5, 18, 14);
-            //g.setFont(narrowFont(18));
-            int sw = g.getFontMetrics().stringWidth(d.name());
-            int x2 = x+((w-sw)/2);
-            g.setColor(SystemPanel.grayText);
-            g.drawString(d.name(), x2, y+s5);
+            if (contact) {
+                scaledFont(g, d.name(), w-s5, 18, 14);
+                //g.setFont(narrowFont(18));
+                int sw = g.getFontMetrics().stringWidth(d.name());
+                int x2 = x+((w-sw)/2);
+                g.setColor(SystemPanel.grayText);
+                g.drawString(d.name(), x2, y+s5);
+            }
 
             int y3 = y+h+s7;
 

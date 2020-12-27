@@ -27,8 +27,8 @@ public class RotpGovernor {
     // minified versions will use WebP images and Ogg sounds.
     public static boolean minified = false;
 
-    static String governorVersion = "2.01.1";
-    static String expectedROTPVersion = "Beta 2.01";
+    static String governorVersion = "2.03.1";
+    static String expectedROTPVersion = "Beta 2.03";
 
     public static void main(String[] args) {
         String jarFilename = "ROTP-" + governorVersion + "-governor.jar";

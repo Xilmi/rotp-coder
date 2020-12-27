@@ -202,6 +202,8 @@ public class MainUI extends BasePanel implements IMapHandler {
     public boolean showAlerts() {
         return (session().currentAlert() != null) && displayPanel.isVisible();
     }
+    @Override
+    public boolean showTreasuryResearchBar()       { return overlay != overlayAdvice; }
     public void setOverlay(MapOverlay lay) {
         overlay = lay;
     }
@@ -450,7 +452,7 @@ public class MainUI extends BasePanel implements IMapHandler {
 
         if (overlay.hoveringOverSprite(o))
             return;
-
+        
         boolean used = (displayPanel != null) && displayPanel.useHoveringSprite(o);
         if (!used) {
             if (hoveringSprite() != null)
@@ -508,7 +510,7 @@ public class MainUI extends BasePanel implements IMapHandler {
         sessionVar("MAINUI_HOVERING_SPRITE", s); 
         if (s == null)
            return; 
-        if (s.hasDisplayPanel() && !!session().performingTurn()) 
+        if (s.hasDisplayPanel() && !session().performingTurn()) 
             showDisplayPanel(); 
     }
     public Sprite lastHoveringSprite()       { return (Sprite) sessionVar("MAINUI_LAST_HOVERING_SPRITE"); }
@@ -651,6 +653,20 @@ public class MainUI extends BasePanel implements IMapHandler {
         int w3 = scaled(300);
         HelpSpec sp8 = helpUI.addBlueHelpText(x3,y3,w3, 4, text("MAIN_HELP_1H"));
         sp8.setLine(x3+(w2*3/4), y3, scaled(1175), scaled(455));        
+
+        if (showTreasuryResearchBar()) {
+            int x12 = scaled(115);
+            int y12 = scaled(440);
+            int w12 = scaled(220);
+            HelpSpec sp12 = helpUI.addBlueHelpText(x12, y12, w12, 3, text("MAIN_HELP_2L"));
+            sp12.setLine(x12, y12+(sp12.height()/2), s55, scaled(470));
+
+            int x13 = scaled(120);
+            int y13 = scaled(540);
+            int w13 = scaled(220);
+            HelpSpec sp13 = helpUI.addBlueHelpText(x13, y13, w13, 3, text("MAIN_HELP_2M"));
+            sp13.setLine(x13, y13+(sp13.height()/2), s55, scaled(595));
+        }
     }
     private void loadEmpireColonyHelpFrame2() {
         HelpUI helpUI = RotPUI.helpUI();
@@ -725,6 +741,7 @@ public class MainUI extends BasePanel implements IMapHandler {
         int w11 = scaled(170);
         HelpSpec sp11 = helpUI.addBlueHelpText(x11, y11, w11, 4, text("MAIN_HELP_2K"));
         sp11.setLine(scaled(1195), y11+sp11.height(), scaled(1195), scaled(185));
+
     }
     private void loadButtonBarHelpFrame() {
         HelpUI helpUI = RotPUI.helpUI();

@@ -1235,7 +1235,7 @@ public final class Empire implements Base, NamedObject, Serializable {
             return;
         }
 
-        boolean colonyHasResrerveFuel = false;
+        boolean colonyHasReserveFuel = false;
         // Pick colony ship designs, fastest first
         List<ShipDesign> colonyDesigns = new ArrayList<>();
         int minWarpSpeed = 999;
@@ -1247,7 +1247,7 @@ public final class Empire implements Base, NamedObject, Serializable {
                     continue;
                 }
                 if (sd.isExtendedRange()) {
-                    colonyHasResrerveFuel = true;
+                    colonyHasReserveFuel = true;
                 }
                 minWarpSpeed = Math.min(sd.engine().warp(), minWarpSpeed);
                 colonyDesigns.add(sd);
@@ -1315,12 +1315,12 @@ public final class Empire implements Base, NamedObject, Serializable {
             if (!sv.view(i).isColonized() && sv.view(i).scouted() && !PlanetType.NONE.equals(sv.view(i).planetType().key())
                     && !sv.isGuarded(i) && sv.view(i).empire() == null ) {
                 // if we don't have tech or ships to colonize this planet, ignore it.
-                if (!bestColonyShip.canColonize(sv.system(i).planet())) {
+                if (!race().ignoresPlanetEnvironment() && !bestColonyShip.canColonize(sv.system(i).planet())) {
                     continue;
                 }
 
                 boolean inRange;
-                if (colonyHasResrerveFuel) {
+                if (colonyHasReserveFuel) {
                     inRange = sv.inScoutRange(i);
                 } else {
                     inRange = sv.inShipRange(i);
@@ -1366,7 +1366,7 @@ public final class Empire implements Base, NamedObject, Serializable {
 //                    System.out.println("We have "+sf.num(sd.id())+" colony ships of design "+sd.name());
                     int si = it.next();
 
-                    if (!sd.colonySpecial().canColonize(sv.system(si).planet())) {
+                    if (!race().ignoresPlanetEnvironment() && !sd.colonySpecial().canColonize(sv.system(si).planet())) {
                         continue;
                     }
 
@@ -1375,7 +1375,8 @@ public final class Empire implements Base, NamedObject, Serializable {
                     if (orbitingFleet != null) {
                         boolean colonyShipOrbiting = false;
                         for (ShipDesign d1: colonyDesigns) {
-                            if (orbitingFleet.hasShip(d1) && d1.colonySpecial().canColonize(sv.system(si).planet())) {
+                            if (orbitingFleet.hasShip(d1) &&
+                                    (race().ignoresPlanetEnvironment() || d1.colonySpecial().canColonize(sv.system(si).planet()))) {
                                 colonyShipOrbiting = true;
                                 break;
                             }

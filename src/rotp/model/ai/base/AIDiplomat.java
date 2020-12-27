@@ -399,7 +399,7 @@ public class AIDiplomat implements Base, Diplomat {
         }
 
         v.otherView().embassy().tradeAccepted();
-        DiplomaticIncident inc = v.embassy().establishTradeTreaty(level);
+        DiplomaticIncident inc = v.otherView().embassy().establishTradeTreaty(level);
         return v.otherView().accept(DialogueManager.ACCEPT_TRADE, inc);
     }
     @Override
@@ -1369,7 +1369,7 @@ public class AIDiplomat implements Base, Diplomat {
         for (StarSystem sys: empire.allColonizedSystems()) {
             List<ShipFleet> fleets = sys.orbitingFleets();
             for (ShipFleet fl: fleets) {
-                if (fl.empire() == view.empire())
+                if (!fl.retreating() && (fl.empire() == view.empire()))
                     events.add(new TrespassingIncident(view,sys,fl));
             }
         }
