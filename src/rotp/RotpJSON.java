@@ -58,7 +58,6 @@ public class RotpJSON {
             jsonGenerator.writeNumberField("id", gameSession.id());
 
             jsonGenerator.writeObjectField("governorOptions", gameSession.getGovernorOptions());
-            jsonGenerator.writeObjectField("governorOptions2", gameSession.getGovernorOptions2());
             jsonGenerator.writeEndObject();
         }
     }

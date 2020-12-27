@@ -20,6 +20,7 @@ import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -1033,4 +1034,9 @@ public class ShipFleet implements Base, Sprite, Ship, Serializable {
     }
     @Override
     public IMappedObject source() { return this; }
+
+    public boolean isOneShip() {
+        int count = Arrays.stream(this.num).sum();
+        return count == 1;
+    }
 }

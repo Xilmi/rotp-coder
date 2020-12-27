@@ -7,7 +7,6 @@ import javax.swing.SpinnerNumberModel;
 import rotp.model.galaxy.StarSystem;
 import rotp.model.game.GameSession;
 import rotp.model.game.GovernorOptions;
-import rotp.model.game.GovernorOptions2;
 import rotp.ui.RotPUI;
 
 /**
@@ -20,12 +19,11 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         initComponents();
         // initial values
         GovernorOptions options = GameSession.instance().getGovernorOptions();
-        GovernorOptions2 options2 = GameSession.instance().getGovernorOptions2();
         this.governorDefault.setSelected(options.isGovernorOnByDefault());
         this.autotransport.setSelected(options.isAutotransport());
-        this.transportPop.setValue(options2.getTransportPopulation());
-        this.transportMaxPercent.setValue(options2.getTransportMaxPercent());
-        this.transportMaxTurns.setValue(options2.getTransportMaxTurns());
+        this.transportPop.setValue(options.getTransportPopulation());
+        this.transportMaxPercent.setValue(options.getTransportMaxPercent());
+        this.transportMaxTurns.setValue(options.getTransportMaxTurns());
         changePopulationLabel();
         switch (GameSession.instance().getGovernorOptions().getGates()) {
             case None:
@@ -38,12 +36,12 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
                 this.stargateOn.setSelected(true);
                 break;
         }
-        this.missileBases.setValue(options2.getMinimumMissileBases());
-        this.autospend.setSelected(options2.isAutospend());
-        this.reserve.setValue(options2.getReserve());
-        this.shipbuilding.setSelected(options2.isShipbuilding());
-        this.autoScout.setSelected(options2.isAutoScout());
-        this.autoColonize.setSelected(options2.isAutoColonize());
+        this.missileBases.setValue(options.getMinimumMissileBases());
+        this.autospend.setSelected(options.isAutospend());
+        this.reserve.setValue(options.getReserve());
+        this.shipbuilding.setSelected(options.isShipbuilding());
+        this.autoScout.setSelected(options.isAutoScout());
+        this.autoColonize.setSelected(options.isAutoColonize());
     }
 
     /**
@@ -413,12 +411,11 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
 
     private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
         GovernorOptions options = GameSession.instance().getGovernorOptions();
-        GovernorOptions2 options2 = GameSession.instance().getGovernorOptions2();
         options.setGovernorOnByDefault(governorDefault.isSelected());
         options.setAutotransport(autotransport.isSelected());
-        options2.setTransportPopulation((Integer)transportPop.getValue());
-        options2.setTransportMaxPercent((Integer)transportMaxPercent.getValue());
-        options2.setTransportMaxTurns((Integer)transportMaxTurns.getValue());
+        options.setTransportPopulation((Integer)transportPop.getValue());
+        options.setTransportMaxPercent((Integer)transportMaxPercent.getValue());
+        options.setTransportMaxTurns((Integer)transportMaxTurns.getValue());
 
         if (stargateOff.isSelected()) {
             options.setGates(GovernorOptions.GatesGovernor.None);
@@ -427,12 +424,12 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         } else if (stargateOn.isSelected()) {
             options.setGates(GovernorOptions.GatesGovernor.All);
         }
-        options2.setMinimumMissileBases((Integer)missileBases.getValue());
-        options2.setAutospend(autospend.isSelected());
-        options2.setReserve((Integer)reserve.getValue());
-        options2.setShipbuilding(shipbuilding.isSelected());
-        options2.setAutoScout(autoScout.isSelected());
-        options2.setAutoColonize(autoColonize.isSelected());
+        options.setMinimumMissileBases((Integer)missileBases.getValue());
+        options.setAutospend(autospend.isSelected());
+        options.setReserve((Integer)reserve.getValue());
+        options.setShipbuilding(shipbuilding.isSelected());
+        options.setAutoScout(autoScout.isSelected());
+        options.setAutoColonize(autoColonize.isSelected());
         frame.setVisible(false);
     }//GEN-LAST:event_okButtonActionPerformed
 

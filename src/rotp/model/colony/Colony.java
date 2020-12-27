@@ -36,7 +36,6 @@ import rotp.model.galaxy.StarSystem;
 import rotp.model.galaxy.Transport;
 import rotp.model.game.GameSession;
 import rotp.model.game.GovernorOptions;
-import rotp.model.game.GovernorOptions2;
 import rotp.model.incidents.ColonyCapturedIncident;
 import rotp.model.incidents.ColonyInvadedIncident;
 import rotp.model.planet.Planet;
@@ -1203,7 +1202,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
 
     private boolean governor = GameSession.instance().getGovernorOptions().isGovernorOnByDefault();
 //  TODO: For future use, flag allowing this colony to autobuild ships
-    private boolean autoShips = GameSession.instance().getGovernorOptions2().isAutoShipsByDefault();
+    private boolean autoShips = GameSession.instance().getGovernorOptions().isAutoShipsByDefault();
 
     public boolean isGovernor() {
         return governor;
@@ -1272,9 +1271,9 @@ public final class Colony implements Base, IMappedObject, Serializable {
                 return;
 
         // Set max missile bases if minimum is set
-        if (session().getGovernorOptions2().getMinimumMissileBases() > 0) {
-            if (defense().maxBases() < session().getGovernorOptions2().getMinimumMissileBases()) {
-                defense().maxBases(session().getGovernorOptions2().getMinimumMissileBases());
+        if (session().getGovernorOptions().getMinimumMissileBases() > 0) {
+            if (defense().maxBases() < session().getGovernorOptions().getMinimumMissileBases()) {
+                defense().maxBases(session().getGovernorOptions().getMinimumMissileBases());
             }
         }
         // unlock all sliders
@@ -1286,7 +1285,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         // start from scratch
         clearSpending();
         // if we were building ships, keep 1 tick in shipbuilding
-        if (buildingShips && session().getGovernorOptions2().isShipbuilding()) {
+        if (buildingShips && session().getGovernorOptions().isShipbuilding()) {
             increment(SHIP, 1);
         }
         // lock ship slider while we allocate spending elsewhere
@@ -1313,7 +1312,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
 
         // Build gate if tech is available. Also add a system property to turn it off.
         // Don't build gate if shipbuilding on governor is enabled, and planet is alrady building ships
-        if (!buildingShips || !session().getGovernorOptions2().isShipbuilding()) {
+        if (!buildingShips || !session().getGovernorOptions().isShipbuilding()) {
             buildStargate();
         }
 
@@ -1329,7 +1328,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
 //            System.out.println("NO SPENDING "+this.name());
             moveSlider(Colony.RESEARCH, null, text(ColonySpendingCategory.reserveText));
         }
-        if (buildingShips && session().getGovernorOptions2().isShipbuilding() && allocation[RESEARCH] > 0) {
+        if (buildingShips && session().getGovernorOptions().isShipbuilding() && allocation[RESEARCH] > 0) {
             // if we were building ships, push all research into shipbuilding.
             locked(Colony.SHIP, false);
             increment(Colony.SHIP, allocation[RESEARCH]);

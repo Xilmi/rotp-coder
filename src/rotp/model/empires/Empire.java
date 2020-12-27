@@ -52,7 +52,6 @@ import rotp.model.galaxy.Ship;
 import rotp.model.galaxy.ShipFleet;
 import rotp.model.galaxy.StarSystem;
 import rotp.model.galaxy.Transport;
-import rotp.model.game.GovernorOptions2;
 import rotp.model.incidents.GenocideIncident;
 import rotp.model.planet.Planet;
 import rotp.model.planet.PlanetType;
@@ -833,7 +832,7 @@ public final class Empire implements Base, NamedObject, Serializable {
      *
      */
     public void autospend() {
-        GovernorOptions2 options = session().getGovernorOptions2();
+        GovernorOptions options = session().getGovernorOptions();
         if (isAIControlled() || !options.isAutospend()) {
             return;
         }
@@ -876,7 +875,6 @@ public final class Empire implements Base, NamedObject, Serializable {
     // New autotransport. Start with targets first.
     public void autotransport() {
         GovernorOptions options = session().getGovernorOptions();
-        GovernorOptions2 options2 = session().getGovernorOptions2();
         if (isAIControlled() || !options.isAutotransport()) {
             return;
         }
@@ -885,7 +883,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         for (int i = 0; i < this.sv.count(); ++i) {
             if (this.sv.empire(i) == this && this.sv.isColonized(i)) {
                 Colony c = this.sv.colony(i);
-                if (c.planet().currentSize() - c.expectedPopulation() > options2.getTransportPopulation() ) {
+                if (c.planet().currentSize() - c.expectedPopulation() > options.getTransportPopulation() ) {
                     colonies.add(c);
                 }
             }
@@ -909,7 +907,7 @@ public final class Empire implements Base, NamedObject, Serializable {
                 if (!c.isGovernor()) {
                     continue;
                 }
-                if (c.transporting() || !c.canTransport() || c.maxTransportsAllowed() < options2.getTransportPopulation()) {
+                if (c.transporting() || !c.canTransport() || c.maxTransportsAllowed() < options.getTransportPopulation()) {
                     continue;
                 }
                 // we don't have excess population
@@ -924,7 +922,7 @@ public final class Empire implements Base, NamedObject, Serializable {
                 if (!c.industry().isCompleted()) {
                     continue;
                 }
-                int size = options2.getTransportPopulation() * 100 / options2.getTransportMaxPercent();
+                int size = options.getTransportPopulation() * 100 / options.getTransportMaxPercent();
                 if (c.planet().currentSize() < size) {
                     continue;
                 }
@@ -946,11 +944,11 @@ public final class Empire implements Base, NamedObject, Serializable {
                     (Colony o1, Colony o2) -> (int)Math.signum(
                             o1.travelTime(o1, c, this.tech().transportTravelSpeed()) -
                             o2.travelTime(o2, c, this.tech().transportTravelSpeed())));
-            while (neededPopulation > options2.getTransportPopulation() && !donors.isEmpty()) {
+            while (neededPopulation > options.getTransportPopulation() && !donors.isEmpty()) {
                 Colony donor = donors.get(0);
                 float transportTime = donor.travelTime(donor, c, this.tech().transportTravelSpeed());
                 // limit max transport time
-                double maxTime = c.starSystem().inNebula() ? options2.getTransportMaxTurns() * 1.5 : options2.getTransportMaxTurns();
+                double maxTime = c.starSystem().inNebula() ? options.getTransportMaxTurns() * 1.5 : options.getTransportMaxTurns();
                 // if first donor doesn't match max travel time, others surely won't.
                 if (transportTime > maxTime) {
                     break;
@@ -964,7 +962,7 @@ public final class Empire implements Base, NamedObject, Serializable {
 
                 System.out.println("Will transport from "+donor.name()+" to "+c.name());
                 System.out.println("Before transport expectedPopulation= "+c.expectedPopulation());
-                donor.scheduleTransportsToSystem(c.starSystem(), options2.getTransportPopulation());
+                donor.scheduleTransportsToSystem(c.starSystem(), options.getTransportPopulation());
                 System.out.println("After transport expectedPopulation="+c.expectedPopulation());
                 donors.remove(0);
                 // adjust needed population!
@@ -974,8 +972,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     }
     public void autoscout() {
         GovernorOptions options = session().getGovernorOptions();
-        GovernorOptions2 options2 = session().getGovernorOptions2();
-        if (isAIControlled() || !options2.isAutoScout()) {
+        if (isAIControlled() || !options.isAutoScout()) {
             return;
         }
 
@@ -1140,7 +1137,14 @@ public final class Empire implements Base, NamedObject, Serializable {
                         // first try to deploy non-extended designs
                         if (!sd.isExtendedRange() && sv.inShipRange(si)) {
                             // it's in short range, and scout is short range, send the scout
-                            boolean success = galaxy().ships.deploySubfleet(sf, counts, sv.system(si).id);
+                            boolean success;
+                            if (sf.isOneShip()) {
+                                galaxy().ships.deployFleet(sf, sv.system(si).id);
+                                success = true;
+                            } else {
+                                success = galaxy().ships.deploySubfleet(sf, counts, sv.system(si).id);
+                            }
+                            System.out.println("Attempt SR deploy "+sf+" to "+sv.system(si).name()+" success="+success);
                             if (success) {
                                 System.out.println("Deployed normal 1 scout to "+sv.system(si).name());
                                 numShipsAvailable--;
@@ -1149,7 +1153,14 @@ public final class Empire implements Base, NamedObject, Serializable {
                             }
                         } else if (sd.isExtendedRange() && sv.inScoutRange(si)) {
                             // it's in long range, and scout is long range, send the scout
-                            boolean success = galaxy().ships.deploySubfleet(sf, counts, sv.system(si).id);
+                            boolean success;
+                            if (sf.isOneShip()) {
+                                galaxy().ships.deployFleet(sf, sv.system(si).id);
+                                success = true;
+                            } else {
+                                success = galaxy().ships.deploySubfleet(sf, counts, sv.system(si).id);
+                            }
+                            System.out.println("Attempt LR deploy "+sf+" to "+sv.system(si).name()+" success="+success);
                             if (success) {
                                 System.out.println("Deployed extended 1 scout to "+sv.system(si).name());
                                 // remove this system as it has scout assigned already
@@ -1189,13 +1200,21 @@ public final class Empire implements Base, NamedObject, Serializable {
                         counts[sd.id()] = 1;
                         if (sd.isExtendedRange() && sv.inScoutRange(si)) {
                             // it's in long range, and scout is long range, send the scout
-                            galaxy().ships.deploySubfleet(sf, counts, si);
+                            if (sf.isOneShip()) {
+                                galaxy().ships.deployFleet(sf, sv.system(si).id);
+                            } else {
+                                galaxy().ships.deploySubfleet(sf, counts, sv.system(si).id);
+                            }
                             // remove this system as it has scout assigned already
                             it.remove();
                             continue toScoutLoop;
                         } else if (!sd.isExtendedRange() && sv.inShipRange(si)) {
                             // it's in short range, and scout is short range, send the scout
-                            galaxy().ships.deploySubfleet(sf, counts, si);
+                            if (sf.isOneShip()) {
+                                galaxy().ships.deployFleet(sf, sv.system(si).id);
+                            } else {
+                                galaxy().ships.deploySubfleet(sf, counts, sv.system(si).id);
+                            }
                             // remove this system as it has scout assigned already
                             it.remove();
                             continue toScoutLoop;
@@ -1212,8 +1231,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     // but for first version, just go for it.
     public void autocolonize() {
         GovernorOptions options = session().getGovernorOptions();
-        GovernorOptions2 options2 = session().getGovernorOptions2();
-        if (isAIControlled() || !options2.isAutoColonize()) {
+        if (isAIControlled() || !options.isAutoColonize()) {
             return;
         }
 
@@ -1370,7 +1388,7 @@ public final class Empire implements Base, NamedObject, Serializable {
 
                     // already orbiting the planet we need to colonize, don't send the ship anywhere.
                     if (sf.system().id == si) {
-                        // remove this system as it has scout assigned already
+                        // remove this system as it has colony assigned already
                         numShipsAvailable--;
                         it.remove();
                         continue;
@@ -1378,7 +1396,13 @@ public final class Empire implements Base, NamedObject, Serializable {
                     // first try to deploy non-extended designs
                     if (!sd.isExtendedRange() && sv.inShipRange(si)) {
                         // it's in short range, and scout is short range, send the scout
-                        boolean success = galaxy().ships.deploySubfleet(sf, counts, sv.system(si).id);
+                        boolean success;
+                        if (sf.isOneShip()) {
+                            galaxy().ships.deployFleet(sf, sv.system(si).id);
+                            success = true;
+                        } else {
+                            success = galaxy().ships.deploySubfleet(sf, counts, sv.system(si).id);
+                        }
                         if (success) {
                             // remove this system as it has scout assigned already
                             numShipsAvailable--;
@@ -1386,7 +1410,13 @@ public final class Empire implements Base, NamedObject, Serializable {
                         }
                     } else if (sd.isExtendedRange() && sv.inScoutRange(si)) {
                         // it's in long range, and scout is long range, send the scout
-                        boolean success = galaxy().ships.deploySubfleet(sf, counts, sv.system(si).id);
+                        boolean success;
+                        if (sf.isOneShip()) {
+                            galaxy().ships.deployFleet(sf, sv.system(si).id);
+                            success = true;
+                        } else {
+                            success = galaxy().ships.deploySubfleet(sf, counts, sv.system(si).id);
+                        }
                         if (success) {
                             // remove this system as it has scout assigned already
                             numShipsAvailable--;
