@@ -14,13 +14,13 @@
         <java.version>8</java.version>
     </properties>
 
-<distributionManagement>
-   <repository>
-     <id>github</id>
-     <name>coder111111</name>
-     <url>https://maven.pkg.github.com/coder111111/rotp-public</url>
-   </repository>
-</distributionManagement>
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>coder111111</name>
+            <url>https://maven.pkg.github.com/coder111111/rotp-public</url>
+        </repository>
+    </distributionManagement>
 
 
     <dependencies>

@@ -1292,12 +1292,17 @@ public final class Empire implements Base, NamedObject, Serializable {
                 continue;
             }
             for (ShipDesign sd: colonyDesigns) {
+                // single fleet can have several colony ships with different environments. Iterate all designs to see
+                // which is the highest one
+                boolean colonyShipsFound = false;
                 if (sf.hasShip(sd)) {
                     if (bestColonyShip == null || bestColonyShip.tech().environment() < sd.colonySpecial().tech().environment()) {
                         bestColonyShip = sd.colonySpecial();
                     }
+                    colonyShipsFound = true;
+                }
+                if (colonyShipsFound) {
                     fleets.add(sf);
-                    break;
                 }
             }
         }
