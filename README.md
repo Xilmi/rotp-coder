@@ -14,7 +14,7 @@ This RotP MOD contains many gameplay additions/changes from the official game ve
 - **Better AI**
 - [**Re-colored Ships**](https://reddit.com/r/rotp/comments/gli5z5/rotp_recolored_ship_design_sets_download/)
 - [**5 New Playable Races**](https://i.imgur.com/K1KRTzh.jpg)
-- [**Options in Remnants.cfg for New Game Modes**](https://i.imgur.com/39aRl16.png)
+- [**Options in Remnants.cfg for New Game Modes**](https://i.imgur.com/fQSRrch.png)
 - [**New Space Pirates Random Event**](https://i.imgur.com/jBu21Pt.png)
 - [**Quality of Life Improvements**](https://i.imgur.com/lBAVLpV.png)
     - **Increased Minimum Empire Homeworld Separation** (**10 ly**, up from 6 ly in the official version)
