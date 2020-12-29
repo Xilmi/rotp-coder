@@ -44,6 +44,7 @@ public class ShipLibrary implements Base {
     private static final String[] designKey = { "01", "02", "03", "04", "05", "06" };
     private static final String[] frameKey = { "a", "b", "c", "d", "e", "f", "g", "h"};
     private static final String shipImageExtension = ".png";
+    private static final String shipImageExtensionWebP = ".webp";
 
     static {
         current().loadData();
@@ -254,14 +255,22 @@ public class ShipLibrary implements Base {
                 for (int k=0;k<designsPerSize;k++) {
                     ShipImage styleImage = new ShipImage();
                     style.images.add(styleImage);
-                    String shipIconKey = fileName(i,j,k);
-                    if (url(shipIconKey) != null)
+                    // Only check if it exists. Do NOT add WebP key anywhere in internal structures
+                    // as it would break save game compatibility
+                    String shipIconKeyWebP = fileName(i,j,k, true);
+                    String shipIconKey = fileName(i,j,k, true);
+
+                    if (url(shipIconKeyWebP) != null || url(shipIconKey) != null) {
+                        // add original name to the data structures, not webp.
                         styleImage.iconKeys.add(shipIconKey);
-                    else {
+                    } else {
                         for (String f: frameKey) {
-                            shipIconKey = fileName(i,j,k,f);
-                            if (url(shipIconKey) != null) 
+                            shipIconKeyWebP = fileName(i,j,k,f, true);
+                            shipIconKey = fileName(i,j,k,f, false);
+                            if (url(shipIconKeyWebP) != null || url(shipIconKey) != null) {
+                                // add original name to the data structures, not webp.
                                 styleImage.iconKeys.add(shipIconKey);
+                            }
                         }
                     }
                 }
@@ -273,13 +282,21 @@ public class ShipLibrary implements Base {
         for (int i=0;i<styles.size();i++)
             unchosenStyles.add(styles.get(i));
     }
-    private String fileName(int i, int j, int k) {
+    private String fileName(int i, int j, int k, boolean webp) {
         String setName = styles.get(i);
-        return imageDir+setName+"/"+sizeKey[j]+designKey[k]+shipImageExtension;
+        if (webp) {
+            return imageDir+setName+"/"+sizeKey[j]+designKey[k]+shipImageExtensionWebP;
+        } else {
+            return imageDir+setName+"/"+sizeKey[j]+designKey[k]+shipImageExtension;
+        }
     }
-    private String fileName(int i, int j, int k, String f) {
+    private String fileName(int i, int j, int k, String f, boolean webp) {
         String setName = styles.get(i);
-        return imageDir+setName+"/"+sizeKey[j]+designKey[k]+f+shipImageExtension;
+        if (webp) {
+            return imageDir+setName+"/"+sizeKey[j]+designKey[k]+f+shipImageExtensionWebP;
+        } else {
+            return imageDir+setName+"/"+sizeKey[j]+designKey[k]+f+shipImageExtension;
+        }
     }
     private void loadSetFile() {
         BufferedReader in = reader(imageDir+setFilename);

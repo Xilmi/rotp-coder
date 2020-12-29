@@ -52,7 +52,9 @@ text in the planetary spending screen. Since version 1.8 Governor is on by defau
 
 Additional features / changelog
 
-* 2.05.1. Initial support for minified version. Build and packaging fixes. Fix the eco overspending bug.
+* 2.05.3. Minified version fixed- now game start should not crash. Fixed small exercution issue on governor only jar.
+
+* 2.05.2. Initial support for minified version. Build and packaging fixes. Fix the eco overspending bug.
 
 * 2.04.2. Attempts at improving github build & release process
 
