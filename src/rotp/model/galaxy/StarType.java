@@ -94,7 +94,9 @@ public class StarType implements Base {
         int r1 = 127+(c0.getRed()/2);
         int g1 = 127+(c0.getGreen()/2);
         int b1 = 127+(c0.getBlue()/2);
-        Color c1 = unscaled(r) > 70 ? Color.white : newColor(r1,g1,b1);
+        // modnar: color for all stars
+        Color c1 = newColor(r1,g1,b1);
+        //Color c1 = unscaled(r) > 70 ? Color.white : newColor(r1,g1,b1);
         //Color c1 = Color.white;
         int w = (r+f+f)*2;
         int x = w/2;

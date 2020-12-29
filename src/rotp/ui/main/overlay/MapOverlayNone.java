@@ -51,8 +51,10 @@ public class MapOverlayNone extends MapOverlay {
     @Override
     public boolean handleKeyPress(KeyEvent e) {
         if (session().performingTurn()) {
-            misClick();
-            return false;
+            // allocate systems overlay should pass keystrokes
+            if (parent.displayPanel().isVisible())
+                parent.displayPanel().keyPressed(e);
+            return true;
         }
         int s40 = BasePanel.s40;
         List<StarSystem> systems;
@@ -115,7 +117,7 @@ public class MapOverlayNone extends MapOverlay {
                     RotPUI.instance().selectRacesPanel();
                     break;
                 }
-                else if (e.isAltDown()) {
+                else if (e.getModifiersEx() == 64) {
                     if (parent.clickedSprite() instanceof StarSystem) {
                         StarSystem sys = (StarSystem) parent.clickedSprite();
                         if (player().canRallyFleetsTo(id(sys))) {
@@ -124,9 +126,9 @@ public class MapOverlayNone extends MapOverlay {
                             parent.displayPanel().repaint();
                             break;
                         }
-                        }
+                    }
                 }
-                else if (e.isControlDown()) {
+                else if (e.getModifiersEx() == 128) {
                     if (parent.clickedSprite() instanceof StarSystem) {
                         StarSystem sys = (StarSystem) parent.clickedSprite();
                         if (player().canRallyFleetsFrom(id(sys))) {
@@ -149,11 +151,12 @@ public class MapOverlayNone extends MapOverlay {
                     RotPUI.instance().selectTechPanel();
                     break;
                 }
-                else if (e.getModifiersEx() == 2) {
+                else if (e.getModifiersEx() == 128) {
                     if (parent.clickedSprite() instanceof StarSystem) {
                         StarSystem sys = (StarSystem) parent.clickedSprite();
                         if (player().canSendTransportsFrom(sys)) {
                             softClick();
+                            parent.hoveringOverSprite(null);
                             parent.clickedSprite(sys.transportSprite());
                             parent.displayPanel().repaint();
                             break;
@@ -187,27 +190,64 @@ public class MapOverlayNone extends MapOverlay {
                 systems = player().orderedColonies();
                 currSys = null;
                 // are we transporting?
-                if (parent.clickedSprite() instanceof StarSystem) 
+                if (parent.clickedSprite() instanceof SystemTransportSprite) {
+                    SystemTransportSprite trSpr = (SystemTransportSprite) parent.clickedSprite();
+                    currSys = trSpr.starSystem() == null ? trSpr.homeSystem() : trSpr.starSystem();
+                }
+                // are we ship relocating?
+                else if (parent.clickedSprite() instanceof ShipRelocationSprite) {
+                    ShipRelocationSprite spr = (ShipRelocationSprite) parent.clickedSprite();
+                    currSys = spr.starSystem() == null ? spr.homeSystemView() : spr.starSystem();
+                }
+                else if (parent.clickedSprite() instanceof StarSystem)
                     currSys = (StarSystem) parent.clickedSprite();
                 // find next index (exploit that missing element returns -1, so set to 0)
                 index = systems.indexOf(currSys)+1;
                 if (index == systems.size())
                     index = 0;
-                parent.clickedSprite(systems.get(index));
-                parent.map().recenterMapOn(systems.get(index));
+                if (parent.clickedSprite() instanceof SystemTransportSprite) {
+                    parent.hoveringOverSprite(systems.get(index));
+                    parent.clickingOnSprite(systems.get(index), 1, false, false);
+                }
+                else if (parent.clickedSprite() instanceof ShipRelocationSprite) {
+                    parent.hoveringOverSprite(systems.get(index));
+                }
+                else {
+                    parent.clickedSprite(systems.get(index));
+                    parent.map().recenterMapOn(systems.get(index));
+                }
                 parent.repaint();
                 break;
             case KeyEvent.VK_F3:
                 //softClick();
                 systems = player().orderedColonies();
                 currSys = null;
-                if (parent.clickedSprite() instanceof StarSystem) 
+                // are we transporting?
+                if (parent.clickedSprite() instanceof SystemTransportSprite) {
+                    SystemTransportSprite spr = (SystemTransportSprite) parent.clickedSprite();
+                    currSys = spr.starSystem() == null ? spr.homeSystem() : spr.starSystem();
+                }
+                // are we ship relocating?
+                else if (parent.clickedSprite() instanceof ShipRelocationSprite) {
+                    ShipRelocationSprite spr = (ShipRelocationSprite) parent.clickedSprite();
+                    currSys = spr.starSystem() == null ? spr.homeSystemView() : spr.starSystem();
+                }
+                else if (parent.clickedSprite() instanceof StarSystem)
                     currSys = (StarSystem) parent.clickedSprite();
                 index = systems.indexOf(currSys)-1;
                 if (index < 0)
                     index = systems.size()-1;
-                parent.clickedSprite(systems.get(index));
-                parent.map().recenterMapOn(systems.get(index));
+                if (parent.clickedSprite() instanceof SystemTransportSprite) {
+                    parent.hoveringOverSprite(systems.get(index));
+                    parent.clickingOnSprite(systems.get(index), 1, false, false);
+                }
+                else if (parent.clickedSprite() instanceof ShipRelocationSprite) {
+                    parent.hoveringOverSprite(systems.get(index));
+                }
+                else {
+                    parent.clickedSprite(systems.get(index));
+                    parent.map().recenterMapOn(systems.get(index));
+                }
                 parent.repaint();
                 break;
             case KeyEvent.VK_F5:

@@ -16,6 +16,7 @@
 package rotp.model.combat;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import rotp.model.galaxy.ShipFleet;
@@ -589,6 +590,22 @@ public class CombatStackShip extends CombatStack {
             AlphaComposite ac = java.awt.AlphaComposite.getInstance(AlphaComposite.SRC_OVER,transparency);
             g.setComposite(ac);
         }
+		// modnar: one-step progressive image downscaling, slightly better
+		// there should be better methods
+		if (scale0 < 0.5) {
+			BufferedImage tmp = new BufferedImage(w0/2, h0/2, BufferedImage.TYPE_INT_ARGB);
+			Graphics2D g2D = tmp.createGraphics();
+			g2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+			g2D.drawImage(img, 0, 0, w0/2, h0/2, 0, 0, w0, h0, ui);
+			g2D.dispose();
+			img = tmp;
+			w0 = img.getWidth(null);
+			h0 = img.getHeight(null);
+			scale0 = scale0*2;
+		}
+		// modnar: use (slightly) better downsampling
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         if (reversed)  // XOR
             g.drawImage(img, x1, y1, x1+w1, y1+h1, w0, 0, 0, h0, ui);
         else

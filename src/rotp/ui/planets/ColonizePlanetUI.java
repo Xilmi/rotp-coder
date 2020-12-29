@@ -30,6 +30,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.awt.RenderingHints; // modnar: needed for adding RenderingHints
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractAction;
@@ -168,6 +169,9 @@ public class ColonizePlanetUI extends FadeInPanel implements MouseListener, Mous
         g.setColor(Color.black);
         g.fillRect(0, 0, w, h);
         super.paintComponent(g);
+		// modnar: use (slightly) better upsampling
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g.drawImage(pType.atmosphereImage(), 0, 0, w, h, null);
         //drawStar(g);
         g.drawImage(pType.randomCloudImage(), 0, 0, w, h, null);
@@ -289,6 +293,9 @@ public class ColonizePlanetUI extends FadeInPanel implements MouseListener, Mous
         int dispW = landingShipW;
         float shipScale = (float)dispW/shipW;
         int dispH = (int)(shipH*shipScale);
+		// modnar: use (slightly) better upsampling
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g.drawImage(shipImg, landingX, landingY-dispH, landingX+dispW, landingY, 0,0,shipW,shipH, null);
 
         // draw walking astronaut
@@ -301,6 +308,23 @@ public class ColonizePlanetUI extends FadeInPanel implements MouseListener, Mous
                 int raceH = raceImg.getHeight(null);
                 dispH = s40;
                 dispW = raceW*dispH/raceH;
+				// modnar: one-step progressive image downscaling, slightly better
+				// there should be better methods
+				float scaleWalk = dispH/raceH;
+				if (scaleWalk < 0.5) {
+					BufferedImage tmp = new BufferedImage(raceW/2, raceH/2, BufferedImage.TYPE_INT_ARGB);
+					Graphics2D g2D = tmp.createGraphics();
+					g2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+					g2D.drawImage(raceImg, 0, 0, raceW/2, raceH/2, 0, 0, raceW, raceH, this);
+					g2D.dispose();
+					raceImg = tmp;
+					raceW = raceImg.getWidth(null);
+					raceH = raceImg.getHeight(null);
+					scaleWalk = scaleWalk*2;
+				}
+				// modnar: use (slightly) better downsampling
+				g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+				g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
                 g.drawImage(raceImg, claimX, claimY-dispH, claimX+dispW, claimY, 0,0,raceW,raceH, null);
                 // draw flag
                 if (showFlag) {

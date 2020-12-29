@@ -784,6 +784,7 @@ public abstract class SystemListingUI extends BasePanel implements MouseListener
                 return;
             }
             if (nameField.isVisible()) {
+                nameField.setForeground(color(sys));
                 if (nameField.getY() != (y-s30)) {
                     nameField.setBounds(x, y-s30, w, s30);
                     nameField.repaint();
@@ -797,9 +798,20 @@ public abstract class SystemListingUI extends BasePanel implements MouseListener
                     nameField.setBackground(selectedC());
                 nameField.setBounds(x, y-s30, w, s30);
                 nameField.setVisible(true);
+                nameField.setForeground(color(sys));
                 nameField.repaint();
             }
         }
+
+        @Override
+        protected Color color(StarSystem sys) {
+            if (sys.colony().isGovernor()) {
+                return Color.green;
+            } else {
+                return super.color(sys);
+            }
+        }
+
         public boolean showField(int y) {
             return (y >= minDisplayY) && (y <= maxDisplayY);
         }

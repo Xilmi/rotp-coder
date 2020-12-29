@@ -42,7 +42,11 @@ public class UserPreferences {
     private static boolean playMusic = true;
     private static boolean playSounds = true;
     private static boolean displayYear = true;
-    private static boolean textures = true;
+    // modnar: set default texture to off/false
+    private static boolean textures = false;
+    private static boolean alwaysStarGates = false; // modnar: add option to always have Star Gates tech
+    private static boolean challengeMode = false; // modnar: add option to give AI more initial resources
+    private static boolean randomTechStart = false; // modnar: add option to start all Empires with 2 techs, no Artifacts
     private static float uiTexturePct = 0.20f;
     private static int screenSizePct = 93;
     private static final HashMap<String, String> raceNames = new HashMap<>();
@@ -59,6 +63,9 @@ public class UserPreferences {
     public static void toggleMusic()        { playMusic = !playMusic; save();  }
     public static boolean textures()        { return textures; }
     public static void toggleTextures()     { textures = !textures; save();  }
+    public static boolean alwaysStarGates()  { return alwaysStarGates; } // modnar: add option to always have Star Gates tech
+    public static boolean challengeMode()    { return challengeMode; } // modnar: add option to give AI more initial resources
+    public static boolean randomTechStart()  { return randomTechStart; } // modnar: add option to start all Empires with 2 techs, no Artifacts
     public static int screenSizePct()       { return screenSizePct; }
     public static void screenSizePct(int i) { setScreenSizePct(i); }
 
@@ -96,7 +103,7 @@ public class UserPreferences {
         Collections.sort(raceKeys);
         try (FileOutputStream fout = new FileOutputStream(new File(path, PREFERENCES_FILE));
             // modnar: change to OutputStreamWriter, force UTF-8
-			PrintWriter out = new PrintWriter(new OutputStreamWriter(fout, "UTF-8")); ) {
+            PrintWriter out = new PrintWriter(new OutputStreamWriter(fout, "UTF-8")); ) {
             out.println(keyFormat("GRAPHICS")+ graphicsLevel.toString());
             out.println(keyFormat("MUSIC")+ yesOrNo(playMusic));
             out.println(keyFormat("SOUNDS")+ yesOrNo(playSounds));
@@ -107,6 +114,9 @@ public class UserPreferences {
             out.println(keyFormat("SCREEN_SIZE_PCT")+ screenSizePct());
             out.println(keyFormat("UI_TEXTURES")+ yesOrNo(textures));
             out.println(keyFormat("UI_TEXTURE_LEVEL")+(int) (uiTexturePct()*100));
+            out.println(keyFormat("ALWAYS_STAR_GATES")+ yesOrNo(alwaysStarGates)); // modnar: add option to always have Star Gates tech
+            out.println(keyFormat("CHALLENGE_MODE")+ yesOrNo(challengeMode)); // modnar: add option to give AI more initial resources
+            out.println(keyFormat("RANDOM_TECH_START")+ yesOrNo(randomTechStart)); // modnar: add option to start all Empires with 2 techs, no Artifacts
             out.println(keyFormat("LANGUAGE")+ languageDir());
             for (String raceKey: raceKeys) 
               out.println(keyFormat(raceKey)+raceNames.get(raceKey));
@@ -130,7 +140,8 @@ public class UserPreferences {
         if (key.isEmpty() || val.isEmpty())
                 return;
 
-        System.out.println("Key:"+key+"  value:"+val);
+        if (Rotp.logging)
+            System.out.println("Key:"+key+"  value:"+val);
         switch(key) {
             case "GRAPHICS":     graphicsLevel(val); return;
             case "MUSIC":        playMusic = yesOrNo(val); return;
@@ -142,6 +153,9 @@ public class UserPreferences {
             case "SCREEN_SIZE_PCT": screenSizePct(Integer.valueOf(val)); return;
             case "UI_TEXTURES":  textures = yesOrNo(val); return;
             case "UI_TEXTURE_LEVEL": uiTexturePct(Integer.valueOf(val)); return;
+            case "ALWAYS_STAR_GATES": alwaysStarGates = yesOrNo(val); return; // modnar: add option to always have Star Gates tech
+            case "CHALLENGE_MODE": challengeMode = yesOrNo(val); return; // modnar: add option to give AI more initial resources
+            case "RANDOM_TECH_START": randomTechStart = yesOrNo(val); return; // modnar: add option to start all Empires with 2 techs, no Artifacts
             case "LANGUAGE":     selectLanguage(val); return;
             default:
                 raceNames.put(key, val); break;

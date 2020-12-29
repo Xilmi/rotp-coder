@@ -73,23 +73,23 @@ public class SystemGraphicPane extends BasePanel implements MouseMotionListener,
             g.setColor(SystemPanel.nebulaC);
             g.fillRect(0,0,w,h);
         }
-        drawStar(g, sys.starType(), adjW*2/5, w*2/5, h/3);
+        drawStar(g, sys.starType(), adjW*2/5, w-s20, s20); //modnar: move star due to increased planet size
         starCircle.setFrame((w/3)-s20, s10, s40, s40);
 
         g0.setFont(narrowFont(36*adjW/w));
         String str = player().sv.name(sys.id);
-        int y0 = s42*adjW/w;
+        int y0 = s32*adjW/w; //modnar: move colony name up due to increase planet size
         int x0 = s25;
         drawBorderedString(g0, str, 1, x0, y0, Color.black, SystemPanel.orangeText);
 
         //log("graphic h:", str(unscaled(h)));
-        int x1 = s20;
-        int y1 = s70*adjW/w;
-        int r = s40;
-        sys.planet().draw(g0, w, h, x1, y1, (r+r)*adjW/w, 45);
+        int x1 = s5;
+        int y1 = s70/2;
+        int r = s80; //modnar: increase planet size
+        sys.planet().draw(g0, w, h, x1, y1, (r+r), 45);
         planetCircle.setFrame(x1, y1, r+r, r+r);
 
-        parent.drawPlanetInfo(g, sys, showSpyData, showPopulation, s40, w-s3, h-s12);
+        parent.drawPlanetInfo(g, sys, showSpyData, showPopulation, s40, w+s5, h-s5);
     }
     @Override
     public void animate() {

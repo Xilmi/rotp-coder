@@ -29,6 +29,7 @@ public class RandomEvents implements Base, Serializable {
     public static final int START_TURN = 50;
     private List<RandomEvent> events;
     private List<RandomEvent> activeEvents;
+	private RandomEvent lastEvent; // modnar: keep track of last event
     private float eventChance = START_CHANCE;
 
     public RandomEvents() {
@@ -61,11 +62,25 @@ public class RandomEvents implements Base, Serializable {
         if (turnNum < triggeredEvent.minimumTurn())
             return;
         
-        events.remove(triggeredEvent);
+		// modnar: make random events repeatable
+		if (!triggeredEvent.repeatable()) {
+			events.remove(triggeredEvent);
+		}
+		// modnar: with random events now repeatable
+		// don't trigger the same event twice in a row
+		if (triggeredEvent == lastEvent)
+			return;
+		// don't trigger when a duplicate event is still in effect
+		for (RandomEvent ev: activeEvents) {
+            if (triggeredEvent == ev)
+                return;
+        }
+		
         eventChance = START_CHANCE;
 
         Empire affectedEmpire = triggeredEvent.goodEvent() ? empireForGoodEvent() : empireForBadEvent();
         triggeredEvent.trigger(affectedEmpire);
+		lastEvent = triggeredEvent; // modnar: keep track of last event
     }
     public RandomEvent activeEventForKey(String key) {
         for (RandomEvent ev: activeEvents) {
@@ -93,6 +108,8 @@ public class RandomEvents implements Base, Serializable {
         addEvent(new RandomEventComet());
         addEvent(new RandomEventSpaceAmoeba());
         addEvent(new RandomEventSpaceCrystal());
+        // modnar: add space pirate random event
+        addEvent(new RandomEventSpacePirates());
     }
     private void addEvent(RandomEvent ev) {
         if (options().allowRandomEvent(ev))

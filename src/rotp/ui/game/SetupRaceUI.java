@@ -31,6 +31,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.awt.RenderingHints; // modnar: needed for adding RenderingHints
 import java.util.List;
 import javax.swing.JTextField;
 import rotp.model.empires.Race;
@@ -40,7 +41,7 @@ import rotp.ui.RotPUI;
 public final class SetupRaceUI extends BasePanel implements MouseListener, MouseMotionListener {
     private static final long serialVersionUID = 1L;
     static final int MAX_RACES = 10;
-    int MAX_COLORS = 10;
+    int MAX_COLORS = 16; // modnar: add new colors
     int FIELD_W;
     int FIELD_H;
     BufferedImage backImg;
@@ -76,8 +77,9 @@ public final class SetupRaceUI extends BasePanel implements MouseListener, Mouse
     }
     public void init() {
         createNewGameOptions();
+        newGameOptions().copyOptions(options());
         raceChanged();
-        newGameOptions().galaxyShape().quickGenerate();
+                                                       
     }
     @Override
     public void paintComponent(Graphics g0) {
@@ -88,10 +90,15 @@ public final class SetupRaceUI extends BasePanel implements MouseListener, Mouse
         leaderBox.setBounds(x-s1, y-s59, FIELD_W+s2, FIELD_H+s2);
         homeWorld.setCaretPosition(homeWorld.getText().length());
         homeWorld.setLocation(x, y-s100-s19);
+		// modnar: test hover text
+		homeWorld.setToolTipText("<html> Homeworld Name is used as <br> the Galaxy Map when selecting <br> Map Shape [Text] [Option-C]. <br><br> (Unicode characters allowed)");
         homeWorldBox.setBounds(x-s1, y-scaled(119), FIELD_W+s2, FIELD_H+s2);
 
         super.paintComponent(g0);
         Graphics2D g = (Graphics2D) g0;
+		// modnar: use (slightly) better upsampling
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         int w = getWidth();
         int h = getHeight();
 
@@ -117,7 +124,7 @@ public final class SetupRaceUI extends BasePanel implements MouseListener, Mouse
             }
         }
 
-        // hovering race b`ox outline
+        // hovering race box outline
         for (int i=0;i<raceBox.length;i++) {
             if (raceBox[i] == hoverBox) {
                 Stroke prev = g.getStroke();
@@ -356,6 +363,9 @@ public final class SetupRaceUI extends BasePanel implements MouseListener, Mouse
         backImg = newOpaqueImage(w, h);
         Graphics2D g = (Graphics2D) backImg.getGraphics();
         setFontHints(g);
+		// modnar: use (slightly) better upsampling
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
         // background image
         Image back = GameUI.background();
@@ -409,17 +419,17 @@ public final class SetupRaceUI extends BasePanel implements MouseListener, Mouse
         // draw color buttons on right panel
         int xC = scaled(830);
         int yC = scaled(550);
-        int wC = s25;
+        int wC = s18; // modnar: add new colors, change color box sizes
         int hC = s15;
         for (int i=0;i<MAX_COLORS;i++) {
             int yC1 = i%2 == 0 ? yC : yC+hC+s5;
-            Color c = newGameOptions().color(i);
-            Color c0 = new Color(c.getRed(), c.getGreen(), c.getBlue(), 128);
+            Color c = options().color(i);
+            Color c0 = new Color(c.getRed(), c.getGreen(), c.getBlue(), 160); // modnar: less transparent unselected color
             g.setColor(c0);
             g.fillRect(xC, yC1, wC, hC);
             colorBox[i].setBounds(xC, yC1, wC, hC);
             if (i%2 == 1)
-                xC += (wC+s10);
+                xC += (wC+s5); // modnar: add new colors, less separation between color boxes
         }
 
         // draw left button

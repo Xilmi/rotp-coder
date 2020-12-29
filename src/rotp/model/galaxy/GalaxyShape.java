@@ -25,12 +25,12 @@ import rotp.util.Base;
 public abstract class GalaxyShape implements Base, Serializable {
     private static final long serialVersionUID = 1L;
     static final int GALAXY_EDGE_BUFFER = 12;
-    static final float MIN_ORION_BUFFER = 8;
-    static final float MIN_EMPIRE_BUFFER = 6;
+    static final float MIN_ORION_BUFFER = 10; // modnar: increase spacing between empires and orion, original 8
+    static final float MIN_EMPIRE_BUFFER = 8; // modnar: increase spacing between empires, original 6
     static final float MAX_MIN_EMPIRE_BUFFER = 30;
     static final float SYSTEM_BUFFER = 1.9f;
-    static float orionBuffer = 8;
-    static float empireBuffer = 6;
+    static float orionBuffer = 10;
+    static float empireBuffer = 8;
     float[] x;
     float[] y;
     ShapeRegion[][] regions;

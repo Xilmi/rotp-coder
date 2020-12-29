@@ -134,23 +134,23 @@ public class SystemInfoPanel extends SystemPanel implements MouseMotionListener 
 
             Graphics2D g2 = (Graphics2D) g;
             g2.drawImage(pl.sv.starBackground(this), 0, 0, null);
-            drawStar(g2, selectedSystem().starType(), s80, getWidth()/3, s70);
+            drawStar(g2, selectedSystem().starType(), s80, getWidth()-s20, s20); //modnar: move star due to increased planet size
             starCircle.setFrame((getWidth()/3)-s20, s10, s40, s40);
 
             g.setFont(narrowFont(36));
             String str = player().sv.name(sys.id);
-            int y0 = s42;
+            int y0 = s32; //modnar: move colony name up due to increase planet size
             int x0 = s25;
             drawBorderedString(g, str, 2, x0, y0, Color.black, SystemPanel.orangeText);
 
             if (!player().sv.isScouted(sys.id))
                 return;
-            int x1 = s20;
-            int y1 = s70;
-            int r = s40;
+            int x1 = s5;
+            int y1 = s70/2;
+            int r = s80; //modnar: increase planet size
             selectedSystem().planet().draw(g, w, h, x1, y1, r+r, 45);
             planetCircle.setFrame(x1, y1, r+r, r+r);
-            parent.drawPlanetInfo(g2, selectedSystem(), false, false, s40, getWidth(), getHeight()-s12);
+            parent.drawPlanetInfo(g2, selectedSystem(), false, false, s40, getWidth()+s5, getHeight()-s5);
         }
         @Override
         public void animate() {

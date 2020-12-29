@@ -30,6 +30,8 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
 import java.awt.geom.RoundRectangle2D;
+import java.awt.image.BufferedImage;
+import java.awt.RenderingHints; // modnar: needed for adding RenderingHints
 import rotp.model.empires.Empire;
 import rotp.model.empires.Race;
 import rotp.model.galaxy.StarSystem;
@@ -89,6 +91,7 @@ public class TransportPanel extends BasePanel {
         public Color starBackgroundC()         { return SystemPanel.starBackgroundC; }
         @Override
         public void paintComponent(Graphics g0) {
+			// modnar: draw transport ship icon on top of Transport information panel on main map screen
             Graphics2D g = (Graphics2D) g0;
             super.paintComponent(g);
             int w = getWidth();
@@ -111,6 +114,22 @@ public class TransportPanel extends BasePanel {
             int shipH = (int) (scale*imgH);
             int shipX = s40;
             int shipY = h-shipH-s10;
+			// modnar: one-step progressive image downscaling, slightly better
+			// there should be better methods
+			if (scale < 0.5) {
+				BufferedImage tmp = new BufferedImage(imgW/2, imgH/2, BufferedImage.TYPE_INT_ARGB);
+				Graphics2D g2D = tmp.createGraphics();
+				g2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+				g2D.drawImage(shipImg, 0, 0, imgW/2, imgH/2, 0, 0, imgW, imgH, this);
+				g2D.dispose();
+				shipImg = tmp;
+				imgW = shipImg.getWidth(null);
+				imgH = shipImg.getHeight(null);
+				scale = scale*2;
+			}
+			// modnar: use (slightly) better downsampling
+			g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+			g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
             g.drawImage(shipImg, shipX,shipY,shipX+shipW,shipY+shipH, 0,0,imgW,imgH, null);
 
             // draw title
@@ -182,13 +201,32 @@ public class TransportPanel extends BasePanel {
                 drawTransport(g, img, w, h, i);
         }
         private void drawTransport(Graphics2D g, Image img, int w, int h, int n) {
+			// modnar: draw multiple transport ship icons at bottom of Transport information panel on main map screen
             int imgW = img.getWidth(null);
             int imgH = img.getHeight(null);
 
-            int dispW = w*4/(n+5);
-            int dispH = imgH*dispW/imgW;
+            // modnar: slight change in scaling to give slightly better image quality scaling
+            float scale = (float) (4.0f/(n+5.0f));
+            int dispW = (int) (imgW*scale);
+            int dispH = (int) (imgH*scale);
             int y0 = (int) (h*randY[n]/1000.0);
             int x0 = (int) (w*randX[n]/1000.0);
+			// modnar: one-step progressive image downscaling, slightly better
+			// there should be better methods
+			if (scale < 0.5) {
+				BufferedImage tmp = new BufferedImage(imgW/2, imgH/2, BufferedImage.TYPE_INT_ARGB);
+				Graphics2D g2D = tmp.createGraphics();
+				g2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+				g2D.drawImage(img, 0, 0, imgW/2, imgH/2, 0, 0, imgW, imgH, this);
+				g2D.dispose();
+				img = tmp;
+				imgW = img.getWidth(null);
+				imgH = img.getHeight(null);
+				scale = scale*2;
+			}
+			// modnar: use (slightly) better downsampling
+			g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+			g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
             g.drawImage(img, x0, y0, x0+dispW, y0+dispH, 0, 0, imgW, imgH, null);
         }
     }

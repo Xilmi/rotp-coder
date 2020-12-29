@@ -38,14 +38,14 @@ public class Rotp {
     private static final int MB = 1048576;
     public static int IMG_W = 1229;
     public static int IMG_H = 768;
-    public static String jarFileName = "Remnants.jar";
+    public static String jarFileName = "RotP-2.05_modnar_MOD15.jar";
     private static String jarPath;
     private static JFrame frame;
-    public static String releaseId = "Beta 2.01";
+    public static String releaseId = "Beta 2.05 modnar_MOD15";
     public static long startMs = System.currentTimeMillis();
     public static long maxHeapMemory = Runtime.getRuntime().maxMemory() / 1048576;
     public static long maxUsedMemory;
-    public static boolean logging = true;
+    public static boolean logging = false;
     private static float resizeAmt =  -1.0f;
     public static int actualAlloc = -1;
     public static boolean reloadRecentSave = false;
@@ -57,7 +57,8 @@ public class Rotp {
                 return;
             logging = false;
         }
-        reloadRecentSave = args.length > 0 && args[0].equals("reload");
+        reloadRecentSave = containsArg(args, "reload");
+        logging = containsArg(args, "log");
         stopIfInsufficientMemory(frame, (int)maxHeapMemory);
         Thread.setDefaultUncaughtExceptionHandler(new SwingExceptionHandler());
         frame.addWindowListener(new WindowAdapter() {
@@ -72,10 +73,18 @@ public class Rotp {
 
         setFrameSize();
 
-        if (reloadRecentSave) 
+        if (reloadRecentSave) {
             GameSession.instance().loadRecentSession(false);
+        }
         frame.setResizable(false);
         frame.setVisible(true);
+    }
+    public static boolean containsArg(String[] argList, String key) {
+        for (String s: argList) {
+            if (s.equalsIgnoreCase(key))
+                return true;
+        }
+        return false;
     }
     public static void setFrameSize() {
         resizeAmt = -1;
@@ -85,7 +94,8 @@ public class Rotp {
         int hFrame = 0;
         int maxX = (int)((hFrame+IMG_W)*adj);
         int maxY = (int)((vFrame+IMG_H)*adj);
-        System.out.println("setting size to: "+maxX+" x "+maxY);
+        if (logging)
+            System.out.println("setting size to: "+maxX+" x "+maxY);
         frame.getContentPane().setPreferredSize(new Dimension(maxX,maxY));
         frame.pack();
     }
@@ -102,7 +112,8 @@ public class Rotp {
 
             resizeAmt = (float) maxY/768;
             (new BasePanel()).loadScaledIntegers();
-            System.out.println("resize amt:"+resizeAmt);
+            if (logging)
+                System.out.println("resize amt:"+resizeAmt);
         }
         return resizeAmt;
     }

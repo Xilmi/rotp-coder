@@ -21,9 +21,17 @@ import java.util.Collections;
 import java.util.List;
 import rotp.model.empires.Race;
 import rotp.util.Base;
+import rotp.ui.UserPreferences;
 
 public final class TechCategory implements Base, Serializable {
     private static final long serialVersionUID = 1L;
+    public static final int COMPUTER = 0;
+    public static final int CONSTRUCTION = 1;
+    public static final int FORCE_FIELD = 2;
+    public static final int PLANETOLOGY = 3;
+    public static final int PROPULSION = 4;
+    public static final int WEAPON = 5;
+    
     public static int ATTEMPTS = 0;
     public static float RESEARCH_INTEREST = 0.25f;
     public static final int MAX_ALLOCATION_TICKS = 60;
@@ -34,12 +42,12 @@ public final class TechCategory implements Base, Serializable {
                     "TECH_PLANETOLOGY", "TECH_PROPULSION", "TECH_WEAPONS" };
     public static String id(int i) {
         switch (i) {
-            case 0 : return "TECH_COMPUTERS";
-            case 1 : return "TECH_CONSTRUCTION";
-            case 2 : return "TECH_FORCE_FIELDS";
-            case 3 : return "TECH_PLANETOLOGY";
-            case 4 : return "TECH_PROPULSION";
-            case 5 : return "TECH_WEAPONS";
+            case COMPUTER     : return "TECH_COMPUTERS";
+            case CONSTRUCTION : return "TECH_CONSTRUCTION";
+            case FORCE_FIELD  : return "TECH_FORCE_FIELDS";
+            case PLANETOLOGY  : return "TECH_PLANETOLOGY";
+            case PROPULSION   : return "TECH_PROPULSION";
+            case WEAPON       : return "TECH_WEAPONS";
         }
         return "";
     }
@@ -194,6 +202,17 @@ public final class TechCategory implements Base, Serializable {
                     found = true;
                 }
             }
+			
+			// modnar: always add in Star Gates Tech
+			// if the ALWAYS_STAR_GATES option in UserPreferences (Remnants.cfg) is set to YES
+			// for tech category Propulsion, index = 4
+			// tech level 27, quintile i = 5
+			if ((index == 4) && (i == 5) && UserPreferences.alwaysStarGates()) {
+				String StarGateId = "Stargate:0";
+				addPossibleTech(StarGateId);
+                found = true;
+			}
+			
             if (!found)
                 addPossibleTech(random(techs));
         }

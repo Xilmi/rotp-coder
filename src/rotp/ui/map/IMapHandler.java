@@ -65,6 +65,7 @@ public interface IMapHandler {
     default public boolean isHovering(Sprite s)            { return hoveringSprite() == s; }
     default public boolean isHighlighting(Sprite s)        { return false; }
     default public boolean isLowlighting(Sprite s)         { return false; }
+    default public boolean showTreasuryResearchBar()       { return false; }
     default public boolean allowsDragSelect()              { return false; }
     default public boolean hoverOverFleets()               { return true; }
     default public boolean hoverOverSystems()              { return true; }

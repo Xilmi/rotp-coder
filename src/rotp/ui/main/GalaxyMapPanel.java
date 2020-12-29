@@ -44,6 +44,7 @@ import rotp.model.galaxy.Location;
 import rotp.model.galaxy.Nebula;
 import rotp.model.galaxy.Ship;
 import rotp.model.galaxy.StarSystem;
+import rotp.model.tech.TechCategory;
 import rotp.ui.BasePanel;
 import rotp.ui.RotPUI;
 import rotp.ui.map.IMapHandler;
@@ -53,6 +54,8 @@ import rotp.ui.sprites.GridCircularDisplaySprite;
 import rotp.ui.sprites.RangeDisplaySprite;
 import rotp.ui.sprites.ShipDisplaySprite;
 import rotp.ui.sprites.SystemNameDisplaySprite;
+import rotp.ui.sprites.TechStatusSprite;
+import rotp.ui.sprites.TreasurySprite;
 import rotp.ui.sprites.ZoomInWidgetSprite;
 import rotp.ui.sprites.ZoomOutWidgetSprite;
 
@@ -252,6 +255,27 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
             baseControls.add(new FlightPathDisplaySprite(10,130,30,30));
             baseControls.add(new ShipDisplaySprite(10,95,30,30));
             baseControls.add(new SystemNameDisplaySprite(10,60,30,30));
+
+            /*
+            int y0 = 445;
+            baseControls.add(new TechStatusSprite(TechCategory.WEAPON,       10,y0+210,30,30));
+            baseControls.add(new TechStatusSprite(TechCategory.PROPULSION,   10,y0+175,30,30));
+            baseControls.add(new TechStatusSprite(TechCategory.PLANETOLOGY,  10,y0+140,30,30));
+            baseControls.add(new TechStatusSprite(TechCategory.FORCE_FIELD,  10,y0+105, 30,30));
+            baseControls.add(new TechStatusSprite(TechCategory.CONSTRUCTION, 10,y0+70, 30,30));
+            baseControls.add(new TechStatusSprite(TechCategory.COMPUTER,     10,y0+35, 30,30));
+            baseControls.add(new TreasurySprite(10,y0, 30,30));
+            */
+            // modnar: make TreasuryResearchBar horizontal
+            int x0 = 10;
+            int y0 = 655;
+            baseControls.add(new TechStatusSprite(TechCategory.WEAPON,       x0+210,y0,30,30));
+            baseControls.add(new TechStatusSprite(TechCategory.PROPULSION,   x0+175,y0,30,30));
+            baseControls.add(new TechStatusSprite(TechCategory.PLANETOLOGY,  x0+140,y0,30,30));
+            baseControls.add(new TechStatusSprite(TechCategory.FORCE_FIELD,  x0+105,y0,30,30));
+            baseControls.add(new TechStatusSprite(TechCategory.CONSTRUCTION, x0+70,y0, 30,30));
+            baseControls.add(new TechStatusSprite(TechCategory.COMPUTER,     x0+35,y0, 30,30));
+            baseControls.add(new TreasurySprite(x0,y0, 30,30));
         }
         
         addMouseListener(this);
@@ -327,9 +351,12 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
 
         setScale(scaleY());
         //log("map scale:", fmt(scaleX(),2), "@", fmt(scaleY(),2), "  center:", fmt(center().x(),2), "@", fmt(center().y(),2), "  x-rng:", fmt(mapMinX()), "-", fmt(mapMaxX(),2), "  y-rng:", fmt(mapMinY()), "-", fmt(mapMaxY(),2));
-        drawBackground(g2);
+        //drawBackground(g2); // modnar: not needed due to drawShipRanges below
         if ((scaleX() < 200) && showStars())
             drawBackgroundStars(g2);
+		// modnar: cover starry background with drawShipRanges
+		drawShipRanges(g2);
+		
         drawGrids(g2);
 
         drawNebulas(g2);
@@ -418,6 +445,19 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
             g.drawImage(rangeMapBuffer,0,0,null);
         }
     }
+	// modnar: make regular ship fuel range cover starry background
+	private void drawShipRanges(Graphics2D g) {
+		if (showShipRanges()) {
+			if (redrawRangeMap) {
+                //redrawRangeMap = false;
+				//Graphics2D g0 = (Graphics2D) rangeMapBuffer.getGraphics();
+				Graphics2D g0 = (Graphics2D) g.create(); // use create() to not leave afterimage
+				setFontHints(g0);
+				drawExtendedRangeDisplay(g0);
+				drawOwnershipDisplay(g0);
+			}
+        }
+	}
 
     private void drawGrids(Graphics2D g) {
         if (showGridCircular) {
@@ -508,10 +548,8 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
             clusterArea.add(new Area( new Ellipse2D.Float(mapX(sv.x())-extR, mapY(sv.y())-extR, 2*extR, 2*extR) ));       
            
         g.setColor(extendedBorder);
-        g.setStroke(new BasicStroke(4));
-        g.draw(clusterArea);   
-        g.setColor(emptyBackground);
-        g.fill(clusterArea);
+        g.setStroke(stroke2);
+        g.draw(clusterArea);
         clusterArea.reset();
         
         
@@ -521,11 +559,11 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
         for (StarSystem sv: systems)
             clusterArea.add(new Area( new Ellipse2D.Float(mapX(sv.x())-baseR, mapY(sv.y())-baseR, 2*baseR, 2*baseR) ));       
                    
-        g.setColor(normalBorder);
-        g.setStroke(new BasicStroke(4));
-        g.draw(clusterArea);   
         g.setColor(normalBackground);
         g.fill(clusterArea);
+        g.setColor(normalBorder);
+        g.setStroke(stroke2);
+        g.draw(clusterArea);
 
     }
     private void drawGridCircularDisplayDark(Graphics2D g) {
@@ -655,6 +693,7 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
         // is there any overlay covering the map and preventing a search
         if (parent.masksMouseOver(x1,y1))
             return null;
+
         Galaxy gal = galaxy();
         Empire pl = player();
         List<Ship> ships = null;
@@ -715,7 +754,7 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
         int focusY = mapY(parent.mapFocus().y());
         recenterMap(objX(focusX-deltaX), objY(focusY-deltaY));
         clearRangeMap();
-        parent.repaint();
+        repaint();
     }
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -733,7 +772,7 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
             zoomAdj = 1.0f/zoomAmt;
 
         setScale(currentScale*zoomAdj);
-        parent.repaint();
+        repaint();
     }
     @Override
     public void animate() {
@@ -743,7 +782,7 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
             return;
 
         if (playAnimations() && (animationCount() % 5 == 0)) 
-            parent.repaint();	
+            repaint();	
     }
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {

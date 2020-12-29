@@ -25,8 +25,8 @@ import rotp.util.FastImage;
 public class Sphere2D implements Base {
 	private final int radius;
 	private final FastImage mapImage;
-	public static final int FAST_PLANET_R = 50;
-	public static final int SMALL_PLANET_R = 100;
+	public static final int FAST_PLANET_R = 100; // modnar: increase planet resolution
+	public static final int SMALL_PLANET_R = 200; // modnar: increase planet resolution
 	public static Map<Integer, FastImage> cachedFastOvalImg = new HashMap<>();
 	public static Map<Integer, FastImage> cachedFastGlobeImg = new HashMap<>();
 

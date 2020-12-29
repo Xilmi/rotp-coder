@@ -34,6 +34,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
+import java.awt.RenderingHints; // modnar: needed for adding RenderingHints
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import rotp.model.colony.Colony;
@@ -50,13 +51,14 @@ public class EmpireSystemPanel extends SystemPanel {
 
     static final Color darkBrown = new Color(45,14,5);
     static final Color brown = new Color(64,24,13);
-    static final Color darkText = new Color(40,40,40);
     static final Color sliderBoxBlue = new Color(34,140,142);
 
     private SystemViewInfoPane topPane;
     private EmpireColonySpendingPane spendingPane;
     private EmpireShipPane shipPane;
-
+    private EmpireColonyFoundedPane foundedPane;
+    private EmpireColonyInfoPane infoPane;
+    
     public EmpireSystemPanel(SpriteDisplayPanel p) {
         parentSpritePanel = p;
         init();
@@ -80,10 +82,21 @@ public class EmpireSystemPanel extends SystemPanel {
     @Override
     public void keyPressed(KeyEvent e) {
         int k = e.getKeyCode();
+        int code = e.getModifiersEx();
         switch (k) {
+            case KeyEvent.VK_B:
+                if (code == 0)
+                    infoPane.incrementBases();
+                else if (code == 64)
+                    infoPane.decrementBases();
+                return;
+            case KeyEvent.VK_F:
+                foundedPane.toggleFlagColor();
+                return;
             case KeyEvent.VK_S:
                 nextShipDesign();
                 return;
+            case KeyEvent.VK_Q:
             case KeyEvent.VK_1:
             case KeyEvent.VK_2:
             case KeyEvent.VK_3:
@@ -135,12 +148,14 @@ public class EmpireSystemPanel extends SystemPanel {
         detailTopPane.setOpaque(true);
         detailTopPane.setBackground(dataBorders);
 
+        foundedPane = new EmpireColonyFoundedPane(this, parentSpritePanel.parent, MainUI.paneBackground());
+        infoPane = new EmpireColonyInfoPane(this, MainUI.paneBackground(), dataBorders, SystemPanel.yellowText, SystemPanel.blackText);
         BorderLayout layout = new BorderLayout();
         layout.setVgap(s1);
         detailTopPane.setLayout(layout);
         detailTopPane.setPreferredSize(new Dimension(getWidth(),scaled(110)));
-        detailTopPane.add(new EmpireColonyFoundedPane(this, parentSpritePanel.parent, MainUI.paneBackground()), BorderLayout.NORTH);
-        detailTopPane.add(new EmpireColonyInfoPane(this, MainUI.paneBackground(), dataBorders, SystemPanel.yellowText, darkText), BorderLayout.CENTER);
+        detailTopPane.add(foundedPane, BorderLayout.NORTH);
+        detailTopPane.add(infoPane, BorderLayout.CENTER);
         Color textC = new Color(204,204,204);
         spendingPane = new EmpireColonySpendingPane(this, MainUI.paneBackground(), textC, labelBorderHi, labelBorderLo);
         shipPane = new EmpireShipPane(this);
@@ -244,6 +259,7 @@ public class EmpireSystemPanel extends SystemPanel {
             drawShadowedString(g, str, 2, s5, s22, MainUI.shadeBorderC(), textColor);
         }
         private void drawShipIcon(Graphics2D g,  Colony c, int x, int y, int w, int h) {
+			// modnar: draw ship design icons in System information panel on main map screen
             g.setColor(Color.black);
             g.fillRect(x, y, w, h);
 
@@ -267,6 +283,22 @@ public class EmpireSystemPanel extends SystemPanel {
             int h1 = (int)(scale*h0);
             int x1 = x+(w - w1) / 2;
             int y1 = y+(h - h1) / 2;
+			// modnar: one-step progressive image downscaling, slightly better
+			// there should be better methods
+			if (scale < 0.5) {
+				BufferedImage tmp = new BufferedImage(w0/2, h0/2, BufferedImage.TYPE_INT_ARGB);
+				Graphics2D g2D = tmp.createGraphics();
+				g2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+				g2D.drawImage(img, 0, 0, w0/2, h0/2, 0, 0, w0, h0, this);
+				g2D.dispose();
+				img = tmp;
+				w0 = img.getWidth(null);
+				h0 = img.getHeight(null);
+				scale = scale*2;
+			}
+			// modnar: use (slightly) better downsampling
+			g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+			g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
             g.drawImage(img, x1, y1, x1+w1, y1+h1, 0, 0, w0, h0, this);
 
             if (hoverBox == shipDesignBox) {

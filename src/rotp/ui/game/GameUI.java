@@ -557,8 +557,9 @@ public class GameUI  extends BasePanel implements MouseListener, MouseMotionList
     public void continueGame() {
         if (canContinue()) {
             buttonClick();
-            if (!session().status().inProgress())
+            if (!session().status().inProgress()) {
                 session().loadRecentSession(true);
+            }
             RotPUI.instance().selectMainPanel();
             RotPUI.instance().mainUI().showDisplayPanel();
         }

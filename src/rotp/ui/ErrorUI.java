@@ -68,7 +68,7 @@ public class ErrorUI extends BasePanel implements MouseListener, MouseMotionList
 
         g.setFont(narrowFont(24));
         y0 += BasePanel.s60;
-        g.drawString("Email: rayfowler@fastmail.com", x0, y0);
+        g.drawString("Email: coder111@protonmail.com", x0, y0);
         y0 += BasePanel.s30;
         g.drawString("Reddit: www.Reddit.com/r/rotp", x0, y0);
 

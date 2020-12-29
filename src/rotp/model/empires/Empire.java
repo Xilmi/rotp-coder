@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import rotp.model.ai.AI;
@@ -39,6 +41,8 @@ import rotp.model.colony.ColonyShipyard;
 import rotp.model.empires.SpyNetwork.FleetView;
 import rotp.model.events.SystemColonizedEvent;
 import rotp.model.events.SystemHomeworldEvent;
+import rotp.model.game.GovernorOptions;
+import rotp.model.ships.ShipSpecialColony;
 import rotp.ui.notifications.*;
 import rotp.model.galaxy.Galaxy;
 import rotp.model.galaxy.IMappedObject;
@@ -76,7 +80,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     public static final int SHAPE_TRIANGLE2 = 4;
 
     public static Empire thePlayer() { return Galaxy.current().player(); }
-    
+
     public static long[] times = new long[6];
 
     public final int id;
@@ -555,6 +559,14 @@ public final class Empire implements Base, NamedObject, Serializable {
         if (colonizedSystems.isEmpty())
             goExtinct();
     }
+    public void takeAbandonedSystem(StarSystem sys, Transport tr) {
+        sys.addEvent(new SystemColonizedEvent(id));
+        newSystems.add(sys);
+        addColonizedSystem(sys);
+        sys.becomeColonized(sys.name(), this);
+        sys.colony().setPopulation(tr.size());
+        tr.size(0);
+    }
     public Colony colonize(String sysName, StarSystem sys) {
         StarSystem home = galaxy().system(capitalSysId);
         sys.addEvent(new SystemColonizedEvent(id));
@@ -708,7 +720,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         return shipMaint / empireBC;
     }
     public void nextTurn() {
-        log(this + ": NextTurn");       
+        log(this + ": NextTurn");
         shipBuildingSystems.clear();
         newSystems.clear();
         recalcPlanetaryProduction();
@@ -717,7 +729,7 @@ public final class Empire implements Base, NamedObject, Serializable {
             if (d != null)
                 d.preNextTurn();
         }
-        
+
         List<StarSystem> allColonies = allColonizedSystems();
         List<Transport> transports = transports();
 
@@ -773,11 +785,11 @@ public final class Empire implements Base, NamedObject, Serializable {
     }
     public void makeNextTurnDecisions() {
         recalcPlanetaryProduction();
-        
+
         log(this + ": make NextTurnDecisions");
         NoticeMessage.setSubstatus(text("TURN_SCRAP_SHIPS"));
         shipLab.nextTurn();
-        
+
         // empire settings
         if (isAIControlled()) {
             scientistAI().setTechTreeAllocations();
@@ -803,8 +815,708 @@ public final class Empire implements Base, NamedObject, Serializable {
                 if ((ev != null) && ev.embassy().contact())
                     ev.setSuggestedAllocations();
             }
+        } else {
+            autospend();
+            autotransport();
+            autoscout();
+            autocolonize();
+            // If planets are governed, redo allocations now
+            for (int i = 0; i < this.sv.count(); ++i) {
+                if (this.sv.empire(i) == this && this.sv.isColonized(i)) {
+                    this.sv.colony(i).governIfNeeded();
+                }
+            }
         }
     }
+    /**
+     * Spend reserve automatically (if enabled).
+     *
+     * Spend only on planets with production &lt; 30% average
+     * Spend only the amount planet can consume this turn
+     * Start with planet with lowest production, and end when money runs out
+     * or no suitable planets are available.
+     * Spend only on planets with governor on.
+     * Spend only if industry and ecology are not complete.
+     *
+     */
+    public void autospend() {
+        GovernorOptions options = session().getGovernorOptions();
+        if (isAIControlled() || !options.isAutospend()) {
+            return;
+        }
+        // if reserve is low, don't even attempt to spend money
+        if ((int)this.totalReserve() <= options.getReserve()) {
+            return;
+        }
+
+        List<Colony> colonies = new LinkedList<>();
+        for (int i = 0; i < this.sv.count(); ++i) {
+            if (this.sv.empire(i) == this && this.sv.isColonized(i)) {
+                Colony c = this.sv.colony(i);
+                if (c.isGovernor() && c.maxReserveNeeded() >= 1) {
+                    if (!c.industry().isCompleted() || !c.ecology().isCompleted()) {
+                        colonies.add(c);
+                    }
+                }
+            }
+        }
+        Collections.sort(colonies,
+                (Colony o1, Colony o2) -> (int)Math.signum(o1.production() - o2.production()));
+//        for (Colony c: colonies) {
+//            System.out.println("Autospend "+c.production()+" "+c.name());
+//        }
+        // spend money
+        for (Colony c: colonies) {
+            if (c.maxReserveNeeded() <= 0) {
+                continue;
+            }
+            float available = totalReserve() - options.getReserve();
+            if (available <= 1) {
+                break;
+            }
+            // overallocate by 1 BC to speed up fractional spending
+            int bcToSpend = (int)Math.ceil(Math.min(available, c.maxReserveNeeded()));
+            allocateReserve(c, bcToSpend);
+//            System.out.format("Autospend allocated %d bs to %s%n", bcToSpend, c.name());
+        }
+    }
+    // New autotransport. Start with targets first.
+    public void autotransport() {
+        GovernorOptions options = session().getGovernorOptions();
+        if (isAIControlled() || !options.isAutotransport()) {
+            return;
+        }
+
+        List<Colony> colonies = new LinkedList<>();
+        for (int i = 0; i < this.sv.count(); ++i) {
+            if (this.sv.empire(i) == this && this.sv.isColonized(i)) {
+                Colony c = this.sv.colony(i);
+                if (c.planet().currentSize() - c.expectedPopulation() > options.getTransportPopulation() ) {
+                    colonies.add(c);
+                }
+            }
+        }
+        // all colonies at full population- nothing to do
+        if (colonies.isEmpty()) {
+            return;
+        }
+
+        Collections.sort(colonies,
+                (Colony o1, Colony o2) -> (int)Math.signum(o1.expectedPopPct() - o2.expectedPopPct()));
+        for (Colony c: colonies) {
+            System.out.println("Transport Recipient "+c.expectedPopPct()+" "+c.expectedPopulation()+"/"+c.planet().currentSize()+" "+c.name());
+        }
+
+        List<Colony> donors = new LinkedList<>();
+        for (int i = 0; i < this.sv.count(); ++i) {
+            if (this.sv.empire(i) == this && this.sv.isColonized(i)) {
+                Colony c = this.sv.colony(i);
+                // don't send population from planets with governor off
+                if (!c.isGovernor()) {
+                    continue;
+                }
+                if (c.transporting() || !c.canTransport() || c.maxTransportsAllowed() < options.getTransportPopulation()) {
+                    continue;
+                }
+                // we don't have excess population
+                if (c.expectedPopulation() < c.planet().currentSize()) {
+                    continue;
+                }
+                // TODO: ship population out earlier?
+                if (!c.ecology().isCompleted()) {
+                    continue;
+                }
+                // TODO: ship population out earlier?
+                if (!c.industry().isCompleted()) {
+                    continue;
+                }
+                int size = options.getTransportPopulation() * 100 / options.getTransportMaxPercent();
+                if (c.planet().currentSize() < size) {
+                    continue;
+                }
+                donors.add(c);
+            }
+        }
+        for (Colony c: donors) {
+            System.out.println("Transport Donor "+c.expectedPopulation()+"/"+c.planet().currentSize()+" "+c.name());
+        }
+        // no potential donors- no reason to do any of this.
+        if (donors.isEmpty()) {
+            return;
+        }
+        // for each underpopulated colony, find a suitable donor and ship some population
+        for (Colony c: colonies) {
+            float neededPopulation = (int) (c.planet().currentSize() - c.expectedPopulation());
+            // Sort donors by distance
+            Collections.sort(donors,
+                    (Colony o1, Colony o2) -> (int)Math.signum(
+                            o1.travelTime(o1, c, this.tech().transportTravelSpeed()) -
+                            o2.travelTime(o2, c, this.tech().transportTravelSpeed())));
+            while (neededPopulation > options.getTransportPopulation() && !donors.isEmpty()) {
+                Colony donor = donors.get(0);
+                float transportTime = donor.travelTime(donor, c, this.tech().transportTravelSpeed());
+                // limit max transport time
+                double maxTime = c.starSystem().inNebula() ? options.getTransportMaxTurns() * 1.5 : options.getTransportMaxTurns();
+                // if first donor doesn't match max travel time, others surely won't.
+                if (transportTime > maxTime) {
+                    break;
+                }
+                // if population will grow large enough natually before transports arrive, don't transport.
+                double expectedPopAtTransportTime = c.population() +
+                        Math.pow(1+c.normalPopGrowth() / c.population(), transportTime);
+                if (expectedPopAtTransportTime >= c.planet().currentSize()) {
+                    break;
+                }
+
+                System.out.println("Will transport from "+donor.name()+" to "+c.name());
+                System.out.println("Before transport expectedPopulation= "+c.expectedPopulation());
+                donor.scheduleTransportsToSystem(c.starSystem(), options.getTransportPopulation());
+                System.out.println("After transport expectedPopulation="+c.expectedPopulation());
+                donors.remove(0);
+                // adjust needed population!
+                neededPopulation = (int) (c.planet().currentSize() - c.expectedPopulation());
+            }
+        }
+    }
+    public void autoscout() {
+        GovernorOptions options = session().getGovernorOptions();
+        if (isAIControlled() || !options.isAutoScout()) {
+            return;
+        }
+
+        boolean scoutHasResrerveFuel = false;
+        // Pick scout designs
+
+        List<ShipDesign> scoutDesigns = new ArrayList<>();
+        int minWarpSpeed = 999;
+        for (ShipDesign sd: shipLab().designs()) {
+            if (sd.isAutoScout()) {
+                if (sd.isExtendedRange()) {
+                    scoutHasResrerveFuel = true;
+                }
+                minWarpSpeed = Math.min(sd.engine().warp(), minWarpSpeed);
+                scoutDesigns.add(sd);
+            }
+        }
+        int warpSpeed = minWarpSpeed;
+        // sort extended range vs normal range. Send out normal range first.
+        // sort scouts fastest to slowest, send out fastest scouts first.
+        scoutDesigns.sort((d1, d2) -> {
+            int rangeDiff = Boolean.compare(d1.isExtendedRange(), d2.isExtendedRange() );
+            if (rangeDiff != 0) {
+                return rangeDiff;
+            } else {
+                return d2.warpSpeed() - d1.warpSpeed();
+            }
+        } );
+
+        // no scout ship designs
+        if (scoutDesigns.isEmpty()) {
+            System.out.println("No Scout designs");
+            return;
+        } else {
+            for (ShipDesign sd: scoutDesigns) {
+                System.out.println("Scout Design "+sd.name()+" "+sd.isExtendedRange()+" sz="+sd.sizeDesc()+" warp="+sd.warpSpeed());
+            }
+        }
+
+        List<Integer> toScout = new LinkedList<>();
+        // scouttime only gets set for scouted systems, not ones we were forced to retreat from
+        toScout:
+        for (int i = 0; i < this.sv.count(); ++i) {
+            // don't autoscout planets owned by other empires
+            if (!sv.view(i).scouted() && !sv.view(i).isGuarded()) {
+                boolean inRange;
+                if (scoutHasResrerveFuel) {
+                    inRange = sv.inScoutRange(i);
+                } else {
+                    inRange = sv.inShipRange(i);
+                }
+                if (!inRange) {
+                    continue;
+                }
+                // don't send scouts to occupied planets
+                if (sv.view(i).empire() != null) {
+                    continue;
+                }
+//                System.out.println("System "+i+" "+sv.descriptiveName(i)+" exiting fleets "+sv.view(i).exitingFleets());
+//                System.out.println("System "+i+" "+sv.descriptiveName(i)+" orbiting fleets "+sv.view(i).orbitingFleets());
+//                System.out.println("System "+i+" "+sv.descriptiveName(i)+" fleetPlan "+sv.view(i).fleetPlan());
+//                for (Empire e: galaxy().activeEmpires()) {
+//                    System.out.println("System "+i+" "+sv.descriptiveName(i)+" for empure "+e.name()+" has fleet "+sv.view(i).hasFleetForCiv(e));
+//                }
+
+                if (sv.view(i).orbitingFleets() != null && !sv.view(i).orbitingFleets().isEmpty()) {
+//                    System.out.println("System "+i+" "+sv.descriptiveName(i)+" has ships in orbit");
+                    for (ShipFleet f: sv.view(i).orbitingFleets()) {
+                        // WTF, planet should be scouting if own ships are orbiting
+                        if (f.empId() == this.id) {
+                            continue toScout;
+                        }
+                        // if fleet isn't armed- ignore it
+                        if (!f.isArmed()) {
+                            continue;
+                        }
+                        // if fleet belongs to allied/non-aggression pact empire- ignore it
+                        if (this.pactWith(f.empId) || this.alliedWith(f.empId)) {
+                            continue;
+                        }
+                        // don't scout systems guardedy by armed enemy.
+                        System.out.println("System "+i+" "+sv.descriptiveName(i)+" has armed enemy ships in orbit");
+                        continue toScout;
+                    }
+                } else {
+                    System.out.println("System "+i+" "+sv.descriptiveName(i)+" has NO orbiting fleets");
+                }
+                // ships already on route- no need to scout
+                if (!this.ownFleetsTargetingSystem(sv.system(i)).isEmpty()) {
+                    System.out.println("System "+i+" "+sv.descriptiveName(i)+" already has ships going there");
+                    continue;
+                }
+//                System.out.println("Scout "+sv.descriptiveName(i) + " "+sv.view(i).scouted()+" "+sv.inScoutRange(i)+" "+sv.inShipRange(i)
+//                        +" scoutTime="+sv.view(i).scoutTime()+" guarded="+sv.view(i).isGuarded()+" empire="+sv.view(i).empire()+" inEmpire="+sv.view(i).isInEmpire());
+                toScout.add(i);
+            }
+        }
+        // No systems to scout
+        if (toScout.isEmpty()) {
+            return;
+        }
+        // shuffle toScout list. This is to prevent colony ship with autoscouting on from going directly to the habitable planet.
+        // That's because AFAIK map generation sets one of the 2 nearby planets to be habitable, and it's always first one in the list
+        // So if we keep default order, that's cheating
+        Collections.shuffle(toScout);
+
+        for (Integer i: toScout) {
+            System.out.println("ToScout "+i+" "+sv.name(i) + " "+sv.descriptiveName(i)+" "+sv.view(i).scouted()+" "+sv.inScoutRange(i)+" "+sv.inShipRange(i)+" colonized="+sv.view(i).isColonized()+" bases="+sv.view(i).bases());
+        }
+        // find fleets that are able of scouting
+        List<ShipFleet> fleets = new ArrayList<>();
+        List<ShipFleet> allFleets = galaxy().ships.notInTransitFleets(id);
+        // number of scout ships that we have
+        int scoutCount = 0;
+        for (Iterator<ShipFleet> it = allFleets.iterator(); it.hasNext(); ) {
+            ShipFleet sf = it.next();
+            if (!sf.isOrbiting() || !sf.canSend()) {
+                // we only use idle (orbiting) fleets
+                continue;
+            }
+            for (ShipDesign sd: scoutDesigns) {
+                if (sf.hasShip(sd)) {
+                    scoutCount += sf.num(sd.id());
+                    fleets.add(sf);
+                    break;
+                }
+            }
+        }
+        if (fleets.isEmpty()) {
+            System.out.println("No idle scouts");
+            return;
+        }
+        for (ShipFleet sf: fleets) {
+            System.out.println("Fleet with Scouts "+sf+" "+sf.system().name());
+        }
+
+        // Use min(speed) from all scout designs to measure scout travel time
+        if (toScout.size() > scoutCount) {
+            System.out.println("MORE SYSTEMS THAN SCOUTS");
+            // we have more stars to explore than we have ships, so
+            // we take ships and send them to closest systems.
+            for (ShipFleet sf: fleets) {
+                if (toScout.isEmpty()) {
+                    break;
+                }
+                System.out.println("Deploying scouts from Fleet "+sf+" "+sf.system().name());
+                toScout.sort((s1, s2) ->
+                        (int)Math.signum(sf.travelTime(sv.system(s1), warpSpeed) - sf.travelTime(sv.system(s2), warpSpeed)) );
+                for (int si: toScout) {
+                    System.out.println("ToScout System "+sv.descriptiveName(si)+" travel "+sf.travelTime(sv.system(si), warpSpeed)+" id="+si);
+                }
+
+                for (ShipDesign sd: scoutDesigns) {
+                    int[] counts = new int[ShipDesignLab.MAX_DESIGNS];
+                    counts[sd.id()] = 1;
+                    // we have to save this number. That's because if we invoke deploySubfleet on a fleet of 1 ship
+                    // entire fleet gets redirected and it will keep returning 1 ship available as it's the same fleet
+                    // with same 1 ship, resulting in continued loop.
+                    int numShipsAvailable = sf.num(sd.id());
+                    for (Iterator<Integer> it = toScout.iterator(); it.hasNext() && numShipsAvailable > 0; ) {
+                        int si = it.next();
+                        // first try to deploy non-extended designs
+                        if (!sd.isExtendedRange() && sv.inShipRange(si)) {
+                            // it's in short range, and scout is short range, send the scout
+                            boolean success;
+                            if (sf.isOneShip()) {
+                                galaxy().ships.deployFleet(sf, sv.system(si).id);
+                                success = true;
+                            } else {
+                                success = galaxy().ships.deploySubfleet(sf, counts, sv.system(si).id);
+                            }
+                            System.out.println("Attempt SR deploy "+sf+" to "+sv.system(si).name()+" success="+success);
+                            if (success) {
+                                System.out.println("Deployed normal 1 scout to "+sv.system(si).name());
+                                numShipsAvailable--;
+                                // remove this system as it has scout assigned already
+                                it.remove();
+                            }
+                        } else if (sd.isExtendedRange() && sv.inScoutRange(si)) {
+                            // it's in long range, and scout is long range, send the scout
+                            boolean success;
+                            if (sf.isOneShip()) {
+                                galaxy().ships.deployFleet(sf, sv.system(si).id);
+                                success = true;
+                            } else {
+                                success = galaxy().ships.deploySubfleet(sf, counts, sv.system(si).id);
+                            }
+                            System.out.println("Attempt LR deploy "+sf+" to "+sv.system(si).name()+" success="+success);
+                            if (success) {
+                                System.out.println("Deployed extended 1 scout to "+sv.system(si).name());
+                                // remove this system as it has scout assigned already
+                                numShipsAvailable--;
+                                it.remove();
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            System.out.println("MORE SCOUTS THAN SYSTEMS");
+            // we have more ships than stars to explore. We start with stars
+            // and send closest scout ship to each of them.
+            toScoutLoop:
+            for (Iterator<Integer> it = toScout.iterator(); it.hasNext(); ) {
+                int si = it.next();
+                // sort fleets by whichever is closest
+                fleets.sort((f1, f2) ->
+                        (int)Math.signum(f1.travelTime(sv.system(si), warpSpeed) - f2.travelTime(sv.system(si), warpSpeed)) );
+                for (ShipFleet f: fleets) {
+                    System.out.println("Fleet "+sv.descriptiveName(f.sysId())+" travel "+f.travelTime(sv.system(si), warpSpeed));
+                }
+
+                for (ShipFleet sf: fleets) {
+                    // if fleet was sent elsewhere during previous iteration, don't redirect it again
+                    if (!sf.inOrbit()) {
+                        continue;
+                    }
+                    for (ShipDesign sd : scoutDesigns) {
+                        int count = sf.num(sd.id());
+                        System.out.println("We have " + count + " scouts of design " + sd.name());
+                        if (count <= 0) {
+                            continue;
+                        }
+                        int[] counts = new int[ShipDesignLab.MAX_DESIGNS];
+                        counts[sd.id()] = 1;
+                        if (sd.isExtendedRange() && sv.inScoutRange(si)) {
+                            // it's in long range, and scout is long range, send the scout
+                            if (sf.isOneShip()) {
+                                galaxy().ships.deployFleet(sf, sv.system(si).id);
+                            } else {
+                                galaxy().ships.deploySubfleet(sf, counts, sv.system(si).id);
+                            }
+                            // remove this system as it has scout assigned already
+                            it.remove();
+                            continue toScoutLoop;
+                        } else if (!sd.isExtendedRange() && sv.inShipRange(si)) {
+                            // it's in short range, and scout is short range, send the scout
+                            if (sf.isOneShip()) {
+                                galaxy().ships.deployFleet(sf, sv.system(si).id);
+                            } else {
+                                galaxy().ships.deploySubfleet(sf, counts, sv.system(si).id);
+                            }
+                            // remove this system as it has scout assigned already
+                            it.remove();
+                            continue toScoutLoop;
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+
+    // similar to autoscout. Always assume more planets than colony ships, i.e. prioritize ships first
+    // colonize closest planets first. I know we should prioritize by planet value
+    // but for first version, just go for it.
+    public void autocolonize() {
+        GovernorOptions options = session().getGovernorOptions();
+        if (isAIControlled() || !options.isAutoColonize()) {
+            return;
+        }
+
+        boolean colonyHasReserveFuel = false;
+        // Pick colony ship designs, fastest first
+        List<ShipDesign> colonyDesigns = new ArrayList<>();
+        int minWarpSpeed = 999;
+        for (ShipDesign sd: shipLab().designs()) {
+            if (sd.isAutoColonize()) {
+                // ignore design if name matches if it's not a colony ship
+
+                if (!sd.hasColonySpecial()) {
+                    continue;
+                }
+                if (sd.isExtendedRange()) {
+                    colonyHasReserveFuel = true;
+                }
+                minWarpSpeed = Math.min(sd.engine().warp(), minWarpSpeed);
+                colonyDesigns.add(sd);
+            }
+        }
+        int warpSpeed = minWarpSpeed;
+        // non-extended range to extended range
+        // least hostile to most hostile colony bases, send out least hostile colony bases first
+        // sort ships fastest to slowest, send out fastest colony ships first
+        colonyDesigns.sort((d1, d2) -> {
+            int rangeDiff = Boolean.compare(d1.isExtendedRange(), d2.isExtendedRange() );
+            // desc order
+            int envDiff = d1.colonySpecial().tech().environment() - d2.colonySpecial().tech().environment();
+            if (rangeDiff != 0) {
+                return rangeDiff;
+            } else if (envDiff != 0) {
+                return envDiff;
+            } else {
+                return d2.warpSpeed() - d1.warpSpeed();
+            }
+        } );
+
+        // no colony ship designs
+        if (colonyDesigns.isEmpty()) {
+            System.out.println("No Colony ship designs");
+            return;
+        } else {
+            for (ShipDesign sd: colonyDesigns) {
+                System.out.println("Colony Design "+sd.name()+" "+sd.isExtendedRange()+" sz="+sd.sizeDesc()+" warp="+sd.warpSpeed());
+            }
+        }
+
+        // find fleets that are able of colonizing
+        List<ShipFleet> fleets = new ArrayList<>();
+        List<ShipFleet> allFleets = galaxy().ships.notInTransitFleets(id);
+        // number of scout ships that we have
+        ShipSpecialColony bestColonyShip = null;
+        for (Iterator<ShipFleet> it = allFleets.iterator(); it.hasNext(); ) {
+            ShipFleet sf = it.next();
+            if (!sf.isOrbiting() || !sf.canSend()) {
+                // we only use idle (orbiting) fleets
+                continue;
+            }
+            for (ShipDesign sd: colonyDesigns) {
+                // single fleet can have several colony ships with different environments. Iterate all designs to see
+                // which is the highest one
+                boolean colonyShipsFound = false;
+                if (sf.hasShip(sd)) {
+                    if (bestColonyShip == null || bestColonyShip.tech().environment() < sd.colonySpecial().tech().environment()) {
+                        bestColonyShip = sd.colonySpecial();
+                    }
+                    colonyShipsFound = true;
+                }
+                if (colonyShipsFound) {
+                    fleets.add(sf);
+                }
+            }
+        }
+        if (fleets.isEmpty()) {
+            System.out.println("No idle colony ships");
+            return;
+        }
+        System.out.println("Best colony ship special "+bestColonyShip.tech().name());
+        List<Integer> toColonize = new LinkedList<>();
+        toColonize:
+        for (int i = 0; i < this.sv.count(); ++i) {
+            // only colonize scouted systems, systems with planets, unguarded systems.
+            // don't attempt to colonize systems already owned by someone
+            // TODO: Exclude systems that have enemy fleets orbiting?
+            if (!sv.view(i).isColonized() && sv.view(i).scouted() && !PlanetType.NONE.equals(sv.view(i).planetType().key())
+                    && !sv.isGuarded(i) && sv.view(i).empire() == null ) {
+                // if we don't have tech or ships to colonize this planet, ignore it.
+                if (!race().ignoresPlanetEnvironment() && !bestColonyShip.canColonize(sv.system(i).planet())) {
+                    continue;
+                }
+
+                boolean inRange;
+                if (colonyHasReserveFuel) {
+                    inRange = sv.inScoutRange(i);
+                } else {
+                    inRange = sv.inShipRange(i);
+                }
+                if (!inRange) {
+                    continue;
+                }
+                // colony ship already on route- no need to send more
+                for (ShipFleet sf: this.ownFleetsTargetingSystem(sv.system(i))) {
+                    if (sf.numColonies() > 0) {
+                        System.out.println("System "+sv.name(i)+" already has colony ships going there");
+                        continue toColonize;
+                    }
+                }
+                toColonize.add(i);
+            }
+        }
+        // No systems to scout
+        if (toColonize.isEmpty()) {
+            return;
+        }
+        for (Integer i: toColonize) {
+            System.out.println("ToColonize "+sv.name(i) + " scouted="+sv.view(i).scouted()+" extrange="+sv.inScoutRange(i)+" range="+sv.inShipRange(i)+" type"+sv.planetType(i));
+        }
+        for (ShipFleet sf: fleets) {
+            System.out.println("Fleet with Colony ships "+sf);
+        }
+        // Use min(speed) from all scout designs to measure scout travel time
+        for (ShipFleet sf: fleets) {
+            if (toColonize.isEmpty()) {
+                break;
+            }
+            sortByPriority(sf, toColonize, warpSpeed);
+
+            for (ShipDesign sd: colonyDesigns) {
+                int[] counts = new int[ShipDesignLab.MAX_DESIGNS];
+                counts[sd.id()] = 1;
+                // we have to save this number. That's because if we invoke deploySubfleet on a fleet of 1 ship
+                // entire fleet gets redirected and it will keep returning 1 ship available as it's the same fleet
+                // with same 1 ship, resulting in continued loop.
+                int numShipsAvailable = sf.num(sd.id());
+                for (Iterator<Integer> it = toColonize.iterator(); it.hasNext() && numShipsAvailable > 0;  ) {
+//                    System.out.println("We have "+sf.num(sd.id())+" colony ships of design "+sd.name());
+                    int si = it.next();
+
+                    if (!race().ignoresPlanetEnvironment() && !sd.colonySpecial().canColonize(sv.system(si).planet())) {
+                        continue;
+                    }
+
+                    // if target system already has a colony ship in orbit, don't send colony ships there
+                    ShipFleet orbitingFleet = sv.system(si).orbitingFleetForEmpire(this);
+                    if (orbitingFleet != null) {
+                        boolean colonyShipOrbiting = false;
+                        for (ShipDesign d1: colonyDesigns) {
+                            if (orbitingFleet.hasShip(d1) &&
+                                    (race().ignoresPlanetEnvironment() || d1.colonySpecial().canColonize(sv.system(si).planet()))) {
+                                colonyShipOrbiting = true;
+                                break;
+                            }
+                        }
+                        if (colonyShipOrbiting) {
+                            // don't remove from target list, otherwise the ship orbiting the planet will be sent away
+                            continue;
+                        }
+                    }
+
+                    // already orbiting the planet we need to colonize, don't send the ship anywhere.
+                    if (sf.system().id == si) {
+                        // remove this system as it has colony assigned already
+                        numShipsAvailable--;
+                        it.remove();
+                        continue;
+                    }
+                    // first try to deploy non-extended designs
+                    if (!sd.isExtendedRange() && sv.inShipRange(si)) {
+                        // it's in short range, and scout is short range, send the scout
+                        boolean success;
+                        if (sf.isOneShip()) {
+                            galaxy().ships.deployFleet(sf, sv.system(si).id);
+                            success = true;
+                        } else {
+                            success = galaxy().ships.deploySubfleet(sf, counts, sv.system(si).id);
+                        }
+                        if (success) {
+                            // remove this system as it has scout assigned already
+                            numShipsAvailable--;
+                            it.remove();
+                        }
+                    } else if (sd.isExtendedRange() && sv.inScoutRange(si)) {
+                        // it's in long range, and scout is long range, send the scout
+                        boolean success;
+                        if (sf.isOneShip()) {
+                            galaxy().ships.deployFleet(sf, sv.system(si).id);
+                            success = true;
+                        } else {
+                            success = galaxy().ships.deploySubfleet(sf, counts, sv.system(si).id);
+                        }
+                        if (success) {
+                            // remove this system as it has scout assigned already
+                            numShipsAvailable--;
+                            it.remove();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void sortByPriority(ShipFleet sf, List<Integer> toColonize, int warpSpeed) {
+        // ok, let's use both distance and value of planet to prioritize colonization, 50% and 50%
+        float maxDistance = -1;
+        float maxValue = -1;
+        for (int sid: toColonize) {
+            float value = planetValue(sid);
+            if (maxValue < 0 || maxValue < value) {
+                maxValue = value;
+            }
+            float distance = sf.travelTime(sv.system(sid), warpSpeed);
+            if (maxDistance < 0 || maxDistance < distance) {
+                maxDistance = distance;
+            }
+        }
+        // could happen if we only have 1 colony ship already orbiting the only remaining colonizable planet
+        if (Math.abs(maxDistance) <= 0.1) {
+            maxDistance = 1;
+        }
+        System.out.println("Autocolonize maxDistance ="+maxDistance+" maxValue="+maxValue);
+
+        float maxDistance1 = maxDistance;
+        float maxValue1 = maxValue;
+        // planets with lowest weight are most desirable (closest/best)
+        toColonize.sort((s1, s2) -> (int)Math.signum(autocolonizeWeight(sf, s1, maxDistance1, maxValue1, warpSpeed)
+                - autocolonizeWeight(sf, s2, maxDistance1, maxValue1, warpSpeed)));
+        for (int si: toColonize) {
+            double weight = autocolonizeWeight(sf, si, maxDistance, maxValue, warpSpeed);
+            System.out.format("toColonize System %d %s travel=%.1f value=%.1f weight=%.2f%n",
+                    si, sv.name(si), sf.travelTime(sv.system(si), warpSpeed),
+                    planetValue(si), weight);
+        }
+    }
+
+    public double autocolonizeWeight(ShipFleet sf, int sid, float maxDistance, float maxValue, int warpSpeed) {
+        // let's flip value percent and sort by descending order. That's because in rare cases distancePercent could be
+        // greater than 1
+        float valuePercent = 1 - planetValue(sid) / maxValue;
+        float distancePercent = sf.travelTime(sv.system(sid), warpSpeed) / maxDistance;
+        // so distance is worth 50% of weight, value 50%
+        return valuePercent * 0.5 + distancePercent * 0.5;
+    }
+
+    // taken from AIFleetCommander.setColonyFleetPlan()
+    public float planetValue(int sid) {
+        float value = this.sv.currentSize(sid);
+
+        //increase value by 5 for each of our systems it is near, and
+        //decrease by 2 for alien systems. This is an attempt to encourage
+        //colonization of inner colonies (easier to defend) even if they
+        //are not as good as outer colonies
+        int[] nearbySysIds = this.sv.galaxy().system(sid).nearbySystems();
+        for (int nearSysId : nearbySysIds) {
+            int nearEmpId = this.sv.empId(nearSysId);
+            if (nearEmpId != this.NULL_ID) {
+                if (nearEmpId == this.id)
+                    value += 5;
+                else
+                    value -= 2;
+            }
+        }
+        // assume that we will terraform  the planet
+        value += this.tech().terraformAdj();
+        //multiply *2 for artifacts, *3 for super-artifacts
+        value *= (1 + this.sv.artifactLevel(sid));
+        if (this.sv.isUltraRich(sid))
+            value *= 3;
+        else if (this.sv.isRich(sid))
+            value *= 2;
+        else if (this.sv.isPoor(sid))
+            value /= 2;
+        else if (this.sv.isUltraPoor(sid))
+            value /= 3;
+        return value;
+    }
+
     public String decode(String s, Empire listener) {
         String s1 = this.replaceTokens(s, "my");
         s1 = listener.replaceTokens(s1, "your");
@@ -1070,7 +1782,7 @@ public final class Empire implements Base, NamedObject, Serializable {
                     return true;
             }
         }
-        
+
         float shipRange = shipScanningRange();
         if (shipRange > 0) {
             for (Ship sh: ships) {
@@ -1780,13 +2492,15 @@ public final class Empire implements Base, NamedObject, Serializable {
         }
         return false;
     }
-    public List<ShipFleet> fleetsTargetingSystem(StarSystem target) {
+    public List<ShipFleet> ownFleetsTargetingSystem(StarSystem target) {
         List<ShipFleet> fleets1 = new ArrayList<>();
-        for (ShipFleet fl : fleets1) {
-            if (fl.inTransit() && (fl.destSysId() == target.id))
-                fleets1.add(fl);
-            else if (!fl.inTransit() && (fl.sysId() == target.id))
-                fleets1.add(fl);
+        for (ShipFleet fl : galaxy().ships.inTransitFleets()) {
+            if (fl.empId() == this.id) {
+                if (fl.inTransit() && (fl.destSysId() == target.id))
+                    fleets1.add(fl);
+                else if (!fl.inTransit() && (fl.sysId() == target.id))
+                    fleets1.add(fl);
+            }
         }
         return fleets1;
     }
@@ -2346,11 +3060,11 @@ public final class Empire implements Base, NamedObject, Serializable {
                     StarSystem sys = g.system(sh.destSysId());
                     if (sys != null) {
                         // don't care about ships going to already-added systems or AI systems
-                        if (!list.contains(sys) && (sys.empire() == pl)) { 
+                        if (!list.contains(sys) && (sys.empire() == pl)) {
                             Empire emp = g.empire(sh.empId());
                             // add if incoming fleet is hostile to player
                             if (emp.aggressiveWith(pl.id)) {
-                                boolean showShip = showUnarmed 
+                                boolean showShip = showUnarmed
                                         || (showTransports && (sh instanceof Transport)) || sh.isPotentiallyArmed(pl);
                                 if (showShip)
                                     list.add(sys);

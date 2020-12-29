@@ -35,6 +35,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.awt.RenderingHints; // modnar: needed for adding RenderingHints
 import javax.swing.SwingUtilities;
 import rotp.model.empires.Race;
 import rotp.model.galaxy.GalaxyShape;
@@ -97,6 +98,9 @@ public final class SetupGalaxyUI  extends BasePanel implements MouseListener, Mo
     public void paintComponent(Graphics g0) {
         super.paintComponent(g0);
         Graphics2D g = (Graphics2D) g0;
+		// modnar: use (slightly) better upsampling
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         int w = getWidth();
         int h = getHeight();
 
@@ -462,6 +466,9 @@ public final class SetupGalaxyUI  extends BasePanel implements MouseListener, Mo
         backImg = newOpaqueImage(w, h);
         Graphics2D g = (Graphics2D) backImg.getGraphics();
         setFontHints(g);
+		// modnar: use (slightly) better upsampling
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         Race race = Race.keyed(newGameOptions().selectedPlayerRace());
 
         // background image

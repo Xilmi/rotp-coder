@@ -372,7 +372,7 @@ public class BasePanel extends JPanel implements Base {
     public static int s81, s82, s83, s84, s85, s86, s87, s88, s89, s90;
     public static int s91, s92, s93, s94, s95, s96, s97, s98, s99, s100;
 
-    public static Stroke stroke1, stroke2, stroke3, stroke4, stroke5, stroke6, stroke7;
+    public static Stroke stroke1, stroke2, stroke3, stroke4, stroke5, stroke6, stroke7, stroke8, stroke9, stroke10; // modnar: add 3 strokes
 
     public void loadScaledIntegers() {
         s1 = scaled(1); s2 = scaled(2); s3 = scaled(3); s4 = scaled(4); s5 = scaled(5); s6 = scaled(6); s7 = scaled(7); s8 = scaled(8); s9 = scaled(9); s10 = scaled(10);
@@ -386,13 +386,16 @@ public class BasePanel extends JPanel implements Base {
         s81 = scaled(81); s82 = scaled(82); s83 = scaled(83); s84 = scaled(84); s85 = scaled(85); s86 = scaled(86); s87 = scaled(87); s88 = scaled(88); s89 = scaled(89); s90 = scaled(90);
         s91 = scaled(91); s92 = scaled(92); s93 = scaled(93); s94 = scaled(94); s95 = scaled(95); s96 = scaled(96); s97 = scaled(97); s98 = scaled(98); s99 = scaled(99); s100 = scaled(100);
 
-        stroke1 = new BasicStroke(s1);
-        stroke2 = new BasicStroke(s2);
-        stroke3 = new BasicStroke(s3);
-        stroke4 = new BasicStroke(s4);
-        stroke5 = new BasicStroke(s5);
-        stroke6 = new BasicStroke(s6);
-        stroke7 = new BasicStroke(s7);
+        stroke1 = new BasicStroke(s1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND); // modnar: round cap and join
+        stroke2 = new BasicStroke(s2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND); // modnar: round cap and join
+        stroke3 = new BasicStroke(s3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND); // modnar: round cap and join
+        stroke4 = new BasicStroke(s4, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND); // modnar: round cap and join
+        stroke5 = new BasicStroke(s5, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND); // modnar: round cap and join
+        stroke6 = new BasicStroke(s6, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND); // modnar: round cap and join
+        stroke7 = new BasicStroke(s7, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND); // modnar: round cap and join
+        stroke8 = new BasicStroke(s8, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND); // modnar: add strokes
+        stroke9 = new BasicStroke(s9, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND); // modnar: add strokes
+        stroke10 = new BasicStroke(s10, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND); // modnar: add strokes
     }
     public static Stroke baseStroke(int n) {
         switch(n) {
@@ -403,6 +406,9 @@ public class BasePanel extends JPanel implements Base {
             case 5: return stroke5;
             case 6: return stroke6;
             case 7: return stroke7;
+            case 8: return stroke8; // modnar: add strokes
+            case 9: return stroke9; // modnar: add strokes
+            case 10: return stroke10; // modnar: add strokes
             default: return stroke1;
         }
     }

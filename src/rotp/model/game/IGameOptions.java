@@ -50,6 +50,17 @@ public interface IGameOptions {
     public static final String SHAPE_RECTANGLE = "SETUP_GALAXY_SHAPE_RECTANGLE";
     public static final String SHAPE_ELLIPTICAL = "SETUP_GALAXY_SHAPE_ELLIPSE";
     public static final String SHAPE_SPIRAL = "SETUP_GALAXY_SHAPE_SPIRAL";
+    // mondar: add new map shapes
+    public static final String SHAPE_TEXT = "SETUP_GALAXY_SHAPE_TEXT";
+    public static final String SHAPE_LORENZ = "SETUP_GALAXY_SHAPE_LORENZ";
+    public static final String SHAPE_FRACTAL = "SETUP_GALAXY_SHAPE_FRACTAL";
+    public static final String SHAPE_MAZE = "SETUP_GALAXY_SHAPE_MAZE";
+    public static final String SHAPE_SHURIKEN = "SETUP_GALAXY_SHAPE_SHURIKEN";
+    public static final String SHAPE_BULLSEYE = "SETUP_GALAXY_SHAPE_BULLSEYE";
+    public static final String SHAPE_GRID = "SETUP_GALAXY_SHAPE_GRID";
+    public static final String SHAPE_CLUSTER = "SETUP_GALAXY_SHAPE_CLUSTER";
+    public static final String SHAPE_SWIRLCLUSTERS = "SETUP_GALAXY_SHAPE_SWIRLCLUSTERS";
+    public static final String SHAPE_SPIRALARMS = "SETUP_GALAXY_SHAPE_SPIRALARMS";
 
     public static final String DIFFICULTY_EASIEST = "SETUP_DIFFICULTY_EASIEST";
     public static final String DIFFICULTY_EASIER  = "SETUP_DIFFICULTY_EASIER";
@@ -60,6 +71,8 @@ public interface IGameOptions {
     public static final String DIFFICULTY_HARDEST = "SETUP_DIFFICULTY_HARDEST";
     
     public static final String RESEARCH_NORMAL  = "SETUP_RESEARCH_RATE_NORMAL";
+    // mondar: add fast research option
+    public static final String RESEARCH_FAST    = "SETUP_RESEARCH_RATE_FAST";
     public static final String RESEARCH_SLOW    = "SETUP_RESEARCH_RATE_SLOW";
     public static final String RESEARCH_SLOWER  = "SETUP_RESEARCH_RATE_SLOWER";
     public static final String RESEARCH_SLOWEST = "SETUP_RESEARCH_RATE_SLOWEST";
@@ -87,7 +100,7 @@ public interface IGameOptions {
     public static final String COUNCIL_REBELS    = "SETUP_COUNCIL_REBELS";
     
     public default boolean isAutoPlay()          { return false; }
-    public default boolean communityAI()         { return false; }
+    public default boolean communityAI()         { return true; } // modnar: default to communityAI = true
     public default void communityAI(boolean b)   { }
     public default int maxOpponents()            { return MAX_OPPONENTS; }
     public String name();
@@ -179,7 +192,7 @@ public interface IGameOptions {
     public String selectedOpponentRace(int i);
     public void selectedOpponentRace(int i, String s);
 
-    
+    default void copyOptions(IGameOptions opt) { }
     default boolean immediateCouncilWin()   { return selectedCouncilWinOption().equals(COUNCIL_IMMEDIATE); }
     
     default String nextGalaxySize(boolean bounded) {

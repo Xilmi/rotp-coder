@@ -25,6 +25,9 @@ import rotp.model.galaxy.GalaxyShape.EmpireSystem;
 import rotp.model.game.GameSession;
 import rotp.model.game.IGameOptions;
 import rotp.model.planet.Planet;
+import rotp.model.tech.Tech; // modnar: add game mode to start all Empires with 2 random techs
+import rotp.model.tech.TechTree; // modnar: add game mode to start all Empires with 2 random techs
+import rotp.ui.UserPreferences; // modnar: add game mode to start all Empires with 2 random techs
 import rotp.ui.util.planets.PlanetImager;
 import rotp.util.Base;
 
@@ -87,6 +90,34 @@ public class GalaxyFactory implements Base {
         // after systems created, add system views for each emp
         for (Empire e: g.empires()) {
             e.loadStartingTechs();
+			
+			// modnar: add game mode to start all Empires with 2 random techs
+			if (UserPreferences.randomTechStart()) {
+				// randomUnknownTech, somewhat awkward to use in succession
+				//e.tech().learnTech(e.tech().randomUnknownTech(1,4).id());
+				//e.tech().learnTech(e.tech().randomUnknownTech(1,4).id());
+				
+				// generate full tech tree
+				TechTree eTech = e.tech();
+				List<String> firstTierTechs = new ArrayList<>();
+				List<String> allTechs = new ArrayList<>();
+				allTechs.addAll(eTech.computer().allTechs());
+				allTechs.addAll(eTech.construction().allTechs());
+				allTechs.addAll(eTech.forceField().allTechs());
+				allTechs.addAll(eTech.planetology().allTechs());
+				allTechs.addAll(eTech.propulsion().allTechs());
+				allTechs.addAll(eTech.weapon().allTechs());
+				for (String id: allTechs) {
+					Tech t = tech(id);
+					// pick only from first tier/quintile
+					if ((t.level() >= 2) && (t.level() <= 5))
+						firstTierTechs.add(id);
+				}
+				// shuffle for randomness
+				Collections.shuffle(firstTierTechs);
+				e.tech().learnTech(firstTierTechs.get(0));
+				e.tech().learnTech(firstTierTechs.get(1));
+			}
         }
         long tm3 = System.currentTimeMillis();
         log("load starting techs: "+(tm3-tm2)+"ms");

@@ -20,6 +20,7 @@ import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -664,6 +665,7 @@ public class ShipFleet implements Base, Sprite, Ship, Serializable {
     public int numScouts()   { return numShipType(ShipDesign.SCOUT); }
     public int numFighters() { return numShipType(ShipDesign.FIGHTER); }
     public int numBombers()  { return numShipType(ShipDesign.BOMBER); }
+    public int numDestroyers()  { return numShipType(ShipDesign.DESTROYER); } // modnar: add in destroyer number, not used anywhere (?)
     public int numColonies() { return numShipType(ShipDesign.COLONY); }
     public boolean isEmpty()  { return numShips() == 0; }
     public int numShips ()   {
@@ -1033,4 +1035,9 @@ public class ShipFleet implements Base, Sprite, Ship, Serializable {
     }
     @Override
     public IMappedObject source() { return this; }
+
+    public boolean isOneShip() {
+        int count = Arrays.stream(this.num).sum();
+        return count == 1;
+    }
 }

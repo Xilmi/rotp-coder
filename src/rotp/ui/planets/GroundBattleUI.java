@@ -25,6 +25,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.awt.RenderingHints; // modnar: needed for adding RenderingHints
 import java.util.ArrayList;
 import java.util.List;
 import rotp.model.colony.Colony;
@@ -241,6 +242,9 @@ public class GroundBattleUI extends BasePanel implements MouseListener {
         Graphics2D g = (Graphics2D) landscapeImg.getGraphics();
         g.setColor(Color.black);
         g.fillRect(0, 0, getWidth(), getHeight());
+		// modnar: use (slightly) better upsampling
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g.drawImage(c.planet().type().atmosphereImage(), 0, 0, w, h, null);
         g.drawImage(c.planet().type().randomCloudImage(), 0, 0, w, h, null);
         g.drawImage(c.planet().landscapeImage(), 0, 0, w, h, null);
@@ -364,6 +368,9 @@ public class GroundBattleUI extends BasePanel implements MouseListener {
         attackerFired =false;
         defenderFired = false;
 
+        // modnar: use (slightly) better upsampling
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g.drawImage(landscapeImg, 0, 0, w, h, null);
 
         int textY = h-s100;
@@ -617,6 +624,9 @@ public class GroundBattleUI extends BasePanel implements MouseListener {
                     attackerX[count] = x0;
                     attackerY[count] = y0+yAdj;
                     //log("attacker #"+count+" frame:"+frame+"  x:"+x0+"  y:"+(y0+yAdj)+"  w:"+imgW+"  h:"+imgH);
+					// modnar: use (slightly) better downsampling
+					g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+					g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
                     g.drawImage(iconImg, x0, y0+yAdj, imgW, imgH, null);
                     if (frame == attackerFiringFrame)
                         fireAtDefender(g, count);
@@ -633,6 +643,9 @@ public class GroundBattleUI extends BasePanel implements MouseListener {
                     defenderX[count] = x0;
                     defenderY[count] = y0+yAdj;
                     //log("defender #"+count+" frame:"+frame+"  x:"+x0+"  y:"+(y0+yAdj)+"  w:"+imgW+"  h:"+imgH);
+					// modnar: use (slightly) better downsampling
+					g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+					g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
                     g.drawImage(iconImg, x0, y0+yAdj, imgW, imgH, null);
                     if (frame == defenderFiringFrame)
                         fireAtAttacker(g, count);

@@ -74,9 +74,9 @@ public class ColonyEcology extends ColonySpendingCategory {
     }
     @Override
     public void removeSpendingOrders()   {
-        colony().removeColonyOrder(Colony.Orders.SOIL);
-        colony().removeColonyOrder(Colony.Orders.ATMOSPHERE);
-        colony().removeColonyOrder(Colony.Orders.TERRAFORM);
+        colony().removeColonyOrder(Colony.Orders.SOIL, false);
+        colony().removeColonyOrder(Colony.Orders.ATMOSPHERE, false);
+        colony().removeColonyOrder(Colony.Orders.TERRAFORM, false);
     }
     public void capturedBy(Empire newCiv) {
         hostileBC = 0;
@@ -121,7 +121,7 @@ public class ColonyEcology extends ColonySpendingCategory {
 
         // try to convert hostile atmosphere
         atmosphereCompleted = false;
-        if (p.canTerraformAtmosphere(emp))  {
+        if (p.canTerraformAtmosphere(emp))  { 
             float hostileCost = min((atmosphereTerraformCost() - hostileBC), newBC);
             hostileCost = max(hostileCost,0);
             hostileBC += hostileCost;
@@ -177,7 +177,7 @@ public class ColonyEcology extends ColonySpendingCategory {
                 float orderAmt = c.orderAmount(Colony.Orders.TERRAFORM);
                 if (orderAmt > 0) {
                     c.removeColonyOrder(Colony.Orders.TERRAFORM);
-                    //c.addColonyOrder(Colony.Orders.FACTORIES, orderAmt);
+                    c.addColonyOrder(Colony.Orders.FACTORIES, orderAmt);
                 }
             }
         }
@@ -219,7 +219,7 @@ public class ColonyEcology extends ColonySpendingCategory {
             float orderAmt = c.orderAmount(Colony.Orders.TERRAFORM);
             if (orderAmt > 0) {
                 c.removeColonyOrder(Colony.Orders.TERRAFORM);
-                //colony().addColonyOrder(Colony.Orders.FACTORIES, orderAmt);
+                colony().addColonyOrder(Colony.Orders.FACTORIES, orderAmt);
             }
             else {
                 c.empire().governorAI().setColonyAllocations(c);
@@ -425,6 +425,7 @@ public class ColonyEcology extends ColonySpendingCategory {
         return tform + newPopCost;
     }
     public float terraformSpendingNeeded() {
+        float cleanCost = colony().minimumCleanupCost();
         Empire emp = empire();
         TechTree tech = emp.tech();
         Planet planet = planet();
@@ -453,7 +454,7 @@ public class ColonyEcology extends ColonySpendingCategory {
             terraformCost = max(0,terraformCost);
         }
 
-        return hostileCost + enrichCost + terraformCost;
+        return cleanCost + hostileCost + enrichCost + terraformCost;
     }
     public int terraformAllocationNeeded() {
         float needed = terraformSpendingNeeded();

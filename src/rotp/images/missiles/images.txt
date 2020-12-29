@@ -21,4 +21,6 @@ TORPEDO_PLASMA            | images/missiles/missile.png
 
 SPACE_AMOEBA              | images/missiles/SpaceAmoeba.png
 SPACE_CRYSTAL             | images/missiles/SpaceCrystal.png
+// modnar: add space pirate random event
+SPACE_PIRATES             | images/missiles/SpacePirates.png
 ORION_GUARDIAN            | images/missiles/OrionGuardian.png

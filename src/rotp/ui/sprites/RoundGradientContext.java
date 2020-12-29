@@ -67,7 +67,7 @@ public class RoundGradientContext implements Base, PaintContext {
                 float ratio1 = ratio;
                 float ratio2 = ratio;
 
-                if (radius <= 18) {
+                if (radius <= 60) { // modnar: changed to make map stars bypass this check, original: (radius <= 18)
                     if (distance > drawRadius)
                         ratio2 = ratio1 = 1.0f;
                     else if (distance <= coreEdge)
@@ -76,7 +76,7 @@ public class RoundGradientContext implements Base, PaintContext {
                         ratio2 = ratio1 = (distance - coreEdge) / (drawRadius -coreEdge);
                 }
                 else {
-                    float radiusPct = 0.15f;
+                    float radiusPct = 0.30f; // modnar: larger star core
                     if (ratio > 1.0)
                         // outside the star display radius, complete transparency
                         ratio2 = ratio1 = 1.0f;
