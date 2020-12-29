@@ -13,6 +13,7 @@
             <includes>
                 <include>**/*.class</include>
                 <include>**/*.txt</include>
+                <include>**/rotp-version.properties</include>
             </includes>
             <outputDirectory>/</outputDirectory>
         </fileSet>

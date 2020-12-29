@@ -1,0 +1,4 @@
+#NOTE: This is a Maven Resolver internal implementation file, its format can be changed without prior notice.
+#Tue Dec 29 13:06:54 GMT 2020
+native-transform-maven-plugin-1.0-SNAPSHOT.pom>=
+native-transform-maven-plugin-1.0-SNAPSHOT.jar>=

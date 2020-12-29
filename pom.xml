@@ -29,6 +29,18 @@
         </repository>
     </distributionManagement>
 
+    <pluginRepositories>
+        <pluginRepository>
+            <id>local-repository</id>
+            <url>file:///${project.basedir}/maven-repository</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 
     <dependencies>
         <dependency>
@@ -65,7 +77,15 @@
                 <directory>src</directory>
                 <excludes>
                     <exclude>**/*.java</exclude>
+                    <exclude>rotp-version.properties</exclude>
                 </excludes>
+            </resource>
+            <resource>
+                <directory>src</directory>
+                <includes>
+                    <include>rotp-version.properties</include>
+                </includes>
+                <filtering>true</filtering>
             </resource>
             <resource>
                 <directory>${project.basedir}</directory>
@@ -86,11 +106,14 @@
                 </configuration>
             </plugin>
 
-            <plugin> <!-- convert wav to ogg. Needs vorbis-tools package, oggenc executable -->
+            <plugin> 
                 <groupId>org.maven.coder</groupId>
                 <artifactId>native-transform-maven-plugin</artifactId>
+                <version>1.0-SNAPSHOT</version>
                 <executions>
+		    <!-- convert wav to ogg. Needs vorbis-tools package, oggenc executable -->
                     <execution>
+			<id>ogg</id>
                         <phase>compile</phase>
                         <goals>
                             <goal>run</goal>
@@ -107,20 +130,16 @@
                             </inputFiles>
                         </configuration>
                     </execution>
-                </executions>
-            </plugin>
-            <plugin> <!-- convert png/jpg to webp. Needs webp package, cwebp executable -->
-                <groupId>org.maven.coder</groupId>
-                <artifactId>native-transform-maven-plugin</artifactId>
-                <executions>
+		    <!-- convert png/jpg to webp. Needs webp package, cwebp executable -->
                     <execution>
+			<id>webp</id>
                         <phase>compile</phase>
                         <goals>
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <!-- quality 90 is visually same as original jpeg -->
-                            <!-- but given that people using minified version want small jar, let's use quality 80 -->
+                            <!-- quality 90 is visually indistinguishable from original jpeg -->
+                            <!-- but given that people using minified version want a small jar, let's use quality 80 -->
                             <command>cwebp -mt -q 80 ${input} -o ${output}</command>
                             <outputExtension>webp</outputExtension>
                             <errorToOutput>true</errorToOutput>
@@ -133,6 +152,7 @@
                             </inputFiles>
                         </configuration>
                     </execution>
+
                 </executions>
             </plugin>
 
@@ -160,6 +180,7 @@
                                     <mainClass>rotp.Rotp</mainClass>
                                     <manifestEntries>
                                         <Built-By>coder111@protonmail.com</Built-By>
+                                        <Mini>true</Mini>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>
@@ -200,6 +221,7 @@
                                     <excludes>
                                         <exclude>**/*.ogg</exclude>
                                         <exclude>**/*.webp</exclude>
+                                        <exclude>**/rotp-mini.properties</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
