@@ -52,7 +52,7 @@ text in the planetary spending screen. Since version 1.8 Governor is on by defau
 
 Additional features / changelog
 
-* 2.04.3. Initial support for minified version. Build and packaging fixes.
+* 2.05.1. Initial support for minified version. Build and packaging fixes. Fix the eco overspending bug.
 
 * 2.04.2. Attempts at improving github build & release process
 
