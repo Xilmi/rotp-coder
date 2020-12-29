@@ -7,11 +7,11 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.rayfowler</groupId>
 
-    <version>2.04.2</version>
+    <version>2.04.3</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>8</java.version>
-	<GITHUB_TOKEN></GITHUB_TOKEN>
+        <GITHUB_TOKEN></GITHUB_TOKEN>
     </properties>
 
     <scm>
@@ -20,6 +20,7 @@
         <url>https://github.com/coder111111/rotp-public.git</url>
         <tag>HEAD</tag>
     </scm>
+
     <distributionManagement>
         <repository>
             <id>github</id>
@@ -36,9 +37,25 @@
             <version>3.6.1</version>
         </dependency>
         <dependency>
+            <groupId>com.googlecode.soundlibs</groupId>
+            <artifactId>tritonus-share</artifactId>
+            <version>0.3.7.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.soundlibs</groupId>
+            <artifactId>vorbisspi</artifactId>
+            <version>1.0.3-1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.sejda.imageio</groupId>
+            <artifactId>webp-imageio</artifactId>
+            <version>0.1.2</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.11.2</version>
+            <version>2.11.3</version>
         </dependency>
     </dependencies>
     <build>
@@ -49,6 +66,13 @@
                 <excludes>
                     <exclude>**/*.java</exclude>
                 </excludes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}</directory>
+                <includes>
+                    <include>README.md</include>
+                </includes>
+                <filtering>true</filtering>
             </resource>
         </resources>
 
@@ -61,6 +85,57 @@
                     <target>${java.version}</target>
                 </configuration>
             </plugin>
+
+            <plugin> <!-- convert wav to ogg. Needs vorbis-tools package, oggenc executable -->
+                <groupId>org.maven.coder</groupId>
+                <artifactId>native-transform-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <command>oggenc ${input} -o ${output}</command>
+                            <outputExtension>ogg</outputExtension>
+                            <errorToOutput>true</errorToOutput>
+                            <inputFiles>
+                                <directory>${project.basedir}/src</directory>
+                                <includes>
+                                    <include>**/*.wav</include>
+                                </includes>
+                            </inputFiles>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin> <!-- convert png/jpg to webp. Needs webp package, cwebp executable -->
+                <groupId>org.maven.coder</groupId>
+                <artifactId>native-transform-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <!-- quality 90 is visually same as original jpeg -->
+                            <!-- but given that people using minified version want small jar, let's use quality 80 -->
+                            <command>cwebp -mt -q 80 ${input} -o ${output}</command>
+                            <outputExtension>webp</outputExtension>
+                            <errorToOutput>true</errorToOutput>
+                            <inputFiles>
+                                <directory>${project.basedir}/src</directory>
+                                <includes>
+                                    <include>**/*.png</include>
+                                    <include>**/*.jpg</include>
+                                </includes>
+                            </inputFiles>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -80,10 +155,60 @@
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>rotp.Rotp</mainClass>
                                     <manifestEntries>
-                                        <Built-By>coder111</Built-By>
+                                        <Built-By>coder111@protonmail.com</Built-By>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>com.rayfowler:rotp</artifact>
+                                    <excludes>
+                                        <exclude>**/*.ogg</exclude>
+                                        <exclude>**/*.webp</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- package minified jar -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <!-- Run shade goal on package phase -->
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedArtifactId>${project.artifactId}-mini</shadedArtifactId>
+                            <shadedClassifierName></shadedClassifierName>
+                            <transformers>
+                                <!-- add Main-Class to manifest file -->
+                                <!-- When launching full version, run Rotp directly, no need to go via RotpGovernor main -->
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>rotp.Rotp</mainClass>
+                                    <manifestEntries>
+                                        <Built-By>coder111@protonmail.com</Built-By>
+                                    </manifestEntries>
+                                </transformer>
+                            </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>com.rayfowler:rotp</artifact>
+                                    <excludes>
+                                        <exclude>**/*.wav</exclude>
+                                        <exclude>**/*.jpg</exclude>
+                                        <exclude>**/*.png</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
                         </configuration>
                     </execution>
                 </executions>
@@ -108,13 +233,14 @@
                                 </manifest>
                                 <manifestEntries>
                                     <Class-Path>Remnants.jar</Class-Path>
-                                    <Built-By>coder111</Built-By>
+                                    <Built-By>coder111@protonmail.com</Built-By>
                                 </manifestEntries>
                             </archive>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+            <!-- runs with github-release:github-release -->
             <plugin>
                 <groupId>com.ragedunicorn.tools.maven</groupId>
                 <artifactId>github-release-maven-plugin</artifactId>
@@ -125,14 +251,11 @@
                         <configuration>
                             <owner>coder111111</owner>
                             <repository>rotp-public</repository>
-			    <authToken>${GITHUB_TOKEN}</authToken>
-<!--
-                            <server>github-oauth</server>
--->
+                            <authToken>${GITHUB_TOKEN}</authToken>
                             <tagName>v${project.version}</tagName>
                             <name>ROTP with Planetary Governor v${project.version} beta</name>
                             <targetCommitish>master</targetCommitish>
-                            <releaseNotes>README.md</releaseNotes>
+                            <releaseNotes>target/classes/README.md</releaseNotes>
                             <assets>
                                 <asset>target/rotp-${project.version}.jar</asset>
                                 <asset>target/rotp-${project.version}-governor.jar</asset>

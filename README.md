@@ -33,15 +33,15 @@ amount of micromanagement needed drastically.
 
 To run the mod:
 
-* Download my distribution of rotp-2.04.1.jar (large file) and run that instead of 
-original game. You are also welcome to try rotp-mini-2.04.1.jar which is smaller
+* Download my distribution of rotp-${project.version}.jar (large file) and run that instead of 
+original game. You are also welcome to try rotp-mini-${project.version}.jar which is smaller
 as it uses better compression for game assets. 
 
 or
 
-* Download only the rotp-2.04.1-governor.jar
-* Place it in same directory that contains original Remnants.jar version Beta 1.4
-* Run rotp-2.04.1-governor.jar
+* Download only the rotp-${project.version}-governor.jar
+* Place it in same directory that contains original Remnants.jar
+* Run rotp-${project.version}-governor.jar
 
 Binary files are now built by github and available here: https://github.com/coder111111/rotp-public/packages/
 
@@ -51,6 +51,8 @@ text in the planetary spending screen. Since version 1.8 Governor is on by defau
 ---
 
 Additional features / changelog
+
+* 2.04.3. Initial support for minified version.
 
 * 2.04.2. Attempts at improving github build & release process
 

@@ -1,12 +1,12 @@
 /*
  * Copyright 2015-2020 Ray Fowler
- * 
+ *
  * Licensed under the GNU General Public License, Version 3 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.gnu.org/licenses/gpl-3.0.html
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,14 +15,16 @@
  */
 package rotp.util.sound;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import rotp.ui.UserPreferences;
 import rotp.ui.game.GameUI;
 import rotp.util.Base;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public enum SoundManager implements Base {
     INSTANCE;
@@ -45,13 +47,13 @@ public enum SoundManager implements Base {
     }
 
     private SoundManager() {  }
-    
+
     public static void loadSounds() {
         INSTANCE.init();
     }
 
     private void init() {
-        sounds.clear();        
+        sounds.clear();
         long st = System.currentTimeMillis();
         try {
             loadSoundFiles(soundListDir);
@@ -93,24 +95,24 @@ public enum SoundManager implements Base {
             disableOnError("on toggle:"+e.getMessage());
         }
     }
-    public void increaseMusicLevel()    { 
-        musicLevel = min(10, musicLevel+1); 
+    public void increaseMusicLevel()    {
+        musicLevel = min(10, musicLevel+1);
         resetMusicVolumes();
         UserPreferences.save();
     }
-    public void decreaseMusicLevel()    { 
-        musicLevel = max(0, musicLevel-1); 
-        resetMusicVolumes(); 
+    public void decreaseMusicLevel()    {
+        musicLevel = max(0, musicLevel-1);
+        resetMusicVolumes();
         UserPreferences.save();
     };
-    public void increaseSoundLevel()    { 
-        soundLevel = min(10, soundLevel+1); 
-        resetSoundVolumes(); 
+    public void increaseSoundLevel()    {
+        soundLevel = min(10, soundLevel+1);
+        resetSoundVolumes();
         UserPreferences.save();
     }
-    public void decreaseSoundLevel()    { 
-        soundLevel = max(0, soundLevel-1); 
-        resetSoundVolumes(); 
+    public void decreaseSoundLevel()    {
+        soundLevel = max(0, soundLevel-1);
+        resetSoundVolumes();
         UserPreferences.save();
     }
     private void resetSoundVolumes() {
@@ -267,14 +269,31 @@ public enum SoundManager implements Base {
     }
     private class Sound {
         private final String filename;
+        private transient final String oggFilename;
         private float gain = 0;
         public String style;
         boolean music = false;
+        private final boolean formatOgg;
         public Sound(String fn, float g, String s, boolean b) {
             filename = fn;
             gain = g;
             style = s;
             music = b;
+
+            this.oggFilename = OggClip.changeExtension(fn);
+            try {
+                try (InputStream is = WavClip.wavFileStream(oggFilename)) {
+                    if (is != null) {
+                        System.out.println("Found ogg sound file "+oggFilename);
+                        log("Found ogg sound file "+oggFilename);
+                        formatOgg = true;
+                    } else {
+                        formatOgg = false;
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e.getMessage(), e);
+            }
         }
         public float masterVolume() {
             if (music)
@@ -283,19 +302,30 @@ public enum SoundManager implements Base {
                 return SoundManager.soundLevel/ 10.0f;
         }
         public void setVolume(float vol) {
-            if (filename.endsWith("wav"))
+            if (filename.endsWith("wav")) {
+                if (formatOgg) {
+                    OggClip.setVolume(oggFilename, vol);
+                    return;
+                }
                 WavClip.setVolume(filename, vol);
+            }
         }
         public SoundClip play(float gain) {
-            if (filename.endsWith("wav"))
+            if (filename.endsWith("wav")) {
+                if (formatOgg) {
+                    return OggClip.play(oggFilename, gain, masterVolume());
+                }
                 return WavClip.play(filename, gain, masterVolume());
-            else
+            } else
                 return null;
         }
         public SoundClip playContinuously(float gain) {
-            if (filename.endsWith("wav"))
+            if (filename.endsWith("wav")) {
+                if (formatOgg) {
+                    return OggClip.playContinuously(oggFilename, gain, style, masterVolume());
+                }
                 return WavClip.playContinuously(filename, gain, style, masterVolume());
-            else
+            } else
                 return null;
         }
     }
