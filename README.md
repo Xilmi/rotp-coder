@@ -27,14 +27,15 @@ This RotP MOD contains many gameplay additions/changes from the official game ve
         - Should Improve All Art Instances
     - [**Colony Shield Display on Map**](https://i.imgur.com/QBUHiV4.png)
         - Toggle Between Two Display Styles
-    - [**Empire Range Display Blocks Background Stars, Larger Playable Stars**](https://i.imgur.com/Svbk2fv.png)
+    - **Empire Range Display Blocks Background Stars**
+        - Larger Playable Stars on Map
     - **Repeatable Random Events**
         - A Few Random Events are Non-Repeatable
     - **Horizontal TreasuryResearchBar**
     - **Disable Showing Help Tool-Tips at Start of New Game**
     - **Texture Defaults to OFF**
     - **FAST Research Rate Option** added to Advanced Options
-        - Flat half cost Techs
+        - Flat Half Cost Techs
     
 
 
