@@ -1450,7 +1450,8 @@ public final class Colony implements Base, IMappedObject, Serializable {
             //System.out.println("balance "+this.name()+" remainingBC "+remainingBC);
 
             // Check for terraforming / atmosphere / soil enrichment
-            float terraformBC = Math.min(ecology().terraformSpendingNeeded(), remainingBC);
+            // Since 2.05 or so ecology().terraformSpendingNeeded() includes cleanup cost
+            float terraformBC = Math.min(ecology().terraformSpendingNeeded() - cleanupCost, remainingBC);
             ecoBC += terraformBC;
             remainingBC = Math.max(remainingBC - terraformBC, 0);
             //System.out.println("balance "+this.name()+" terraformBC "+terraformBC);
