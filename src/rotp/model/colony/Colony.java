@@ -351,12 +351,16 @@ public final class Colony implements Base, IMappedObject, Serializable {
         empire().governorAI().setColonyAllocations(this);
         validate();
     }
-
     public void removeColonyOrder(Colony.Orders order) {
+        removeColonyOrder(order, true);
+    }
+    public void removeColonyOrder(Colony.Orders order, boolean resetAllocations) {
         if (orders.containsKey(order)) {
             orders.remove(order);
-            empire().governorAI().setColonyAllocations(this);
-            validate();
+            if (resetAllocations) {
+                empire().governorAI().setColonyAllocations(this);
+                validate();
+            }
         }
     }
 
@@ -500,7 +504,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
     }
     public void checkEcoAtClean() {
         recalcSpendingForNewTaxRate = false;
-        if ((keepEcoLockedToClean) && !locked[ECOLOGY]) {
+        if (!locked[ECOLOGY]) {
             int newAlloc = ecology().cleanupAllocationNeeded();
             if (allocation[ECOLOGY] < newAlloc) {
                 allocation[ECOLOGY] = cleanupAllocation = newAlloc;

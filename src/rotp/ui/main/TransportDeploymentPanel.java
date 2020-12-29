@@ -143,7 +143,11 @@ public class TransportDeploymentPanel extends SystemPanel {
                 cancel();
                 return;
             case KeyEvent.VK_SPACE:
-                acceptTransport();
+            case KeyEvent.VK_ENTER:
+                if (transportSprite().canAccept())
+                    acceptTransport();
+                else
+                    clearTransport();
                 return;
             case KeyEvent.VK_TAB:
                 // tab-targeting for transports
@@ -499,8 +503,6 @@ public class TransportDeploymentPanel extends SystemPanel {
         public void mouseReleased(MouseEvent e) {
             if (e.getButton() > 3)
                 return;
-            if (e.getClickCount() > 1)
-                return;;
             int x = e.getX();
             int y = e.getY();
 
