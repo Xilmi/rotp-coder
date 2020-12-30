@@ -15,6 +15,7 @@
  */
 package rotp.model.colony;
 
+import java.util.Map;
 import rotp.model.empires.Empire;
 
 public class ColonyDefense extends ColonySpendingCategory {
@@ -94,7 +95,6 @@ public class ColonyDefense extends ColonySpendingCategory {
     private float orderedShieldValue() {
         return shieldAtMaxLevel() ? 0 : colony().orderAmount(Colony.Orders.SHIELD);
     }
-    public float maintenanceCost() { return missileBaseMaintenanceCost(); }
     @Override
     public float orderedValue() {
         return max(super.orderedValue(),
@@ -162,7 +162,8 @@ public class ColonyDefense extends ColonySpendingCategory {
             float orderAmt = c.orderAmount(Colony.Orders.SHIELD);
             if (orderAmt > 0) {
                 c.removeColonyOrder(Colony.Orders.SHIELD);
-                c.addColonyOrder(Colony.Orders.BASES, orderAmt*2/5);
+                if (!missileBasesCompleted()) 
+                    c.addColonyOrder(Colony.Orders.BASES, orderAmt*2/5);
             }
         }
         if (missileBasesCompleted()) 
@@ -195,7 +196,16 @@ public class ColonyDefense extends ColonySpendingCategory {
         unallocatedBC = 0;
     }
     public float maxShieldLevel()      { return colony().starSystem().inNebula() ? 0 : tech().maxPlanetaryShieldLevel(); }
-    public float missileBaseMaintenanceCost() { return ((int) bases * missileBase.cost(empire()) * .02f); }
+    public float missileBaseMaintenanceCost(Map<MissileBase, Float> knownBaseCosts) { 
+        float baseCost = 0;
+        if (knownBaseCosts.containsKey(missileBase))
+            baseCost = knownBaseCosts.get(missileBase);
+        else {
+            baseCost = missileBase.cost(player());
+            knownBaseCosts.put(missileBase, baseCost);
+        }
+        return ((int) bases * baseCost * .02f); 
+    }
     private float missileUpgradeCost()  { return bases * (tech().newMissileBaseCost() - missileBase.cost(empire())); }
     public boolean isArmed()             { return missileBases() >= 1; }
     public int shieldLevel()             { return (int) (shield / 5) * 5; }

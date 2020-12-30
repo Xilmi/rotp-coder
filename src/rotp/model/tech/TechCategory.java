@@ -72,7 +72,12 @@ public final class TechCategory implements Base, Serializable {
     public List<String> knownTechs()       { return knownTechs; }
     public String currentTech()            { return currentTech; }
     public String currentTechName()        { return tech(currentTech).name(); }
-    public void currentTech(Tech t)        { currentTech = t.id(); }
+    public boolean currentTech(Tech t)        { 
+        if (!id().equals(t.cat.id()))
+            return false;
+        currentTech = t.id(); 
+        return true;
+    }
     public boolean locked()                { return researchCompleted || locked; }
     public void toggleLock()               { locked = !locked; }
     public String id()                     { return id(index); }
@@ -472,7 +477,7 @@ public final class TechCategory implements Base, Serializable {
     public void allocateResearchBC() {
         totalBC = totalBC + currentResearch();
 
-        // currentTech == null should only happen at game start
+       // currentTech == null should only happen at game start
         // and when all category techs have been research
         // knowntechs contains currentTech is an error condition
         // that needs to be recovered from
@@ -483,6 +488,17 @@ public final class TechCategory implements Base, Serializable {
                 return; // we are out of techs... skip this category
             else
                 setTechToResearch();
+        }
+        
+        // error case where current tech does not belong to this category, force
+        // a new selection, but keep RP in this category
+        if ((currentTech != null) && !tech(currentTech).cat.id().equals(id())) {
+            List<String> techs = techIdsAvailableForResearch();
+            if (techs.isEmpty())
+                return; // we are out of techs... skip this category
+            else
+                setTechToResearch();
+            return;
         }
         
         if (random() < discoveryChance()) 

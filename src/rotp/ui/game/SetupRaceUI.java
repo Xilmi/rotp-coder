@@ -79,7 +79,6 @@ public final class SetupRaceUI extends BasePanel implements MouseListener, Mouse
         createNewGameOptions();
         newGameOptions().copyOptions(options());
         raceChanged();
-                                                       
     }
     @Override
     public void paintComponent(Graphics g0) {

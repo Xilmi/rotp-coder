@@ -340,6 +340,7 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
     @Override
     public void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
+        setFontHints(g2);
         parent.checkMapInitialized();
         paintToImage(mapBuffer());
         g.drawImage(mapBuffer,0,0,null);
@@ -549,7 +550,7 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
            
         g.setColor(extendedBorder);
         g.setStroke(stroke2);
-        g.draw(clusterArea);
+        g.draw(clusterArea);   
         clusterArea.reset();
         
         
@@ -563,7 +564,7 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
         g.fill(clusterArea);
         g.setColor(normalBorder);
         g.setStroke(stroke2);
-        g.draw(clusterArea);
+        g.draw(clusterArea);   
 
     }
     private void drawGridCircularDisplayDark(Graphics2D g) {

@@ -154,10 +154,6 @@ public class ColonyIndustry extends ColonySpendingCategory {
                 else if (!c.defense().missileBasesCompleted())
                     c.addColonyOrder(Colony.Orders.BASES, orderAmt*2/5);
             }   
-            else {
-                empire().governorAI().setColonyAllocations(c);
-                c.validate();
-            }
         }
     }
     public void commitTurn() {

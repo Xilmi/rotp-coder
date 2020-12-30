@@ -23,10 +23,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import rotp.model.ai.AI;
 import rotp.model.ai.interfaces.Diplomat;
@@ -38,6 +40,7 @@ import rotp.model.ai.interfaces.ShipDesigner;
 import rotp.model.ai.interfaces.SpyMaster;
 import rotp.model.colony.Colony;
 import rotp.model.colony.ColonyShipyard;
+import rotp.model.colony.MissileBase;
 import rotp.model.empires.SpyNetwork.FleetView;
 import rotp.model.events.SystemColonizedEvent;
 import rotp.model.events.SystemHomeworldEvent;
@@ -119,6 +122,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     private float totalReserve = 0;
     private float tradePiracyRate = 0;
     private NamedObject lastAttacker;
+    private int defaultMaxBases = 1;
 
     private transient AI ai;
     private transient boolean[] canSeeShips;
@@ -195,6 +199,20 @@ public final class Empire implements Base, NamedObject, Serializable {
     public boolean scanPlanets()                  { return scanPlanets; }
     public void scanPlanets(boolean b)            { scanPlanets = (scanPlanets || b); }
     public void setRecalcDistances()              { recalcDistances = true; }
+    public int defaultMaxBases()                  { return defaultMaxBases; }
+    public boolean incrDefaultMaxBases()  { 
+        int maxBase=999;
+        if (defaultMaxBases == maxBase)
+            return false;
+        defaultMaxBases = min(maxBase, defaultMaxBases+1);
+        return true;
+    }
+    public boolean decrDefaultMaxBases() { 
+        if (defaultMaxBases == 0) 
+            return false;
+        defaultMaxBases = max(0, defaultMaxBases-1); 
+        return true;
+    }
 
     public Colony.Orders priorityOrders()         { return priorityOrders; }
     public void priorityOrders(Colony.Orders o)   { priorityOrders = o; }
@@ -539,8 +557,12 @@ public final class Empire implements Base, NamedObject, Serializable {
             from.transportSprite().clear();
     }
     public void addColonyOrder(Colony.Orders order, float amt) {
-        for (StarSystem sys: allColonizedSystems())
-            sys.colony().addColonyOrder(order, amt);
+        for (StarSystem sys: allColonizedSystems()) {
+            Colony col = sys.colony();
+            col.addColonyOrder(order, amt);
+            if (col.reallocationRequired)
+                governorAI().setColonyAllocations(col);     
+        }
     }
     public void addColonizedSystem(StarSystem s) {
         if (!colonizedSystems.contains(s)) {
@@ -2792,8 +2814,9 @@ public final class Empire implements Base, NamedObject, Serializable {
         float empireBC = totalPlanetaryProduction();
         float totalCostBC = 0;
         List<StarSystem> allSystems = new ArrayList<>(allColonizedSystems());
+        Map<MissileBase, Float> baseCosts = new HashMap<>();
         for (StarSystem sys: allSystems)
-            totalCostBC += sys.colony().defense().missileBaseMaintenanceCost();
+            totalCostBC += sys.colony().defense().missileBaseMaintenanceCost(baseCosts);
         return totalCostBC / empireBC;
     }
     public float totalStargateCostPct() {

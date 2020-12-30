@@ -219,11 +219,7 @@ public class ColonyEcology extends ColonySpendingCategory {
             float orderAmt = c.orderAmount(Colony.Orders.TERRAFORM);
             if (orderAmt > 0) {
                 c.removeColonyOrder(Colony.Orders.TERRAFORM);
-                colony().addColonyOrder(Colony.Orders.FACTORIES, orderAmt);
-            }
-            else {
-                c.empire().governorAI().setColonyAllocations(c);
-                c.validate();
+                c.addColonyOrder(Colony.Orders.FACTORIES, orderAmt);
             }
         }
     }

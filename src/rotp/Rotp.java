@@ -38,10 +38,10 @@ public class Rotp {
     private static final int MB = 1048576;
     public static int IMG_W = 1229;
     public static int IMG_H = 768;
-    public static String jarFileName = "RotP-2.05_modnar_MOD15.jar";
+    public static String jarFileName = "RotP-2.06_modnar_MOD16.jar";
     private static String jarPath;
     private static JFrame frame;
-    public static String releaseId = "Beta 2.05 modnar_MOD15";
+    public static String releaseId = "Beta 2.06 modnar_MOD16";
     public static long startMs = System.currentTimeMillis();
     public static long maxHeapMemory = Runtime.getRuntime().maxMemory() / 1048576;
     public static long maxUsedMemory;
