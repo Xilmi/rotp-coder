@@ -109,6 +109,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
     private transient boolean hasNewOrders = false;
     private transient int cleanupAllocation = 0;
     private transient boolean recalcSpendingForNewTaxRate;
+    public transient boolean reallocationRequired = false;
 
     public void toggleRecalcSpending()         { recalcSpendingForNewTaxRate = true; }
     public boolean underSiege()                { return underSiege; }
@@ -191,6 +192,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         setPopulation(2);
         shipyard().goToNextDesign();
         defense().updateMissileBase();
+        defense().maxBases(empire().defaultMaxBases());
         cleanupAllocation = -1;
     }
     public boolean isBuildingShip() { return shipyard().design() instanceof ShipDesign; }
@@ -348,19 +350,12 @@ public final class Colony implements Base, IMappedObject, Serializable {
 
         hasNewOrders = true;
         orders.put(order, amt);
-        empire().governorAI().setColonyAllocations(this);
-        validate();
+        reallocationRequired = true;
     }
     public void removeColonyOrder(Colony.Orders order) {
-        removeColonyOrder(order, true);
-    }
-    public void removeColonyOrder(Colony.Orders order, boolean resetAllocations) {
         if (orders.containsKey(order)) {
             orders.remove(order);
-            if (resetAllocations) {
-                empire().governorAI().setColonyAllocations(this);
-                validate();
-            }
+            reallocationRequired = true;
         }
     }
 
@@ -446,6 +441,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
                     , str(defense().allocation()) , "-" , str(industry().allocation()) , "-" , str(ecology().allocation()) , "-"
                     , str(research().allocation()) , "]");
         previousPopulation = population;
+        reallocationRequired = false;          
 
         ensureProperSpendingRates();
         // if rebelling, nothing happens (only enough prod assumed to clean new
@@ -501,6 +497,10 @@ public final class Colony implements Base, IMappedObject, Serializable {
         research().assessTurn();
         
         checkEcoAtClean();
+        
+        if (reallocationRequired)
+            empire().governorAI().setColonyAllocations(this);            
+
     }
     public void checkEcoAtClean() {
         recalcSpendingForNewTaxRate = false;

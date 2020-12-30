@@ -102,8 +102,13 @@ public class AIGovernor implements Base, Governor {
         }
         if (col.ecology().terraformCompleted())
             session().addSystemToAllocate(sys, text("MAIN_ALLOCATE_TERRAFORM_COMPLETE", name));
-        if (col.hasNewOrders() || (col.allocationRemaining() != 0) || session().awaitingAllocation(sys))
+        if (col.research().hasCompletedProject()) 
+            session().addSystemToAllocate(sys, text("MAIN_ALLOCATE_PROJECT_ENDED", name, col.research().completedProject().projectKey()));
+            
+        if (col.hasNewOrders() || (col.allocationRemaining() != 0) || session().awaitingAllocation(sys)) {
             baseSetPlayerAllocations(col);
+            col.validate();
+        }
     }
     private void baseSetPlayerAllocations(Colony col) {
         int prevShip = col.shipyard().allocation();
@@ -125,11 +130,11 @@ public class AIGovernor implements Base, Governor {
         col.clearUnlockedSpending();
         col.hasNewOrders(false);
         
-        // spend ECO for cleaning before anything else
+        // 1. spend ECO for cleaning before anything else
         if (!col.locked(ECOLOGY))
             col.addAllocation(ECOLOGY, min(col.allocationRemaining(), cleanEco-col.allocation(ECOLOGY)));
 
-        // NOW ENSURE ORDERED AMOUNTS ARE MET (orders set when techs are learned)
+        // 2. NOW ENSURE ORDERED AMOUNTS ARE MET (orders set when techs are learned)
         // priority of orders is: industry, ecology, defense, ship, research
         // but do not exceed the max needed to finish the project
         if (!col.locked(INDUSTRY))
@@ -138,8 +143,14 @@ public class AIGovernor implements Base, Governor {
             col.setAllocation(ECOLOGY,  min(orderedEco, maxEco));
         if (!col.locked(DEFENSE))
             col.setAllocation(DEFENSE,  min(orderedDef, maxDef));
+        
+        // 3. Ensure SHIP spending is maintained. Ship spending is never allocaated 
+        // for player colonies by the AI Governor so any spending here must be treated
+        // similarly to a player order
+        if (!col.locked(SHIP))
+            col.setAllocation(SHIP, prevShip);
  
-        // now fill any remaining build requirements for ind/eco/def
+        // 4. now fill any remaining build requirements for ind/eco/def
         // being careful not to exceed previous spending in that category
         // i.e. if we raise spending in a category, it is only because
         // it was ordered by a new technology
@@ -150,12 +161,6 @@ public class AIGovernor implements Base, Governor {
         if (!col.locked(DEFENSE))
             col.setAllocation(DEFENSE,  min(prevDef, maxDef));
 
-        // try to maintain previous ship/res for players when possible
-        if (!col.locked(SHIP))
-            col.setAllocation(SHIP, prevShip);
-        if (!col.locked(RESEARCH))
-            col.setAllocation(RESEARCH, prevRes);
-        
         // SPEND THE EXCESS
         // if there is industry left to build, go there first
         if (!col.locked(INDUSTRY))
