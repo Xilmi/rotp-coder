@@ -270,7 +270,7 @@ public final class TechShipWeapon extends Tech {
                 heavyStroke = 5;
                 break;
             case 16: // DEATH RAY
-                range = 4;
+                range = 1; // modnar: change death ray range to 1, same as MoO1
                 damageLow = 200;
                 damageHigh = 1000;
                 weaponWidth = 10;
