@@ -944,6 +944,12 @@ public final class Empire implements Base, NamedObject, Serializable {
                 if (c.expectedPopulation() < c.planet().currentSize()) {
                     continue;
                 }
+                // if this option is checked, don't send out population out of planets which are Rich or Artefacts
+                if (options.isTransportRichDisabled() &&
+                        (c.planet().isResourceRich() || c.planet().isResourceUltraRich() ||
+                                c.planet().isArtifact() || c.planet().isOrionArtifact())) {
+                    continue;
+                }
                 // TODO: ship population out earlier?
                 if (!c.ecology().isCompleted()) {
                     continue;
@@ -983,7 +989,10 @@ public final class Empire implements Base, NamedObject, Serializable {
                 if (transportTime > maxTime) {
                     break;
                 }
-                // if population will grow large enough natually before transports arrive, don't transport.
+                // TODO: Take into account proper governing, simulate X turns
+                // That's close to impossible, Colony has multiple side effects on Planet and on Empire and
+                // produces ships
+                // if population will grow large enough naturally before transports arrive, don't transport.
                 double expectedPopAtTransportTime = c.population() +
                         Math.pow(1+c.normalPopGrowth() / c.population(), transportTime);
                 if (expectedPopAtTransportTime >= c.planet().currentSize()) {
@@ -992,7 +1001,12 @@ public final class Empire implements Base, NamedObject, Serializable {
 
                 System.out.println("Will transport from "+donor.name()+" to "+c.name());
                 System.out.println("Before transport expectedPopulation= "+c.expectedPopulation());
-                donor.scheduleTransportsToSystem(c.starSystem(), options.getTransportPopulation());
+                int populationToTransport = options.getTransportPopulation();
+                // if this option is set, transport 2x population from poor planets
+                if (options.isTransportPoorDouble() && (c.planet().isResourcePoor() || c.planet().isResourceUltraPoor()) ) {
+                    populationToTransport *= 2;
+                }
+                donor.scheduleTransportsToSystem(c.starSystem(), populationToTransport);
                 System.out.println("After transport expectedPopulation="+c.expectedPopulation());
                 donors.remove(0);
                 // adjust needed population!
@@ -1008,7 +1022,6 @@ public final class Empire implements Base, NamedObject, Serializable {
 
         boolean scoutHasResrerveFuel = false;
         // Pick scout designs
-
         List<ShipDesign> scoutDesigns = new ArrayList<>();
         int minWarpSpeed = 999;
         for (ShipDesign sd: shipLab().designs()) {
