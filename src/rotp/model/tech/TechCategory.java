@@ -467,7 +467,7 @@ public final class TechCategory implements Base, Serializable {
         return upcomingDiscoveryChance(tree.empire().totalPlanetaryResearch());
     }
     public float currentResearch() {
-        return currentResearch(tree.empire().totalPlanetaryResearch());
+        return currentResearch(tree.totalResearchThisTurn);
     }
     public float currentResearch(float totalRP) {
         float categoryBC = totalRP * allocationPct();

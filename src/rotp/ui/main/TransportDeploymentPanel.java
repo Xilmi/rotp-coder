@@ -135,7 +135,7 @@ public class TransportDeploymentPanel extends SystemPanel {
             case KeyEvent.VK_1:
                 switch (mods) {
                     case 0: increment(true); break;
-                    case 1: decrement(true); break;
+                    case 64: decrement(true); break;
                     default:  break;
                 }
                 return;
@@ -393,7 +393,7 @@ public class TransportDeploymentPanel extends SystemPanel {
             }
 
             textureClip = new Rectangle2D.Float(0,s8,w,scaled(108));
-            int maxDestSize = pl.sv.maxTransportsToReceive(dest.id);
+            //int maxDestSize = pl.sv.maxTransportsToReceive(dest.id);
             maxSendingSize = enableAbandon? pl.sv.population(from.id): pl.sv.maxTransportsToSend(from.id);
             int turns = (int) Math.ceil(from.transportTimeTo(dest));
 
@@ -446,7 +446,7 @@ public class TransportDeploymentPanel extends SystemPanel {
                 int boxH = boxBottomY - boxTopY;
                 int boxBorderW = s3;
 
-                sliderBox.setBounds(boxL+boxBorderW, boxTopY+boxBorderW, boxW-(2*boxBorderW), boxH-(2*boxBorderW));
+                sliderBox.setBounds(boxL+boxBorderW, boxTopY-boxBorderW, boxW-(2*boxBorderW), boxH+(2*boxBorderW));
 
                 g.setColor(sliderBackEnabled);
                 g.fillRect(boxL, boxTopY, boxW, boxH);
@@ -513,6 +513,10 @@ public class TransportDeploymentPanel extends SystemPanel {
             else if (sliderBox.contains(x,y)) {
                 float pct = (float) (x -sliderBox.x) / sliderBox.width;
                 if (pct >= 0) {
+                    if (pct < .05)
+                       pct = 0;
+                    else if (pct > .95)
+                       pct = 1;
                     transportSprite().amt(bounds(0, (int)(pct*maxSendingSize), maxSendingSize));
                     parentSpritePanel.repaint();
                 }
@@ -549,14 +553,18 @@ public class TransportDeploymentPanel extends SystemPanel {
             }
         }
     }
-    class ToSystemDetailPane extends BasePanel {
+    class ToSystemDetailPane extends BasePanel implements MouseMotionListener, MouseListener {
         private static final long serialVersionUID = 1L;
+        Shape hoverBox;
+        Rectangle flagBox = new Rectangle();
         public ToSystemDetailPane() {
             init();
         }
         private void init() {
             setPreferredSize(new Dimension(getWidth(),s80));
             setBackground(MainUI.paneBackground);
+            addMouseMotionListener(this);
+            addMouseListener(this);
         }
         @Override
         public String textureName()            { return TEXTURE_GRAY; }
@@ -614,6 +622,17 @@ public class TransportDeploymentPanel extends SystemPanel {
             }
             String name = pl.sv.descriptiveName(id);
             drawShadowedString(g, name, 2, leftM, s22, MainUI.shadeBorderC(), SystemPanel.whiteLabelText);
+            
+            Color flagC = parentSpritePanel.parent.flagColor(sys);
+            if (hoverBox == flagBox) 
+                sys.drawBanner(g, flagC, SystemPanel.yellowText, w-s10,s35);
+            else {
+                Color c1 = flagC == null ? SystemPanel.blackText : SystemPanel.whiteText;
+                sys.drawBanner(g, flagC, c1, w-s10,s35);
+            }
+
+            flagBox.setBounds(w-s30,s5,s20,s60);            
+            
             String error = null;
             if (!pl.sv.inShipRange(id))
                 error = text("MAIN_TRANSPORT_OUT_OF_RANGE");
@@ -674,6 +693,44 @@ public class TransportDeploymentPanel extends SystemPanel {
                 g.drawLine(0, y1-s18, w, y1-s18);
                 g.drawLine(x1-s5, y0-s19, x1-s5, y0+s31);
                 g.setStroke(prevStroke);
+            }
+        }
+        public void toggleFlagColor() {
+            StarSystem sys = destination();
+            player().sv.view(sys.id).toggleFlagColor();
+            parentSpritePanel.parent.repaint();
+        }
+        @Override
+        public void mouseDragged(MouseEvent e) { }
+        @Override
+        public void mouseMoved(MouseEvent e) {
+            int x = e.getX();
+            int y = e.getY();
+            Shape prevHover = hoverBox;
+            hoverBox = null;
+            if (flagBox.contains(x,y))
+                hoverBox = flagBox;
+
+            if (prevHover != hoverBox)
+                repaint();
+        }
+        @Override
+        public void mouseClicked(MouseEvent e) { }
+        @Override
+        public void mousePressed(MouseEvent e) { }
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            if (hoverBox == flagBox) {
+                toggleFlagColor();
+           }
+        }
+        @Override
+        public void mouseEntered(MouseEvent e) { }
+        @Override
+        public void mouseExited(MouseEvent e) { 
+            if (hoverBox != null) {
+                hoverBox = null;
+                repaint();
             }
         }
     }

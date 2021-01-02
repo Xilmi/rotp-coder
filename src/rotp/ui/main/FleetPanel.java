@@ -384,6 +384,8 @@ public class FleetPanel extends BasePanel implements MapSpriteViewer {
             case KeyEvent.VK_TAB:
                 // tab-targeting for transports
                 ShipFleet fl = adjustedFleet();
+                if (fl == null)
+                    break;
                 StarSystem currSys;
                 if (tentativeDest() != null)
                     currSys = tentativeDest();

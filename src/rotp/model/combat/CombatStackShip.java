@@ -171,8 +171,10 @@ public class CombatStackShip extends CombatStack {
         int maxRange = 0;
         for (int i=0;i<weapons.size();i++) {
             ShipComponent wpn = weapons.get(i);
-            if (!tgt.isColony() || !wpn.groundAttacksOnly())
-                maxRange = max(maxRange,weaponRange(wpn));
+            if (!tgt.isColony() || !wpn.groundAttacksOnly()) {
+                if (roundsRemaining[i]>0)
+                    maxRange = max(maxRange,weaponRange(wpn));
+            }
         }
         return maxRange;
     }
@@ -365,10 +367,12 @@ public class CombatStackShip extends CombatStack {
                 log(fullName(), " firing ", str(count), " ", selectedWeapon.name(), " at ", targetStack.fullName());
                 selectedWeapon.fireUpon(this, target, count);
             }
-            if (target == null) 
-                log("TARGET IS NULL AFTER BEING FIRED UPON!");
             if (selectedWeapon.isLimitedShotWeapon())
                 roundsRemaining[index] = max(0, roundsRemaining[index]-1);
+            if (target == null) {
+                log("TARGET IS NULL AFTER BEING FIRED UPON!");
+                return;
+            }
             if (target.damageSustained > 0)
                 log("weapon damage: ", str(target.damageSustained));
         }

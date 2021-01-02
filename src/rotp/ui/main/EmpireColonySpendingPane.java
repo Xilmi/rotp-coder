@@ -417,6 +417,12 @@ public class EmpireColonySpendingPane extends BasePanel {
                         misClick();
                     else {
                         softClick();
+                        // clicks near the edge of the box are typically trying
+                        // to zero or max them out. Assume that.
+                        if (pct < .05)
+                            pct = 0;
+                        else if (pct > .95)
+                            pct = 1;
                         colony.forcePct(category, pct);
                         parent.repaint();
                     }
@@ -462,8 +468,8 @@ public class EmpireColonySpendingPane extends BasePanel {
 
             if ((x < minX)
             || (x > maxX)
-            || (y < (boxTopY()+bw))
-            || (y > (boxBottomY()-bw)))
+            || (y < (boxTopY()-bw))
+            || (y > (boxBottomY()+bw)))
                 return -1;
 
             float num = x - minX;
