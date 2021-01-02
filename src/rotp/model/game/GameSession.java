@@ -305,7 +305,7 @@ public final class GameSession implements Base, Serializable {
                 log("Next Turn - BEGIN: ", str(galaxy.currentYear()));
                 log("Autosaving pre-turn");
                 instance.saveRecentSession(false);
-                
+                instance.autoSaveSession(false); // modnar: auto-save pre next turn
                 
 				/*
 				// modnar: private logging
@@ -784,6 +784,21 @@ public final class GameSession implements Base, Serializable {
             err("Error saving: ", RECENT_SAVEFILE, " - ", e.getMessage());
             if (showWarning)
                 RotPUI.instance().mainUI().showAutosaveFailedPrompt(e.getMessage());
+        }
+    }
+    // modnar: pre next turn auto-save every n-turns, set in UserPreferences.autoSaveTurns()
+    public void autoSaveSession(boolean showWarning) {
+        if (UserPreferences.autoSaveTurns() <= 0) {return;} // if autoSaveTurns=0, no auto-saves
+        try {
+            if ((galaxy.currentTurn() == 1) || (galaxy.currentTurn() % UserPreferences.autoSaveTurns() == 0)) {
+                // auto-save name: LeaderName-GalaxyShape-GalaxySize-Difficulty-Turn#
+                // strip white space from leader name and galaxy shape
+                String autoPreSave = String.format("%s-%s-%s-%s-T%04d.rotp", options().selectedLeaderName().replaceAll("\\s", ""), text(options().selectedGalaxyShape()).replaceAll("\\s", ""), text(options().selectedGalaxySize()), text(options().selectedGameDifficulty()), galaxy.currentTurn());
+                saveSession(autoPreSave);
+            }
+        }
+        catch(Exception e) {
+            err("Error trying to auto-save: ", e.getMessage());
         }
     }
     public boolean hasRecentSession() {
