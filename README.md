@@ -17,6 +17,7 @@ This RotP MOD contains many gameplay additions/changes from the official game ve
 - [**Options in Remnants.cfg for New Game Modes**](https://i.imgur.com/fQSRrch.png)
 - [**New Space Pirates Random Event**](https://i.imgur.com/jBu21Pt.png)
 - [**Quality of Life Improvements**](https://i.imgur.com/lBAVLpV.png)
+    - [**Auto-Saves**](https://i.imgur.com/TfAXG2P.png)
     - **Increased Minimum Empire Homeworld Separation** (**10 ly**, up from 6 ly in the official version)
         - Reduce Max Number of Empires for Map Sizes
     - **Colony Map Info Shorthand**
@@ -27,6 +28,7 @@ This RotP MOD contains many gameplay additions/changes from the official game ve
         - Should Improve All Art Instances
     - [**Colony Shield Display on Map**](https://i.imgur.com/QBUHiV4.png)
         - Toggle Between Two Display Styles
+    - [**Display Alien Fortress on System View Panel**](https://i.imgur.com/se4Y7fc.png)
     - **Empire Range Display Blocks Background Stars**
         - Larger Playable Stars on Map
     - **Repeatable Random Events**
