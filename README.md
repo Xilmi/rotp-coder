@@ -52,6 +52,9 @@ text in the planetary spending screen. Since version 1.8 Governor is on by defau
 
 Additional features / changelog
 
+* 2.07.1. Merge v2.07 Beta. Don't build ships after finishing stargate. Major refactor of autoscout/autocolonize. 
+New autotransport options for Rich/Poor planets. Change option defaults- not more features are on by default.
+
 * 2.05.3. Minified version fixed- now game start should not crash. Fixed small exercution issue on governor only jar.
 
 * 2.05.2. Initial support for minified version. Build and packaging fixes. Fix the eco overspending bug.
