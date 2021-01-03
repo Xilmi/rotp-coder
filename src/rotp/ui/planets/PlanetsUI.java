@@ -1506,7 +1506,7 @@ public class PlanetsUI extends BasePanel implements SystemViewer {
             lbl = text("PLANETS_COSTS_BASES");
             sw = g.getFontMetrics().stringWidth(lbl);
             drawShadowedString(g, lbl, 2, midX-sw, y1, SystemPanel.textShadowC, SystemPanel.whiteText);
-            val = text("PLANETS_AMT_PCT", fmt(100*player().totalMissileBaseCostPct(),1));
+            val = text("PLANETS_AMT_PCT", fmt(100*player().missileBaseCostPerBC(),1));
             sw = g.getFontMetrics().stringWidth(val);
             g.setColor(palette.black);
             g.drawString(val, midX+s50-sw, y1);
@@ -1516,7 +1516,7 @@ public class PlanetsUI extends BasePanel implements SystemViewer {
             lbl = text("PLANETS_COSTS_STARGATES");
             sw = g.getFontMetrics().stringWidth(lbl);
             drawShadowedString(g, lbl, 2, midX-sw, y1, SystemPanel.textShadowC, SystemPanel.whiteText);
-            val = text("PLANETS_AMT_PCT", fmt(100*player().totalStargateCostPct(),1));
+            val = text("PLANETS_AMT_PCT", fmt(100*player().stargateCostPerBC(),1));
             sw = g.getFontMetrics().stringWidth(val);
             g.setColor(palette.black);
             g.drawString(val, midX+s50-sw, y1);
@@ -1677,7 +1677,7 @@ public class PlanetsUI extends BasePanel implements SystemViewer {
             drawShadowedString(g, label, 2, midP-sw, y1, SystemPanel.textShadowC, SystemPanel.whiteText);
 
             g.setColor(palette.black);
-            String text = text("PLANETS_AMT_BC", (int)player().totalReserve());
+            String text = text("PLANETS_AMT_BC", shortFmt(player().totalReserve()));
             g.drawString(text, midP+s10, y1);
 
             y1 += s10;
@@ -1700,8 +1700,15 @@ public class PlanetsUI extends BasePanel implements SystemViewer {
             drawSliderBox(g, x1, y1-s15, boxW, s18);
 
             String result;
-            if (player().empireTaxLevel() > 0)
-                result = text("PLANETS_RESERVE_INCREASE", fmt(player().empireTaxRevenue(),1));
+            if (player().empireTaxLevel() > 0) {
+                float revenue = player().empireTaxRevenue();
+                String revStr;
+                if (revenue < 100)
+                    revStr = fmt(player().empireTaxRevenue(),1);
+                else
+                    revStr = shortFmt(revenue);
+                result = text("PLANETS_RESERVE_INCREASE", revStr);
+            }
             else
                 result = text("PLANETS_RESERVE_NO_TAX");
             g.setFont(narrowFont(16));
