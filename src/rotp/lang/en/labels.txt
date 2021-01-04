@@ -157,7 +157,7 @@ EVENT_SPACE_CRYSTAL_3             | The Space Crystal was destroyed by [race] de
 EVENT_SPACE_PIRATES               | A fleet of marauding Space Pirates have been spotted approaching the [system] system. Defending [race] colonists and fleets are preparing for the worst.
 EVENT_SPACE_PIRATES_1             | A fleet of marauding Space Pirates have been spotted approaching the uncolonized [system] system.
 EVENT_SPACE_PIRATES_2             | The dreaded Space Pirates have ravaged the population and pillaged all industry on the [race] colony in the [system] system, devastating the local ecology.
-EVENT_SPACE_PIRATES_3             | The Space Pirate fleet was destroyed by [race] defenders in the [system] system.
+EVENT_SPACE_PIRATES_3             | The Space Pirate fleet was destroyed by [race] defenders in the [system] system. Significant riches found in the wreckage have been seized by the [race] military to bolster their Planetary Reserve.
 
 SYSEVENT_HOMEWORLD                | Homeworld for the %1.
 SYSEVENT_SCOUTED                  | First scouted by the %1.
@@ -204,7 +204,7 @@ INC_CLOSED_EMBASSY_DESC           | The [your_empire] ceased diplomatic relation
 INC_BROKE_ALLIANCE_TITLE          | Broke Alliance
 INC_BROKE_ALLIANCE_DESC           | The [your_empire] broke their Alliance with the [my_empire].
 INC_BROKE_PACT_TITLE              | Broke Non-Aggression Pact
-INC_BROKE_PACT_DESC               | The[your_empire] broke their Non-Aggression Pact with the [my_empire].
+INC_BROKE_PACT_DESC               | The [your_empire] broke their Non-Aggression Pact with the [my_empire].
 INC_BROKE_TRADE_TITLE             | Broke Trade Treaty
 INC_BROKE_TRADE_DESC              | The [your_empire] broke their Trade Treaty with the [my_empire].
 INC_ATTACKED_COLONY_TITLE         | Attacked Colony

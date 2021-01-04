@@ -135,6 +135,12 @@ public class RandomEventSpacePirates implements Base, Serializable, RandomEvent 
         galaxy().events().removeActiveEvent(this);
         
         monster.plunder();
+        
+        // destroying the space pirates gives reserve BC, scaling with turn number
+        Empire heroEmp = monster.lastAttacker();
+        int turnNum = galaxy().currentTurn();
+        int spoilsBC = turnNum * 25;
+        heroEmp.addToTreasury(spoilsBC);
 
         if (player().knowsOf(galaxy().empire(empId)) || !player().sv.name(sysId).isEmpty())
             GNNNotification.notifyRandomEvent(notificationText("EVENT_SPACE_PIRATES_3", monster.lastAttacker()), "GNN_Event_Pirates");

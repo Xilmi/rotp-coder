@@ -59,27 +59,30 @@ public class CombatStackSpacePirates extends CombatStack {
 			if (empTechLvl > maxTechLvl)
 				maxTechLvl = empTechLvl;
 		}
+        // reduce maxTechLvl to fine-tune Space Pirate strength
+        maxTechLvl = (float)Math.max(1.0f, maxTechLvl - 2.0f);
 		//maxTechLvl = (float)(Math.random() * 59); // testing
 		//stackScale = (float)(Math.random() * 3); // testing
 		
 		// modnar: customize different number of Space Pirate ship stacks for different tech levels
-		// also gradually scale number of weapons within each design tier, 75% to 100%
+		// also gradually scale number of weapons, attackLevel, and defenses within each design tier, 75% to 100%
 		float weaponScale = 1.0f;
 		if (maxTechLvl <= 5) {
+			weaponScale = (maxTechLvl + 15.0f)/20.0f;// gradually scale weapon count
 			num = 5;
 			maxHits = hits = 18;
 			maxMove = move = 1;
 			maneuverability = 1;
-			attackLevel = 2;
-			beamDefense = 2;
-			missileDefense = 3;
+			attackLevel = (int)Math.round(weaponScale*2);
+			beamDefense = (int)Math.round(weaponScale*2);
+			missileDefense = (int)Math.round(weaponScale*3);
 			maxShield = shield = 1.0f;
 			specials.add(new ShipSpecialScanner((TechScanner)tech("Scanner:0"))); // battle scanner
 			weapons.add(new ShipWeaponBeam((TechShipWeapon) tech("ShipWeapon:0"), false)); // laser
 			weapons.add(new ShipWeaponBeam((TechShipWeapon) tech("ShipWeapon:0"), true)); // heavy laser
 			weapons.add(new ShipWeaponMissile((TechMissileWeapon) tech("MissileWeapon:0"), false, 5, 4, 2.0f)); // nuclear missiles
 			weapons.add(new ShipWeaponBomb((TechBombWeapon) tech("BombWeapon:0"))); // nuclear bombs
-			weaponScale = (maxTechLvl + 15.0f)/20.0f;// gradually scale weapon count
+
 			weaponCount[0] = (int)Math.round(weaponScale*3);
 			weaponCount[1] = (int)Math.round(weaponScale*5);
 			weaponCount[2] = (int)Math.round(weaponScale*3);
@@ -94,20 +97,20 @@ public class CombatStackSpacePirates extends CombatStack {
 			shotsRemaining[3] = 1;
 		}
 		else if ((maxTechLvl > 5) && (maxTechLvl <= 10)) {
+			weaponScale = (maxTechLvl + 10.0f)/20.0f;// gradually scale weapon count
 			num = (int)Math.ceil(stackScale*maxTechLvl);
 			maxHits = hits = 18;
 			maxMove = move = 2;
 			maneuverability = 2;
-			attackLevel = 3;
-			beamDefense = 3;
-			missileDefense = 5;
+			attackLevel = (int)Math.round(weaponScale*3);
+			beamDefense = (int)Math.round(weaponScale*3);
+			missileDefense = (int)Math.round(weaponScale*4);
 			maxShield = shield = 2.0f;
 			specials.add(new ShipSpecialScanner((TechScanner)tech("Scanner:0"))); // battle scanner
 			weapons.add(new ShipWeaponBeam((TechShipWeapon) tech("ShipWeapon:1"), false)); // gatling laser
 			weapons.add(new ShipWeaponBeam((TechShipWeapon) tech("ShipWeapon:2"), false)); // npg
 			weapons.add(new ShipWeaponMissile((TechMissileWeapon) tech("MissileWeapon:1"), false, 5, 5, 2.5f)); // hyper-v missiles
 			weapons.add(new ShipWeaponBomb((TechBombWeapon) tech("BombWeapon:1"))); // fusion bombs
-			weaponScale = (maxTechLvl + 10.0f)/20.0f;// gradually scale weapon count
 			weaponCount[0] = (int)Math.round(weaponScale*3);
 			weaponCount[1] = (int)Math.round(weaponScale*6);
 			weaponCount[2] = (int)Math.round(weaponScale*3);
@@ -122,20 +125,20 @@ public class CombatStackSpacePirates extends CombatStack {
 			shotsRemaining[3] = 1;
 		}
 		else if ((maxTechLvl > 10) && (maxTechLvl <= 15)) {
+			weaponScale = (maxTechLvl + 5.0f)/20.0f;// gradually scale weapon count
 			num = (int)Math.ceil(stackScale*maxTechLvl);
 			maxHits = hits = 27;
 			maxMove = move = 2;
 			maneuverability = 3;
-			attackLevel = 4;
-			beamDefense = 4;
-			missileDefense = 7;
+			attackLevel = (int)Math.round(weaponScale*4);
+			beamDefense = (int)Math.round(weaponScale*4);
+			missileDefense = (int)Math.round(weaponScale*5);
 			maxShield = shield = 3.0f;
 			specials.add(new ShipSpecialScanner((TechScanner)tech("Scanner:0"))); // battle scanner
 			weapons.add(new ShipWeaponBeam((TechShipWeapon) tech("ShipWeapon:3"), false)); // ion cannon
 			weapons.add(new ShipWeaponBeam((TechShipWeapon) tech("ShipWeapon:3"), true)); // heavy ion cannon
 			weapons.add(new ShipWeaponMissile((TechMissileWeapon) tech("MissileWeapon:2"), false, 5, 5, 2.5f)); // hyper-x missiles
 			weapons.add(new ShipWeaponBomb((TechBombWeapon) tech("BombWeapon:1"))); // fusion bombs
-			weaponScale = (maxTechLvl + 5.0f)/20.0f;// gradually scale weapon count
 			weaponCount[0] = (int)Math.round(weaponScale*4);
 			weaponCount[1] = (int)Math.round(weaponScale*7);
 			weaponCount[2] = (int)Math.round(weaponScale*4);
@@ -150,13 +153,14 @@ public class CombatStackSpacePirates extends CombatStack {
 			shotsRemaining[3] = 1;
 		}
 		else if ((maxTechLvl > 15) && (maxTechLvl <= 20)) {
+			weaponScale = (maxTechLvl + 0.0f)/20.0f;// gradually scale weapon count
 			num = (int)Math.ceil(stackScale*maxTechLvl);
 			maxHits = hits = 36;
 			maxMove = move = 3;
 			maneuverability = 4;
-			attackLevel = 5;
-			beamDefense = 7;
-			missileDefense = 11;
+			attackLevel = (int)Math.round(weaponScale*5);
+			beamDefense = (int)Math.round(weaponScale*6);
+			missileDefense = (int)Math.round(weaponScale*8);
 			maxShield = shield = 4.0f;
 			specials.add(new ShipSpecialScanner((TechScanner)tech("Scanner:0"))); // battle scanner
 			specials.add(new ShipSpecialInertial((TechShipInertial)tech("ShipInertial:0"))); // inertial stabilizer
@@ -164,7 +168,6 @@ public class CombatStackSpacePirates extends CombatStack {
 			weapons.add(new ShipWeaponBeam((TechShipWeapon) tech("ShipWeapon:5"), true)); // heavy neutron blaster
 			weapons.add(new ShipWeaponMissile((TechMissileWeapon) tech("MissileWeapon:4"), false, 5, 6, 3.0f)); // merculite missiles
 			weapons.add(new ShipWeaponBomb((TechBombWeapon) tech("BombWeapon:2"))); // anti-matter bombs
-			weaponScale = (maxTechLvl + 0.0f)/20.0f;// gradually scale weapon count
 			weaponCount[0] = (int)Math.round(weaponScale*4);
 			weaponCount[1] = (int)Math.round(weaponScale*7);
 			weaponCount[2] = (int)Math.round(weaponScale*4);
@@ -179,13 +182,14 @@ public class CombatStackSpacePirates extends CombatStack {
 			shotsRemaining[3] = 1;
 		}
 		else if ((maxTechLvl > 20) && (maxTechLvl <= 25)) {
+			weaponScale = (maxTechLvl - 5.0f)/20.0f;// gradually scale weapon count
 			num = (int)Math.ceil(stackScale*maxTechLvl);
 			maxHits = hits = 36;
 			maxMove = move = 3;
 			maneuverability = 4;
-			attackLevel = 6;
-			beamDefense = 7;
-			missileDefense = 12;
+			attackLevel = (int)Math.round(weaponScale*6);
+			beamDefense = (int)Math.round(weaponScale*7);
+			missileDefense = (int)Math.round(weaponScale*10);
 			maxShield = shield = 5.0f;
 			specials.add(new ShipSpecialScanner((TechScanner)tech("Scanner:0"))); // battle scanner
 			specials.add(new ShipSpecialInertial((TechShipInertial)tech("ShipInertial:0"))); // inertial stabilizer
@@ -193,7 +197,6 @@ public class CombatStackSpacePirates extends CombatStack {
 			weapons.add(new ShipWeaponBeam((TechShipWeapon) tech("ShipWeapon:8"), true)); // heavy fusion blaster
 			weapons.add(new ShipWeaponMissile((TechMissileWeapon) tech("MissileWeapon:5"), false, 5, 7, 3.5f)); // stinger missiles
 			weapons.add(new ShipWeaponBomb((TechBombWeapon) tech("BombWeapon:3"))); // omega-v bombs
-			weaponScale = (maxTechLvl - 5.0f)/20.0f;// gradually scale weapon count
 			weaponCount[0] = (int)Math.round(weaponScale*5);
 			weaponCount[1] = (int)Math.round(weaponScale*8);
 			weaponCount[2] = (int)Math.round(weaponScale*5);
@@ -208,13 +211,14 @@ public class CombatStackSpacePirates extends CombatStack {
 			shotsRemaining[3] = 1;
 		}
 		else if ((maxTechLvl > 25) && (maxTechLvl <= 30)) {
+			weaponScale = (maxTechLvl - 10.0f)/20.0f;// gradually scale weapon count
 			num = (int)Math.ceil(stackScale*maxTechLvl);
 			maxHits = hits = 45;
 			maxMove = move = 4;
 			maneuverability = 5;
-			attackLevel = 7;
-			beamDefense = 8;
-			missileDefense = 14;
+			attackLevel = (int)Math.round(weaponScale*7);
+			beamDefense = (int)Math.round(weaponScale*8);
+			missileDefense = (int)Math.round(weaponScale*12);
 			maxShield = shield = 6.0f;
 			specials.add(new ShipSpecialScanner((TechScanner)tech("Scanner:0"))); // battle scanner
 			specials.add(new ShipSpecialInertial((TechShipInertial)tech("ShipInertial:0"))); // inertial stabilizer
@@ -222,7 +226,6 @@ public class CombatStackSpacePirates extends CombatStack {
 			weapons.add(new ShipWeaponBeam((TechShipWeapon) tech("ShipWeapon:11"), false)); // auto-blaster
 			weapons.add(new ShipWeaponMissile((TechMissileWeapon) tech("MissileWeapon:6"), false, 5, 6, 3.0f)); // scatter pack-vii missiles
 			weapons.add(new ShipWeaponBomb((TechBombWeapon) tech("BombWeapon:3"))); // omega-v  bombs
-			weaponScale = (maxTechLvl - 10.0f)/20.0f;// gradually scale weapon count
 			weaponCount[0] = (int)Math.round(weaponScale*6);
 			weaponCount[1] = (int)Math.round(weaponScale*8);
 			weaponCount[2] = (int)Math.round(weaponScale*5);
@@ -237,13 +240,14 @@ public class CombatStackSpacePirates extends CombatStack {
 			shotsRemaining[3] = 1;
 		}
 		else if ((maxTechLvl > 30) && (maxTechLvl <= 35)) {
+			weaponScale = (maxTechLvl - 15.0f)/20.0f;// gradually scale weapon count
 			num = (int)Math.ceil(stackScale*maxTechLvl);
 			maxHits = hits = 54;
 			maxMove = move = 4;
 			maneuverability = 6;
-			attackLevel = 8;
-			beamDefense = 9;
-			missileDefense = 16;
+			attackLevel = (int)Math.round(weaponScale*8);
+			beamDefense = (int)Math.round(weaponScale*9);
+			missileDefense = (int)Math.round(weaponScale*14);
 			maxShield = shield = 7.0f;
 			beamRangeBonus = 3; // high energy focus
 			specials.add(new ShipSpecialScanner((TechScanner)tech("Scanner:0"))); // battle scanner
@@ -253,7 +257,6 @@ public class CombatStackSpacePirates extends CombatStack {
 			weapons.add(new ShipWeaponBeam((TechShipWeapon) tech("ShipWeapon:13"), false)); // gauss auto-cannon
 			weapons.add(new ShipWeaponMissile((TechMissileWeapon) tech("MissileWeapon:7"), false, 5, 8, 4.0f)); // pulson missiles
 			weapons.add(new ShipWeaponBomb((TechBombWeapon) tech("BombWeapon:3"))); // omega-v bombs
-			weaponScale = (maxTechLvl - 15.0f)/20.0f;// gradually scale weapon count
 			weaponCount[0] = (int)Math.round(weaponScale*7);
 			weaponCount[1] = (int)Math.round(weaponScale*8);
 			weaponCount[2] = (int)Math.round(weaponScale*6);
@@ -268,13 +271,14 @@ public class CombatStackSpacePirates extends CombatStack {
 			shotsRemaining[3] = 1;
 		}
 		else if ((maxTechLvl > 35) && (maxTechLvl <= 40)) {
+			weaponScale = (maxTechLvl - 20.0f)/20.0f;// gradually scale weapon count
 			num = (int)Math.ceil(stackScale*maxTechLvl);
 			maxHits = hits = 54;
 			maxMove = move = 5;
 			maneuverability = 7;
-			attackLevel = 9;
-			beamDefense = 10;
-			missileDefense = 18;
+			attackLevel = (int)Math.round(weaponScale*9);
+			beamDefense = (int)Math.round(weaponScale*10);
+			missileDefense = (int)Math.round(weaponScale*15);
 			maxShield = shield = 9.0f;
 			beamRangeBonus = 3; // high energy focus
 			specials.add(new ShipSpecialScanner((TechScanner)tech("Scanner:0"))); // battle scanner
@@ -284,7 +288,6 @@ public class CombatStackSpacePirates extends CombatStack {
 			weapons.add(new ShipWeaponBeam((TechShipWeapon) tech("ShipWeapon:17"), false)); // disruptor
 			weapons.add(new ShipWeaponMissile((TechMissileWeapon) tech("MissileWeapon:8"), false, 5, 9, 4.5f)); // hercular missiles
 			weapons.add(new ShipWeaponBomb((TechBombWeapon) tech("BombWeapon:4"))); // neutronium bombs
-			weaponScale = (maxTechLvl - 20.0f)/20.0f;// gradually scale weapon count
 			weaponCount[0] = (int)Math.round(weaponScale*8);
 			weaponCount[1] = (int)Math.round(weaponScale*10);
 			weaponCount[2] = (int)Math.round(weaponScale*8);
@@ -299,13 +302,14 @@ public class CombatStackSpacePirates extends CombatStack {
 			shotsRemaining[3] = 1;
 		}
 		else if ((maxTechLvl > 40) && (maxTechLvl <= 45)) {
+			weaponScale = (maxTechLvl - 25.0f)/20.0f;// gradually scale weapon count
 			num = (int)Math.ceil(stackScale*maxTechLvl);
 			maxHits = hits = 63;
 			maxMove = move = 5;
 			maneuverability = 8;
-			attackLevel = 10;
-			beamDefense = 11;
-			missileDefense = 20;
+			attackLevel = (int)Math.round(weaponScale*10);
+			beamDefense = (int)Math.round(weaponScale*11);
+			missileDefense = (int)Math.round(weaponScale*16);
 			maxShield = shield = 11.0f;
 			beamRangeBonus = 3; // high energy focus
 			specials.add(new ShipSpecialScanner((TechScanner)tech("Scanner:0"))); // battle scanner
@@ -315,7 +319,6 @@ public class CombatStackSpacePirates extends CombatStack {
 			weapons.add(new ShipWeaponBeam((TechShipWeapon) tech("ShipWeapon:17"), false)); // disruptor
 			weapons.add(new ShipWeaponMissile((TechMissileWeapon) tech("MissileWeapon:9"), false, 5, 10, 5.0f)); // zeon missiles
 			weapons.add(new ShipWeaponBomb((TechBombWeapon) tech("BombWeapon:4"))); // neutronium bombs
-			weaponScale = (maxTechLvl - 25.0f)/20.0f;// gradually scale weapon count
 			weaponCount[0] = (int)Math.round(weaponScale*10);
 			weaponCount[1] = (int)Math.round(weaponScale*12);
 			weaponCount[2] = (int)Math.round(weaponScale*10);
@@ -330,13 +333,14 @@ public class CombatStackSpacePirates extends CombatStack {
 			shotsRemaining[3] = 1;
 		}
 		else if ((maxTechLvl > 45) && (maxTechLvl <= 50)) {
+			weaponScale = (maxTechLvl - 30.0f)/20.0f;// gradually scale weapon count
 			num = (int)Math.ceil(stackScale*maxTechLvl);
 			maxHits = hits = 63;
 			maxMove = move = 6;
 			maneuverability = 8;
-			attackLevel = 11;
-			beamDefense = 13;
-			missileDefense = 23;
+			attackLevel = (int)Math.round(weaponScale*11);
+			beamDefense = (int)Math.round(weaponScale*13);
+			missileDefense = (int)Math.round(weaponScale*18);
 			maxShield = shield = 13.0f;
 			beamRangeBonus = 3; // high energy focus
 			specials.add(new ShipSpecialScanner((TechScanner)tech("Scanner:0"))); // battle scanner
@@ -346,7 +350,6 @@ public class CombatStackSpacePirates extends CombatStack {
 			weapons.add(new ShipWeaponBeam((TechShipWeapon) tech("ShipWeapon:21"), false)); // mauler device
 			weapons.add(new ShipWeaponMissile((TechMissileWeapon) tech("MissileWeapon:10"), false, 5, 7, 3.5f)); // scatter pack X missiles
 			weapons.add(new ShipWeaponBomb((TechBombWeapon) tech("BombWeapon:4"))); // neutronium bombs
-			weaponScale = (maxTechLvl - 30.0f)/20.0f;// gradually scale weapon count
 			weaponCount[0] = (int)Math.round(weaponScale*12);
 			weaponCount[1] = (int)Math.round(weaponScale*15);
 			weaponCount[2] = (int)Math.round(weaponScale*12);
@@ -361,13 +364,14 @@ public class CombatStackSpacePirates extends CombatStack {
 			shotsRemaining[3] = 1;
 		}
 		else if ((maxTechLvl > 50) && (maxTechLvl <= 55)) {
+			weaponScale = (maxTechLvl - 35.0f)/20.0f;// gradually scale weapon count
 			num = (int)Math.ceil(stackScale*maxTechLvl);
 			maxHits = hits = 72;
 			maxMove = move = 7;
 			maneuverability = 9;
-			attackLevel = 12;
-			beamDefense = 14;
-			missileDefense = 24;
+			attackLevel = (int)Math.round(weaponScale*12);
+			beamDefense = (int)Math.round(weaponScale*14);
+			missileDefense = (int)Math.round(weaponScale*20);
 			maxShield = shield = 15.0f;
 			beamRangeBonus = 3; // high energy focus
 			specials.add(new ShipSpecialScanner((TechScanner)tech("Scanner:0"))); // battle scanner
@@ -377,7 +381,6 @@ public class CombatStackSpacePirates extends CombatStack {
 			weapons.add(new ShipWeaponBeam((TechShipWeapon) tech("ShipWeapon:21"), false)); // mauler device
 			weapons.add(new ShipWeaponMissile((TechMissileWeapon) tech("MissileWeapon:10"), false, 5, 7, 3.5f)); // scatter pack X missiles
 			weapons.add(new ShipWeaponBomb((TechBombWeapon) tech("BombWeapon:4"))); // neutronium bombs
-			weaponScale = (maxTechLvl - 35.0f)/20.0f;// gradually scale weapon count
 			weaponCount[0] = (int)Math.round(weaponScale*15);
 			weaponCount[1] = (int)Math.round(weaponScale*20);
 			weaponCount[2] = (int)Math.round(weaponScale*15);
@@ -398,7 +401,7 @@ public class CombatStackSpacePirates extends CombatStack {
 			maneuverability = 9;
 			attackLevel = 12;
 			beamDefense = 14;
-			missileDefense = 24;
+			missileDefense = 22;
 			maxShield = shield = 15.0f;
 			beamRangeBonus = 3; // high energy focus
 			specials.add(new ShipSpecialScanner((TechScanner)tech("Scanner:0"))); // battle scanner
