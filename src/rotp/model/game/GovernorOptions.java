@@ -23,11 +23,13 @@ public class GovernorOptions implements Serializable {
     private int transportMaxPercent = 10;
     // 1.5x for destinations inside nebulae
     private int transportMaxTurns = 5;
+    private boolean transportRichDisabled = true;
+    private boolean transportPoorDouble = true;
 
     private int minimumMissileBases = 0;
-    private boolean autospend = false;
+    private boolean autospend = true;
     private int reserve = 1000;
-    private boolean shipbuilding = false;
+    private boolean shipbuilding = true;
 
     // if true, new colonies will have auto ship building set to "on"
     // TODO: for future use
@@ -142,6 +144,22 @@ public class GovernorOptions implements Serializable {
 
     public void setAutoColonize(boolean autoColonize) {
         this.autoColonize = autoColonize;
+    }
+
+    public boolean isTransportRichDisabled() {
+        return transportRichDisabled;
+    }
+
+    public void setTransportRichDisabled(boolean transportRichDisabled) {
+        this.transportRichDisabled = transportRichDisabled;
+    }
+
+    public boolean isTransportPoorDouble() {
+        return transportPoorDouble;
+    }
+
+    public void setTransportPoorDouble(boolean transportPoorDouble) {
+        this.transportPoorDouble = transportPoorDouble;
     }
 
 }

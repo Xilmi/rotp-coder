@@ -354,9 +354,6 @@ public final class Colony implements Base, IMappedObject, Serializable {
         reallocationRequired = true;
     }
     public void removeColonyOrder(Colony.Orders order) {
-        removeColonyOrder(order, true);
-    }
-    public void removeColonyOrder(Colony.Orders order, boolean resetAllocations) {
         if (orders.containsKey(order)) {
             orders.remove(order);
             reallocationRequired = true;
@@ -1335,7 +1332,10 @@ public final class Colony implements Base, IMappedObject, Serializable {
             locked(i, false);
         }
         // remember if this planet was building ships. Stargate doesn't count
-        boolean buildingShips = allocation[SHIP] > 0 && !shipyard().design().equals(empire.shipLab().stargateDesign());
+        // if we just finished building a stargate, we're not building ships
+        boolean buildingShips = allocation[SHIP] > 0 &&
+                !shipyard().design().equals(empire.shipLab().stargateDesign()) &&
+                !shipyard().stargateCompleted();
         // start from scratch
         clearSpending();
         // if we were building ships, keep 1 tick in shipbuilding
@@ -1382,7 +1382,9 @@ public final class Colony implements Base, IMappedObject, Serializable {
 //            System.out.println("NO SPENDING "+this.name());
             moveSlider(Colony.RESEARCH, null, text(ColonySpendingCategory.reserveText));
         }
-        if (buildingShips && session().getGovernorOptions().isShipbuilding() && allocation[RESEARCH] > 0) {
+        // if we finished building stargate, don't build any ships.
+        if (!shipyard().stargateCompleted() && buildingShips
+                && session().getGovernorOptions().isShipbuilding() && allocation[RESEARCH] > 0) {
             // if we were building ships, push all research into shipbuilding.
             locked(Colony.SHIP, false);
             increment(Colony.SHIP, allocation[RESEARCH]);

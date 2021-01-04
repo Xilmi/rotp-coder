@@ -53,6 +53,11 @@
                           </Group>
                       </Group>
                   </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="okButton" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
+                      <Component id="cancelButton" min="-2" max="-2" attributes="0"/>
+                  </Group>
                   <Group type="102" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="governorDefault" min="-2" max="-2" attributes="0"/>
@@ -62,11 +67,6 @@
                           </Group>
                       </Group>
                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                  </Group>
-                  <Group type="102" alignment="0" attributes="0">
-                      <Component id="okButton" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="32767" attributes="0"/>
-                      <Component id="cancelButton" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -163,6 +163,8 @@
                           <Component id="transportMaxTurnsLabel" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <Component id="transportMaxTurnsNebula" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="transportRichDisabled" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="transportPoorDouble" alignment="0" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="32767" attributes="0"/>
               </Group>
@@ -191,6 +193,10 @@
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="transportMaxTurnsNebula" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="transportRichDisabled" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="transportPoorDouble" min="-2" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -282,6 +288,19 @@
             <AuxValue name="JavaCodeGenerator_VariableLocal" type="java.lang.Boolean" value="true"/>
             <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="0"/>
           </AuxValues>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="transportRichDisabled">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Don&apos;t send from Rich/Artefacts planets"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="transportPoorDouble">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Send double from Poor planets"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="transportPoorDoubleActionPerformed"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>
