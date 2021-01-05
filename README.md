@@ -52,6 +52,10 @@ text in the planetary spending screen. Since version 1.8 Governor is on by defau
 
 Additional features / changelog
 
+* 2.08.2. Fix full screen to really be full-screen. Add "Completionist" button for the endgame which allows all 
+  empires to research certain techs like Irradiated colony base or Atmospheric Terraforming. This allows me to finish
+  the game with entire galaxy full of gaia planets. If you don't like it- don't use it :)
+
 * 2.08.1. Merge v2.08 Beta. More fair autotransport. It used to take the colony with least population, and send all
   transports to it. Now if there are two colonies with 2 population, both will get some transports. This might be slow
   for large galaxies, so please let me know if you have long end of turn processing times and turning off 
