@@ -328,7 +328,7 @@ public final class SaveGameUI extends BasePanel implements MouseListener, MouseW
             addMouseMotionListener(this);
 
             newFileField.setBackground(GameUI.loadHoverBackground());
-            newFileField.setBorder(this.newEmptyBorder(5,0,0,0));
+            newFileField.setBorder(this.newEmptyBorder(0,0,0,0));
             newFileField.setFont(narrowFont(20));
             newFileField.setForeground(Color.black);
             newFileField.setCaretColor(Color.black);
@@ -363,7 +363,7 @@ public final class SaveGameUI extends BasePanel implements MouseListener, MouseW
 
             end = min(saveFiles.size(), start+saveFiles.size());
 
-            int w0 = getWidth()-scaled(680);
+            int w0 = scaled(550);
             int x0 = (w-w0)/2;
             int h0 = s5+(MAX_FILES*lineH);
             int y0 = scaled(180);
@@ -375,7 +375,7 @@ public final class SaveGameUI extends BasePanel implements MouseListener, MouseW
             g.setColor(GameUI.loadListMask());
             g.fillRect(x0-wSide, y0-wTop, w0+wSide+wSide, h0+lineH+wTop+wBottom);
 
-            g.setPaint(GameUI.loadBackground());
+            g.setColor(GameUI.raceCenterColor());
             g.fillRect(x0, y0, w0, h0+lineH);
             
             g.setColor(GameUI.sortLabelBackColor());

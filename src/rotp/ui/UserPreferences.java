@@ -19,11 +19,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
@@ -48,6 +46,7 @@ public class UserPreferences {
     private static boolean challengeMode = false; // modnar: add option to give AI more initial resources
     private static boolean randomTechStart = false; // modnar: add option to start all Empires with 2 techs, no Artifacts
     private static int autoSaveTurns = 5; // modnar: add option to auto-save every n-turns
+    private static boolean fullScreen = true;
     private static float uiTexturePct = 0.20f;
     private static int screenSizePct = 93;
     private static final HashMap<String, String> raceNames = new HashMap<>();
@@ -55,6 +54,8 @@ public class UserPreferences {
 
     public static boolean showMemory()      { return showMemory; }
     public static void toggleMemory()       { showMemory = !showMemory; save(); }
+    public static boolean fullScreen()      { return fullScreen; }
+    public static void toggleFullScreen()   { fullScreen = !fullScreen; save(); }
     public static boolean playAnimations()  { return graphicsLevel != GraphicsSetting.LOW; }
 
     public static boolean antialiasing()    { return graphicsLevel == GraphicsSetting.NORMAL; }
@@ -114,6 +115,7 @@ public class UserPreferences {
             out.println(keyFormat("SOUND_VOLUME")+ SoundManager.soundLevel());
             out.println(keyFormat("SHOW_MEMORY")+ yesOrNo(showMemory));
             out.println(keyFormat("DISPLAY_YEAR")+ yesOrNo(displayYear));
+            out.println(keyFormat("FULL_SCREEN")+ yesOrNo(fullScreen));
             out.println(keyFormat("SCREEN_SIZE_PCT")+ screenSizePct());
             out.println(keyFormat("UI_TEXTURES")+ yesOrNo(textures));
             out.println(keyFormat("UI_TEXTURE_LEVEL")+(int) (uiTexturePct()*100));
@@ -154,6 +156,7 @@ public class UserPreferences {
             case "SOUND_VOLUME": SoundManager.soundLevel(Integer.valueOf(val)); return;
             case "SHOW_MEMORY":  showMemory = yesOrNo(val); return;
             case "DISPLAY_YEAR": displayYear = yesOrNo(val); return;
+            case "FULL_SCREEN":  fullScreen = yesOrNo(val); return;
             case "SCREEN_SIZE_PCT": screenSizePct(Integer.valueOf(val)); return;
             case "UI_TEXTURES":  textures = yesOrNo(val); return;
             case "UI_TEXTURE_LEVEL": uiTexturePct(Integer.valueOf(val)); return;

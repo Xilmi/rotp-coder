@@ -24,6 +24,7 @@ import java.awt.LinearGradientPaint;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.Stroke;
+import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -38,7 +39,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.swing.BorderFactory;
 import javax.swing.JLayeredPane;
 import javax.swing.border.Border;
 import rotp.Rotp;
@@ -56,6 +56,7 @@ import rotp.model.tech.Tech;
 import rotp.ui.BasePanel;
 import rotp.ui.ExitButton;
 import rotp.ui.RotPUI;
+import rotp.ui.UserPreferences;
 import rotp.ui.game.HelpUI;
 import rotp.ui.main.GalaxyMapPanel;
 import rotp.ui.main.MainUI;
@@ -87,10 +88,10 @@ public final class SystemsUI extends BasePanel implements IMapHandler, ActionLis
     private MainTitlePanel titlePanel;
     public static SystemsUI instance;
 
-    private int pad = 10;
     private GalaxyMapPanel map;
     private LinearGradientPaint backGradient;
     private SystemInfoPanel displayPanel;
+    private ExitFleetsButton exitButton;
     private final List<Sprite> controls = new ArrayList<>();
     private final Map<Integer,Integer> expandEnRouteSystems = new HashMap<>();
     private final Map<Integer,Integer> expandGuardedSystems = new HashMap<>();
@@ -110,7 +111,6 @@ public final class SystemsUI extends BasePanel implements IMapHandler, ActionLis
 
     public SystemsUI() {
         instance = this;
-        pad = s10;
         initModel();
     }
     public void init() {
@@ -246,7 +246,7 @@ public final class SystemsUI extends BasePanel implements IMapHandler, ActionLis
         }
         g.setPaint(backGradient);
         Area a = new Area(new Rectangle(0,0,w,h));
-        a.subtract(new Area(new Rectangle(s5, s40,w-scaled(285), h-s70)));
+        a.subtract(new Area(new Rectangle(s5, s40,w-s20, h-s70)));
         g.fill(a);
     }
     @Override
@@ -260,40 +260,40 @@ public final class SystemsUI extends BasePanel implements IMapHandler, ActionLis
     @Override
     public GalaxyMapPanel map()         { return map; }
     private void initModel() {
-        int w = scaled(Rotp.IMG_W);
-        int h = scaled(Rotp.IMG_H);
+        int w, h;
+        if (UserPreferences.fullScreen()) {
+            Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
+            w = size.width;
+            h = size.height;
+        }
+        else {
+            w = scaled(Rotp.IMG_W);
+            h = scaled(Rotp.IMG_H);
+        }
+        
         int rightPaneW = scaled(250);
 
         setBackground(Color.black);
-        Border emptyBorder = newEmptyBorder(0,pad,pad,pad);
-        setBorder(emptyBorder);
 
         map = new GalaxyMapPanel(this);
-        map.setBorder(null);
         map.setBounds(0,0,w,h);
 
         titlePanel = new MainTitlePanel(this, "SYSTEMS_TITLE");
         titlePanel.setBounds(0,0,w-rightPaneW-s25, s45);
         
         displayPanel = new SystemInfoPanel(this);
+        displayPanel.setBounds(w-rightPaneW-s5,s5,rightPaneW,scaled(673));
         
-        BasePanel rightPanel = new BasePanel();
-        rightPanel.setBounds(w-rightPaneW-s25,0,rightPaneW,h-s20);
-        rightPanel.setOpaque(false);
-        rightPanel.setLayout(new BorderLayout(0, pad));
-        rightPanel.add(displayPanel, BorderLayout.CENTER);
-        rightPanel.add(new ExitFleetsButton(w, s60, s10, s2), BorderLayout.SOUTH);
+        exitButton = new ExitFleetsButton(rightPaneW, s60, s10, s2);
+        exitButton.setBounds(w-rightPaneW-s20,h-s83,rightPaneW,s60);
         
         setLayout(new BorderLayout());
         add(layers, BorderLayout.CENTER);
         
         layers.add(titlePanel, JLayeredPane.PALETTE_LAYER);
-        layers.add(rightPanel, JLayeredPane.PALETTE_LAYER);
+        layers.add(displayPanel, JLayeredPane.PALETTE_LAYER);
+        layers.add(exitButton, JLayeredPane.PALETTE_LAYER);
         layers.add(map, JLayeredPane.DEFAULT_LAYER);
-        Border line1 = newLineBorder(newColor(60,60,60),2);
-        Border line2 = newLineBorder(newColor(0,0,0),8);
-        Border compound1 = BorderFactory.createCompoundBorder(line2, line1);
-        setBorder(compound1);
         setOpaque(false);
 
         addMouseWheelListener(this);
@@ -882,6 +882,9 @@ public final class SystemsUI extends BasePanel implements IMapHandler, ActionLis
             case KeyEvent.VK_RIGHT:
                 softClick();
                 map().dragMap(-s40, 0);
+                return;
+            case KeyEvent.VK_F:
+                displayPanel.toggleFlagColor();
                 return;
         }
     }

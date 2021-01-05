@@ -38,10 +38,10 @@ public class Rotp {
     private static final int MB = 1048576;
     public static int IMG_W = 1229;
     public static int IMG_H = 768;
-    public static String jarFileName = "RotP-2.07_modnar_MOD17.jar";
+    public static String jarFileName = "RotP-2.08_modnar_MOD18.jar";
     private static String jarPath;
     private static JFrame frame;
-    public static String releaseId = "Beta 2.07 modnar_MOD17";
+    public static String releaseId = "Beta 2.08 modnar_MOD18";
     public static long startMs = System.currentTimeMillis();
     public static long maxHeapMemory = Runtime.getRuntime().maxMemory() / 1048576;
     public static long maxUsedMemory;
@@ -67,16 +67,23 @@ public class Rotp {
                 System.exit(0);
             }
         });
+
+        // note: referencing the RotPUI class executes its static block
+        // which loads in sounds, images, etc
         frame.setLayout(new BorderLayout());
         frame.add(RotPUI.instance(), BorderLayout.CENTER);
 
-
+        if (UserPreferences.fullScreen()) {
+            frame.setExtendedState(JFrame.MAXIMIZED_BOTH); 
+            frame.setUndecorated(true);
+        }
+        else {
+            frame.setResizable(false);
+        }
         setFrameSize();
 
         if (reloadRecentSave) {
             GameSession.instance().loadRecentSession(false);
-        }
-        frame.setResizable(false);
         frame.setVisible(true);
     }
     public static boolean containsArg(String[] argList, String key) {
@@ -100,7 +107,8 @@ public class Rotp {
         frame.pack();
     }
     public static float resizeAmt() {
-        float sizeAdj = (float) UserPreferences.screenSizePct() / 100.0f;
+        int pct = UserPreferences.fullScreen() ? 100 : UserPreferences.screenSizePct();
+        float sizeAdj = (float) pct / 100.0f;
         if (resizeAmt < 0) {
             Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
             int sizeW = (int) (sizeAdj*size.width);
