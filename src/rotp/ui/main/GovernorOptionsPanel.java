@@ -90,7 +90,7 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
 
         autotransportPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Autotransport Options"));
 
-        autotransport.setText("Population automatically transported from full colonies");
+        autotransport.setText("Population automatically transported from colonies at max production capacity");
 
         transportPop.setModel(new javax.swing.SpinnerNumberModel(10, 1, 10, 1));
         transportPop.addChangeListener(new javax.swing.event.ChangeListener() {
@@ -148,7 +148,7 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
 
         transportMaxTurnsNebula.setText("(1.5x higher distance when transporting to nebulae)");
 
-        transportRichDisabled.setText("Don't send from Rich/Artefacts planets");
+        transportRichDisabled.setText("Don't send from Rich/Artifacts planets");
 
         transportPoorDouble.setText("Send double from Poor planets");
 

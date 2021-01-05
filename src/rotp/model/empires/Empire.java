@@ -961,21 +961,26 @@ public final class Empire implements Base, NamedObject, Serializable {
             return;
         }
         // for each underpopulated colony, find a suitable donor and ship some population
-        for (Colony c: colonies) {
+        // More expensive approach- after sending out some population, resort the target list, so that
+        // population is more evenly distributed when there are many colonies that need population transported
+        while (!colonies.isEmpty() && !donors.isEmpty()) {
+            Colony c = colonies.get(0);
             float neededPopulation = (int) (c.planet().currentSize() - c.expectedPopulation());
             // Sort donors by distance
             Collections.sort(donors,
                     (Colony o1, Colony o2) -> (int)Math.signum(
                             o1.travelTime(o1, c, this.tech().transportTravelSpeed()) -
                             o2.travelTime(o2, c, this.tech().transportTravelSpeed())));
-            while (neededPopulation > options.getTransportPopulation() && !donors.isEmpty()) {
+            if (neededPopulation > options.getTransportPopulation()) {
                 Colony donor = donors.get(0);
                 float transportTime = donor.travelTime(donor, c, this.tech().transportTravelSpeed());
                 // limit max transport time
                 double maxTime = c.starSystem().inNebula() ? options.getTransportMaxTurns() * 1.5 : options.getTransportMaxTurns();
-                // if first donor doesn't match max travel time, others surely won't.
                 if (transportTime > maxTime) {
-                    break;
+                    // if first donor doesn't match max travel time, others surely won't.
+                    // so no way we're going to transport population to this colony, remove it from the list
+                    colonies.remove(c);
+                    continue;
                 }
                 // TODO: Take into account proper governing, simulate X turns
                 // That's close to impossible, Colony has multiple side effects on Planet and on Empire and
@@ -984,7 +989,9 @@ public final class Empire implements Base, NamedObject, Serializable {
                 double expectedPopAtTransportTime = c.population() +
                         Math.pow(1+c.normalPopGrowth() / c.population(), transportTime);
                 if (expectedPopAtTransportTime >= c.planet().currentSize()) {
-                    break;
+                    // colony will be full by the time population arrives from the closest donor, skip this colony
+                    colonies.remove(c);
+                    continue;
                 }
 
                 System.out.println("Will transport from "+donor.name()+" to "+c.name());
@@ -997,9 +1004,11 @@ public final class Empire implements Base, NamedObject, Serializable {
                 donor.scheduleTransportsToSystem(c.starSystem(), populationToTransport);
                 System.out.println("After transport expectedPopulation="+c.expectedPopulation());
                 donors.remove(0);
-                // adjust needed population!
-                neededPopulation = (int) (c.planet().currentSize() - c.expectedPopulation());
+            } else {
+                colonies.remove(c);
             }
+            Collections.sort(colonies,
+                    (Colony o1, Colony o2) -> (int)Math.signum(o1.expectedPopPct() - o2.expectedPopPct()));
         }
     }
     private List<ShipDesign> scoutDesigns() {
