@@ -38,18 +38,23 @@
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" alignment="0" attributes="0">
-                              <Component id="missileBases" min="-2" pref="50" max="-2" attributes="0"/>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Component id="missileBasesLabel" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <Component id="shipbuilding" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Group type="102" alignment="1" attributes="0">
                               <Component id="autospend" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="32767" attributes="0"/>
                               <Component id="reserve" min="-2" pref="90" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="resrveLabel" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="102" attributes="0">
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Component id="missileBases" min="-2" pref="50" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="missileBasesLabel" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                                  <Component id="shipbuilding" alignment="0" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -70,6 +75,11 @@
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
+          </Group>
+          <Group type="102" alignment="0" attributes="0">
+              <EmptySpace min="-2" pref="150" max="-2" attributes="0"/>
+              <Component id="completionist" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -105,6 +115,8 @@
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="shipbuilding" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="completionist" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="okButton" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -298,9 +310,6 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="Send double from Poor planets"/>
           </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="transportPoorDoubleActionPerformed"/>
-          </Events>
         </Component>
       </SubComponents>
     </Container>
@@ -452,14 +461,20 @@
       <Properties>
         <Property name="text" type="java.lang.String" value="Auto Scout"/>
       </Properties>
-      <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="autoScoutActionPerformed"/>
-      </Events>
     </Component>
     <Component class="javax.swing.JCheckBox" name="autoColonize">
       <Properties>
         <Property name="text" type="java.lang.String" value="Auto Colonize"/>
       </Properties>
+    </Component>
+    <Component class="javax.swing.JButton" name="completionist">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Completionist Technologies"/>
+        <Property name="toolTipText" type="java.lang.String" value="&lt;html&gt;&#xa;I like completing game fully. &lt;br/&gt;&#xa;Make following technologies available to all races:&lt;br/&gt;&#xa;&lt;br/&gt;&#xa;Controlled Irradiated Environment&lt;br/&gt;&#xa;Atmospheric Terraforming&lt;br/&gt;&#xa;Controlled Irradiated Environment&lt;br/&gt;&#xa;Advanced Soil Enrichment&lt;br/&gt;&#xa;Intergalactic Star Gates&lt;br/&gt;&#xa;&lt;br/&gt;&#xa;30% of galaxy needs to be colonized.&lt;br/&gt;&#xa;Player must control 50% of the galaxy.&lt;br/&gt;&#xa;All research needs to be completed (future techs too)&lt;br/&gt;&#xa;&lt;/html&gt;"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="completionistActionPerformed"/>
+      </Events>
     </Component>
   </SubComponents>
 </Form>

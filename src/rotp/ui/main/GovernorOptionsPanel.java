@@ -4,6 +4,8 @@ import java.awt.event.MouseWheelEvent;
 import javax.swing.JFrame;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+
+import rotp.model.empires.Empire;
 import rotp.model.galaxy.StarSystem;
 import rotp.model.game.GameSession;
 import rotp.model.game.GovernorOptions;
@@ -44,8 +46,46 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         this.shipbuilding.setSelected(options.isShipbuilding());
         this.autoScout.setSelected(options.isAutoScout());
         this.autoColonize.setSelected(options.isAutoColonize());
+        this.completionist.setEnabled(isCompletionistEnabled());
     }
 
+    public boolean isCompletionistEnabled() {
+        if (GameSession.instance().galaxy() == null) {
+            return false;
+        }
+        float colonized = GameSession.instance().galaxy().numColonizedSystems() / (float)GameSession.instance().galaxy().numStarSystems();
+        float controlled = GameSession.instance().galaxy().player().numColonies() / GameSession.instance().galaxy().numColonizedSystems();
+        boolean completed = GameSession.instance().galaxy().player().tech().researchCompleted();
+        System.out.format("Colonized %.2f galaxy, controlled %.2f galaxy, completed research %s%n", colonized, controlled, completed);
+        if (colonized >= 0.3 && controlled >= 0.5 && completed) {
+            return true;
+        } else {
+            // TODO: FIXME:
+            return true;
+        }
+    }
+    public void performCompletionist() {
+        // game not in session
+        if (GameSession.instance().galaxy() == null) {
+            return;
+        }
+        // Techs to give
+        String techs[] = {
+                "ImprovedTerraforming:8",
+                "SoilEnrichment:1",
+                "AtmosphereEnrichment:0",
+                "ControlEnvironment:6",
+                "Stargate:0"
+        };
+        for (Empire e: GameSession.instance().galaxy().empires()) {
+            if (e.extinct()) {
+                continue;
+            }
+            for (String t: techs) {
+                e.tech().allowResearch(t);
+            }
+        }
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -85,12 +125,13 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         shipbuilding = new javax.swing.JCheckBox();
         autoScout = new javax.swing.JCheckBox();
         autoColonize = new javax.swing.JCheckBox();
+        completionist = new javax.swing.JButton();
 
         governorDefault.setText("Governor is on by default");
 
         autotransportPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Autotransport Options"));
 
-        autotransport.setText("Population automatically transported from colonies at max production capacity");
+        autotransport.setText("Population automatically transported from full colonies");
 
         transportPop.setModel(new javax.swing.SpinnerNumberModel(10, 1, 10, 1));
         transportPop.addChangeListener(new javax.swing.event.ChangeListener() {
@@ -148,7 +189,7 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
 
         transportMaxTurnsNebula.setText("(1.5x higher distance when transporting to nebulae)");
 
-        transportRichDisabled.setText("Don't send from Rich/Artifacts planets");
+        transportRichDisabled.setText("Don't send from Rich/Artefacts planets");
 
         transportPoorDouble.setText("Send double from Poor planets");
 
@@ -293,6 +334,14 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
 
         autoColonize.setText("Auto Colonize");
 
+        completionist.setText("Completionist Technologies");
+        completionist.setToolTipText("<html>\nI like completing game fully. <br/>\nMake following technologies available to all races:<br/>\n<br/>\nControlled Irradiated Environment<br/>\nAtmospheric Terraforming<br/>\nControlled Irradiated Environment<br/>\nAdvanced Soil Enrichment<br/>\nIntergalactic Star Gates<br/>\n<br/>\n30% of galaxy needs to be colonized.<br/>\nPlayer must control 50% of the galaxy.<br/>\nAll research needs to be completed (future techs too)<br/>\n</html>");
+        completionist.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                completionistActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -313,17 +362,20 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
                     .addGroup(layout.createSequentialGroup()
                         .addGap(12, 12, 12)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(missileBases, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(missileBasesLabel))
-                            .addComponent(shipbuilding)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addComponent(autospend)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(reserve, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(resrveLabel))))
+                                .addComponent(resrveLabel))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(missileBases, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(missileBasesLabel))
+                                    .addComponent(shipbuilding))
+                                .addGap(0, 0, Short.MAX_VALUE))))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(okButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -336,6 +388,10 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
                                 .addComponent(autoScout)))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
+            .addGroup(layout.createSequentialGroup()
+                .addGap(150, 150, 150)
+                .addComponent(completionist)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -365,6 +421,8 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
                     .addComponent(resrveLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(shipbuilding)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(completionist)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(okButton)
@@ -463,6 +521,10 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         mouseWheel(reserve, evt);
     }//GEN-LAST:event_reserveMouseWheelMoved
 
+    private void completionistActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_completionistActionPerformed
+        performCompletionist();
+    }//GEN-LAST:event_completionistActionPerformed
+
     private void changePopulationLabel() {
         int pop = (int)this.transportPop.getValue();
         int maxPercent = (int)this.transportMaxPercent.getValue();
@@ -497,6 +559,7 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
     private javax.swing.JCheckBox autospend;
     private javax.swing.JCheckBox autotransport;
     private javax.swing.JButton cancelButton;
+    private javax.swing.JButton completionist;
     private javax.swing.JCheckBox governorDefault;
     private javax.swing.JSpinner missileBases;
     private javax.swing.JLabel missileBasesLabel;
