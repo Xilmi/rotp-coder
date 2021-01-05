@@ -41,7 +41,7 @@ public class Rotp {
     public static String jarFileName = "rotp-"+RotpGovernor.governorVersion()+RotpGovernor.miniSuffix()+".jar";
     private static String jarPath;
     private static JFrame frame;
-    public static String releaseId = "Beta 2.07";
+    public static String releaseId = "Beta 2.08";
     public static long startMs = System.currentTimeMillis();
     public static long maxHeapMemory = Runtime.getRuntime().maxMemory() / 1048576;
     public static long maxUsedMemory;
@@ -67,16 +67,23 @@ public class Rotp {
                 System.exit(0);
             }
         });
+
+        // note: referencing the RotPUI class executes its static block
+        // which loads in sounds, images, etc
         frame.setLayout(new BorderLayout());
         frame.add(RotPUI.instance(), BorderLayout.CENTER);
 
-
+        if (UserPreferences.fullScreen()) {
+            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            frame.setUndecorated(true);
+        }
+        else {
+            frame.setResizable(false);
+        }
         setFrameSize();
 
-        if (reloadRecentSave) {
+        if (reloadRecentSave) 
             GameSession.instance().loadRecentSession(false);
-        }
-        frame.setResizable(false);
         frame.setVisible(true);
     }
     public static boolean containsArg(String[] argList, String key) {
@@ -100,7 +107,8 @@ public class Rotp {
         frame.pack();
     }
     public static float resizeAmt() {
-        float sizeAdj = (float) UserPreferences.screenSizePct() / 100.0f;
+        int pct = UserPreferences.fullScreen() ? 100 : UserPreferences.screenSizePct();
+        float sizeAdj = (float) pct / 100.0f;
         if (resizeAmt < 0) {
             Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
             int sizeW = (int) (sizeAdj*size.width);

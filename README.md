@@ -52,8 +52,13 @@ text in the planetary spending screen. Since version 1.8 Governor is on by defau
 
 Additional features / changelog
 
+* 2.08.1. Merge v2.08 Beta. More fair autotransport. It used to take the colony with least population, and send all
+  transports to it. Now if there are two colonies with 2 population, both will get some transports. This might be slow
+  for large galaxies, so please let me know if you have long end of turn processing times and turning off 
+  autotransport speeds things up considerably.
+
 * 2.07.1. Merge v2.07 Beta. Don't build ships after finishing stargate. Major refactor of autoscout/autocolonize. 
-New autotransport options for Rich/Poor planets. Change option defaults- not more features are on by default.
+  New autotransport options for Rich/Poor planets. Change option defaults- not more features are on by default.
 
 * 2.05.3. Minified version fixed- now game start should not crash. Fixed small exercution issue on governor only jar.
 

@@ -15,6 +15,10 @@
                 <include>**/*.txt</include>
                 <include>**/rotp-version.properties</include>
             </includes>
+            <excludes> <!-- this class should come from original game jar -->
+                <exclude>**/ROTP.class</exclude>
+                <exclude>**/ROTP$1.class</exclude>
+            </excludes>
             <outputDirectory>/</outputDirectory>
         </fileSet>
     </fileSets>

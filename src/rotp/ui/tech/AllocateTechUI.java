@@ -199,9 +199,11 @@ public class AllocateTechUI extends BasePanel implements MouseListener, MouseMot
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
+        int w = getWidth();
+        int h = getHeight();
         paintToImage(screenBuffer());
         g.drawImage(screenBuffer(), 0,0, this);
-        exitButton.setBounds(scaled(980),scaled(695),scaled(235),s50);
+        exitButton.setBounds(w-scaled(250),h-s73,scaled(235),s50);
     }
     private void paintToImage(Image img) {
         Graphics2D g = (Graphics2D) img.getGraphics();
@@ -255,7 +257,7 @@ public class AllocateTechUI extends BasePanel implements MouseListener, MouseMot
         }
         catArea.setBounds(leftM,topM,catW,y0-topM);
         // draw right-side panel
-        int subPanelX = scaled(980);
+        int subPanelX = w-scaled(250);
         int subPanelW = scaled(233);
         int subPanelY = s50;
         int subPanelH = scaled(585);
