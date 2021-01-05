@@ -267,7 +267,7 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
             */
             // modnar: make TreasuryResearchBar horizontal
             int x0 = 10;
-            int y0 = y0 = unscaled(getHeight())-520;
+            int y0 = unscaled(getHeight())-100;
             baseControls.add(new TechStatusSprite(TechCategory.WEAPON,       x0+210,y0,30,30));
             baseControls.add(new TechStatusSprite(TechCategory.PROPULSION,   x0+175,y0,30,30));
             baseControls.add(new TechStatusSprite(TechCategory.PLANETOLOGY,  x0+140,y0,30,30));

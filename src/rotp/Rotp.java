@@ -82,7 +82,7 @@ public class Rotp {
         }
         setFrameSize();
 
-        if (reloadRecentSave) {
+        if (reloadRecentSave)
             GameSession.instance().loadRecentSession(false);
         frame.setVisible(true);
     }
