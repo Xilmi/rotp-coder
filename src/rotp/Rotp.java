@@ -18,6 +18,7 @@ package rotp;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -31,6 +32,7 @@ import rotp.ui.RotPUI;
 import rotp.ui.SwingExceptionHandler;
 import rotp.ui.UserPreferences;
 import rotp.util.FontManager;
+import rotp.util.ImageManager;
 
 public class Rotp {
     private static final int MB = 1048576;
@@ -73,6 +75,11 @@ public class Rotp {
         // which loads in sounds, images, etc
         frame.setLayout(new BorderLayout());
         frame.add(RotPUI.instance(), BorderLayout.CENTER);
+
+        Image img = ImageManager.current().image("LANDSCAPE_RUINS_ORION");
+        BufferedImage bimg = (BufferedImage) img;
+        BufferedImage square = bimg.getSubimage(bimg.getWidth()-bimg.getHeight(), 0, bimg.getHeight(), bimg.getHeight());
+        frame.setIconImage(square);
 
         if (UserPreferences.fullScreen()) {
             frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
