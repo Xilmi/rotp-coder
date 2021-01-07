@@ -47,6 +47,7 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         this.autoScout.setSelected(options.isAutoScout());
         this.autoColonize.setSelected(options.isAutoColonize());
         this.completionist.setEnabled(isCompletionistEnabled());
+        this.promptColonize.setSelected(!GameSession.instance().options().disableColonizePrompt());
     }
 
     public boolean isCompletionistEnabled() {
@@ -60,8 +61,7 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         if (colonized >= 0.3 && controlled >= 0.5 && completed) {
             return true;
         } else {
-            // TODO: FIXME:
-            return true;
+            return false;
         }
     }
     public void performCompletionist() {
@@ -126,6 +126,7 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         autoScout = new javax.swing.JCheckBox();
         autoColonize = new javax.swing.JCheckBox();
         completionist = new javax.swing.JButton();
+        promptColonize = new javax.swing.JCheckBox();
 
         governorDefault.setText("Governor is on by default");
 
@@ -342,25 +343,20 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
             }
         });
 
+        promptColonize.setText("Prompt to colonize");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(autotransportPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(stargatePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(allGovernorsOn)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(allGovernorsOff))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(12, 265, Short.MAX_VALUE)
+                        .addContainerGap(271, Short.MAX_VALUE)
                         .addComponent(autoColonize)
                         .addGap(108, 108, 108))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(12, 12, 12)
+                        .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addComponent(autospend)
@@ -374,24 +370,35 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
                                         .addComponent(missileBases, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(missileBasesLabel))
-                                    .addComponent(shipbuilding))
+                                    .addComponent(shipbuilding)
+                                    .addComponent(promptColonize))
                                 .addGap(0, 0, Short.MAX_VALUE))))
                     .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(autotransportPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(stargatePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(allGovernorsOn)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(allGovernorsOff))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(governorDefault)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(12, 12, 12)
+                                        .addComponent(autoScout)))
+                                .addGap(0, 0, Short.MAX_VALUE))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(150, 150, 150)
+                        .addComponent(completionist)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
                         .addComponent(okButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(cancelButton))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(governorDefault)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(12, 12, 12)
-                                .addComponent(autoScout)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addComponent(cancelButton)))
                 .addContainerGap())
-            .addGroup(layout.createSequentialGroup()
-                .addGap(150, 150, 150)
-                .addComponent(completionist)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -423,6 +430,8 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
                 .addComponent(shipbuilding)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(completionist)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(promptColonize)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(okButton)
@@ -498,6 +507,7 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         options.setShipbuilding(shipbuilding.isSelected());
         options.setAutoScout(autoScout.isSelected());
         options.setAutoColonize(autoColonize.isSelected());
+        GameSession.instance().options().disableColonizePrompt(!promptColonize.isSelected());
         frame.setVisible(false);
     }//GEN-LAST:event_okButtonActionPerformed
 
@@ -564,6 +574,7 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
     private javax.swing.JSpinner missileBases;
     private javax.swing.JLabel missileBasesLabel;
     private javax.swing.JButton okButton;
+    private javax.swing.JCheckBox promptColonize;
     private javax.swing.JSpinner reserve;
     private javax.swing.JLabel resrveLabel;
     private javax.swing.JCheckBox shipbuilding;
