@@ -124,8 +124,20 @@ public final class TechCategory implements Base, Serializable {
             buildResearchList();
     }
     public void addPossibleTech(String id) {
-        if (!possibleTechs.contains(id))
+        if (!possibleTechs.contains(id)) {
             possibleTechs.add(id);
+            if (researchCompleted) {
+                // unlock current category
+                researchCompleted = false;
+                locked = false;
+                // set all other completed categories to 0
+                for (int i = 0; i < TechTree.NUM_CATEGORIES; i++) {
+                    if (tree.category(i).researchCompleted) {
+                        tree.category(i).allocation(0);
+                    }
+                }
+            }
+        }
     }
     private void addKnownTech(String id) {
         if (!knownTechs().contains(id)) {
@@ -528,9 +540,10 @@ public final class TechCategory implements Base, Serializable {
         if (id.equals(currentTech())) {
             resetResearchBC();
             List<String> techs = techIdsAvailableForResearch();
-            if (techs.isEmpty())
+            if (techs.isEmpty()) {
+                allocation(0); // if we're complete, set allocation to 0
                 researchCompleted = true;
-            else
+            } else
                 setTechToResearch();
         }
         return newTech;

@@ -4,6 +4,7 @@ import java.awt.event.MouseWheelEvent;
 import javax.swing.JFrame;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import rotp.model.empires.Empire;
 import rotp.model.galaxy.StarSystem;
 import rotp.model.game.GameSession;
 import rotp.model.game.GovernorOptions;
@@ -44,8 +45,46 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         this.shipbuilding.setSelected(options.isShipbuilding());
         this.autoScout.setSelected(options.isAutoScout());
         this.autoColonize.setSelected(options.isAutoColonize());
+        this.completionist.setEnabled(isCompletionistEnabled());
+        this.promptColonize.setSelected(!GameSession.instance().options().disableColonizePrompt());
     }
 
+    public boolean isCompletionistEnabled() {
+        if (GameSession.instance().galaxy() == null) {
+            return false;
+        }
+        float colonized = GameSession.instance().galaxy().numColonizedSystems() / (float)GameSession.instance().galaxy().numStarSystems();
+        float controlled = GameSession.instance().galaxy().player().numColonies() / GameSession.instance().galaxy().numColonizedSystems();
+        boolean completed = GameSession.instance().galaxy().player().tech().researchCompleted();
+        System.out.format("Colonized %.2f galaxy, controlled %.2f galaxy, completed research %s%n", colonized, controlled, completed);
+        if (colonized >= 0.3 && controlled >= 0.5 && completed) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    public void performCompletionist() {
+        // game not in session
+        if (GameSession.instance().galaxy() == null) {
+            return;
+        }
+        // Techs to give
+        String techs[] = {
+                "ImprovedTerraforming:8",
+                "SoilEnrichment:1",
+                "AtmosphereEnrichment:0",
+                "ControlEnvironment:6",
+                "Stargate:0"
+        };
+        for (Empire e: GameSession.instance().galaxy().empires()) {
+            if (e.extinct()) {
+                continue;
+            }
+            for (String t: techs) {
+                e.tech().allowResearch(t);
+            }
+        }
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -85,6 +124,8 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         shipbuilding = new javax.swing.JCheckBox();
         autoScout = new javax.swing.JCheckBox();
         autoColonize = new javax.swing.JCheckBox();
+        completionist = new javax.swing.JButton();
+        promptColonize = new javax.swing.JCheckBox();
 
         governorDefault.setText("Governor is on by default");
 
@@ -293,48 +334,69 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
 
         autoColonize.setText("Auto Colonize");
 
+        completionist.setText("Completionist Technologies");
+        completionist.setToolTipText("<html>\nI like completing game fully. <br/>\nMake following technologies available to all races:<br/>\n<br/>\nComplete Terraforming<br/>\nControlled Irradiated Environment<br/>\nAtmospheric Terraforming<br/>\nAdvanced Soil Enrichment<br/>\nIntergalactic Star Gates<br/>\n<br/>\n30% of galaxy needs to be colonized.<br/>\nPlayer must control 50% of the galaxy.<br/>\nAll research needs to be completed (future techs too)<br/>\n</html>");
+        completionist.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                completionistActionPerformed(evt);
+            }
+        });
+
+        promptColonize.setText("Prompt to colonize");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(autotransportPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(stargatePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(allGovernorsOn)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(allGovernorsOff))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(12, 265, Short.MAX_VALUE)
+                        .addContainerGap(271, Short.MAX_VALUE)
                         .addComponent(autoColonize)
                         .addGap(108, 108, 108))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(12, 12, 12)
+                        .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(missileBases, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(missileBasesLabel))
-                            .addComponent(shipbuilding)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addComponent(autospend)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(reserve, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(resrveLabel))))
+                                .addComponent(resrveLabel))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(missileBases, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(missileBasesLabel))
+                                    .addComponent(shipbuilding)
+                                    .addComponent(promptColonize))
+                                .addGap(0, 0, Short.MAX_VALUE))))
                     .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(autotransportPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(stargatePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(allGovernorsOn)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(allGovernorsOff))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(governorDefault)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(12, 12, 12)
+                                        .addComponent(autoScout)))
+                                .addGap(0, 0, Short.MAX_VALUE))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(150, 150, 150)
+                        .addComponent(completionist)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
                         .addComponent(okButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(cancelButton))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(governorDefault)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(12, 12, 12)
-                                .addComponent(autoScout)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addComponent(cancelButton)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -365,6 +427,10 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
                     .addComponent(resrveLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(shipbuilding)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(completionist)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(promptColonize)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(okButton)
@@ -440,6 +506,7 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         options.setShipbuilding(shipbuilding.isSelected());
         options.setAutoScout(autoScout.isSelected());
         options.setAutoColonize(autoColonize.isSelected());
+        GameSession.instance().options().disableColonizePrompt(!promptColonize.isSelected());
         frame.setVisible(false);
     }//GEN-LAST:event_okButtonActionPerformed
 
@@ -462,6 +529,10 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
     private void reserveMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_reserveMouseWheelMoved
         mouseWheel(reserve, evt);
     }//GEN-LAST:event_reserveMouseWheelMoved
+
+    private void completionistActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_completionistActionPerformed
+        performCompletionist();
+    }//GEN-LAST:event_completionistActionPerformed
 
     private void changePopulationLabel() {
         int pop = (int)this.transportPop.getValue();
@@ -497,10 +568,12 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
     private javax.swing.JCheckBox autospend;
     private javax.swing.JCheckBox autotransport;
     private javax.swing.JButton cancelButton;
+    private javax.swing.JButton completionist;
     private javax.swing.JCheckBox governorDefault;
     private javax.swing.JSpinner missileBases;
     private javax.swing.JLabel missileBasesLabel;
     private javax.swing.JButton okButton;
+    private javax.swing.JCheckBox promptColonize;
     private javax.swing.JSpinner reserve;
     private javax.swing.JLabel resrveLabel;
     private javax.swing.JCheckBox shipbuilding;
