@@ -34,9 +34,9 @@ public class SpyConfessionIncident extends DiplomaticIncident {
         
         if (spies.isEspionage()) {
             mission = text("NOTICE_SPYING_MISSION_ESPIONAGE");
-            severity = max(-20, -5+ev.embassy().currentSpyIncidentSeverity());
+            severity = max(-40, -10+ev.embassy().currentSpyIncidentSeverity()); // modnar: increase spy confession severity
             missionType = 1;
-            duration = 5;
+            duration = 15; // modnar: increase spy confession duration
         }
         else if (spies.isSabotage()) {
             mission = text("NOTICE_SPYING_MISSION_SABOTAGE");

@@ -32,7 +32,7 @@ public class TradeIncomeIncident extends DiplomaticIncident {
         profit = p;
         severity = min(40, max(0,pct*50));
         dateOccurred = galaxy().currentYear();
-        duration = 3;
+        duration = 5; // modnar: increase duration
         empMe = ev.owner().id;
         empYou = ev.empire().id;
     }

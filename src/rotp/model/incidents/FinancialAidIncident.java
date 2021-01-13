@@ -38,7 +38,7 @@ public class FinancialAidIncident extends DiplomaticIncident {
         severity = sev;
         amount = amt;
         dateOccurred = galaxy().currentYear();
-        duration = 3;
+        duration = 5; // modnar: increase duration
     }
     @Override
     public String title()        { return text("INC_FINANCIAL_AID_TITLE"); }

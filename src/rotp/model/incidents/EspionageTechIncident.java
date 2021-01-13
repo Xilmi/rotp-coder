@@ -30,10 +30,10 @@ public class EspionageTechIncident extends DiplomaticIncident {
 
     public EspionageTechIncident(EmpireView ev, EspionageMission m) {
         ev.embassy().resetAllianceTimer();
-        severity = max(-30,-15 + ev.embassy().currentSpyIncidentSeverity());
+        severity = max(-60, -30+ev.embassy().currentSpyIncidentSeverity()); // modnar: increase tech steal severity
 
         dateOccurred = galaxy().currentYear();
-        duration = 10;
+        duration = 20; // modnar: increase tech steal duration
         
         // empSpy is the actual spy
         // empThief is the suspected spy (the one who was framed)

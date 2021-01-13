@@ -41,7 +41,7 @@ public class TechnologyAidIncident extends DiplomaticIncident {
         float sev = min(25,100*pct);
         severity = sev;
         dateOccurred = galaxy().currentYear();
-        duration = 3;
+        duration = 5; // modnar: increase duration
     }
     @Override
     public String title()        { return text("INC_TECHNOLOGY_AID_TITLE"); }
