@@ -115,40 +115,48 @@ public final class RacesStatusUI extends BasePanel implements MouseListener, Mou
         int w = getWidth();
         int h = getHeight();
 
+        // modnar: reduce RaceIcon size, increase RankingList size
+        int s100 = scaled(100);
+        int s110 = scaled(110);
+        int s160 = scaled(160);
         int s200 = scaled(200);
         int s210 = scaled(210);
         int s260 = scaled(260);
         int s370 = scaled(370);
-        drawRaceIconBase(g, emp, s55, s25, s210, s210);
-        drawRaceIconBase(g, emp, w-s65-s200, s25, s210, s210);
-        drawAllRankingsLists(g, emp, s55, s260, w-s55-s55, h-s260-s10);
+        drawRaceIconBase(g, emp, s55, s25, s110, s110);
+        drawRaceIconBase(g, emp, w-s65-s100, s25, s110, s110);
+        drawAllRankingsLists(g, emp, s55, s160, w-s55-s55, h-s160-s10);
         if (UserPreferences.textures()) 
             drawTexture(g,0,0,w,h);
-        drawRaceIcon(g, emp, s60, s30, s200, s200);
-        drawOpponentIcon(g, null, w-s60-s200, s30, s200, s200);
-        drawPlayerTitle(g, emp, s260, s30, s370, s50);
-        drawVS(g, emp, s260, s90, w-scaled(520), s50); 
-        drawKnownEmpiresTitle(g, emp, w-s60-s200, s30+s200, 0, s50);
+        drawRaceIcon(g, emp, s60, s30, s100, s100);
+        drawOpponentIcon(g, null, w-s60-s100, s30, s100, s100);
+        drawPlayerTitle(g, emp, s160, s30, s370, s50);
+        drawVS(g, emp, s160, s40, w-scaled(380), s50); 
+        drawKnownEmpiresTitle(g, emp, w-s60-s100, s30+s100, 0, s50);
     }
     private void paintAIData(Graphics2D g) {
         Empire emp = parent.selectedEmpire();
         int w = getWidth();
         int h = getHeight();
 
+        // modnar: reduce RaceIcon size, increase RankingList size
+        int s100 = scaled(100);
+        int s110 = scaled(110);
+        int s160 = scaled(160);
         int s200 = scaled(200);
         int s210 = scaled(210);
         int s260 = scaled(260);
         int s370 = scaled(370);
-        drawRaceIconBase(g, emp, s55, s25, s210, s210);
-        drawRaceIconBase(g, emp, w-s65-s200, s25, s210, s210);
-        drawVsRankingsLists(g, emp, s55, s260, w-s55-s55, h-s260-s10);
+        drawRaceIconBase(g, emp, s55, s25, s110, s110);
+        drawRaceIconBase(g, emp, w-s65-s100, s25, s110, s110);
+        drawVsRankingsLists(g, emp, s55, s160, w-s55-s55, h-s160-s10);
         if (UserPreferences.textures()) 
             drawTexture(g,0,0,w,h);
-        drawRaceIcon(g, emp, s60, s30, s200, s200);
-        drawOpponentIcon(g, emp, w-s60-s200, s30, s200, s200);
-        drawPlayerTitle(g, emp, s260, s30, s370, s50);
-        drawVS(g, emp, s260, s90, w-scaled(520), s50);
-        drawAITitle(g, emp, w-s60-s200, s30+s200, 0, s50);
+        drawRaceIcon(g, emp, s60, s30, s100, s100);
+        drawOpponentIcon(g, emp, w-s60-s100, s30, s100, s100);
+        drawPlayerTitle(g, emp, s160, s30, s370, s50);
+        drawVS(g, emp, s160, s40, w-scaled(380), s50);
+        drawAITitle(g, emp, w-s60-s100, s30+s100, 0, s50);
     }
     private void drawRaceIconBase(Graphics2D g, Empire emp, int x, int y, int w, int h) {
         g.setColor(RacesUI.darkBrown);
@@ -161,7 +169,7 @@ public final class RacesStatusUI extends BasePanel implements MouseListener, Mou
         g.fill(rect);
         
         BufferedImage backImg = parent.raceIconBackImg();
-        g.drawImage(backImg, x,y, null);
+        g.drawImage(backImg, x,y, s100,s100, null); // modnar: reduce RaceIcon background size
         
         int x1 = x + w/10;
         int w1 = w * 8/10;
@@ -179,7 +187,7 @@ public final class RacesStatusUI extends BasePanel implements MouseListener, Mou
         g.fill(rect);
         
         BufferedImage backImg = parent.raceIconBackImg();
-        g.drawImage(backImg, x,y, null);
+        g.drawImage(backImg, x,y, s100,s100, null); // modnar: reduce RaceIcon background size
         
         if (emp == null)
             return;
