@@ -354,17 +354,32 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         
         // the various "slowing" options increase the research cost for higher tech levels
         
+        // modnar: adjust research costs to asymptotically reach their original scaling
+        // mainly to keep low tech level costs similar to RESEARCH_NORMAL (1.00)
+        // also corrects for old_SLOW's cheaper techLevel==2 and same cost techLevel==3
+        //
+        // techLevel:     2     3     4     5     6     7     8     9     10     20     30     40     50    100
+        // old_SLOW:     0.82  1.00  1.15  1.29  1.41  1.53  1.63  1.73  1.83   2.58   3.16   3.65   4.08   5.77
+        // new_SLOW:     1.15  1.17  1.25  1.34  1.44  1.53  1.62  1.71  1.80   2.53   3.12   3.62   4.06   5.81
+        // old_SLOWER:   1.41  1.73  2.00  2.24  2.45  2.65  2.83  3.00  3.16   4.47   5.48   6.32   7.07  10.00
+        // new_SLOWER:   1.20  1.25  1.40  1.58  1.77  1.96  2.14  2.32  2.49   3.97   5.14   6.14   7.03  10.52
+        // old_SLOWEST:  3.16  3.87  4.47  5.00  5.48  5.92  6.32  6.71  7.07  10.00  12.25  14.14  15.81  22.36
+        // new_SLOWEST:  1.24  1.36  1.75  2.21  2.68  3.15  3.61  4.06  4.49   8.17  11.10  13.60  15.81  24.55
+        
         float amt = 30.0f;                    // default adjustment
         switch(selectedResearchRate()) {
             // mondar: add fast research option
             case RESEARCH_FAST:
-                return amt*0.5f;              // flat 2x faster
+                return amt*(1.0f/(techLevel+2.0f) + 0.5f);    // mondar: asymptotically approach 2x faster
             case RESEARCH_SLOW:
-                return amt*sqrt(techLevel/3.0f); // approx. 4x slower for level 50
+                return amt*((0.6f*techLevel*sqrt(techLevel)+1.0f)/techLevel - 0.2f); // mondar: asymptotically similar
+                //return amt*sqrt(techLevel/3.0f); // approx. 4x slower for level 50
             case RESEARCH_SLOWER:
-                return amt*sqrt(techLevel);   // approx. 7x slower for level 50
+                return amt*((1.2f*techLevel*sqrt(techLevel)+2.0f)/techLevel - 1.5f); // mondar: asymptotically similar
+                //return amt*sqrt(techLevel);   // approx. 7x slower for level 50
             case RESEARCH_SLOWEST:
-                return amt*sqrt(techLevel*5); // approx. 16x slower for level 50
+                return amt*((3.0f*techLevel*sqrt(techLevel)+5.0f)/techLevel - 5.5f); // mondar: asymptotically similar
+                //return amt*sqrt(techLevel*5); // approx. 16x slower for level 50
             default:  
                 return amt;                   // no additional slowing. 
         }
