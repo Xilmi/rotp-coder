@@ -43,6 +43,7 @@ public class UserPreferences {
     // modnar: set default texture to off/false
     private static boolean textures = false;
     private static boolean alwaysStarGates = false; // modnar: add option to always have Star Gates tech
+    private static boolean alwaysThorium = false; // modnar: add option to always have Thorium Cells tech
     private static boolean challengeMode = false; // modnar: add option to give AI more initial resources
     private static boolean randomTechStart = false; // modnar: add option to start all Empires with 2 techs, no Artifacts
     private static int autoSaveTurns = 5; // modnar: add option to auto-save every n-turns
@@ -66,6 +67,7 @@ public class UserPreferences {
     public static boolean textures()        { return textures; }
     public static void toggleTextures()     { textures = !textures; save();  }
     public static boolean alwaysStarGates()  { return alwaysStarGates; } // modnar: add option to always have Star Gates tech
+    public static boolean alwaysThorium()    { return alwaysThorium; } // modnar: add option to always have Thorium Cells tech
     public static boolean challengeMode()    { return challengeMode; } // modnar: add option to give AI more initial resources
     public static boolean randomTechStart()  { return randomTechStart; } // modnar: add option to start all Empires with 2 techs, no Artifacts
     public static int autoSaveTurns()       { return autoSaveTurns; } // modnar: add option to auto-save every n-turns
@@ -120,6 +122,7 @@ public class UserPreferences {
             out.println(keyFormat("UI_TEXTURES")+ yesOrNo(textures));
             out.println(keyFormat("UI_TEXTURE_LEVEL")+(int) (uiTexturePct()*100));
             out.println(keyFormat("ALWAYS_STAR_GATES")+ yesOrNo(alwaysStarGates)); // modnar: add option to always have Star Gates tech
+            out.println(keyFormat("ALWAYS_THORIUM")+ yesOrNo(alwaysThorium)); // modnar: add option to always have Thorium Cells tech
             out.println(keyFormat("CHALLENGE_MODE")+ yesOrNo(challengeMode)); // modnar: add option to give AI more initial resources
             out.println(keyFormat("RANDOM_TECH_START")+ yesOrNo(randomTechStart)); // modnar: add option to start all Empires with 2 techs, no Artifacts
             out.println(keyFormat("AUTO_SAVE_TURNS")+ autoSaveTurns()); // modnar: add option to auto-save every n-turns
@@ -161,6 +164,7 @@ public class UserPreferences {
             case "UI_TEXTURES":  textures = yesOrNo(val); return;
             case "UI_TEXTURE_LEVEL": uiTexturePct(Integer.valueOf(val)); return;
             case "ALWAYS_STAR_GATES": alwaysStarGates = yesOrNo(val); return; // modnar: add option to always have Star Gates tech
+            case "ALWAYS_THORIUM": alwaysThorium = yesOrNo(val); return; // modnar: add option to always have Thorium Cells tech
             case "CHALLENGE_MODE": challengeMode = yesOrNo(val); return; // modnar: add option to give AI more initial resources
             case "RANDOM_TECH_START": randomTechStart = yesOrNo(val); return; // modnar: add option to start all Empires with 2 techs, no Artifacts
             case "AUTO_SAVE_TURNS": autoSaveTurns(Integer.valueOf(val)); return; // modnar: add option to auto-save every n-turns

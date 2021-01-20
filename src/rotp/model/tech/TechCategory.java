@@ -229,6 +229,15 @@ public final class TechCategory implements Base, Serializable {
 				addPossibleTech(StarGateId);
                 found = true;
 			}
+            // modnar: always add in Thorium Cells Tech
+			// if the ALWAYS_THORIUM option in UserPreferences (Remnants.cfg) is set to YES
+			// for tech category Propulsion, index = 4
+			// tech level 41, quintile i = 8
+			if ((index == 4) && (i == 8) && UserPreferences.alwaysThorium()) {
+				String ThoriumCellId = "FuelRange:8";
+				addPossibleTech(ThoriumCellId);
+                found = true;
+			}
 			
             if (!found)
                 addPossibleTech(random(techs));
