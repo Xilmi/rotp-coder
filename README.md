@@ -9,12 +9,12 @@ This RotP MOD contains many gameplay additions/changes from the official game ve
 ## Overview of MOD Features
 
 - [**coder111 governor mod**](https://github.com/coder111111/rotp-public)
+- **Better AI**
 - [**Many New Map Shapes**](https://i.imgur.com/115jnZb.png)
     - [**Text allows custom player input map shape**](https://i.imgur.com/J5Wr3yL.png) (text/unicode in the Homeworld name [**A**](https://i.imgur.com/UUpH1TK.png), [**B**](https://i.imgur.com/JsZp69f.png), [**C**](https://i.imgur.com/tjkhdYP.png))
-- **Better AI**
+- [**6 New Playable Races**](https://i.imgur.com/Iza3WpE.jpg)
 - [**Re-colored Ships**](https://reddit.com/r/rotp/comments/gli5z5/rotp_recolored_ship_design_sets_download/)
-- [**5 New Playable Races**](https://i.imgur.com/K1KRTzh.jpg)
-- [**Options in Remnants.cfg for New Game Modes**](https://i.imgur.com/fQSRrch.png)
+- [**Options in Remnants.cfg for New Game Modes**](https://i.imgur.com/OhyMaKj.png)
 - [**New Space Pirates Random Event**](https://i.imgur.com/jBu21Pt.png)
 - [**Quality of Life Improvements**](https://i.imgur.com/lBAVLpV.png)
     - [**Auto-Saves**](https://i.imgur.com/TfAXG2P.png)
@@ -37,7 +37,11 @@ This RotP MOD contains many gameplay additions/changes from the official game ve
     - **Disable Showing Help Tool-Tips at Start of New Game**
     - **Texture Defaults to OFF**
     - **FAST Research Rate Option** added to Advanced Options
-        - Flat Half Cost Techs
+        - Asymptotically Approach Half Cost Techs
+    - **All Research Rate Options Scale Asymptotically**
+        - Cost at Low Tech Levels Closer to NORMAL Tech Costs
+    - [**Change Missile Colors according to Missile Type**](https://i.imgur.com/HSD2Irb.png)
+    - [**Larger Race Status plots**](https://i.imgur.com/tn0mL6E.png)
     
 
 
