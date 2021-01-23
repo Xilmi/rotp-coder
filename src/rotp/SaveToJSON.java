@@ -12,8 +12,8 @@ public class SaveToJSON {
     }
 
     public static void main(String arg[]) throws IOException, ClassNotFoundException {
-        int chars[] = { 0x1F66D };
-        System.out.println("SPACESHIP "+new String(chars, 0, 1));
+//        int chars[] = { 0x1F66D };
+//        System.out.println("SPACESHIP "+new String(chars, 0, 1));
         if (arg.length != 2) {
             System.out.println("SaveToJSON input.rotp output.json");
             System.exit(2);
