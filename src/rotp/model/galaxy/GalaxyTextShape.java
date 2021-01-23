@@ -34,19 +34,21 @@ import rotp.model.game.IGameOptions;
 // modnar: custom map shape, Text
 public class GalaxyTextShape extends GalaxyShape {
     public static final List<String> options1;
-    //public static final List<String> options2;
+    public static final List<String> options2;
     private static final long serialVersionUID = 1L;
     static {
         options1 = new ArrayList<>();
         options1.add("SETUP_TEXT_0");
         options1.add("SETUP_TEXT_1");
         options1.add("SETUP_TEXT_2");
-        //options2 = new ArrayList<>();
-        //options2.add("SETUP_NOT_AVAILABLE");
+        options2 = new ArrayList<>();
+        options2.add("SETUP_1_LINE");
+        options2.add("SETUP_2_LINE");
+        options2.add("SETUP_3_LINE");
     }
 	
-	float adjust_densityX = 4.0f;
-	float adjust_densityY = 1.5f;
+    float aspectRatio = 4.0f;
+    float adjust_line = 1.0f;
     Shape textShape;
 	
     public GalaxyTextShape(IGameOptions options) {
@@ -54,20 +56,20 @@ public class GalaxyTextShape extends GalaxyShape {
     }
     @Override
     public List<String> options1()  { return options1; }
-    //@Override
-    //public List<String> options2()  { return options2; }
+    @Override
+    public List<String> options2()  { return options2; }
     @Override
     public String defaultOption1()  { return options1.get(0); }
-    //@Override
-    //public String defaultOption2()  { return options2.get(0); }
+    @Override
+    public String defaultOption2()  { return options2.get(0); }
     @Override
 	public void init(int n) {
         super.init(n);
-		
-        int option1 = max(0, options1.indexOf(opts.selectedGalaxyShapeOption1()));
-        //int option2 = max(0, options2.indexOf(opts.selectedGalaxyShapeOption2()));
         
-		BufferedImage img = new BufferedImage(galaxyWidthLY(), galaxyHeightLY(), BufferedImage.TYPE_INT_ARGB);
+        int option1 = max(0, options1.indexOf(opts.selectedGalaxyShapeOption1()));
+        int option2 = max(0, options2.indexOf(opts.selectedGalaxyShapeOption2()));
+        
+		BufferedImage img = new BufferedImage(16, 10, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g2 = img.createGraphics();
 		
 		// Monospaced font used for constant spacing
@@ -75,11 +77,11 @@ public class GalaxyTextShape extends GalaxyShape {
 		Font font1 = new Font("Monospaced", Font.PLAIN, 96);
 		Map<TextAttribute, Object> attributes = new HashMap<TextAttribute, Object>();
 		// use TextAttribute.TRACKING to cram letters together for better connectivity
-		attributes.put(TextAttribute.TRACKING, -0.17);
+		attributes.put(TextAttribute.TRACKING, -0.15);
 		Font font2 = font1.deriveFont(attributes);
 		
 		// modnar: choose text string with option1
-		// TODO: work out multi-line text
+		// TODO: work out true multi-line text
 		// some text strings will have issues with connectivity regardless of TextAttribute.TRACKING
         switch(option1) {
             case 0: {
@@ -103,10 +105,32 @@ public class GalaxyTextShape extends GalaxyShape {
             }
         }
 		
+        // modnar: choose number of times to repeat text string with option2
+        switch(option2) {
+            case 0: {
+                // repeat once, 1 line
+                adjust_line = 1.0f;
+                break;
+            }
+            case 1: {
+                // repeat twice, 2 lines, with some in-bewteen spacing
+                adjust_line = 2.05f;
+                break;
+            }
+            case 2: {
+                // repeat thrice, 3 lines, with some in-bewteen spacing
+                adjust_line = 3.10f;
+                break;
+            }
+        }
+        
 		// set galaxy aspect ratio to the textShape aspect ratio
 		// this accommodates very long or short text strings
-		// and multi-line texts in the future
-		adjust_densityX = (float) (adjust_densityY * textShape.getBounds().getWidth() / textShape.getBounds().getHeight());
+		// for multi-line texts, use adjust_line
+        aspectRatio = (float) (textShape.getBounds().getWidth() / (adjust_line * textShape.getBounds().getHeight()));
+        
+        // reset w/h vars since aspect ratio may have changed
+        initWidthHeight();
 		
 		// rescale textShape to fit galaxy map, then move into map center
 		AffineTransform scaleText = new AffineTransform();
@@ -114,31 +138,31 @@ public class GalaxyTextShape extends GalaxyShape {
 		
 		// rescale
 		double zoomX = (galaxyWidthLY() - 4*galaxyEdgeBuffer()) / textShape.getBounds().getWidth();
-		double zoomY = (galaxyHeightLY() - 4*galaxyEdgeBuffer()) / textShape.getBounds().getHeight();
+        // zoomY changes with multiple lines
+		double zoomY = (1.0f/adjust_line)*(galaxyHeightLY() - 4*galaxyEdgeBuffer()) / textShape.getBounds().getHeight();
 		double zoom = Math.min(zoomX, zoomY);
 		scaleText.scale(zoom, zoom);
 		textShape = scaleText.createTransformedShape(textShape);
 		
-		// recenter
-		double oldx = textShape.getBounds().getX();
-		double oldy = textShape.getBounds().getY();
-		moveText.translate((galaxyWidthLY()-textShape.getBounds().getWidth())/2 - oldx, (galaxyHeightLY()-textShape.getBounds().getHeight())/2 - oldy);
+		// recenter with multiple lines
+		double oldX = textShape.getBounds().getX();
+		double oldY = textShape.getBounds().getY();
+        double moveX = (galaxyWidthLY()-textShape.getBounds().getWidth())/2 - oldX + 2*galaxyEdgeBuffer();
+        double moveY = (galaxyHeightLY()-textShape.getBounds().getHeight())/2 - oldY + 2*galaxyEdgeBuffer();
+		moveText.translate(moveX, moveY);
 		textShape = moveText.createTransformedShape(textShape);
         
-        // reset w/h vars since aspect ratio may have changed
-        initWidthHeight();
-
 	}
 	
     @Override
     public float maxScaleAdj()               { return 0.95f; }
     @Override
     protected int galaxyWidthLY() { 
-        return (int) (Math.sqrt(adjust_densityX*opts.numberStarSystems()*adjustedSizeFactor()));
+        return (int) (Math.sqrt(1.4f*aspectRatio*opts.numberStarSystems()*adjustedSizeFactor()));
     }
     @Override
     protected int galaxyHeightLY() { 
-        return (int) (Math.sqrt(adjust_densityY*opts.numberStarSystems()*adjustedSizeFactor()));
+        return (int) (Math.sqrt(1.4f*(1/aspectRatio)*opts.numberStarSystems()*adjustedSizeFactor()));
     }
     @Override
     public void setRandom(Point.Float pt) {
@@ -147,6 +171,17 @@ public class GalaxyTextShape extends GalaxyShape {
     }
     @Override
     public boolean valid(float x, float y) {
+        // modnar: check validity of point with multiple lines
+        int option2 = max(0, options2.indexOf(opts.selectedGalaxyShapeOption2()));
+        if (option2 == 1) {
+            // repeat twice, 2 lines, with some in-bewteen spacing
+            return (textShape.contains(x, y+textShape.getBounds().getHeight()*(adjust_line-1)/2) || textShape.contains(x, y-textShape.getBounds().getHeight()*(adjust_line-1)/2));
+        }
+        else if (option2 == 2) {
+            // repeat thrice, 3 lines, with some in-bewteen spacing
+            return (textShape.contains(x, y) || textShape.contains(x, y+textShape.getBounds().getHeight()*(adjust_line-1)/2) || textShape.contains(x, y-textShape.getBounds().getHeight()*(adjust_line-1)/2));
+        }
+        // repeast once, 1 line
         return textShape.contains(x, y);
     }
     float randomLocation(float max, float buff) {

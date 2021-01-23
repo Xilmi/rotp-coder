@@ -1091,6 +1091,9 @@ SETUP_VOID_5                      | Void 5
 SETUP_TEXT_0                      | Homeworld Name
 SETUP_TEXT_1                      | ROTP
 SETUP_TEXT_2                      | MoO1
+SETUP_1_LINE                      | Single Line
+SETUP_2_LINE                      | Double Line
+SETUP_3_LINE                      | Triple Line
 SETUP_BULLSEYE_0                  | Dartboard
 SETUP_BULLSEYE_1                  | Rings
 SETUP_BULLSEYE_2                  | Squares
