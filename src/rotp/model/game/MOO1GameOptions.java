@@ -49,6 +49,7 @@ import rotp.util.Base;
 
 public class MOO1GameOptions implements Base, IGameOptions, Serializable {
     private static final long serialVersionUID = 1L;
+    private static final float BASE_RESEARCH_MOD = 30f;
     private final String[] opponentRaces = new String[MAX_OPPONENTS];
     private final List<Integer> colors = new ArrayList<>();
     private final List<Color> empireColors = new ArrayList<>();
@@ -366,7 +367,7 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         // old_SLOWEST:  3.16  3.87  4.47  5.00  5.48  5.92  6.32  6.71  7.07  10.00  12.25  14.14  15.81  22.36
         // new_SLOWEST:  1.24  1.36  1.75  2.21  2.68  3.15  3.61  4.06  4.49   8.17  11.10  13.60  15.81  24.55
         
-        float amt = 30.0f;                    // default adjustment
+        float amt = BASE_RESEARCH_MOD;                  // default adjustment
         switch(selectedResearchRate()) {
             // mondar: add fast research option
             case RESEARCH_FAST:

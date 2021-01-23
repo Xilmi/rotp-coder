@@ -19,9 +19,19 @@ import rotp.util.Base;
 
 public class TreatyPeace extends DiplomaticTreaty implements Base {
     private static final long serialVersionUID = 1L;
-    public TreatyPeace(Empire e1, Empire e2) {
+    private int duration;
+    public TreatyPeace(Empire e1, Empire e2, int d) {
         super(e1,e2,"RACES_PEACE");
+        duration = d;
     }    
+    @Override
+    public void nextTurn(Empire emp)      { 
+        duration--;
+        if (duration <= 0) {
+            galaxy().empire(empire2).viewForEmpire(empire1).embassy().setNoTreaty();
+            galaxy().empire(empire1).viewForEmpire(empire2).embassy().setNoTreaty();
+        }
+    }
     @Override
     public boolean isPeace()                 { return true; }
     @Override

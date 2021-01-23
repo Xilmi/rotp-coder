@@ -21,9 +21,8 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.lang.management.ManagementFactory;
-import java.net.URLDecoder;
+import java.net.URISyntaxException;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import rotp.model.game.GameSession;
@@ -38,10 +37,10 @@ public class Rotp {
     private static final int MB = 1048576;
     public static int IMG_W = 1229;
     public static int IMG_H = 768;
-    public static String jarFileName = "RotP-2.08_modnar_MOD18.jar";
+    public static String jarFileName = "RotP-2.09_modnar_MOD19.jar";
     private static String jarPath;
     private static JFrame frame;
-    public static String releaseId = "Beta 2.08 modnar_MOD18";
+    public static String releaseId = "Beta 2.09 modnar_MOD19";
     public static long startMs = System.currentTimeMillis();
     public static long maxHeapMemory = Runtime.getRuntime().maxMemory() / 1048576;
     public static long maxUsedMemory;
@@ -50,6 +49,7 @@ public class Rotp {
     public static int actualAlloc = -1;
     public static boolean reloadRecentSave = false;
     
+    static GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
     public static void main(String[] args) {
         frame = new JFrame("Remnants of the Precursors");
         if (args.length == 0) {
@@ -81,11 +81,14 @@ public class Rotp {
         if (UserPreferences.fullScreen()) {
             frame.setExtendedState(JFrame.MAXIMIZED_BOTH); 
             frame.setUndecorated(true);
+            device.setFullScreenWindow(frame);
+            resizeAmt();
         }
         else {
             frame.setResizable(false);
+            device.setFullScreenWindow(null);
+            setFrameSize();
         }
-        setFrameSize();
 
         if (reloadRecentSave)
             GameSession.instance().loadRecentSession(false);
@@ -133,11 +136,9 @@ public class Rotp {
     public static String jarPath()  {
         if (jarPath == null) {
             try {
-                String path = Rotp.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-                System.out.println("Jar Path: "+path);
-                path = URLDecoder.decode(path, "UTF-8");
-                jarPath = (new File(path)).getParentFile().getPath();
-            } catch (UnsupportedEncodingException ex) {
+                File jarFile = new File(Rotp.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+                jarPath = jarFile.getParentFile().getPath();
+            } catch (URISyntaxException ex) {
                 System.out.println("Unable to resolve jar path: "+ex.toString());
                 jarPath = ".";
             }

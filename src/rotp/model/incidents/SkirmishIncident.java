@@ -38,7 +38,7 @@ public class SkirmishIncident extends DiplomaticIncident {
         sysId = res.system().id;
         empMe = ev.owner().id;
         empYou = ev.empire().id;
-        severity = sev;
+        severity = max(-10, sev);
 
         dateOccurred = galaxy().currentYear();
         duration = 5;
@@ -50,6 +50,8 @@ public class SkirmishIncident extends DiplomaticIncident {
     public String description()         { return decode(text("INC_SKIRMISH_DESC")); }
     @Override
     public String warningMessageId() {  return DialogueManager.WARNING_SKIRMISH; }
+    @Override
+    public int timerKey()               { return ATTACK_WARNING; }
     @Override
     public String key() {
         return concat(systemName(), ":", str(dateOccurred));

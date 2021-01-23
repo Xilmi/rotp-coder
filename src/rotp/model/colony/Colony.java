@@ -42,6 +42,7 @@ import rotp.model.planet.Planet;
 import rotp.model.ships.Design;
 import rotp.model.ships.ShipDesign;
 import rotp.model.tech.Tech;
+import rotp.model.tech.TechMissileWeapon;
 import rotp.model.tech.TechTree;
 import rotp.ui.RotPUI;
 import rotp.ui.notifications.GNNNotification;
@@ -80,7 +81,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
     public enum Orders {
         NONE(""), SHIELD("TECH_ALLOCATE_SHIELD"), BASES("TECH_ALLOCATE_MISSILE_BASES"), FACTORIES(
                         "TECH_ALLOCATE_FACTORIES"), SOIL("TECH_ALLOCATE_ENRICH_SOIL"), ATMOSPHERE(
-                        "TECH_ALLOCATE_ATMOSPHERE"), TERRAFORM("TECH_ALLOCATE_TERRAFORM");
+                        "TECH_ALLOCATE_ATMOSPHERE"), TERRAFORM("TECH_ALLOCATE_TERRAFORM"), POPULATION("TECH_ALLOCATE_POPULATION");
         private final String label;
         Orders(String s) { label = s; }
         @Override
@@ -521,13 +522,33 @@ public final class Colony implements Base, IMappedObject, Serializable {
             empire().governorAI().setColonyAllocations(this);            
 
     }
+    public void addFollowUpSpendingOrder(float orderAmt) {
+        if (orderAmt <= 0)
+            return;
+
+        // a spending order has completed, ripple it down to the next priority
+        // so the colony progresses to completion
+        ColonyEcology eco = ecology();
+        ColonyIndustry ind = industry();
+        ColonyDefense def = defense();
+        if (!eco.terraformCompleted()) 
+            addColonyOrder(Colony.Orders.TERRAFORM, orderAmt);
+        else if (!ind.isCompleted())
+            addColonyOrder(Colony.Orders.FACTORIES, orderAmt);
+        else if (!eco.populationGrowthCompleted())
+            addColonyOrder(Colony.Orders.POPULATION, orderAmt);
+        else if (!def.shieldAtMaxLevel())
+            addColonyOrder(Colony.Orders.SHIELD, orderAmt);
+        else if (!def.missileBasesCompleted())
+            addColonyOrder(Colony.Orders.BASES, orderAmt/5);
+    }
     public void checkEcoAtClean() {
         recalcSpendingForNewTaxRate = false;
         if (!locked[ECOLOGY]) {
             int newAlloc = ecology().cleanupAllocationNeeded();
             if (allocation[ECOLOGY] < newAlloc) {
                 allocation[ECOLOGY] = cleanupAllocation = newAlloc;
-                empire().ai().governor().setColonyAllocations(this);
+                cleanupSpending(ecology());
             }        
         }
     }
@@ -569,7 +590,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
                 // log("reducing transport levels from ", planet.name(), " to ",
                 // str(transport().originalSize), " to avoid income loss");
                 transport().size(maxSize);
-                transport().originalSize(maxSize);
+                transport().launchSize(maxSize);
             } else {
                 // log("cancelling transports from ", planet.name(), " to
                 // avoid income loss");
@@ -994,15 +1015,24 @@ public final class Colony implements Base, IMappedObject, Serializable {
         }
 
         num -= passed;
-        int missileDmg = tech().topBaseMissileTech().damage() * 3;
+
+        // choose most effective missile dmg
+        int missileDmg = 0;
+        TechMissileWeapon scatter = tech().topBaseScatterPackTech();
+        TechMissileWeapon missile = tech().topBaseMissileTech();
+        if (scatter != null)
+            missileDmg = 3*max(missile.damage(), scatter.damage() * scatter.scatterAttacks());
+        else 
+            missileDmg = 3*missile.damage();
+
         int lost = 0;
 
         // start with base missile damage
         float defenderDmg = defense().missileBases() * missileDmg;
 
         // add firepower for each allied ship in orbit
-		// modnar: use firepowerAntiShip to only count ship weapons that can hit ships
-		// to prevent ground bombs from being able to damage transports
+            // modnar: use firepowerAntiShip to only count ship weapons that can hit ships
+            // to prevent ground bombs from being able to damage transports
         List<ShipFleet> fleets = starSystem().orbitingFleets();
         for (ShipFleet fl : fleets) {
             if (fl.empire().aggressiveWith(tr.empId()))
@@ -1013,7 +1043,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         for (int j = 0; j < tr.gauntletRounds(); j++)
             lost += (int) (defenderDmg / tr.hitPoints());
 
-        passed += Math.max(0, (num - lost));
+        passed += max(0, (num - lost));
 
         tr.size(passed);
 
@@ -1021,11 +1051,11 @@ public final class Colony implements Base, IMappedObject, Serializable {
         // neither of these incidents are added to the embassies. They are for
         // player notification only.
         if (tr.size() == 0) {
-            log(concat(str(tr.originalSize()), " ", tr.empire().raceName(), " transports perished at ", name()));
+            log(concat(str(tr.launchSize()), " ", tr.empire().raceName(), " transports perished at ", name()));
             if (tr.empire().isPlayer()) 
-                TransportsKilledAlert.create(empire(), starSystem(), tr.originalSize());
+                TransportsKilledAlert.create(empire(), starSystem(), tr.launchSize());
             else if (empire().isPlayer()) 
-                InvadersKilledAlert.create(tr.empire(), starSystem(), tr.originalSize());
+                InvadersKilledAlert.create(tr.empire(), starSystem(), tr.launchSize());
             return;
         }
 
@@ -1050,7 +1080,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         DiplomaticTreaty treaty = empire().treaty(tr.empire());
         if (treaty != null) {
             treaty.losePopulation(empire(), startingPop-population());
-            treaty.losePopulation(tr.empire(), tr.originalSize()-tr.size());
+            treaty.losePopulation(tr.empire(), tr.launchSize()-tr.size());
         }
 
         // did planet ownership change?
@@ -1117,8 +1147,10 @@ public final class Colony implements Base, IMappedObject, Serializable {
         defense().capturedBy(tr.empire());
         ecology().capturedBy(tr.empire());
 
-        empire.removeColonizedSystem(starSystem());
-        tr.empire().addColonizedSystem(starSystem());
+        StarSystem sys = starSystem();
+        empire.removeColonizedSystem(sys);
+        empire.stopRalliesWithSystem(sys);
+        tr.empire().addColonizedSystem(sys);
 
         empire = tr.empire();
         buildFortress();

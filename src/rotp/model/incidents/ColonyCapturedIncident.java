@@ -42,7 +42,7 @@ public class ColonyCapturedIncident extends DiplomaticIncident {
         sysId = sys.id;
         popLost = p;
 
-        severity = -20 + max(-130, -5*popLost);
+        severity = -20 + max(-30, popLost);
         dateOccurred = galaxy().currentYear();
         duration = 30;
     }
@@ -53,6 +53,8 @@ public class ColonyCapturedIncident extends DiplomaticIncident {
     public String description()   { return  decode(text("INC_CAPTURED_COLONY_DESC")); }
     @Override
     public String declareWarId()  { return DialogueManager.DECLARE_ATTACKED_WAR; }
+    @Override
+    public int timerKey()               { return ATTACK_WARNING; }
     @Override
     public String key() {
         return concat(systemName(), ":", str(dateOccurred));

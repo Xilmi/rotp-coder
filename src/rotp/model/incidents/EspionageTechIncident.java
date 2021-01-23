@@ -30,10 +30,10 @@ public class EspionageTechIncident extends DiplomaticIncident {
 
     public EspionageTechIncident(EmpireView ev, EspionageMission m) {
         ev.embassy().resetAllianceTimer();
-        severity = max(-60, -30+ev.embassy().currentSpyIncidentSeverity()); // modnar: increase tech steal severity
+        severity = max(-30, -10+ev.embassy().currentSpyIncidentSeverity()); // modnar: increase tech steal severity
 
         dateOccurred = galaxy().currentYear();
-        duration = 20; // modnar: increase tech steal duration
+        duration = 15; // modnar: increase tech steal duration
         
         // empSpy is the actual spy
         // empThief is the suspected spy (the one who was framed)
@@ -45,6 +45,8 @@ public class EspionageTechIncident extends DiplomaticIncident {
     }
     @Override
     public boolean isSpying()         { return true; }
+    @Override
+    public int timerKey()           { return SPY_WARNING; }
     @Override
     public String title()             { return text("INC_TECH_STOLEN_TITLE"); }
     @Override
@@ -61,6 +63,10 @@ public class EspionageTechIncident extends DiplomaticIncident {
     }
     @Override
     public String warningMessageId() { return galaxy().empire(empVictim).isPlayer() ? "" : DialogueManager.WARNING_ESPIONAGE; }
+    @Override
+    public String declareWarId()     { return DialogueManager.DECLARE_SPYING_WAR; }
+    @Override
+    public boolean triggersWar()        { return false; } // war is only triggered after a warning
     @Override
     public String key() {
         return str(dateOccurred)+":Espionage";

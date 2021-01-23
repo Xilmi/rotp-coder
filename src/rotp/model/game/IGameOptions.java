@@ -100,7 +100,8 @@ public interface IGameOptions {
     public static final String COUNCIL_REBELS    = "SETUP_COUNCIL_REBELS";
     
     public default boolean isAutoPlay()          { return false; }
-    public default boolean communityAI()         { return true; } // modnar: default to communityAI = true
+    public default boolean communityAI()         { return false; }
+    public default boolean usingExtendedRaces()  { return (selectedNumberOpponents()+1) > startingRaceOptions().size(); }
     public default void communityAI(boolean b)   { }
     public default int maxOpponents()            { return MAX_OPPONENTS; }
     public String name();

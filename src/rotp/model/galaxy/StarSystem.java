@@ -245,6 +245,10 @@ public class StarSystem implements Base, Sprite, IMappedObject, Serializable {
     }
 
     public Empire empire()                      { return planet().empire(); }
+    public int empId() {
+        Empire e = empire();
+        return e == null ? Empire.NULL_ID : e.id;
+    }
     public boolean hasColonyForEmpire(Empire c) { return empire() == c; }
     public boolean hasOrbitingTransports()      { return !orbitingTransports.isEmpty(); }
     public boolean hasStargate(Empire e)        { return isColonized() && colony().hasStargate(e); }
@@ -545,7 +549,8 @@ public class StarSystem implements Base, Sprite, IMappedObject, Serializable {
         Colony col = pl.sv.isColonized(id) ? colony() : null;
         int pop = pl.sv.population(id);
         int fontSize = fontSize(map);
-        if (map.showSystemNames() || (pop == 0) || (fontSize < 12)) {
+        int realFontSize = unscaled(fontSize);
+        if (map.parent().showSystemName(this) || (pop == 0) || (realFontSize < 12)) {
             String s1 = map.parent().systemLabel(this);
             String s2 = map.parent().systemLabel2(this);
             if (s2.isEmpty())
@@ -574,7 +579,8 @@ public class StarSystem implements Base, Sprite, IMappedObject, Serializable {
                 box.height = BasePanel.s20;
             }
         }
-        else if (map.showSystemData()) {
+        else if (map.parent().showSystemData(this)) {
+            fontSize = fontSize * 7 / 10;
             int mgn = BasePanel.s6;
             int s1 = BasePanel.s1;
             String popStr = ""+pop;

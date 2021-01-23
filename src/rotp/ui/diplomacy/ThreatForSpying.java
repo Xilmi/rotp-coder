@@ -17,8 +17,8 @@ package rotp.ui.diplomacy;
 
 import rotp.model.empires.Empire;
 
-public class OfferAllianceMessage extends TurnNotificationMessage {
-    public OfferAllianceMessage(String  s) {
+public class ThreatForSpying extends TurnNotificationMessage {
+    public ThreatForSpying(String  s) {
         messageType = s;
     }
     @Override
@@ -29,31 +29,29 @@ public class OfferAllianceMessage extends TurnNotificationMessage {
     public int numReplies()       		{ return 2; }
     @Override
     public boolean enabled(int i)       { return true; }
-    @Override
+     @Override
     public String reply(int i)          { 
         switch (i) {
-            case 0 : return text("DIPLOMACY_ACCEPT_FORM_ALLIANCE");
-            case 1 : return text("DIPLOMACY_DECLINE_OFFER");
+            case 0 : return text("DIPLOMACY_IGNORE_THREAT");
+            case 1 : return text("DIPLOMACY_HIDE_SPIES", diplomat().name());
         }
         return ""; 
     }
     @Override
     public void select(int i) {
-        log("OfferAllianceMessage - selected: ", str(i));
+        log("ThreatForSpying - selected: ", str(i));
         switch(i) {
-        case 0: 
-            DiplomaticReply reply = player().diplomatAI().acceptOfferAlliance(diplomat());
-            reply.resumeTurn(true);
-            DiplomaticMessage.reply(DiplomacyRequestReply.create(diplomat(), reply));	
-            break;
         case 1: 
+            player().stopSpyingAgainst(diplomat().id);
+            escape();
+            break;
+        case 0: 
         default:
             escape(); break;
         }
     }
     @Override
     public void escape() {
-        player().diplomatAI().refuseOfferAlliance(diplomat());
         session().resumeNextTurnProcessing();
     }
     @Override
