@@ -403,6 +403,15 @@ public class AIDiplomat implements Base, Diplomat {
         return v.otherView().accept(DialogueManager.ACCEPT_TRADE, inc);
     }
     @Override
+    public DiplomaticReply immediateRefusalToTrade(Empire requestor) {
+        EmpireView v = empire.viewForEmpire(requestor);
+        int bonus = requestor.race().diplomacyBonus();
+        if ((baseChanceForTrade(v)+bonus) < 0) {
+            return DiplomaticReply.answer(false, declineReasonText(v));
+        }
+        return null;
+    }
+    @Override
     public DiplomaticReply acceptOfferTrade(Empire e, int level) {
         EmpireView v = empire.viewForEmpire(e);
         DiplomaticIncident inc = v.embassy().establishTradeTreaty(level);
@@ -1015,7 +1024,7 @@ public class AIDiplomat implements Base, Diplomat {
 
         log("cum.sev: ", str(cumulativeSeverity), "   maxInc:", maxIncident.praiseMessageId(), "  maxSev:", str(maxIncident.currentSeverity()));
 
-        // don't issue warning unless new incidents are more than 5
+        // don't issue praise unless new incidents are high enough
         if (maxIncident.currentSeverity() < view.embassy().minimumPraiseLevel())
             return false;
 
@@ -1062,7 +1071,7 @@ public class AIDiplomat implements Base, Diplomat {
             return false;
 
         log("cumulative severity: "+cumulativeSeverity);
-        view.embassy().warningSent();
+        view.embassy().warningSent(maxIncident);
         
         // if we are warning player, send a notification
         if (view.empire().isPlayer()) {
@@ -1094,9 +1103,13 @@ public class AIDiplomat implements Base, Diplomat {
         if (!view.embassy().atPeace()
         || (view.embassy().treatyDate() < galaxy().currentTime())) {
             for (DiplomaticIncident ev: view.embassy().newIncidents()) {
-                if (ev.triggersWar()) {
-                    float sev = ev.currentSeverity();
-                    if (ev.triggersWarning() && (sev < worstNewSeverity) && !ev.declareWarId().isEmpty())
+                if (!ev.declareWarId().isEmpty()) {
+                    if (ev.triggersWar()) {
+                        float sev = ev.currentSeverity();
+                        if (ev.triggersWarning() && (sev < worstNewSeverity))
+                                warIncident = ev;
+                    }
+                    else if (view.embassy().warningAlreadySent(ev.timerKey()))
                         warIncident = ev;
                 }
             }

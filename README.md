@@ -52,6 +52,8 @@ text in the planetary spending screen. Since version 1.8 Governor is on by defau
 
 Additional features / changelog
 
+* 2.09.1. Merge v2.09 Beta. Fix icon loading.
+
 * 2.08.3. Completionist button now really checks for certain conditions before it's enabled (fixed stupid bug). Added
   a game icon. Added option to disable/enable colonization prompts even after the game is started. Modnar- now I can
   really play your 2021 map. 

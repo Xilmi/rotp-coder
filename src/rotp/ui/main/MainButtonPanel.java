@@ -55,6 +55,7 @@ public final class MainButtonPanel extends BasePanel implements MouseListener, M
     int midM = -1;
     int rightM = -1;
     int botM;
+    int buttonW;
     String[] buttons = { "MAIN_NAVIGATION_GAME",
                     "MAIN_NAVIGATION_SYSTEMS",
                     "MAIN_NAVIGATION_FLEETS",
@@ -74,15 +75,17 @@ public final class MainButtonPanel extends BasePanel implements MouseListener, M
         leftM = s1;
         botM = s2;
 
+        for (int i=0;i<buttonBox.length;i++)
+            buttonBox[i] = new Rectangle();
+
         addMouseListener(this);
         addMouseMotionListener(this);
     }
+    public int buttonW()      { return buttonW; }
     private void initGradients(int w) {
         midM = w-scaled(273);
         rightM = w-s2;
 
-        for (int i=0;i<buttonBox.length;i++)
-            buttonBox[i] = new Rectangle();
         Point2D start = new Point2D.Float(leftM, 0);
         Point2D end = new Point2D.Float(midM, 0);
         float[] dist = {0.0f, 0.5f, 1.0f};
@@ -119,7 +122,7 @@ public final class MainButtonPanel extends BasePanel implements MouseListener, M
         g.setColor(Color.black);
         g.fillRect(0, 0, w, h);
 
-        int buttonW = (midM-leftM)/buttons.length;
+        buttonW = (midM-leftM)/buttons.length;
 
         for (int i=0;i<buttons.length;i++)
             drawButton(g, i, leftM+(i*buttonW), s2, buttonW-s2, h-s2-botM);
@@ -141,7 +144,7 @@ public final class MainButtonPanel extends BasePanel implements MouseListener, M
         g.setFont(narrowFont(28));
         int sw = g.getFontMetrics().stringWidth(label);
         int x0 = x+((w-sw)/2);
-        drawShadowedString(g, label, 3, x0, y+h-s15, textShadowC, c0);
+        drawShadowedString(g, label, 3, x0, y+h-s18, textShadowC, c0);
 
         if ((hoverBox == buttonBox[i])
         || (depressedBox == buttonBox[i])) {
@@ -175,7 +178,7 @@ public final class MainButtonPanel extends BasePanel implements MouseListener, M
         int sw = g.getFontMetrics().stringWidth(label);
         int x0 = x+((w-sw)/2);
         g.setColor(buttonTextC);
-        drawShadowedString(g, label, 3, x0, y+h-s15, textShadowC, nextTurnTextC);
+        drawShadowedString(g, label, 3, x0, y+h-s18, textShadowC, nextTurnTextC);
     }
     private void clickButton(int i) {
         RotPUI.instance().mainUI().cancel();

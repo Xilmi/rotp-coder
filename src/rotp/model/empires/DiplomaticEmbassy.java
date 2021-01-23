@@ -75,9 +75,9 @@ public class DiplomaticEmbassy implements Base, Serializable {
     private DiplomaticIncident casusBelliInc;
     private DiplomaticTreaty treaty;
 
-    private int[] timers = new int[20];
+    private final int[] timers = new int[20];
     private float relations = 0;
-    private int peaceDuration = 0;
+    private int peaceDuration = 0; // obsolete - sunset at some point
     private int tradeTimer = 0;
     private int lastRequestedTradeLevel = 0;
     private int tradeRefusalCount = 0;
@@ -137,6 +137,9 @@ public class DiplomaticEmbassy implements Base, Serializable {
     }
     public DiplomaticEmbassy(EmpireView v) {
         view = v;
+        setNoTreaty();
+    }
+    public final void setNoTreaty() {
         treaty = new TreatyNone(view.owner(), view.empire());
     }
     public float currentSpyIncidentSeverity() {
@@ -148,6 +151,7 @@ public class DiplomaticEmbassy implements Base, Serializable {
         return max(-100,sev);
     }
     public void nextTurn(float prod) {
+        peaceDuration--;
         evaluateWarPreparations();
         treaty.nextTurn(empire());
     }
@@ -193,7 +197,23 @@ public class DiplomaticEmbassy implements Base, Serializable {
     public int minimumPraiseLevel()         { return max(10, minimumPraiseLevel); }
     public int minimumWarnLevel()           { return max(10, minimumWarnLevel); }
     public void praiseSent()                { minimumPraiseLevel = minimumPraiseLevel()+10;  }
-    public void warningSent()               { minimumWarnLevel = minimumWarnLevel()+5;  }
+    public void warningSent(DiplomaticIncident inc) { 
+        minimumWarnLevel = minimumWarnLevel()+5;  
+        int timerKey = inc.timerKey();
+        if (timerKey >= 0) {
+            int duration = inc.duration();
+            // increment timer by double the incident duration
+            timers[timerKey] += (2*duration);
+        }
+    }
+    public boolean warningAlreadySent(int timerKey) {
+        return (timerKey >= 0) && (timers[timerKey] > 0);
+    }
+    public void resetTimer(int index) {
+        if ((index <0) || (index >= timers.length))
+            return;
+        timers[index] = 0;
+    }
     public void giveExpansionWarning()      { warningLevel = 1; }
     public boolean gaveExpansionWarning()   { return warningLevel > 0; }
     public void noteRequest() {
@@ -279,9 +299,14 @@ public class DiplomaticEmbassy implements Base, Serializable {
             allianceTimer = 0;
 
         }
+        
+        // decrement all generic timers down to 0
+        for (int i=0;i<timers.length;i++) 
+            timers[i] = max(0, timers[i]-1);
+        
         diplomatGoneTimer--;
         requestCount = 0;
-        currentMaxRequests = Math.min(currentMaxRequests+1, MAX_REQUESTS_TURN);
+        currentMaxRequests = min(currentMaxRequests+1, MAX_REQUESTS_TURN);
         minimumPraiseLevel = min(20,minimumPraiseLevel);
         minimumWarnLevel = min(20, minimumWarnLevel);
         minimumPraiseLevel = minimumPraiseLevel() - 1;
@@ -311,7 +336,7 @@ public class DiplomaticEmbassy implements Base, Serializable {
             return s.hasColonyForEmpire(owner());
         return false;
     }
-    public boolean peaceTreatyInEffect()   { return peaceDuration > 0; }
+    public boolean peaceTreatyInEffect()   { return treaty.isPeace() || (peaceDuration > 0); }
     private void setTreaty(DiplomaticTreaty tr) {
         treaty = tr;
         otherEmbassy().treaty = tr;
@@ -377,15 +402,19 @@ public class DiplomaticEmbassy implements Base, Serializable {
 
         view.trade().stopRoute();
 
-        // if we're not at war yet, inform player that war is upon him
-        if (view.empire().isPlayer() && !anyWar()) {
-           if (casusBelli == null)
-                DiplomaticNotification.createAndNotify(view, DialogueManager.DECLARE_HATE_WAR);
-            else
-                DiplomaticNotification.createAndNotify(view, casusBelli);
+        // if we're not at war yet, start it and inform player if he is involved
+        if (!anyWar()) {
+            setTreaty(new TreatyWar(view.owner(), view.empire()));
+            if (view.empire().isPlayer()) {
+                if ((casusBelli == null) || casusBelli.isEmpty())
+                    DiplomaticNotification.createAndNotify(view, DialogueManager.DECLARE_HATE_WAR);
+                else
+                    DiplomaticNotification.createAndNotify(view, casusBelli);
+            }
         }
 
-        setTreaty(new TreatyWar(view.owner(), view.empire()));
+        resetTimer(DiplomaticIncident.SPY_WARNING);
+        resetTimer(DiplomaticIncident.ATTACK_WARNING);
         resetPeaceTimer(3);
         withdrawAmbassador();
         otherEmbassy().withdrawAmbassador();
@@ -633,8 +662,7 @@ public class DiplomaticEmbassy implements Base, Serializable {
     }
     private void beginPeace(int duration) {
         beginTreaty();
-        peaceDuration = duration;
-        treaty = new TreatyNone(view.empire(), view.owner());
+        treaty = new TreatyPeace(view.empire(), view.owner(), duration);
         view.setSuggestedAllocations();
     }
 }

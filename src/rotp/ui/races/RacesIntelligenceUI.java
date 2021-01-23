@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import rotp.model.empires.Empire;
 import rotp.model.empires.EmpireView;
+import rotp.model.incidents.DiplomaticIncident;
 import rotp.model.tech.Tech;
 import rotp.model.tech.TechCategory;
 import rotp.model.tech.TechTree;
@@ -147,11 +148,10 @@ public final class RacesIntelligenceUI extends BasePanel implements MouseListene
         int s260 = scaled(260);
         int s310 = scaled(310);
         int s370 = scaled(370);
-        int s680 = scaled(680);
         drawRaceIconBase(g, emp, s55, s25, s210, s210);
         drawPlayerBaseInfo(g, emp, s260, s80, s370, scaled(130));
         drawUnknownTechnologyLists(g, emp, s20, s310, w-s40, h-s310-s10);
-        drawPlayerIntelligenceBureau(g, emp, w-scaled(349), s30, scaled(329), s200);
+        drawPlayerIntelligenceBureau(g, emp, w-scaled(299), s30, scaled(279), s200);
         drawTechnologyTitle(g, emp, s80, s260, w-s80-s90, s40);
         if (UserPreferences.textures()) 
             drawTexture(g,0,0,w,h);
@@ -168,11 +168,10 @@ public final class RacesIntelligenceUI extends BasePanel implements MouseListene
         int s260 = scaled(260);
         int s310 = scaled(310);
         int s370 = scaled(370);
-        int s680 = scaled(680);
         drawRaceIconBase(g, emp, s55, s25, s210, s210);
         drawAIBaseInfo(g, emp, s260, s80, s370, scaled(130));
         drawTechnologyLists(g, emp, s20, s310, w-s40, h-s310-s10);
-        drawAISpyOrders(g, emp, w-scaled(349), s30, scaled(329), s200);
+        drawAISpyOrders(g, emp, w-scaled(299), s30, scaled(279), s200);
         drawTechnologyTitle(g, emp, s80, s260, w-s80-s90, s40);
         if (UserPreferences.textures()) 
             drawTexture(g,0,0,w,h);
@@ -653,10 +652,14 @@ public final class RacesIntelligenceUI extends BasePanel implements MouseListene
             return;
         
         boolean treatyBreak = false;
+        boolean triggerWar = false;
         if (!view.spies().isHide() && pl.alliedWith(emp.id))
             treatyBreak = true;
         else if (view.spies().isSabotage() && pl.pactWith(emp.id))
-            treatyBreak = true;           
+            treatyBreak = true;  
+        
+        if (!view.spies().isHide() && view.otherView().embassy().warningAlreadySent(DiplomaticIncident.SPY_WARNING))
+            triggerWar = true;
 
         g.setColor(RacesUI.darkBrown);
         g.fillRect(x, y, w, h);
@@ -684,16 +687,19 @@ public final class RacesIntelligenceUI extends BasePanel implements MouseListene
             g.drawString(line, x+s15, y2);
         }
         
-        if (treatyBreak) {
+        String desc2 = "";
+        if (triggerWar) 
+            desc2 = text("RACES_INTEL_SPY_WARNING_WAR", emp.raceName());
+        else if (treatyBreak)
+            desc2 = text("RACES_INTEL_SPY_WARNING", emp.raceName());
+        if (!desc2.isEmpty()) {
             g.setColor(SystemPanel.yellowText);
-            String desc2 = text("RACES_INTEL_SPY_WARNING", emp.raceName());
             y2 += s5;
             List<String> lines2 = wrappedLines(g, desc2, w-s30);
             for (String line: lines2) {
                 y2 += s16;
                 g.drawString(line, x+s15, y2);
-            }
-            
+            }           
         }
     }
     private void drawSecuritySliderBar(Graphics2D g, int x, int y, int w, int h) {

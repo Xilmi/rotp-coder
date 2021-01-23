@@ -15,15 +15,20 @@
  */
 package rotp;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.awt.Image;
+import java.awt.Graphics2D;
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.lang.management.ManagementFactory;
-import java.net.URLDecoder;
+import java.net.URISyntaxException;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import rotp.model.game.GameSession;
@@ -41,7 +46,7 @@ public class Rotp {
     public static String jarFileName = "rotp-"+RotpGovernor.governorVersion()+RotpGovernor.miniSuffix()+".jar";
     private static String jarPath;
     private static JFrame frame;
-    public static String releaseId = "Beta 2.08";
+    public static String releaseId = "Beta 2.09";
     public static long startMs = System.currentTimeMillis();
     public static long maxHeapMemory = Runtime.getRuntime().maxMemory() / 1048576;
     public static long maxUsedMemory;
@@ -50,9 +55,7 @@ public class Rotp {
     public static int actualAlloc = -1;
     public static boolean reloadRecentSave = false;
 
-    static GraphicsDevice device = GraphicsEnvironment
-            .getLocalGraphicsEnvironment().getDefaultScreenDevice();
-
+    static GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
     public static void main(String[] args) {
         frame = new JFrame("Remnants of the Precursors");
         if (args.length == 0) {
@@ -82,15 +85,16 @@ public class Rotp {
         frame.setIconImage(square);
 
         if (UserPreferences.fullScreen()) {
-            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            frame.setExtendedState(JFrame.MAXIMIZED_BOTH); 
             frame.setUndecorated(true);
             device.setFullScreenWindow(frame);
+            resizeAmt();
         }
         else {
             frame.setResizable(false);
             device.setFullScreenWindow(null);
+            setFrameSize();
         }
-        setFrameSize();
 
         if (reloadRecentSave) 
             GameSession.instance().loadRecentSession(false);
@@ -156,11 +160,9 @@ public class Rotp {
     public static String jarPath()  {
         if (jarPath == null) {
             try {
-                String path = Rotp.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-                System.out.println("Jar Path: "+path);
-                path = URLDecoder.decode(path, "UTF-8");
-                jarPath = (new File(path)).getParentFile().getPath();
-            } catch (UnsupportedEncodingException ex) {
+                File jarFile = new File(Rotp.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+                jarPath = jarFile.getParentFile().getPath();
+            } catch (URISyntaxException ex) {
                 System.out.println("Unable to resolve jar path: "+ex.toString());
                 jarPath = ".";
             }

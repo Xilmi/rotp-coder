@@ -34,7 +34,7 @@ public class ColonyAttackedIncident extends DiplomaticIncident {
         empDefender = r.defender().id;
         empAttacker = r.attacker().id;
         popLost = r.popDestroyed();
-        severity = -5 + max(-95, -5*popLost);
+        severity = -5 + max(-40, popLost);
         dateOccurred = galaxy().currentYear();
         duration = 10;
     }
@@ -48,7 +48,9 @@ public class ColonyAttackedIncident extends DiplomaticIncident {
     @Override
     public String declareWarId()        { return DialogueManager.DECLARE_ATTACKED_WAR; }
     @Override
-    public boolean triggersWar()        { return popLost >= 10; }
+    public boolean triggersWar()        { return popLost >= 30; }
+    @Override
+    public int timerKey()               { return ATTACK_WARNING; }
     @Override
     public String key() {
         return concat(systemName(), ":", str(dateOccurred));

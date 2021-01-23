@@ -37,10 +37,10 @@ public class ColonyDestroyedIncident extends DiplomaticIncident {
         empDefender = r.defender().id;
         empAttacker = r.attacker().id;
         popLost = r.popDestroyed();
-        severity = -20 + max(-130, -5*popLost);
+        severity = -20 + max(-40, popLost);
 
         dateOccurred = galaxy().currentYear();
-        duration = 30;
+        duration = 10;
     }
     private String systemName() { return player().sv.name(sysId); }
     @Override
@@ -49,6 +49,8 @@ public class ColonyDestroyedIncident extends DiplomaticIncident {
     public String description()   { return  decode(text("INC_DESTROYED_COLONY_DESC")); }
     @Override
     public String declareWarId()  { return DialogueManager.DECLARE_ATTACKED_WAR; }
+    @Override
+    public int timerKey()               { return ATTACK_WARNING; }
     @Override
     public String key() {
         return concat(systemName(), ":", str(dateOccurred));

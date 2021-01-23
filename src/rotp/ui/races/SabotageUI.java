@@ -80,6 +80,7 @@ public final class SabotageUI extends BasePanel implements MouseListener {
     static final int SHOW_ANIMATION = 2;
     static final int SHOW_RESULTS = 3;
 
+    LinearGradientPaint backGradient;
     private BasePanel cardPane;
     private final CardLayout cardLayout = new CardLayout();
     private SabotageMission mission;
@@ -99,10 +100,10 @@ public final class SabotageUI extends BasePanel implements MouseListener {
     boolean inciteAudioPlayed = false;
     boolean exited = false;
     SoundClip audioClip = null;
+    int repaintCount = 0;
 
     @Override
     public boolean drawMemory()            { return true; }
-
     public void init(SabotageMission sm, int sysId)       {
         mission = sm;
         exited = false;
@@ -110,11 +111,13 @@ public final class SabotageUI extends BasePanel implements MouseListener {
         destroyCount = 0;
         explosionFrame = 0;
         inciteAudioPlayed = false;
+        backGradient = null;
         // reset map everytime we open
         removeSessionVar("SABOTAGEUI_MAP_INITIALIZED");
         mapPane.checkMapInitialized();
         mapPane.selectTargetSystem(galaxy().system(sysId));
         audioClip = null;
+        repaintCount = 3;
         selectMapPanel();
     }
     public StarSystem systemToDisplay() {
@@ -128,6 +131,28 @@ public final class SabotageUI extends BasePanel implements MouseListener {
         setBackground(Color.black);
         setOpaque(true);
         initModel();
+    }
+    public void destroyFactories() {
+        mission.destroyFactories(systemToDisplay());
+        advanceToNextState();
+        return;
+    }
+    public void destroyBases() {
+        mission.destroyMissileBases(systemToDisplay());
+        advanceToNextState();
+        return;
+    }
+    public void inciteRebellion() {
+        StarSystem sys = systemToDisplay();
+        Leader prevLeader = sys.empire().leader();
+        mission.inciteRebellion(sys);
+        inRebellion = (sys.colony().inRebellion() || (sys.empire().leader() != prevLeader));
+        advanceToNextState();
+    }
+    public void cancelMission() {
+        mission.cancelMission();
+        currentState = SHOW_RESULTS;
+        advanceToNextState();
     }
     private void advanceToNextState() {
         switch(currentState) {
@@ -183,22 +208,34 @@ public final class SabotageUI extends BasePanel implements MouseListener {
     public void selectResultPanel()  { cardLayout.show(cardPane, RESULT_PANEL); }
     @Override
     public void animate() {
-        if ((currentState == REQUEST_MISSION))
+        repaintCount--;
+        if ((currentState == REQUEST_MISSION)) {
             map.animate();
+            if (repaintCount == 0) {
+                titlePanel.repaint();
+                spySystemPanel.repaint();
+                spyDetailPanel.repaint();
+                spyButtonsPanel.repaint();
+            }
+        }
         else if (currentState == SHOW_ANIMATION)
             resultPanel.animate();
     }
     @Override
     public void keyPressed(KeyEvent e) {
         int k = e.getKeyCode();
-        if (k == KeyEvent.VK_ESCAPE) {
-            if (currentState == REQUEST_MISSION)
-                misClick();
-            else {
-                softClick();
-                advanceToNextState();
-            }
+        if (currentState == REQUEST_MISSION) {
+            if (k == KeyEvent.VK_1)
+                destroyFactories();
+            else if (k == KeyEvent.VK_2)
+                destroyBases();
+            else if (k == KeyEvent.VK_3)
+                inciteRebellion();
+            else if (k == KeyEvent.VK_4)
+                cancelMission();
         }
+        else if (k == KeyEvent.VK_ESCAPE) 
+            advanceToNextState();
     }
     @Override
     public void mouseClicked(MouseEvent e) { }
@@ -262,15 +299,13 @@ public final class SabotageUI extends BasePanel implements MouseListener {
             showUnexplored();
         }
         @Override
-        public void paint(Graphics g0) {
+        public void paintComponent(Graphics g0) {
             Graphics2D g = (Graphics2D) g0;
             if (player().sv.isScouted(systemViewToDisplay().id))
                 showExplored();
             else
                 showUnexplored();
-            super.paint(g);
-            int w = getWidth();
-            int h = getHeight();
+            super.paintComponent(g);
         } 
         @Override
         public void animate() {
@@ -422,6 +457,7 @@ public final class SabotageUI extends BasePanel implements MouseListener {
         private final Rectangle rebellionBox = new Rectangle();
         private final Rectangle noActionBox = new Rectangle();
         private Shape hoverTarget;
+        Shape textureClip;
         
         public SabotageButtonsPanel() {
             init();
@@ -434,6 +470,10 @@ public final class SabotageUI extends BasePanel implements MouseListener {
             addMouseMotionListener(this);
         }
         @Override
+        public String textureName()            { return TEXTURE_GRAY; }
+        @Override
+        public Shape textureClip()             { return textureClip; }
+        @Override
         public void paintComponent(Graphics g0) {
             Graphics2D g = (Graphics2D) g0;
             super.paintComponent(g);
@@ -441,6 +481,8 @@ public final class SabotageUI extends BasePanel implements MouseListener {
             int w = getWidth();
             int h = getHeight();
             
+            textureClip = new Rectangle2D.Float(0, 0, w, h);
+
             int messageH = s60;
 
             Empire pl = player();
@@ -475,10 +517,11 @@ public final class SabotageUI extends BasePanel implements MouseListener {
                 grayBackground = new LinearGradientPaint(ptStart, ptEnd, dist, grayColors);                
             }
             
-            g.setFont(narrowFont(18));
             
             // draw factories button
+            g.setFont(narrowFont(18));
             factoriesBox.setBounds(buttonX, buttonY, buttonW, buttonH);
+            String key = "1";
             String label = text("SABOTAGE_BUTTON_FACTORIES");
             int sw = g.getFontMetrics().stringWidth(label);
             g.setColor(SystemPanel.blackText);
@@ -505,10 +548,14 @@ public final class SabotageUI extends BasePanel implements MouseListener {
             g.setStroke(prevStr);
             int x2a = buttonX + ((buttonW - sw) / 2);
             drawShadowedString(g, label, x2a, buttonY + buttonH - s8, Color.black, c0);
+            g.setFont(narrowFont(15));
+            drawShadowedString(g, key, buttonX+s10, buttonY + buttonH - s8, Color.black, c0);
           
             // draw missile bases button
+            g.setFont(narrowFont(18));
             buttonY += (buttonH+s5);
             basesBox.setBounds(buttonX, buttonY, buttonW, buttonH);
+            key = "2";
             label = text("SABOTAGE_BUTTON_BASES");
             sw = g.getFontMetrics().stringWidth(label);
             g.setColor(SystemPanel.blackText);
@@ -534,10 +581,14 @@ public final class SabotageUI extends BasePanel implements MouseListener {
             g.setStroke(prevStr);
             x2a = buttonX + ((buttonW - sw) / 2);
             drawShadowedString(g, label, x2a, buttonY + buttonH - s8, Color.black, c0);
+            g.setFont(narrowFont(15));
+            drawShadowedString(g, key, buttonX+s10, buttonY + buttonH - s8, Color.black, c0);
           
             // draw incite rebellion button
+            g.setFont(narrowFont(18));
             buttonY += (buttonH+s5);
             rebellionBox.setBounds(buttonX, buttonY, buttonW, buttonH);
+            key = "3";
             label = text("SABOTAGE_BUTTON_REBELLION");
             sw = g.getFontMetrics().stringWidth(label);
             g.setColor(SystemPanel.blackText);
@@ -563,10 +614,14 @@ public final class SabotageUI extends BasePanel implements MouseListener {
             g.setStroke(prevStr);
             x2a = buttonX + ((buttonW - sw) / 2);
             drawShadowedString(g, label, x2a, buttonY + buttonH - s8, Color.black, c0);
+            g.setFont(narrowFont(15));
+            drawShadowedString(g, key, buttonX+s10, buttonY + buttonH - s8, Color.black, c0);
           
             // draw no action button
+            g.setFont(narrowFont(18));
             buttonY += (buttonH+s5);
             noActionBox.setBounds(buttonX, buttonY, buttonW, buttonH);
+            key = "4";
             label = text("SABOTAGE_BUTTON_NO_ACTION");
             sw = g.getFontMetrics().stringWidth(label);
             g.setColor(SystemPanel.blackText);
@@ -588,6 +643,8 @@ public final class SabotageUI extends BasePanel implements MouseListener {
             g.setStroke(prevStr);
             x2a = buttonX + ((buttonW - sw) / 2);
             drawShadowedString(g, label, x2a, buttonY + buttonH - s8, Color.black, c0);
+            g.setFont(narrowFont(15));
+            drawShadowedString(g, key, buttonX+s10, buttonY + buttonH - s8, Color.black, c0);
         }
         private boolean canSabotageFactories() {
             return player().sv.canSabotageFactories(systemToDisplay().id);
@@ -605,30 +662,22 @@ public final class SabotageUI extends BasePanel implements MouseListener {
         @Override
         public void mouseReleased(MouseEvent e) {
            if ((hoverTarget == factoriesBox) && canSabotageFactories()) {
-                softClick(); 
-                mission.destroyFactories(systemToDisplay());
-                advanceToNextState();
+                destroyFactories();
                 return;
             }
             else if ((hoverTarget == basesBox) && canSabotageBases()) {
                 softClick(); 
-                mission.destroyMissileBases(systemToDisplay());
-                advanceToNextState();
+                destroyBases();
                 return;
             }
             else if ((hoverTarget == rebellionBox) && canInciteRebellion()) {
                 softClick(); 
-                StarSystem sys = systemToDisplay();
-                Leader prevLeader = sys.empire().leader();
-                mission.inciteRebellion(sys);
-                inRebellion = (sys.colony().inRebellion() || (sys.empire().leader() != prevLeader));
-                advanceToNextState();
+                inciteRebellion();
                 return;
             }
             else if (hoverTarget == noActionBox) {
-                mission.cancelMission();
-                currentState = SHOW_RESULTS;
-                advanceToNextState();
+                softClick(); 
+                cancelMission();
                 return;
             }
         }
@@ -660,8 +709,9 @@ public final class SabotageUI extends BasePanel implements MouseListener {
             else if (noActionBox.contains(x,y))
                 hoverTarget = noActionBox;
 
-            if (prevHover != hoverTarget)
-                repaint();
+            if (prevHover != hoverTarget) {
+               repaint();
+            }
         }
     }
     class SabotageResultPanel extends BasePanel {
@@ -702,9 +752,9 @@ public final class SabotageUI extends BasePanel implements MouseListener {
           
             if ((currentState == SHOW_RESULTS)) {
                 String msg;
-                if (mission.isDestroyFactories())
+                if (mission.isDestroyFactories()) 
                     msg = text("SABOTAGE_FACTORIES_RESULT", mission.factoriesDestroyed());
-                else if (mission.isDestroyBases())
+                else if (mission.isDestroyBases()) 
                     msg = text("SABOTAGE_BASES_RESULT", mission.missileBasesDestroyed());
                 else {
                     if (inRebellion)
@@ -742,9 +792,9 @@ public final class SabotageUI extends BasePanel implements MouseListener {
                 if (animationIndex == 1) {
                     sleep(1000);  // pause on the opening scene before the explosion
                     if (mission.isInciteRebellion())
-                        audioClip = playAudioClip("InciteRebellion");
+                        audioClip = playAudioClip("SabotageRiot");
                     else
-                        audioClip = playAudioClip("ExplosionFactories");
+                        audioClip = playAudioClip("SabotageExplosion");
                 }
                 if (animationIndex < animationFrames.size())
                     repaint();
@@ -763,7 +813,6 @@ public final class SabotageUI extends BasePanel implements MouseListener {
     }
     class SpyParentPanel extends BasePanel {
         private static final long serialVersionUID = 1L;
-        LinearGradientPaint backGradient;
         @Override
         public void paintComponent(Graphics g0) {
             Graphics2D g = (Graphics2D) g0;
@@ -824,6 +873,10 @@ public final class SabotageUI extends BasePanel implements MouseListener {
             g.setColor(SystemPanel.whiteText);
             g.drawString(title, (w-sw)/2, s24);
         }
+        @Override
+        public boolean showSystemName(StarSystem s)         { return s.empire() != mission.target();  } 
+        @Override
+        public boolean showSystemData(StarSystem s)         { return s.empire() == mission.target(); } 
         @Override
         public boolean suspendAnimationsDuringNextTurn()    { return false; }
         @Override
