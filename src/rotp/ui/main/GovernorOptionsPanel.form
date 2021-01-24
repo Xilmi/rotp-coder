@@ -45,7 +45,6 @@
                                       <Component id="missileBasesLabel" min="-2" max="-2" attributes="0"/>
                                   </Group>
                                   <Component id="shipbuilding" alignment="0" min="-2" max="-2" attributes="0"/>
-                                  <Component id="promptColonize" alignment="0" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                           </Group>
@@ -123,8 +122,6 @@
               <Component id="shipbuilding" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="completionist" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
-              <Component id="promptColonize" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="okButton" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -483,11 +480,6 @@
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="completionistActionPerformed"/>
       </Events>
-    </Component>
-    <Component class="javax.swing.JCheckBox" name="promptColonize">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Prompt to colonize"/>
-      </Properties>
     </Component>
   </SubComponents>
 </Form>

@@ -52,6 +52,8 @@ text in the planetary spending screen. Since version 1.8 Governor is on by defau
 
 Additional features / changelog
 
+* 2.10.1. Merge v2.10 Beta. Removed colonize prompt options from Governor options, as they are added in main settings.
+
 * 2.09.2. Merge v2.09b Beta.
 
 * 2.09.1. Merge v2.09 Beta. Fix icon loading.

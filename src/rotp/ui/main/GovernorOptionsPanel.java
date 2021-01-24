@@ -47,7 +47,6 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         this.autoScout.setSelected(options.isAutoScout());
         this.autoColonize.setSelected(options.isAutoColonize());
         this.completionist.setEnabled(isCompletionistEnabled());
-        this.promptColonize.setSelected(!GameSession.instance().options().disableColonizePrompt());
     }
 
     public boolean isCompletionistEnabled() {
@@ -126,7 +125,6 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         autoScout = new javax.swing.JCheckBox();
         autoColonize = new javax.swing.JCheckBox();
         completionist = new javax.swing.JButton();
-        promptColonize = new javax.swing.JCheckBox();
 
         governorDefault.setText("Governor is on by default");
 
@@ -343,8 +341,6 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
             }
         });
 
-        promptColonize.setText("Prompt to colonize");
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -370,8 +366,7 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
                                         .addComponent(missileBases, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(missileBasesLabel))
-                                    .addComponent(shipbuilding)
-                                    .addComponent(promptColonize))
+                                    .addComponent(shipbuilding))
                                 .addGap(0, 0, Short.MAX_VALUE))))
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap()
@@ -430,8 +425,6 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
                 .addComponent(shipbuilding)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(completionist)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(promptColonize)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(okButton)
@@ -507,7 +500,6 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         options.setShipbuilding(shipbuilding.isSelected());
         options.setAutoScout(autoScout.isSelected());
         options.setAutoColonize(autoColonize.isSelected());
-        GameSession.instance().options().disableColonizePrompt(!promptColonize.isSelected());
         frame.setVisible(false);
     }//GEN-LAST:event_okButtonActionPerformed
 
@@ -574,7 +566,6 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
     private javax.swing.JSpinner missileBases;
     private javax.swing.JLabel missileBasesLabel;
     private javax.swing.JButton okButton;
-    private javax.swing.JCheckBox promptColonize;
     private javax.swing.JSpinner reserve;
     private javax.swing.JLabel resrveLabel;
     private javax.swing.JCheckBox shipbuilding;
