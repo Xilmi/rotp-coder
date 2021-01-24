@@ -46,7 +46,7 @@ public class Rotp {
     public static String jarFileName = "rotp-"+RotpGovernor.governorVersion()+RotpGovernor.miniSuffix()+".jar";
     private static String jarPath;
     private static JFrame frame;
-    public static String releaseId = "Beta 2.09b";
+    public static String releaseId = "Beta 2.10";
     public static long startMs = System.currentTimeMillis();
     public static long maxHeapMemory = Runtime.getRuntime().maxMemory() / 1048576;
     public static long maxUsedMemory;
@@ -85,9 +85,13 @@ public class Rotp {
         frame.setIconImage(square);
 
         if (UserPreferences.fullScreen()) {
-            frame.setExtendedState(JFrame.MAXIMIZED_BOTH); 
             frame.setUndecorated(true);
             device.setFullScreenWindow(frame);
+            resizeAmt();
+        }
+        else if (UserPreferences.borderless()) {
+            frame.setExtendedState(JFrame.MAXIMIZED_BOTH); 
+            frame.setUndecorated(true);
             resizeAmt();
         }
         else {
@@ -139,7 +143,7 @@ public class Rotp {
         frame.pack();
     }
     public static float resizeAmt() {
-        int pct = UserPreferences.fullScreen() ? 100 : UserPreferences.screenSizePct();
+        int pct = UserPreferences.windowed() ? UserPreferences.screenSizePct() : 100;
         float sizeAdj = (float) pct / 100.0f;
         if (resizeAmt < 0) {
             Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
