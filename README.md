@@ -9,6 +9,7 @@ This RotP MOD contains many gameplay additions/changes from the official game ve
 ## Overview of MOD Features
 
 - [**coder111 governor mod**](https://github.com/coder111111/rotp-public)
+    - [Automatically Adjusts Colony Spending**](https://i.imgur.com/AhXNE73.png)
 - **Better AI**
 - [**Many New Map Shapes**](https://i.imgur.com/115jnZb.png)
     - [**Text allows custom player input map shape**](https://i.imgur.com/J5Wr3yL.png) (text/unicode in the Homeworld name [**A**](https://i.imgur.com/UUpH1TK.png), [**B**](https://i.imgur.com/JsZp69f.png), [**C**](https://i.imgur.com/tjkhdYP.png))
