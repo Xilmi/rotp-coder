@@ -28,7 +28,7 @@ import java.util.Properties;
  * to get more memory it uses the right jar file name.
  */
 public class RotpGovernor {
-    static String expectedROTPVersion = "Beta 2.09";
+    static String expectedROTPVersion = "Beta 2.09b";
 
     private static String governorVersion = null;
 
