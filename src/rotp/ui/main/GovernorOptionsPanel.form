@@ -475,7 +475,7 @@
     <Component class="javax.swing.JButton" name="completionist">
       <Properties>
         <Property name="text" type="java.lang.String" value="Completionist Technologies"/>
-        <Property name="toolTipText" type="java.lang.String" value="&lt;html&gt;&#xa;I like completing game fully. &lt;br/&gt;&#xa;Make following technologies available to all races:&lt;br/&gt;&#xa;&lt;br/&gt;&#xa;Controlled Irradiated Environment&lt;br/&gt;&#xa;Atmospheric Terraforming&lt;br/&gt;&#xa;Complete Terraforming&lt;br/&gt;&#xa;Advanced Soil Enrichment&lt;br/&gt;&#xa;Intergalactic Star Gates&lt;br/&gt;&#xa;&lt;br/&gt;&#xa;30% of galaxy needs to be colonized.&lt;br/&gt;&#xa;Player must control 50% of the galaxy.&lt;br/&gt;&#xa;All research needs to be completed (future techs too)&lt;br/&gt;&#xa;&lt;/html&gt;"/>
+        <Property name="toolTipText" type="java.lang.String" value="&lt;html&gt;&#xa;I like completing games fully. &lt;br/&gt;&#xa;Allow all Empires to Research the following Technologies:&lt;br/&gt;&#xa;&lt;br/&gt;&#xa;Controlled Irradiated Environment&lt;br/&gt;&#xa;Atmospheric Terraforming&lt;br/&gt;&#xa;Complete Terraforming&lt;br/&gt;&#xa;Advanced Soil Enrichment&lt;br/&gt;&#xa;Intergalactic Star Gates&lt;br/&gt;&#xa;&lt;br/&gt;&#xa;More than 30% of the Galaxy needs to be colonized.&lt;br/&gt;&#xa;Player must control more than 50% of colonized systems.&lt;br/&gt;&#xa;Player must have completed all Research in their Tech Tree (Future Techs too).&lt;br/&gt;&#xa;&lt;/html&gt;"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="completionistActionPerformed"/>
