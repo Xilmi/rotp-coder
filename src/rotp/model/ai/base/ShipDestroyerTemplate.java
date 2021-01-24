@@ -94,7 +94,7 @@ public class ShipDestroyerTemplate implements Base {
         float totalSpace = d.availableSpace();
         setBestCombatSpeed(ai, d);
         setBestNormalArmor(ai, d); // still use normal armor for all, including HUGE
-		
+        
         if (d.size() == ShipDesign.HUGE)
             upgradeRepairSpecial(ai, d); // give HUGE repair special
 
@@ -104,12 +104,12 @@ public class ShipDestroyerTemplate implements Base {
             setBestBattleComputer(ai, d); // give best battle computer to LARGE and HUGE
             set2ndBestECMJammer(ai, d); // give 2nd best ECM to LARGE and HUGE
         }
-		
+        
         if (d.size() == ShipDesign.MEDIUM) {
             set2ndBestShield(ai, d); // give 2nd best shield for MEDIUM
             set2ndBestBattleComputer(ai, d); // give 2nd best battle computer for MEDIUM
         }
-		
+        
         float weaponSpace = d.availableSpace();
 
         // if ship is medium or small and more than 60% of space is already going
@@ -120,7 +120,7 @@ public class ShipDestroyerTemplate implements Base {
         }
 
         setBombardmentWeapon(ai, d); // modnar: give destroyers some bombs too
-		setOptimalWeapon(ai, d, targets);
+        setOptimalWeapon(ai, d, targets);
         upgradeBeamRangeSpecial(ai, d);
         upgradeShipManeuverSpecial(ai, d, targets);
 
@@ -171,7 +171,7 @@ public class ShipDestroyerTemplate implements Base {
                 return;
         }
     }
-	private void setBestECMJammer(ShipDesigner ai, ShipDesign d) {
+    private void setBestECMJammer(ShipDesigner ai, ShipDesign d) {
         List<ShipECM> comps = ai.lab().ecms();
         for (int i=comps.size()-1; i >=0; i--) {
             d.ecm(comps.get(i));
@@ -248,12 +248,12 @@ public class ShipDestroyerTemplate implements Base {
 
         return targets;
     }
-	private void setBombardmentWeapon(ShipDesigner ai, ShipDesign d) {
+    private void setBombardmentWeapon(ShipDesigner ai, ShipDesign d) {
         List<ShipWeapon> allWeapons = ai.lab().weapons();
 
         int maxDmg = 0;
         int maxDmgNum = 0;
-		// modnar: set 15% space for bombs, up to max of 300
+        // modnar: set 15% space for bombs, up to max of 300
         float spaceForWeapons = Math.min(0.15f * d.availableSpace(), 300);
         ShipWeapon maxDmgWeapon = null;
         

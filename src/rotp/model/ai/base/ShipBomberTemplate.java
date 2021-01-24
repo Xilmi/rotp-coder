@@ -88,29 +88,29 @@ public class ShipBomberTemplate implements Base {
         float totalSpace = d.availableSpace();
         set2ndBestBattleComputer(ai, d); // give bombers 2nd best battle computer
         setBestCombatSpeed(ai, d);
-		
+        
         boolean missileDef = upgradeMissileDefenseSpecial(ai, d);
         set2ndBestECMJammer(ai, d); // give bombers 2nd best ECM, even with anti-missile
         if (!missileDef)
             setBestECMJammer(ai, d);
-		
+        
         setBestManeuverSpecial(ai, d, targets);
-		
-		// best armor when larger than small
+        
+        // best armor when larger than small
         if (d.size() >= ShipDesign.MEDIUM) {
             setBestNormalArmor(ai, d);
         }
-		
-		// 2nd best shields for large
-		if (d.size() == ShipDesign.LARGE) {
-			set2ndBestShield(ai, d);
+        
+        // 2nd best shields for large
+        if (d.size() == ShipDesign.LARGE) {
+            set2ndBestShield(ai, d);
         }
-		
-		// best shields for huge
-		if (d.size() == ShipDesign.HUGE) {
+        
+        // best shields for huge
+        if (d.size() == ShipDesign.HUGE) {
             setBestShield(ai, d);
         }
-		
+        
         float weaponSpace = d.availableSpace();
         
         // if ship is small and more than 60% of space is already going
@@ -119,8 +119,8 @@ public class ShipBomberTemplate implements Base {
             d.perTurnDamage(0);
             return d;
         }
-		
-		// if ship is medium and less than 100 units of space is availible after
+        
+        // if ship is medium and less than 100 units of space is availible after
         // factoring in ship components, then quit and try a larger hull size
         if ((d.size() == ShipDesign.MEDIUM) && (weaponSpace < (100))) {
             d.perTurnDamage(0);
@@ -200,7 +200,7 @@ public class ShipBomberTemplate implements Base {
                 return;
         }
     }
-	// add 2nd best shield option
+    // add 2nd best shield option
     private void set2ndBestShield(ShipDesigner ai, ShipDesign d) {
         List<ShipShield> shields = ai.lab().shields();
         for (int i=shields.size()-2; i >=0; i--) {
@@ -235,7 +235,7 @@ public class ShipBomberTemplate implements Base {
 
         int maxDmg = 0;
         int maxDmgNum = 0;
-		// modnar: set 2 types of weapons, 50% space for each
+        // modnar: set 2 types of weapons, 50% space for each
         float spaceForWeapons = 0.5f * d.availableSpace();
         ShipWeapon maxDmgWeapon = null;
         
@@ -257,11 +257,11 @@ public class ShipBomberTemplate implements Base {
             d.weapon(1, maxDmgWeapon);
             d.wpnCount(1, maxDmgNum);
         }
-		
-		// second weapon type, remaining space
-		maxDmg = 0;
+        
+        // second weapon type, remaining space
+        maxDmg = 0;
         maxDmgNum = 0;
-		spaceForWeapons = d.availableSpace();
+        spaceForWeapons = d.availableSpace();
         maxDmgWeapon = null;
         
         // find the highest max damage weapon that can attack ships
@@ -327,9 +327,9 @@ public class ShipBomberTemplate implements Base {
         mockDesign.copyFrom(d);
         int wpnSlot = mockDesign.nextEmptyWeaponSlot();
         int specSlot = mockDesign.nextEmptySpecialSlot();
-		// modnar: use only 40% space for bombs
-		// with some minimum amount of space, 40 (or all of available space)
-		// and some maxium amount of space, 1000
+        // modnar: use only 40% space for bombs
+        // with some minimum amount of space, 40 (or all of available space)
+        // and some maxium amount of space, 1000
         float spaceForBombs = (float) Math.min(Math.max(0.4f * d.availableSpace(), Math.min(40, d.availableSpace())), 1000);
         int numWeapons = (int) (spaceForBombs/wpn.space(d));
 

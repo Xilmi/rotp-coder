@@ -34,20 +34,20 @@ public class AIShipDesigner implements Base, ShipDesigner {
     private static final int OBS_BOMBER_TURNS = 12;
     private static final int OBS_COLONY_TURNS = 8;
     private static final int OBS_SCOUT_TURNS = 1;
-	
-	// modnar: scale military ship obsolete turn counts using the current turn
-	// attempt to allow AI more opportunities to use fleet before scraping
-	// (currentTurn + 100) / (currentTurn + 40))
-	// approx. 2.5 times as long before obsolete at Turn 1
-	// approx. 2.0 times as long before obsolete at Turn 20
-	// approx. 1.5 times as long before obsolete at Turn 80
-	// approx. 1.25 times as long before obsolete at Turn 200
-	private int currentTurn = galaxy().currentTurn();
-	private float obsolete_scale = (float) (currentTurn + 100)/(currentTurn + 40);
-	
-	private int OBS_DESTROYER_TURNS_scale = (int) Math.ceil(OBS_DESTROYER_TURNS * obsolete_scale);
-	private int OBS_FIGHTER_TURNS_scale = (int) Math.ceil(OBS_FIGHTER_TURNS * obsolete_scale);
-	private int OBS_BOMBER_TURNS_scale = (int) Math.ceil(OBS_BOMBER_TURNS * obsolete_scale);
+    
+    // modnar: scale military ship obsolete turn counts using the current turn
+    // attempt to allow AI more opportunities to use fleet before scraping
+    // (currentTurn + 100) / (currentTurn + 40))
+    // approx. 2.5 times as long before obsolete at Turn 1
+    // approx. 2.0 times as long before obsolete at Turn 20
+    // approx. 1.5 times as long before obsolete at Turn 80
+    // approx. 1.25 times as long before obsolete at Turn 200
+    private int currentTurn = galaxy().currentTurn();
+    private float obsolete_scale = (float) (currentTurn + 100)/(currentTurn + 40);
+    
+    private int OBS_DESTROYER_TURNS_scale = (int) Math.ceil(OBS_DESTROYER_TURNS * obsolete_scale);
+    private int OBS_FIGHTER_TURNS_scale = (int) Math.ceil(OBS_FIGHTER_TURNS * obsolete_scale);
+    private int OBS_BOMBER_TURNS_scale = (int) Math.ceil(OBS_BOMBER_TURNS * obsolete_scale);
 
     private final Empire empire;
     private int[] shipCounts;
@@ -478,9 +478,9 @@ public class AIShipDesigner implements Base, ShipDesigner {
             maxProd = max(sys.colony().production(), maxProd);
 
         int maxSize = ShipDesign.MEDIUM;
-        if (maxProd >= 1500) // modnar: change from 1000, keep pure bombers smaller
+        if (maxProd >= 1500) // modnar: change from 1000, keep bombers smaller
             maxSize = ShipDesign.HUGE;
-        else if (maxProd >= 450) // modnar: change from 200, keep pure bombers smaller
+        else if (maxProd >= 450) // modnar: change from 200, keep bombers smaller
             maxSize = ShipDesign.LARGE;
         return min(preferredSize, maxSize);
     }

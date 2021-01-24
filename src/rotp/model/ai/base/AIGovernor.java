@@ -22,7 +22,6 @@ import rotp.model.colony.Colony;
 import rotp.model.colony.ColonySpendingCategory;
 import rotp.model.empires.Empire;
 import rotp.model.galaxy.StarSystem;
-import rotp.model.game.GameSession;
 import rotp.util.Base;
 
 public class AIGovernor implements Base, Governor {
@@ -80,18 +79,10 @@ public class AIGovernor implements Base, Governor {
             session().addSystemToAllocate(sys, text("MAIN_ALLOCATE_BASES_COMPLETE", name, col.defense().maxBases()));
         if (col.industry().isCompletedThisTurn())
             session().addSystemToAllocate(sys, text("MAIN_ALLOCATE_MAX_FACTORIES", name, (int)col.industry().maxBuildableFactories()));
-        if (!cleanupOK) {
-            // ignore cleanup messages for governed colonies
-            if (!col.isGovernor()) {
-                session().addSystemToAllocate(sys, text("MAIN_ALLOCATE_ECO_LOCKED_WASTE", name));
-            }
-        }
-        if (col.ecology().populationGrowthCompletedThisTurn()) {
-            // disable colony at max pop message if governor is on and we are using auto transport
-            if (!col.isGovernor() || !GameSession.instance().getGovernorOptions().isAutotransport()) {
-                session().addSystemToAllocate(sys, text("MAIN_ALLOCATE_MAX_POPULATION", name, (int) col.maxSize()));
-            }
-        }
+        if (!cleanupOK)
+            session().addSystemToAllocate(sys, text("MAIN_ALLOCATE_ECO_LOCKED_WASTE", name));
+        if (col.ecology().populationGrowthCompletedThisTurn())
+            session().addSystemToAllocate(sys, text("MAIN_ALLOCATE_MAX_POPULATION", name, (int)col.maxSize()));
         if (col.ecology().atmosphereCompletedThisTurn())
             session().addSystemToAllocate(sys, text("MAIN_ALLOCATE_ATMOSPHERE_COMPLETE", name));
         if (col.ecology().soilEnrichCompletedThisTurn()) {
@@ -280,7 +271,7 @@ public class AIGovernor implements Base, Governor {
 			}
 		}
 		
-		// ship spending, if requested
+        // ship spending, if requested
         if (!col.shipyard().buildingObsoleteDesign()
         && (col.shipyard().desiredShips() > 0)
         && ((1.0/shipTurns) > factoryIncreasePct)){
@@ -331,7 +322,7 @@ public class AIGovernor implements Base, Governor {
         col.allocation(RESEARCH, maxAllocation - totalAlloc);
 
         // check to allocate reserve
-		// modnar: reduce to 0%, since it's taken care of by the AICTreasurer (?)
+        // modnar: reduce to 0%, since it's taken care of by the AICTreasurer (?)
         if (col.planet().noArtifacts() && (col.pct(RESEARCH) > 0.5) ) {
             int rsvAmt = (int) Math.min(0.0, col.pct(RESEARCH) - 0.5);
             col.addPct(RESEARCH, -rsvAmt);
@@ -408,7 +399,7 @@ public class AIGovernor implements Base, Governor {
         // if locked and insufficient ECO spending, return false
         if (col.locked(ECOLOGY))
             return col.pct(ECOLOGY) >= minPct;
-
+        
         if (minPct < 0)
             err("Minimum cleanup pct: ", str(minPct), "  totalProd:",str(totalProd), "   minEco:", str(minEco));
 

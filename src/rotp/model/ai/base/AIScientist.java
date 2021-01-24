@@ -77,11 +77,11 @@ public class AIScientist implements Base, Scientist {
     @Override
     public void setTechTreeAllocations() {
         // invoked after nextTurn() processing is complete on each civ's turn
-    	// Let our opening book decide if it wants to make tech allocations
-    	if (openingBookTechTreeAllocations()) 
+        // Let our opening book decide if it wants to make tech allocations
+        if (openingBookTechTreeAllocations()) 
             return;
-    	
-    	// Otherwise, go for the defaults modulo future tech adjustments
+        
+        // Otherwise, go for the defaults modulo future tech adjustments
         int futureTechs = 0;
         for (int j=0; j<TechTree.NUM_CATEGORIES; j++) {
             if (empire.tech().category(j).studyingFutureTech())
@@ -112,33 +112,33 @@ public class AIScientist implements Base, Scientist {
     // Sets hard-coded opening tech sliders, returning true if it found one, false if it's okay to resort to defaults
     private boolean openingBookTechTreeAllocations() {
         TechTree tree = empire.tech();
-    	// Opening propulsion is mandatory
-    	// TODO: Extremely rare case where you can cancel this if no early out of range planets exist
-    	if (tree.topFuelRangeTech().range() < 4) {
+        // Opening propulsion is mandatory
+        // TODO: Extremely rare case where you can cancel this if no early out of range planets exist
+        if (tree.topFuelRangeTech().range() < 4) {
             tree.computer().allocation(0);
             tree.construction().allocation(0);
             tree.forceField().allocation(0);
             tree.planetology().allocation(0);
             tree.propulsion().allocation(60);
             tree.weapon().allocation(0);
-            return true;    		
-    	}
-    	
-    	// We have a fuel cell, the rest of this method is looking for initial waste cleanup.
-    	// TODO: Rare case where we should check for hand lasers too
-    	
-    	// We already have one
-    	if (tree.topIndustrialWasteTech() != null
+            return true;            
+        }
+        
+        // We have a fuel cell, the rest of this method is looking for initial waste cleanup.
+        // TODO: Rare case where we should check for hand lasers too
+        
+        // We already have one
+        if (tree.topIndustrialWasteTech() != null
         || tree.topEcoRestorationTech() != null) 
-    		return false;
-    	
-    	// We already tried and failed
-    	if (tree.construction().techLevel() > 2
+            return false;
+        
+        // We already tried and failed
+        if (tree.construction().techLevel() > 2
         || tree.planetology().techLevel() > 2) 
-    		return false;
-    	
-    	// We've never researched construction/planetology, so open evenly
-    	if (tree.construction().currentTech() == null
+            return false;
+        
+        // We've never researched construction/planetology, so open evenly
+        if (tree.construction().currentTech() == null
         || tree.planetology().currentTech() == null) {
             tree.computer().allocation(0);
             tree.construction().allocation(30);
@@ -146,122 +146,121 @@ public class AIScientist implements Base, Scientist {
             tree.planetology().allocation(30);
             tree.propulsion().allocation(0);
             tree.weapon().allocation(0);
-            return true;    		
-    	}
+            return true;            
+        }
 
-    	boolean construction = tech(tree.construction().currentTech()).isType(Tech.INDUSTRIAL_WASTE);
-    	boolean planetology = tech(tree.planetology().currentTech()).isType(Tech.ECO_RESTORATION);    	
-    	if (construction && planetology) {
+        boolean construction = tech(tree.construction().currentTech()).isType(Tech.INDUSTRIAL_WASTE);
+        boolean planetology = tech(tree.planetology().currentTech()).isType(Tech.ECO_RESTORATION);      
+        if (construction && planetology) {
             tree.computer().allocation(0);
             tree.construction().allocation(30);
             tree.forceField().allocation(0);
             tree.planetology().allocation(30);
             tree.propulsion().allocation(0);
             tree.weapon().allocation(0);
-            return true;    		
-    	}
-		// modnar: spread out allocation
-    	if (construction) {
+            return true;            
+        }
+        // modnar: spread out allocation
+        if (construction) {
             tree.computer().allocation(4);
             tree.construction().allocation(40);
             tree.forceField().allocation(4);
             tree.planetology().allocation(4);
             tree.propulsion().allocation(4);
             tree.weapon().allocation(4);
-            return true;    		
-    	}
-		// modnar: spread out allocation
-    	if (planetology) {
+            return true;            
+        }
+        // modnar: spread out allocation
+        if (planetology) {
             tree.computer().allocation(4);
             tree.construction().allocation(4);
             tree.forceField().allocation(4);
             tree.planetology().allocation(40);
             tree.propulsion().allocation(4);
             tree.weapon().allocation(4);
-            return true;    		
-    	}
+            return true;            
+        }
 
-    	// We've escaped the tyrany of the opening book
-    	return false;
+        // We've escaped the tyrany of the opening book
+        return false;
     }
     @Override
     public void setDefaultTechTreeAllocations() {
-        TechTree tree = empire.tech();
         // invoked directly when the TechTree is first created
         if (empire.isPlayerControlled()) {
-            tree.computer().allocation(10);
-            tree.construction().allocation(10);
-            tree.forceField().allocation(10);
-            tree.planetology().allocation(10);
-            tree.propulsion().allocation(10);
-            tree.weapon().allocation(10);
+            empire.tech().computer().allocation(10);
+            empire.tech().construction().allocation(10);
+            empire.tech().forceField().allocation(10);
+            empire.tech().planetology().allocation(10);
+            empire.tech().propulsion().allocation(10);
+            empire.tech().weapon().allocation(10);
             return;
         }
 
         if (empire.leader().isDiplomat()) {
-            tree.computer().allocation(9);
-            tree.construction().allocation(9);
-            tree.forceField().allocation(12);
-            tree.planetology().allocation(9);
-            tree.propulsion().allocation(11);
-            tree.weapon().allocation(10);
+            empire.tech().computer().allocation(9);
+            empire.tech().construction().allocation(9);
+            empire.tech().forceField().allocation(12);
+            empire.tech().planetology().allocation(9);
+            empire.tech().propulsion().allocation(11);
+            empire.tech().weapon().allocation(10);
         }
         else if (empire.leader().isMilitarist()) {
-            tree.computer().allocation(11);
-            tree.construction().allocation(9);
-            tree.forceField().allocation(10);
-            tree.planetology().allocation(8);
-            tree.propulsion().allocation(10);
-            tree.weapon().allocation(12);
+            empire.tech().computer().allocation(11);
+            empire.tech().construction().allocation(9);
+            empire.tech().forceField().allocation(10);
+            empire.tech().planetology().allocation(8);
+            empire.tech().propulsion().allocation(10);
+            empire.tech().weapon().allocation(12);
         }
         else if (empire.leader().isEcologist()) {
-            tree.computer().allocation(10);
-            tree.construction().allocation(10);
-            tree.forceField().allocation(10);
-            tree.planetology().allocation(12);
-            tree.propulsion().allocation(9);
-            tree.weapon().allocation(9);
+            empire.tech().computer().allocation(10);
+            empire.tech().construction().allocation(10);
+            empire.tech().forceField().allocation(10);
+            empire.tech().planetology().allocation(12);
+            empire.tech().propulsion().allocation(9);
+            empire.tech().weapon().allocation(9);
         }
         else if (empire.leader().isIndustrialist()) {
-            tree.computer().allocation(10);
-            tree.construction().allocation(12);
-            tree.forceField().allocation(11);
-            tree.planetology().allocation(9);
-            tree.propulsion().allocation(9);
-            tree.weapon().allocation(9);
+            empire.tech().computer().allocation(10);
+            empire.tech().construction().allocation(12);
+            empire.tech().forceField().allocation(11);
+            empire.tech().planetology().allocation(9);
+            empire.tech().propulsion().allocation(9);
+            empire.tech().weapon().allocation(9);
         }
         else if (empire.leader().isExpansionist()) {
-            tree.computer().allocation(10);
-            tree.construction().allocation(9);
-            tree.forceField().allocation(9);
-            tree.planetology().allocation(10);
-            tree.propulsion().allocation(12);
-            tree.weapon().allocation(10);
+            empire.tech().computer().allocation(10);
+            empire.tech().construction().allocation(9);
+            empire.tech().forceField().allocation(9);
+            empire.tech().planetology().allocation(10);
+            empire.tech().propulsion().allocation(12);
+            empire.tech().weapon().allocation(10);
         }
         else if (empire.leader().isTechnologist()) {
-            tree.computer().allocation(10);
-            tree.construction().allocation(10);
-            tree.forceField().allocation(10);
-            tree.planetology().allocation(10);
-            tree.propulsion().allocation(10);
-            tree.weapon().allocation(10);
+            empire.tech().computer().allocation(10);
+            empire.tech().construction().allocation(10);
+            empire.tech().forceField().allocation(10);
+            empire.tech().planetology().allocation(10);
+            empire.tech().propulsion().allocation(10);
+            empire.tech().weapon().allocation(10);
         }
         // if in special mode, change ratios
         if (empire.generalAI().inWarMode()) {
-            tree.computer().adjustAllocation(4);
-            tree.construction().adjustAllocation(-3);
-            tree.forceField().adjustAllocation(1);
-            tree.planetology().adjustAllocation(-3);
-            tree.propulsion().adjustAllocation(-3);
-            tree.weapon().adjustAllocation(4);
+            empire.tech().computer().adjustAllocation(4);
+            empire.tech().construction().adjustAllocation(-3);
+            empire.tech().forceField().adjustAllocation(1);
+            empire.tech().planetology().adjustAllocation(-3);
+            empire.tech().propulsion().adjustAllocation(-3);
+            empire.tech().weapon().adjustAllocation(4);
         }
         else if (empire.fleetCommanderAI().inExpansionMode()) {
-            tree.computer().adjustAllocation(1);
-            tree.construction().adjustAllocation(-3);
-            tree.forceField().adjustAllocation(-3);
-            tree.planetology().adjustAllocation(4);
-            tree.propulsion().adjustAllocation(4);
-            tree.weapon().adjustAllocation(-3);
+            empire.tech().computer().adjustAllocation(1);
+            empire.tech().construction().adjustAllocation(-3);
+            empire.tech().forceField().adjustAllocation(-3);
+            empire.tech().planetology().adjustAllocation(4);
+            empire.tech().propulsion().adjustAllocation(4);
+            empire.tech().weapon().adjustAllocation(-3);
         }
     }
     @Override
@@ -551,8 +550,7 @@ public class AIScientist implements Base, Scientist {
 
         int numRaces = empire.contactedEmpires().size() + 1;
         // multiply tech level by # new planets possible vs. # known races
-        // TODO: Would be really nice to only divide by races that stand a chance of getting each specific planet
-        // But failing that, just multiply it by two
+        // modnar: further prioritize enviroment tech
         adj *= 2;
         return (newPlanets / numRaces) * adj * t.level;
     }
@@ -573,7 +571,7 @@ public class AIScientist implements Base, Scientist {
             val *= 1.5;
 
         // modnar: add in wartime scaling
-		// Shields have wartime value: multiply by current war enemies
+        // Shields have wartime value: multiply by current war enemies
         val *= Math.sqrt(empire.numEnemies()+1);
 
         return val;
@@ -606,8 +604,8 @@ public class AIScientist implements Base, Scientist {
         if (empire.leader().isEcologist())
             adj *= 2;
         // modnar: wasteCleanupTechMod() = 4 * factoryWasteMod() / wasteElimination()
-		// in TechTree.java
-		// wasteCleanupTechMod goes from 1.6 (initially) to 0 (best)
+        // in TechTree.java
+        // wasteCleanupTechMod goes from 1.6 (initially) to 0 (best)
         return adj * t.level() * empire.tech().wasteCleanupTechMod();
     }
     @Override
@@ -617,7 +615,7 @@ public class AIScientist implements Base, Scientist {
         if (curr.warp() >= t.warp())
             return 0;
 
-        float val = t.level * t.warp() / curr.warp();
+        float  val = t.level * t.warp() / curr.warp();
         float adj = 1.0f;
         
         // Major breakpoints in warp technology:
@@ -626,16 +624,16 @@ public class AIScientist implements Base, Scientist {
             adj *= 3;
         // The first warp above 2 significantly aids troops and expansion
         if (curr.warp() == 2) {
+            if (empire.leader().isMilitarist())
+                adj *= 1.25;
             if (empire.leader().isAggressive())
                 adj *= 1.25;
-        //    if (empire.leader().isEcologist())
-        //        adj *= 1.25;
             if (empire.leader().isExpansionist())
                 adj *= 1.5;
         }
         // Even numbered warps have military value
-		// modnar: debatable, very limited value, commenting out
-		/*
+        // modnar: debatable, very limited value, commenting out
+        /*
         if (t.warp() % 2 == 0) {
             if (empire.leader().isAggressive())
                 adj *= 1.5;
@@ -645,7 +643,7 @@ public class AIScientist implements Base, Scientist {
                 adj *= 1.5;
         }
         */
-		
+        
         return adj * val;
     }
     @Override
@@ -655,10 +653,10 @@ public class AIScientist implements Base, Scientist {
         // obsolete?
         if (currRange >= t.range())
             return 0;
-		
-		// limit max range, use 13 instead of 10, for Range-inf scaling
-		int newRange = min(13,t.range());
-		
+        
+        // limit max range, use 13 instead of 10, for Range-inf scaling
+        int newRange = min(13,t.range());
+        
         // Count new planets this gets us to
         List<StarSystem> possible = empire.uncolonizedPlanetsInRange(currRange);
         List<StarSystem> newPossible = empire.uncolonizedPlanetsInRange(t.range());
@@ -666,10 +664,10 @@ public class AIScientist implements Base, Scientist {
 
         // New planets from fuel cells are very high value (don't even need to design new colony ships).
         // Otherwise they have occasional tiny incremental values, but barely more than 0.
-		// modnar: the incremental value may not be tiny (invading other empires, etc.)
-		// modnar: combine both valuations, approx scaling up to Range-10 (level 29) and Range-inf (level 41)
+        // modnar: the incremental value may not be tiny (invading other empires, etc.)
+        // modnar: combine both valuations, approx scaling up to Range-10 (level 29) and Range-inf (level 41)
         float val = 4 * (newRange-currRange) + 4 * newPlanets;
-		
+        
         float adj = 1.0f;
         if (empire.leader().isExpansionist())
             adj *= 2;
@@ -748,10 +746,10 @@ public class AIScientist implements Base, Scientist {
         float adj = 1.0f;
         if (empire.leader().isEcologist())
             adj *= 2;
-		
+        
         // modnar: wasteCleanupTechMod() = 4 * factoryWasteMod() / wasteElimination()
-		// in TechTree.java
-		// wasteCleanupTechMod goes from 1.6 (initially) to 0 (best)
+        // in TechTree.java
+        // wasteCleanupTechMod goes from 1.6 (initially) to 0 (best)
         return adj * t.level() * empire.tech().wasteCleanupTechMod();
     }
     @Override
@@ -865,10 +863,10 @@ public class AIScientist implements Base, Scientist {
             return 0;
 
         // scale add'l prevention assuming Mark 7 (starts with 2) prevented is best (level 50)
-		// modnar: scale robotic control tech correctly
+        // modnar: scale robotic control tech correctly
         float val = 10 * (t.mark-currMark);
         // robotic controls are just a generally valuable tech
-		// modnar: with corrected scaling, adjust up by *1.5 should be fine
+        // modnar: with corrected scaling, adjust up by *1.5 should be fine
         val *= 1.5;
         // industrialists love factories! economists, too
         if (empire.leader().isIndustrialist())
@@ -899,12 +897,12 @@ public class AIScientist implements Base, Scientist {
     public float baseValue(TechShipWeapon t) {
         TechShipWeapon curr = empire.tech().topShipWeaponTech();
 
-		// modnar: renormalize weapon tech valuation by weapon damage
-		// normalize weapon damage by size, power, attacks, and enemyShieldMod (0.5)
-		// (average damage) * attacks / enemyShieldMod / (size + power); gives 0.1~0.2 for most weapons
-		// then scale by tech level * 7 to reach factor ~50 for best
-		// This method give ranking of: 1)GAUSS AUTO-CANNON , 2)PULSE PHASOR, 3)STELLAR CONVERTOR
-		// 4)TRI-FOCUS PLASMA CANNON, 5)MAULER DEVICE, 6)PARTICLE BEAM, 7)DEATH RAY
+        // modnar: renormalize weapon tech valuation by weapon damage
+        // normalize weapon damage by size, power, attacks, and enemyShieldMod (0.5)
+        // (average damage) * attacks / enemyShieldMod / (size + power); gives 0.1~0.2 for most weapons
+        // then scale by tech level * 7 to reach factor ~50 for best
+        // This method give ranking of: 1)GAUSS AUTO-CANNON , 2)PULSE PHASOR, 3)STELLAR CONVERTOR
+        // 4)TRI-FOCUS PLASMA CANNON, 5)MAULER DEVICE, 6)PARTICLE BEAM, 7)DEATH RAY
         float currVal = 7.0f* curr.level * 0.5f*(curr.damageLow() + curr.damageHigh()) * curr.attacksPerRound / curr.enemyShieldMod / (curr.size + curr.power);
         float tVal = 7.0f* t.level * 0.5f*(t.damageLow() + t.damageHigh()) * t.attacksPerRound / t.enemyShieldMod / (t.size + t.power);
 

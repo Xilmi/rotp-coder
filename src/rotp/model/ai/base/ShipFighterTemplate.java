@@ -97,11 +97,11 @@ public class ShipFighterTemplate implements Base {
             setBestNormalArmor(ai, d);  // normal armor for all sizes
             set2ndBestBattleComputer(ai, d); // set 2nd best battle computer for smaller ships
         }
-		
-		if (d.size() == ShipDesign.MEDIUM) {
+        
+        if (d.size() == ShipDesign.MEDIUM) {
             set2ndBestShield(ai, d); // give 2nd best shield for MEDIUM
         }
-		
+        
         if (d.size() >= ShipDesign.LARGE) {
             setBestBattleComputer(ai, d);
             setBattleScanner(ai, d);
@@ -169,7 +169,7 @@ public class ShipFighterTemplate implements Base {
                 return;
         }
     }
-	private void setBestECMJammer(ShipDesigner ai, ShipDesign d) {
+    private void setBestECMJammer(ShipDesigner ai, ShipDesign d) {
         List<ShipECM> comps = ai.lab().ecms();
         for (int i=comps.size()-1; i >=0; i--) {
             d.ecm(comps.get(i));
@@ -205,7 +205,7 @@ public class ShipFighterTemplate implements Base {
                 return;
         }
     }
-	 // add 2nd best shield option
+     // add 2nd best shield option
     private void set2ndBestShield(ShipDesigner ai, ShipDesign d) {
         List<ShipShield> shields = ai.lab().shields();
         for (int i=shields.size()-2; i >=0; i--) {

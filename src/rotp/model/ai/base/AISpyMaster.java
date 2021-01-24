@@ -37,9 +37,9 @@ public class AISpyMaster implements Base, SpyMaster {
         // invoked after nextTurn() processing is complete on each civ's turn
         // also invoked when contact is made in mid-turn
         // return from 0 to 40, which translates to 0% to 20% of total prod
-		//
-		// modnar: is it not 0% to 10% of total prod, for a max of +20% security bonus, with 0 to 10 ticks/clicks?
-		// MAX_SECURITY_TICKS = 10 in model/empires/Empire.java
+        //
+        // modnar: is it not 0% to 10% of total prod, for a max of +20% security bonus, with 0 to 10 ticks/clicks?
+        // MAX_SECURITY_TICKS = 10 in model/empires/Empire.java
 
         int paranoia = 0;
         boolean alone = true;
@@ -73,26 +73,26 @@ public class AISpyMaster implements Base, SpyMaster {
         int maxSpiesNeeded;
 
         if (v.embassy().finalWar())
-			// modnar: reduce spies needed for large number of active empires
+            // modnar: reduce spies needed for large number of active empires
             maxSpiesNeeded = galaxy().numActiveEmpires() > 20 ? 2 : 3;
         else if (v.embassy().war())
-			// modnar: reduce spies needed for large number of active empires
+            // modnar: reduce spies needed for large number of active empires
             maxSpiesNeeded = galaxy().numActiveEmpires() > 20 ? 1 : 2;
         else if (v.embassy().noTreaty()) {
-			// modnar: check if empire is in range or not
+            // modnar: check if empire is in range or not
             if (v.empire().inEconomicRange(id(empire)))
-				maxSpiesNeeded = 1;
-			else
-				maxSpiesNeeded = 0; // modnar: no spies if not in range
-		}
+                maxSpiesNeeded = 1;
+            else
+                maxSpiesNeeded = 0; // modnar: no spies if not in range
+        }
         else if (v.embassy().pact())
-			// modnar: reduce spies needed for large number of active empires
+            // modnar: reduce spies needed for large number of active empires
             maxSpiesNeeded = galaxy().numActiveEmpires() > 20 ? 0 : 1;
         else   // unity() or alliance()
             maxSpiesNeeded = 0;
 
         // modnar: reduce allocation to 1 tick per spy needed, better for larger games with more empires
-		// 0.5% (1 tick) spending for each spy needed
+        // 0.5% (1 tick) spending for each spy needed
         if (v.spies().numActiveSpies() >= maxSpiesNeeded)
             v.spies().allocation(0);
         else

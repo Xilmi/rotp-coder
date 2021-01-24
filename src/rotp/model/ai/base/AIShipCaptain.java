@@ -331,10 +331,10 @@ public class AIShipCaptain implements Base, ShipCaptain {
         }
         
         // if stack is pacted with colony and doesn't want war, then retreat
-		// modnar: change condition to only "doesn't want war"
+        // modnar: change condition to only "doesn't want war"
         if (combat().results().colonyStack != null) {
             EmpireView cv = currStack.empire.viewForEmpire(combat().results().colonyStack.empire);
-			//if ((cv != null) && cv.embassy().pact() && !cv.embassy().wantWar())
+            //if ((cv != null) && cv.embassy().pact() && !cv.embassy().wantWar())
             if ((cv != null) && !cv.embassy().wantWar())  
                 return true;
         }
