@@ -43,7 +43,7 @@ public class Rotp {
     private static final int MB = 1048576;
     public static int IMG_W = 1229;
     public static int IMG_H = 768;
-    public static String jarFileName = "RotP-2.10_modnar_MOD20b.jar";
+    public static String jarFileName = "RotP-2.10_modnar_MOD20b"+RotpGovernor.miniSuffix()+".jar";
     private static String jarPath;
     private static JFrame frame;
     public static String releaseId = "Beta 2.10 modnar_MOD20b";
