@@ -309,6 +309,11 @@ public interface Base {
         }
         return b;
     }
+    // modnar: add "Quarter-squares plus 1" function [A033638] for warp speed
+    public default int quarterSquaresPlusOne(int n) {
+        int a = (int)(Math.floor(n * n / 4) + 1);
+        return a;
+    }
     public default List<String> varTokens(String s, String key) {
         String startKey = concat("[",key,"_");
         int keySize = startKey.length();

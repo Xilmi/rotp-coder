@@ -437,7 +437,14 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
     public int warpSpeed(TechEngineWarp tech) {
         switch(selectedWarpSpeedOption()) {
             case WARP_SPEED_NORMAL:  return tech.baseWarp();
-            case WARP_SPEED_FAST: return fibonacci(tech.baseWarp());
+            //case WARP_SPEED_FAST: return fibonacci(tech.baseWarp());
+            // modnar: adjust Fast Warp down at advanced Engines
+            //         use [A033638] https://oeis.org/A033638
+            //         a(n) = floor(n^2/4)+1
+            // Normal:     1, 2, 3, 4, 5,  6,  7,  8,  9
+            // FastMOD:    1, 2, 3, 5, 7, 10, 13, 17, 21
+            // Fibonacci:  1, 2, 3, 5, 8, 13, 21, 34, 55
+            case WARP_SPEED_FAST: return quarterSquaresPlusOne(tech.baseWarp());
         }
         return tech.baseWarp();
     }
@@ -730,9 +737,10 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
     public List<String> fuelRangeOptions() {
         List<String> list = new ArrayList<>();
         list.add(FUEL_RANGE_NORMAL);
-        list.add(FUEL_RANGE_HIGH);
-        list.add(FUEL_RANGE_HIGHER);
-        list.add(FUEL_RANGE_HIGHEST);
+        // modnar: comment out fuelRangeOptions from being selected
+        //list.add(FUEL_RANGE_HIGH);
+        //list.add(FUEL_RANGE_HIGHER);
+        //list.add(FUEL_RANGE_HIGHEST);
         return list;
     }
     @Override
