@@ -43,6 +43,10 @@ public class UserPreferences {
     private static final String TEXTURES_NO = "GAME_SETTINGS_TEXTURES_NO";
     private static final String AUTOCOLONIZE_YES = "GAME_SETTINGS_AUTOCOLONIZE_YES";
     private static final String AUTOCOLONIZE_NO = "GAME_SETTINGS_AUTOCOLONIZE_NO";
+    private static final String AUTOBOMBARD_YES = "GAME_SETTINGS_AUTOBOMBARD_YES";
+    private static final String AUTOBOMBARD_NO = "GAME_SETTINGS_AUTOBOMBARD_NO";
+    private static final String AUTOBOMBARD_WAR = "GAME_SETTINGS_AUTOBOMBARD_WAR";
+    private static final String AUTOBOMBARD_INVADE = "GAME_SETTINGS_AUTOBOMBARD_INVADE";
     
     private static final String PREFERENCES_FILE = "Remnants.cfg";
     private static final String keyFormat = "%-20s: ";
@@ -58,6 +62,7 @@ public class UserPreferences {
     private static boolean randomTechStart = false; // modnar: add option to start all Empires with 2 techs, no Artifacts
     private static int autoSaveTurns = 5; // modnar: add option to auto-save every n-turns
     private static boolean autoColonize = false;
+    private static String autoBombardMode = AUTOBOMBARD_NO;
     private static String displayMode = WINDOW_MODE;
     private static String graphicsMode = GRAPHICS_HIGH;
     private static float uiTexturePct = 0.20f;
@@ -96,6 +101,22 @@ public class UserPreferences {
     public static String autoColonizeMode()     { return autoColonize ? AUTOCOLONIZE_YES : AUTOCOLONIZE_NO; }
     public static void toggleAutoColonize()     { autoColonize = !autoColonize; save();  }
     public static boolean autoColonize()        { return autoColonize; }
+    
+    public static void toggleAutoBombard()     { 
+        switch(autoBombardMode) {
+            case AUTOBOMBARD_NO:     autoBombardMode = AUTOBOMBARD_YES; break;
+            case AUTOBOMBARD_YES:    autoBombardMode = AUTOBOMBARD_WAR; break;
+            case AUTOBOMBARD_WAR:    autoBombardMode = AUTOBOMBARD_INVADE; break;
+            case AUTOBOMBARD_INVADE: autoBombardMode = AUTOBOMBARD_NO; break;
+            default:                 autoBombardMode = AUTOBOMBARD_NO; break;
+        }
+        save();
+    }
+    public static String autoBombardMode()        { return autoBombardMode; }
+    public static boolean autoBombardNo()         { return autoBombardMode.equals(AUTOBOMBARD_NO); }
+    public static boolean autoBombardYes()        { return autoBombardMode.equals(AUTOBOMBARD_YES); }
+    public static boolean autoBombardWar()        { return autoBombardMode.equals(AUTOBOMBARD_WAR); }
+    public static boolean autoBombardInvading()   { return autoBombardMode.equals(AUTOBOMBARD_INVADE); }
     
     public static boolean playAnimations()  { return !graphicsMode.equals(GRAPHICS_LOW); }
     public static boolean antialiasing()    { return graphicsMode.equals(GRAPHICS_HIGH); }

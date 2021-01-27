@@ -83,6 +83,7 @@ public class EmpireSystemPanel extends SystemPanel {
     public void keyPressed(KeyEvent e) {
         int k = e.getKeyCode();
         int code = e.getModifiersEx();
+        boolean shift = e.isShiftDown();
         switch (k) {
             case KeyEvent.VK_B:
                 if (code == 0)
@@ -91,7 +92,7 @@ public class EmpireSystemPanel extends SystemPanel {
                     infoPane.decrementBases();
                 return;
             case KeyEvent.VK_F:
-                foundedPane.toggleFlagColor();
+                foundedPane.toggleFlagColor(shift);
                 return;
             case KeyEvent.VK_S:
                 nextShipDesign();

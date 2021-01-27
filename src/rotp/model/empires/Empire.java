@@ -458,7 +458,7 @@ public final class Empire implements Base, NamedObject, Serializable {
             return false;
         if ((sys.empire() == this) && sys.colony().inRebellion())
             return true;
-        return canColonize(sys.planet());
+        return canColonize(sys.planet().type());
     }
     public boolean canRallyFleetsFrom(int sysId) {
         return (sysId != StarSystem.NULL_ID) && (sv.empire(sysId) == this) && (allColonizedSystems().size() > 1);
@@ -669,10 +669,6 @@ public final class Empire implements Base, NamedObject, Serializable {
         int hostility = sv.planetType(sysId).hostility();
         return tech().environmentTechNeededToColonize(hostility);
     }    
-    public boolean canColonize(Planet p) { return canColonize(p.type()); }
-    public boolean canLearnToColonize(Planet p) { return canLearnToColonize(p.type()); }
-    public boolean isLearningToColonize(Planet p) { return isLearningToColonize(p.type()); }
-
     public boolean canColonize(int sysId) {
         StarSystem sys = galaxy().system(sysId);
         return canColonize(sys.planet().type());
@@ -687,7 +683,7 @@ public final class Empire implements Base, NamedObject, Serializable {
             return false;
         if (race().ignoresPlanetEnvironment())
             return true;
-        return pt.hostility() <= tech().hostilityAllowed();
+        return tech().canColonize(pt);
     }
     public boolean isLearningToColonize(PlanetType pt) {
         if (pt == null)  // hasn't been scouted yet
@@ -696,7 +692,7 @@ public final class Empire implements Base, NamedObject, Serializable {
             return false;
         if (race().ignoresPlanetEnvironment())
             return true;
-        return pt.hostility() <= tech().researchingHostilityAllowed();
+        return tech().isLearningToColonize(pt);
     }
     public boolean canLearnToColonize(PlanetType pt) {
         if (pt == null)  // hasn't been scouted yet
@@ -705,7 +701,7 @@ public final class Empire implements Base, NamedObject, Serializable {
             return false;
         if (race().ignoresPlanetEnvironment())
             return true;
-        return pt.hostility() <= tech().learnableHostilityAllowed();
+        return tech().canLearnToColonize(pt);
     }
     public boolean knowETA(Ship sh) {
         return knowShipETA || canSeeShips(sh.empId());
@@ -2493,7 +2489,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         List<StarSystem> systems = new ArrayList<>();
         for (int i=0;i<sv.count();i++) {
             StarSystem sys = gal.system(i);
-            if (sv.isScouted(i) && sv.inShipRange(i) && canColonize(sys.planet()))
+            if (sv.isScouted(i) && sv.inShipRange(i) && canColonize(sys.planet().type()))
                 systems.add(sys);
         }
         return systems;
@@ -2503,7 +2499,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         List<StarSystem> systems = new ArrayList<>();
         for (int i=0;i<sv.count();i++) {
             StarSystem sys = gal.system(i);
-            if (sv.isScouted(i) && (sv.distance(i) <= range) && canColonize(sys.planet()))
+            if (sv.isScouted(i) && (sv.distance(i) <= range) && canColonize(sys.planet().type()))
                 systems.add(sys);
         }
         return systems;
@@ -3112,7 +3108,7 @@ public final class Empire implements Base, NamedObject, Serializable {
             if (sv.inShipRange(i)
             && sv.isScouted(i)
             && sv.isColonized(i)
-            && tech().canColonize(sys.planet()))
+            && tech().canColonize(sys.planet().type()))
                 list.add(sys);
         }
         Collections.sort(list, IMappedObject.MAP_ORDER);
