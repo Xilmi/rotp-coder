@@ -1432,7 +1432,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         }
 
         BiPredicate<ShipDesign, Integer> designFitForSystem =
-            (sd, si) -> race().ignoresPlanetEnvironment() || sd.colonySpecial().canColonize(sv.system(si).planet());
+            (sd, si) -> race().ignoresPlanetEnvironment() || sd.colonySpecial().canColonize(sv.system(si).planet().type());
 
         ShipSpecialColony bestColonyShip = bestColonyShipSpecial(designs);
         System.out.println("Best colony ship special "+bestColonyShip.tech().name());
@@ -1444,7 +1444,7 @@ public final class Empire implements Base, NamedObject, Serializable {
             if (!sv.view(i).isColonized() && sv.view(i).scouted() && !PlanetType.NONE.equals(sv.view(i).planetType().key())
                     && !sv.isGuarded(i) && sv.view(i).empire() == null ) {
                 // if we don't have tech or ships to colonize this planet, ignore it.
-                if (!race().ignoresPlanetEnvironment() && !bestColonyShip.canColonize(sv.system(i).planet())) {
+                if (!race().ignoresPlanetEnvironment() && !bestColonyShip.canColonize(sv.system(i).planet().type())) {
                     return false;
                 }
 
