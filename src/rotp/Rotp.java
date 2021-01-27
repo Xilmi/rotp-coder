@@ -46,7 +46,7 @@ public class Rotp {
     public static String jarFileName = "rotp-"+RotpGovernor.governorVersion()+RotpGovernor.miniSuffix()+".jar";
     private static String jarPath;
     private static JFrame frame;
-    public static String releaseId = "Beta 2.10";
+    public static String releaseId = "Beta 2.11";
     public static long startMs = System.currentTimeMillis();
     public static long maxHeapMemory = Runtime.getRuntime().maxMemory() / 1048576;
     public static long maxUsedMemory;
