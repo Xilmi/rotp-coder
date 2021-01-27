@@ -41,6 +41,8 @@ This RotP MOD contains many gameplay additions/changes from the official game ve
         - Asymptotically Approach Half Cost Techs
     - **All Research Rate Options Scale Asymptotically**
         - Cost at Low Tech Levels Closer to NORMAL Tech Costs
+    - **Fast Warp Speed Reduced**, Still Faster than Normal
+    - **Fuel Range Options Disabled**
     - [**Change Missile Colors according to Missile Type**](https://i.imgur.com/HSD2Irb.png)
     - [**Larger Race Status plots**](https://i.imgur.com/tn0mL6E.png)
     

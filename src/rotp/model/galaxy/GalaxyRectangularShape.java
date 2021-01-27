@@ -42,7 +42,7 @@ public class GalaxyRectangularShape extends GalaxyShape {
 	
     Shape block, circle;
 	Area totalArea, blockArea, circleArea;
-	float adjust_density = 1.0f; // modnar: adjust stellar density
+	float adjust_density = 0.9f; // modnar: adjust stellar density
     float rectangleRatio = 4.0f/3.0f;
     int voids = 0;
 	
@@ -78,9 +78,14 @@ public class GalaxyRectangularShape extends GalaxyShape {
             default: rectangleRatio = 4.0f/3.0f; break;
         }
 		
+        // reset w/h vars since aspect ratio may have changed
+        initWidthHeight();
+        
 		// modnar: choose void configurations with option2
         switch(option2) {
             case 0: {
+                // no voids
+                adjust_density = 0.9f;
                 // reset w/h vars since aspect ratio may have changed
                 initWidthHeight();
                 
@@ -95,7 +100,7 @@ public class GalaxyRectangularShape extends GalaxyShape {
             }
             case 1: {
                 // single large central void
-                adjust_density *= 2.0f;
+                adjust_density = 1.9f;
                 // reset w/h vars since aspect ratio may have changed
                 initWidthHeight();
                 
@@ -114,7 +119,7 @@ public class GalaxyRectangularShape extends GalaxyShape {
             }
             case 2: {
                 // two diagonal voids
-                adjust_density *= 2.0f;
+                adjust_density = 1.9f;
                 // reset w/h vars since aspect ratio may have changed
                 initWidthHeight();
                 
@@ -137,7 +142,7 @@ public class GalaxyRectangularShape extends GalaxyShape {
             }
             case 3: {
                 // five separated voids
-                adjust_density *= 2.0f;
+                adjust_density = 1.9f;
                 // reset w/h vars since aspect ratio may have changed
                 initWidthHeight();
                 
