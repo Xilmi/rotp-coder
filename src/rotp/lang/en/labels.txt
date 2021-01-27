@@ -1138,8 +1138,8 @@ SETUP_ELLIPSE_1                   | Ellipse 1
 SETUP_ELLIPSE_2                   | Ellipse 2
 SETUP_ELLIPSE_3                   | Ellipse 3
 SETUP_ELLIPSE_4                   | Ellipse 4
-SETUP_RECTANGLE_0                 | Dense
-SETUP_RECTANGLE_1                 | Sparse
+SETUP_RECTANGLE_0                 | Rectangle
+SETUP_RECTANGLE_1                 | Square
 SETUP_VOID_0                      | No Void
 SETUP_VOID_1                      | Void 1
 SETUP_VOID_2                      | Void 2

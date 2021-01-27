@@ -42,7 +42,7 @@ public class GalaxyRectangularShape extends GalaxyShape {
 	
     Shape block, circle;
 	Area totalArea, blockArea, circleArea;
-	float adjust_density = 0.8f; // modnar: adjust stellar density
+	float adjust_density = 1.0f; // modnar: adjust stellar density
     float rectangleRatio = 4.0f/3.0f;
     int voids = 0;
 	
@@ -69,41 +69,63 @@ public class GalaxyRectangularShape extends GalaxyShape {
         switch(option1) {
             case 0: {
                 rectangleRatio = 4.0f/3.0f;
-                adjust_density = 0.8f;
                 break;
             }
             case 1: {
-                rectangleRatio = 4.0f/3.0f;
-                adjust_density = 1.6f;
+                rectangleRatio = 1.0f; // square
                 break;
             }
             default: rectangleRatio = 4.0f/3.0f; break;
         }
-        
-        // reset w/h vars since aspect ratio may have changed
-        initWidthHeight();
-        
-        float gE = (float) galaxyEdgeBuffer();
-        float gW = (float) galaxyWidthLY();
-        float gH = (float) galaxyHeightLY();
-        
-        block = new Rectangle2D.Float(gE, gE, gW, gH);
-		blockArea = new Area(block);
-		totalArea = blockArea;
 		
 		// modnar: choose void configurations with option2
         switch(option2) {
-            case 0: break;
+            case 0: {
+                // reset w/h vars since aspect ratio may have changed
+                initWidthHeight();
+                
+                float gE = (float) galaxyEdgeBuffer();
+                float gW = (float) galaxyWidthLY();
+                float gH = (float) galaxyHeightLY();
+                
+                block = new Rectangle2D.Float(gE, gE, gW, gH);
+                blockArea = new Area(block);
+                totalArea = blockArea;
+                break;
+            }
             case 1: {
                 // single large central void
+                adjust_density *= 2.0f;
+                // reset w/h vars since aspect ratio may have changed
+                initWidthHeight();
+                
+                float gE = (float) galaxyEdgeBuffer();
+                float gW = (float) galaxyWidthLY();
+                float gH = (float) galaxyHeightLY();
+                
+                block = new Rectangle2D.Float(gE, gE, gW, gH);
+                blockArea = new Area(block);
+                totalArea = blockArea;
+                
                 circle = new Ellipse2D.Float(gE+0.5f*gW-0.44f*gH, gE+0.06f*gH, 0.88f*gH, 0.88f*gH);
                 circleArea = new Area(circle);
                 totalArea.subtract(circleArea);
-                adjust_density *= 1.8f;
                 break;
             }
             case 2: {
                 // two diagonal voids
+                adjust_density *= 2.0f;
+                // reset w/h vars since aspect ratio may have changed
+                initWidthHeight();
+                
+                float gE = (float) galaxyEdgeBuffer();
+                float gW = (float) galaxyWidthLY();
+                float gH = (float) galaxyHeightLY();
+                
+                block = new Rectangle2D.Float(gE, gE, gW, gH);
+                blockArea = new Area(block);
+                totalArea = blockArea;
+                
                 circle = new Ellipse2D.Float(gE+0.05f*gW, gE+0.05f*gH, 0.45f*gW, 0.45f*gW);
                 circleArea = new Area(circle);
                 totalArea.subtract(circleArea);
@@ -111,11 +133,22 @@ public class GalaxyRectangularShape extends GalaxyShape {
                 circle = new Ellipse2D.Float(gE+0.5f*gW, gE+0.95f*gH-0.45f*gW, 0.45f*gW, 0.45f*gW);
                 circleArea = new Area(circle);
                 totalArea.subtract(circleArea);
-                adjust_density *= 1.8f;
                 break;
             }
             case 3: {
                 // five separated voids
+                adjust_density *= 2.0f;
+                // reset w/h vars since aspect ratio may have changed
+                initWidthHeight();
+                
+                float gE = (float) galaxyEdgeBuffer();
+                float gW = (float) galaxyWidthLY();
+                float gH = (float) galaxyHeightLY();
+                
+                block = new Rectangle2D.Float(gE, gE, gW, gH);
+                blockArea = new Area(block);
+                totalArea = blockArea;
+                
                 circle = new Ellipse2D.Float(gE+0.26f*gW, gE+0.5f*gH-0.24f*gW, 0.48f*gW, 0.48f*gW);
                 circleArea = new Area(circle);
                 totalArea.subtract(circleArea);
@@ -135,7 +168,6 @@ public class GalaxyRectangularShape extends GalaxyShape {
                 circle = new Ellipse2D.Float(gE+0.95f*gW-0.3f*gH, gE+0.633f*gH, 0.3f*gH, 0.3f*gH);
                 circleArea = new Area(circle);
                 totalArea.subtract(circleArea);
-                adjust_density *= 1.8f;
                 break;
             }
             default: break;
