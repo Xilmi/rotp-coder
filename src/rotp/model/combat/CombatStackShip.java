@@ -69,14 +69,14 @@ public class CombatStackShip extends CombatStack {
         startingMaxHits = maxHits = design.hits();
         maxMove = design.moveRange();
         maxShield = design.shieldLevel();
-        attackLevel = design.attackLevel() + empire.race().shipAttackBonus();
+        attackLevel = design.attackLevel() + empire.shipAttackBonus();
         maneuverability = design.maneuverability();
         repulsorRange = design.repulsorRange();
         hits = maxHits;
         move = maxMove;
         shield = maxShield;
-        missileDefense = design.missileDefense() + empire.race().shipDefenseBonus();
-        beamDefense = design.beamDefense() + empire.race().shipDefenseBonus();
+        missileDefense = design.missileDefense() + empire.shipDefenseBonus();
+        beamDefense = design.beamDefense() + empire.shipDefenseBonus();
         displacementPct = design.missPct();
         repairPct = designShipRepairPct();
         beamRangeBonus = designBeamRangeBonus();
@@ -305,7 +305,7 @@ public class CombatStackShip extends CombatStack {
     }
     @Override
     public float initiative() {
-        return design.initiative() + empire.race().shipInitiativeBonus();
+        return design.initiative() + empire.shipInitiativeBonus();
     }
     @Override
     public boolean selectBestWeapon(CombatStack target) {
