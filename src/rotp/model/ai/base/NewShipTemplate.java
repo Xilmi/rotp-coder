@@ -169,6 +169,8 @@ public class NewShipTemplate implements Base {
         boolean sameSpeedAllowed = race.shipDesignMods[SPEED_MATCHING] > 0; 
         // Reinforced Armor Allowed Flag: default true, alkari/klackon false
         boolean reinforcedArmorAllowed = race.shipDesignMods[REINFORCED_ARMOR] > 0; 
+        // modnar: don't allow Reinforced Armor, force reinforcedArmorAllowed to be false
+        reinforcedArmorAllowed = false;
         // Allow Bio Weapons: default false, silicoid true  (adjusted elsewhere for leader type)
         boolean allowBioWeapons = race.shipDesignMods[BIO_WEAPONS] > 0;  
         
@@ -232,10 +234,19 @@ public class NewShipTemplate implements Base {
         // what's left will be used on non-bombs for bombers, second best weapon for destroyers
         // repeat calls of setOptimalShipCombatWeapon() will result in a weapon from another category (beam, missile, streaming) than already installed
         // fighters will have a single best weapon over all four slots
+        
+        // modnar: change bomb space ratio to 0.5f for Bombers
+        // add some bombs (0.1f) for Destroyers
+        // reduce firstWeaponSpaceRatio of remaining space, and to account for one less weapon slot
+        // will give approx: 0.10 Bomb,     0.35 firstWpn, 0.35 firstWpn,  0.20 secondWpn
+        // rather than:      0.40 firstWpn, 0.40 firstWpn, 0.10 secondWpn, 0.10 secondWpn
+        float bombSpaceRatio = 0.5f;
+        float destroyerBombSpaceRatio = 0.1f;
+        firstWeaponSpaceRatio = 0.7f;
 
         switch (role) {
             case BOMBER:
-                setOptimalBombardmentWeapon(ai, d, colonyTargets, firstWeaponSpaceRatio * d.availableSpace(), allowBioWeapons); // uses slot 0
+                setOptimalBombardmentWeapon(ai, d, colonyTargets, bombSpaceRatio * d.availableSpace(), allowBioWeapons); // uses slot 0
                 setOptimalShipCombatWeapon(ai, d, shipTargets, d.availableSpace(), 1); // uses slot 1
                 setPerTurnBombDamage(d, ai.empire());
                 break;
@@ -245,8 +256,9 @@ public class NewShipTemplate implements Base {
                 setPerTurnShipDamage(d, ai.empire());
                 break;
             case DESTROYER:
-                setOptimalShipCombatWeapon(ai, d, shipTargets, firstWeaponSpaceRatio * d.availableSpace(), 2); // uses slots 0-1
-                setOptimalShipCombatWeapon(ai, d, shipTargets, d.availableSpace(), 2); // uses slots 2-3
+                setOptimalBombardmentWeapon(ai, d, colonyTargets, destroyerBombSpaceRatio*d.availableSpace(), false); // modnar: include some bombs on destroyers, uses slot 0
+                setOptimalShipCombatWeapon(ai, d, shipTargets, firstWeaponSpaceRatio * d.availableSpace(), 2); // uses slots 1-2
+                setOptimalShipCombatWeapon(ai, d, shipTargets, d.availableSpace(), 1); // uses slot 3
                 upgradeBeamRangeSpecial(ai, d);
                 setPerTurnShipDamage(d, ai.empire());
                 break;
