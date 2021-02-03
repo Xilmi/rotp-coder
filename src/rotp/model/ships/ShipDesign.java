@@ -60,6 +60,7 @@ public final class ShipDesign extends Design {
     private float perTurnDmg = 0;
     private boolean autoScout = false;
     private boolean autoColonize = false;
+    private boolean autoAttack = false;
     private String iconKey;
     private transient ImageIcon icon;
     private transient float costBC;
@@ -634,5 +635,13 @@ public final class ShipDesign extends Design {
 
     public void setAutoColonize(boolean autoColonize) {
         this.autoColonize = autoColonize;
+    }
+
+    public boolean isAutoAttack() {
+        return autoAttack;
+    }
+
+    public void setAutoAttack(boolean autoAttack) {
+        this.autoAttack = autoAttack;
     }
 }

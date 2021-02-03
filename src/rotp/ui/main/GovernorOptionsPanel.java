@@ -47,6 +47,8 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         this.autoScout.setSelected(options.isAutoScout());
         this.autoColonize.setSelected(options.isAutoColonize());
         this.completionist.setEnabled(isCompletionistEnabled());
+        this.autoAttack.setSelected(options.isAutoAttack());
+        this.autoShipCount.setValue(options.getAutoShipCount());
     }
 
     public boolean isCompletionistEnabled() {
@@ -125,6 +127,9 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         autoScout = new javax.swing.JCheckBox();
         autoColonize = new javax.swing.JCheckBox();
         completionist = new javax.swing.JButton();
+        autoAttack = new javax.swing.JCheckBox();
+        autoShipCount = new javax.swing.JSpinner();
+        autoShipCountLabel = new javax.swing.JLabel();
 
         governorDefault.setText("Governor is on by default");
 
@@ -341,59 +346,73 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
             }
         });
 
+        autoAttack.setText("Auto Attack");
+
+        autoShipCount.setModel(new javax.swing.SpinnerNumberModel(1, 1, 99, 1));
+        autoShipCount.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                autoShipCountMouseWheelMoved(evt);
+            }
+        });
+
+        autoShipCountLabel.setText("Number of ships to send on auto missions");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(autotransportPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(stargatePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(autoColonize)
-                        .addGap(108, 108, 108))
+                        .addComponent(allGovernorsOn)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(allGovernorsOff))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(governorDefault)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(12, 12, 12)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(autoShipCount, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(autoShipCountLabel))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(autoScout)
+                                        .addGap(92, 92, 92)
+                                        .addComponent(autoColonize)
+                                        .addGap(82, 82, 82)
+                                        .addComponent(autoAttack)))))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(12, 12, 12)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(missileBases, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(missileBasesLabel))
+                                    .addComponent(shipbuilding))
+                                .addGap(0, 0, Short.MAX_VALUE))
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addComponent(autospend)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(reserve, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(resrveLabel))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(missileBases, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(missileBasesLabel))
-                                    .addComponent(shipbuilding))
-                                .addGap(0, 0, Short.MAX_VALUE))))
+                                .addComponent(resrveLabel))))
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(autotransportPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(stargatePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(allGovernorsOn)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(allGovernorsOff))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(governorDefault)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGap(12, 12, 12)
-                                        .addComponent(autoScout)))
-                                .addGap(0, 0, Short.MAX_VALUE))))
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
                         .addComponent(okButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(cancelButton)))
+                        .addComponent(cancelButton))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(181, 181, 181)
+                        .addComponent(completionist)
+                        .addGap(179, 179, 179)))
                 .addContainerGap())
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(completionist)
-                .addGap(185, 185, 185))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -411,7 +430,12 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(autoScout)
-                    .addComponent(autoColonize))
+                    .addComponent(autoColonize)
+                    .addComponent(autoAttack))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(autoShipCount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(autoShipCountLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(missileBases, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -500,6 +524,8 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         options.setShipbuilding(shipbuilding.isSelected());
         options.setAutoScout(autoScout.isSelected());
         options.setAutoColonize(autoColonize.isSelected());
+        options.setAutoAttack(autoAttack.isSelected());
+        options.setAutoShipCount((Integer)autoShipCount.getValue());
         frame.setVisible(false);
     }//GEN-LAST:event_okButtonActionPerformed
 
@@ -526,6 +552,10 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
     private void completionistActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_completionistActionPerformed
         performCompletionist();
     }//GEN-LAST:event_completionistActionPerformed
+
+    private void autoShipCountMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_autoShipCountMouseWheelMoved
+        mouseWheel(autoShipCount, evt);
+    }//GEN-LAST:event_autoShipCountMouseWheelMoved
 
     private void changePopulationLabel() {
         int pop = (int)this.transportPop.getValue();
@@ -556,8 +586,11 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton allGovernorsOff;
     private javax.swing.JButton allGovernorsOn;
+    private javax.swing.JCheckBox autoAttack;
     private javax.swing.JCheckBox autoColonize;
     private javax.swing.JCheckBox autoScout;
+    private javax.swing.JSpinner autoShipCount;
+    private javax.swing.JLabel autoShipCountLabel;
     private javax.swing.JCheckBox autospend;
     private javax.swing.JCheckBox autotransport;
     private javax.swing.JButton cancelButton;

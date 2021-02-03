@@ -21,15 +21,52 @@
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" attributes="0">
+              <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="autotransportPanel" alignment="0" max="32767" attributes="0"/>
+                  <Component id="stargatePanel" alignment="0" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
+                      <Component id="allGovernorsOn" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="32767" attributes="0"/>
-                      <Component id="autoColonize" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace min="-2" pref="108" max="-2" attributes="0"/>
+                      <Component id="allGovernorsOff" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <Group type="102" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="governorDefault" min="-2" max="-2" attributes="0"/>
+                          <Group type="102" alignment="0" attributes="0">
+                              <EmptySpace min="12" pref="12" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Group type="102" attributes="0">
+                                      <Component id="autoShipCount" min="-2" pref="64" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="autoShipCountLabel" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                                  <Group type="102" attributes="0">
+                                      <Component id="autoScout" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace min="-2" pref="92" max="-2" attributes="0"/>
+                                      <Component id="autoColonize" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace min="-2" pref="82" max="-2" attributes="0"/>
+                                      <Component id="autoAttack" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                              </Group>
+                          </Group>
+                      </Group>
+                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" alignment="0" attributes="0">
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Group type="102" attributes="0">
+                                      <Component id="missileBases" min="-2" pref="64" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="missileBasesLabel" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                                  <Component id="shipbuilding" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                          </Group>
                           <Group type="102" alignment="1" attributes="0">
                               <Component id="autospend" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="32767" attributes="0"/>
@@ -37,54 +74,20 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="resrveLabel" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <Group type="102" attributes="0">
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Group type="102" alignment="0" attributes="0">
-                                      <Component id="missileBases" min="-2" pref="50" max="-2" attributes="0"/>
-                                      <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="missileBasesLabel" min="-2" max="-2" attributes="0"/>
-                                  </Group>
-                                  <Component id="shipbuilding" alignment="0" min="-2" max="-2" attributes="0"/>
-                              </Group>
-                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                          </Group>
-                      </Group>
-                  </Group>
-                  <Group type="102" attributes="0">
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="autotransportPanel" alignment="0" max="32767" attributes="0"/>
-                          <Component id="stargatePanel" alignment="0" max="32767" attributes="0"/>
-                          <Group type="102" alignment="0" attributes="0">
-                              <Component id="allGovernorsOn" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace max="32767" attributes="0"/>
-                              <Component id="allGovernorsOff" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <Group type="102" attributes="0">
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="governorDefault" min="-2" max="-2" attributes="0"/>
-                                  <Group type="102" alignment="0" attributes="0">
-                                      <EmptySpace min="12" pref="12" max="-2" attributes="0"/>
-                                      <Component id="autoScout" min="-2" max="-2" attributes="0"/>
-                                  </Group>
-                              </Group>
-                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                          </Group>
                       </Group>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace max="-2" attributes="0"/>
                       <Component id="okButton" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="32767" attributes="0"/>
                       <Component id="cancelButton" min="-2" max="-2" attributes="0"/>
                   </Group>
+                  <Group type="102" alignment="1" attributes="0">
+                      <EmptySpace min="-2" pref="181" max="-2" attributes="0"/>
+                      <Component id="completionist" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="179" max="-2" attributes="0"/>
+                  </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-          </Group>
-          <Group type="102" alignment="1" attributes="0">
-              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-              <Component id="completionist" min="-2" max="-2" attributes="0"/>
-              <EmptySpace min="-2" pref="185" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -106,6 +109,12 @@
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="autoScout" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="autoColonize" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="autoAttack" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="autoShipCount" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="autoShipCountLabel" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
@@ -480,6 +489,26 @@
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="completionistActionPerformed"/>
       </Events>
+    </Component>
+    <Component class="javax.swing.JCheckBox" name="autoAttack">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Auto Attack"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JSpinner" name="autoShipCount">
+      <Properties>
+        <Property name="model" type="javax.swing.SpinnerModel" editor="org.netbeans.modules.form.editors2.SpinnerModelEditor">
+          <SpinnerModel initial="1" maximum="99" minimum="1" numberType="java.lang.Integer" stepSize="1" type="number"/>
+        </Property>
+      </Properties>
+      <Events>
+        <EventHandler event="mouseWheelMoved" listener="java.awt.event.MouseWheelListener" parameters="java.awt.event.MouseWheelEvent" handler="autoShipCountMouseWheelMoved"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JLabel" name="autoShipCountLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Number of ships to send on auto missions"/>
+      </Properties>
     </Component>
   </SubComponents>
 </Form>
