@@ -235,14 +235,37 @@ public class NewShipTemplate implements Base {
         // repeat calls of setOptimalShipCombatWeapon() will result in a weapon from another category (beam, missile, streaming) than already installed
         // fighters will have a single best weapon over all four slots
         
-        // modnar: change bomb space ratio to 0.5f for Bombers
-        // add some bombs (0.1f) for Destroyers
-        // reduce firstWeaponSpaceRatio of remaining space, and to account for one less weapon slot
-        // will give approx: 0.10 Bomb,     0.35 firstWpn, 0.35 firstWpn,  0.20 secondWpn
+        // modnar: change weapon space ratios for different Hull sizes, adjust bomb space
+        // Bomber:     Small (1.0f)  Medium (0.8f)  Large (0.6f)  Huge (0.4f)
+        // add some bombs for Destroyers
+        // Destroyer:  Small (0.0f)  Medium (0.0f)  Large (0.1f)  Huge (0.1f)
+        // adjust firstWeaponSpaceRatio of remaining space (0.8f or 0.7f)
+        // to account for one less weapon slot for secondWpn
+        // will give approx: 0.00 Bomb,     0.40 firstWpn, 0.40 firstWpn,  0.20 secondWpn
+        //               or: 0.10 Bomb,     0.35 firstWpn, 0.35 firstWpn,  0.20 secondWpn
         // rather than:      0.40 firstWpn, 0.40 firstWpn, 0.10 secondWpn, 0.10 secondWpn
-        float bombSpaceRatio = 0.5f;
+        float bombSpaceRatio = 0.6f;
         float destroyerBombSpaceRatio = 0.1f;
-        firstWeaponSpaceRatio = 0.7f;
+        if (size == ShipDesign.SMALL) {
+            bombSpaceRatio = 1.0f;
+            destroyerBombSpaceRatio = 0.0f;
+            firstWeaponSpaceRatio = 0.8f;
+        }
+        else if (size == ShipDesign.MEDIUM) {
+            bombSpaceRatio = 0.8f;
+            destroyerBombSpaceRatio = 0.0f;
+            firstWeaponSpaceRatio = 0.8f;
+        }
+        else if (size == ShipDesign.LARGE) {
+            bombSpaceRatio = 0.6f;
+            destroyerBombSpaceRatio = 0.1f;
+            firstWeaponSpaceRatio = 0.7f;
+        }
+        else if (size == ShipDesign.HUGE) {
+            bombSpaceRatio = 0.4f;
+            destroyerBombSpaceRatio = 0.1f;
+            firstWeaponSpaceRatio = 0.7f;
+        }
 
         switch (role) {
             case BOMBER:
@@ -821,8 +844,9 @@ public class NewShipTemplate implements Base {
                 wpnDamage = 0;
             else {
                 wpnDamage = d.wpnCount(i) * wpn.firepower(target.shieldLevel);
+                // modnar: for missiles, include scatterAttacks() for scatter missiles
                 if (wpn.isLimitedShotWeapon())
-                        wpnDamage = wpnDamage * wpn.shots() / 10;
+                        wpnDamage = wpnDamage * wpn.shots() * wpn.scatterAttacks() / 10;
                 // divide by # of turns to fire
                 wpnDamage /= wpn.turnsToFire();
                 // +15% damage for each weapon computer level
