@@ -77,6 +77,9 @@ public class AIScientist implements Base, Scientist {
     @Override
     public void setTechTreeAllocations() {
         // invoked after nextTurn() processing is complete on each civ's turn
+        // Let our opening book decide if it wants to make tech allocations
+        if (openingBookTechTreeAllocations()) 
+            return;
         
         // Otherwise, go for the defaults modulo future tech adjustments
         int futureTechs = 0;
