@@ -78,7 +78,7 @@ public class AIShipDesigner implements Base, ShipDesigner {
                 ShipSpecialColony special = design.colonySpecial();
                 if (special != null) {
                     PlanetType pt = sys.planet().type();
-                    if (empire.race().ignoresPlanetEnvironment()
+                    if (empire.ignoresPlanetEnvironment()
                     || (empire.canColonize(pt) && special.tech().canColonize(pt)) ) {
                         if ((bestDesign == null)
                         || (design.engine().warp() < bestDesign.engine().warp()))
@@ -95,20 +95,20 @@ public class AIShipDesigner implements Base, ShipDesigner {
     }
     private void countdownObsoleteDesigns() {
         ShipDesignLab lab = lab();
-        List<ShipDesign> scrap = new ArrayList<>();
-        for (ShipDesign d: lab.designs()) {
+        for (int slot=0;slot<ShipDesignLab.MAX_DESIGNS;slot++) {
+            ShipDesign d = lab.design(slot);
             if (d.obsolete()) {
                 d.remainingLife--;
                 // if remainingLife < 0, then this design is not an
                 // active design waiting to be scrapped...it's a slot that
                 // needs to be freed up
-                if (d.remainingLife() < 0) 
-                    scrap.add(d);
-            } 
-        }
-        for (ShipDesign d: scrap) {
-            lab.scrapDesign(d);
-            log("Scrapping obsolete design: "+d.name());
+                if (d.remainingLife() < 0) {
+                    if (!lab.slotInUse(slot)) {
+                        log("Empire: "+empire.name()+ "  Scrapping obsolete design: "+d.name()+"  in slot:"+slot);
+                        lab.scrapDesign(d);
+                    }
+                }
+            }
         }
     }
     public void updateScoutDesign() {
@@ -176,6 +176,19 @@ public class AIShipDesigner implements Base, ShipDesigner {
         
         // recalculate current design's damage vs. current targets
         ShipDesign currDesign = lab.bomberDesign();
+
+        // if we don't have any faster engines
+        if (currDesign.engine() == lab.fastestEngine()) {
+            // and if the design has less than 10% free space or has less than 25/50/75/100 free space, we assume the redesign has no sense
+            // 25/50/75/100 may be a too straight-line set of values
+            if ((currDesign.availableSpace()/(currDesign.totalSpace()) < 0.1f) || (currDesign.availableSpace() < (currDesign.size()+1) * 25)) {
+                // we're fairly certain AI packed the ship before and if the current modules haven't shrinked enough,
+                // that means we don't have enough new tech to make the new design markedly better            
+                currDesign.remainingLife++;
+                return;
+            }
+        }
+
         int currSlot = currDesign.id();
         
         // find best hypothetical design vs current targets
@@ -250,8 +263,21 @@ public class AIShipDesigner implements Base, ShipDesigner {
         
         // recalculate current design's damage vs. current targets
         ShipDesign currDesign = lab.fighterDesign();
+
+        // if we don't have any faster engines
+        if (currDesign.engine() == lab.fastestEngine()) {
+            // and if the design has less than 10% free space or has less than 25/50/75/100 free space, we assume the redesign has no sense
+            // 25/50/75/100 may be a too straight-line set of values
+            if ((currDesign.availableSpace()/(currDesign.totalSpace()) < 0.1f) || (currDesign.availableSpace() < (currDesign.size()+1) * 25)) {
+                // we're fairly certain AI packed the ship before and if the current modules haven't shrinked enough,
+                // that means we don't have enough new tech to make the new design markedly better
+                return;
+            }
+        }
+
         int currSlot = currDesign.id();
-        ShipFighterTemplate.setPerTurnDamage(currDesign, empire());
+    //    ShipFighterTemplate.setPerTurnDamage(currDesign, empire());
+        NewShipTemplate.setPerTurnShipDamage(currDesign, empire());
 
         // find best hypothetical design vs current targets
         ShipDesign newDesign = newFighterDesign(currDesign.size());
@@ -323,13 +349,27 @@ public class AIShipDesigner implements Base, ShipDesigner {
         
         // recalculate current design's damage vs. current targets
         ShipDesign currDesign = lab.destroyerDesign();
+
+        // if we don't have any faster engines
+        if (currDesign.engine() == lab.fastestEngine()) {
+            // and if the design has less than 10% free space or has less than 25/50/75/100 free space, we assume the redesign has no sense
+            // 25/50/75/100 may be a too straight-line set of values
+            if ((currDesign.availableSpace()/(currDesign.totalSpace()) < 0.1f) || (currDesign.availableSpace() < (currDesign.size()+1) * 25)) {
+                // we're fairly certain AI packed the ship before and if the current modules haven't shrinked enough,
+                // that means we don't have enough new tech to make the new design markedly better            
+                currDesign.remainingLife++;
+                return;
+            }
+        }
+
         int currSlot = currDesign.id();
-        ShipDestroyerTemplate.setPerTurnDamage(currDesign, empire());
+        // ShipDestroyerTemplate.setPerTurnDamage(currDesign, empire());
+        NewShipTemplate.setPerTurnShipDamage(currDesign, empire);
 
         // find best hypothetical design vs current targets
         ShipDesign newDesign = newDestroyerDesign(currDesign.size());
         
-        // if currDesign is obsolete, replace it immediately with new design
+       // if currDesign is obsolete, replace it immediately with new design
         if (currDesign.obsolete() && (currDesign.remainingLife() < 1)) {
             lab.scrapDesign(currDesign);
             log("Replacing obsolete destroyer design");
@@ -337,9 +377,9 @@ public class AIShipDesigner implements Base, ShipDesigner {
             return;            
         }
 
-        if (currDesign.matchesDesign(newDesign))
+        if (currDesign.matchesDesign(newDesign)) 
             return;
-
+        
         // if we have very few destroyers actually in use, go ahead and
         // scrap/replace now
         float bcValue = currDesign.cost()*shipCounts[currDesign.id()];
@@ -423,7 +463,7 @@ public class AIShipDesigner implements Base, ShipDesigner {
                 design.addWeapon(bestWpn, 1);
         }
 
-        // if we don't need regular-range colony shi[
+        // if we don't need regular-range colony ship
         if (extendedRangeNeeded) {
             ShipSpecial prevSpecial = design.special(1);
             ShipSpecial special = lab.specialReserveFuel();
@@ -440,7 +480,7 @@ public class AIShipDesigner implements Base, ShipDesigner {
     }
     @Override
     public int optimalShipFighterSize() {
-        int preferredSize = empire.race().preferredShipSize();
+        int preferredSize = empire.preferredShipSize();
         if (preferredSize == ShipDesign.SMALL)
             return preferredSize;
 
@@ -460,7 +500,7 @@ public class AIShipDesigner implements Base, ShipDesigner {
     }
     @Override
     public int optimalShipBomberSize() {
-        int preferredSize = empire.race().preferredShipSize()+1;
+        int preferredSize = empire.preferredShipSize()+1;
         if (preferredSize == ShipDesign.LARGE)
             return ShipDesign.LARGE;
 
@@ -478,7 +518,7 @@ public class AIShipDesigner implements Base, ShipDesigner {
     }
     @Override
     public int optimalShipDestroyerSize() {
-        int preferredSize = empire.race().preferredShipSize()+1;
+        int preferredSize = empire.preferredShipSize()+1;
         if (preferredSize == ShipDesign.LARGE)
             return ShipDesign.LARGE;
 
@@ -496,21 +536,24 @@ public class AIShipDesigner implements Base, ShipDesigner {
     }
     @Override
     public ShipDesign newFighterDesign(int size) {
-        ShipDesign design = ShipFighterTemplate.newDesign(this);
+    //    ShipDesign design = ShipFighterTemplate.newDesign(this);
+        ShipDesign design = NewShipTemplate.newFighterDesign(this);
         design.mission(ShipDesign.FIGHTER);
         design.maxUnusedTurns(OBS_FIGHTER_TURNS);
         return design;
     }
     @Override
     public ShipDesign newBomberDesign(int size) {
-        ShipDesign design = ShipBomberTemplate.newDesign(this);
+    //    ShipDesign design = ShipBomberTemplate.newDesign(this);
+        ShipDesign design = NewShipTemplate.newBomberDesign(this);
         design.mission(ShipDesign.BOMBER);
         design.maxUnusedTurns(OBS_BOMBER_TURNS);
         return design;
     }
     @Override
     public ShipDesign newDestroyerDesign(int size) {
-        ShipDesign design = ShipDestroyerTemplate.newDesign(this);
+    //    ShipDesign design = ShipDestroyerTemplate.newDesign(this);
+        ShipDesign design = NewShipTemplate.newDestroyerDesign(this);
         design.mission(ShipDesign.DESTROYER);
         design.maxUnusedTurns(OBS_DESTROYER_TURNS);
         return design;
@@ -518,7 +561,7 @@ public class AIShipDesigner implements Base, ShipDesigner {
     @Override
     public ShipSpecialColony bestColonySpecial() {
         ShipSpecialColony bestSpecial = null;
-        boolean ignoreEnv = empire.race().ignoresPlanetEnvironment();
+        boolean ignoreEnv = empire.ignoresPlanetEnvironment();
 
         for (ShipSpecial spec : empire.shipLab().specials()) {
             if (spec.isColonySpecial()) {

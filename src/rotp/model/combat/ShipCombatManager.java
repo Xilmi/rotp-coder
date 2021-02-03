@@ -245,6 +245,8 @@ public class ShipCombatManager implements Base {
             continueToNextPlayerStack();
     }
     public void resolveAllCombat() {
+        clearAsteroids();
+
         autoComplete = true;
         autoResolve = true;
         performingStackTurn = true;
@@ -572,12 +574,15 @@ public class ShipCombatManager implements Base {
         for (Empire c : empiresInCombat)
             results.addEmpire(c);
     }
-    private void placeAsteroids() {
-        // clear the asteroid map before starting
+    private void clearAsteroids() {
         for (int x=0;x<=maxX;x++) {
             for (int y=0;y<=maxY;y++)
                 asteroidMap[x][y] = false;
         }
+    }
+    private void placeAsteroids() {
+        // clear the asteroid map before starting
+        clearAsteroids();
         
         boolean isAsteroidSystem = system().planet().type().isAsteroids();
         CombatStackColony colony = results().colonyStack;
@@ -630,7 +635,7 @@ public class ShipCombatManager implements Base {
                     if (st.x > 5)
                         st.reverse();
                     stackIndex++;
-                    log("Ship Stack: "+st);
+                    //log("Ship Stack: "+st);
                 }
             }
             empIndex++;
@@ -799,7 +804,7 @@ public class ShipCombatManager implements Base {
         return false;
     }
     public void turnDone(CombatStack st) {
-        log(st.fullName(), " - Done");
+        //log(st.fullName(), " - Done");
         st.endTurn();
 
         List<CombatStack> stacks = new ArrayList<>(results.activeStacks());
@@ -869,11 +874,11 @@ public class ShipCombatManager implements Base {
         }
     }
     public boolean moveStack(CombatStack st, int x1, int y1) {
-        log(currentStack.fullName(), " moving to: ", str(x1), ",", str(y1));
+        //log(currentStack.fullName(), " moving to: ", str(x1), ",", str(y1));
         return st.moveTo(x1,y1);
     }
     public void teleportStack(CombatStack st, int x1, int y1) {
-        log(currentStack.fullName() + " teleporting to: " + x1 + "," + y1);
+        //log(currentStack.fullName() + " teleporting to: " + x1 + "," + y1);
         st.teleportTo(x1,y1, 0.1f);
     }
     public void performAttackTarget(CombatStack st) {

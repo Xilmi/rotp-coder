@@ -44,9 +44,9 @@ public class AIGovernor implements Base, Governor {
     public boolean readyToBuild(Colony col, ShipPlan sh, int designCost) {
         float pct = col.currentProductionCapacity();
         float estProd = col.industry().factories()*col.planet().productionAdj();
-        if (pct > 0.8)  // at 80% we can build anything
+        if (pct > 0.9)  // modnar: change to 90% to build anything
             return true;
-        else if (pct > 0.7) // at 70, colonize is the lowest priority we can build
+        else if (pct > 0.75) // modnar: change to 75%, colonize is the lowest priority we can build
             return sh.plan.priority() >= FleetPlan.COLONIZE;
         
         return estProd > designCost*5;
@@ -72,6 +72,8 @@ public class AIGovernor implements Base, Governor {
         }
         if (col.shipyard().stargateCompleted())
             session().addSystemToAllocate(sys, text("MAIN_ALLOCATE_STARGATE_COMPLETE", name));
+        if (col.shipyard().shipLimitReached())
+            session().addSystemToAllocate(sys, text("MAIN_ALLOCATE_SHIPS_COMPLETE", name, col.shipyard().design().name()));
         if (col.defense().shieldCompleted())
             session().addSystemToAllocate(sys, text("MAIN_ALLOCATE_SHIELD_COMPLETE", name, col.empire().tech().topPlanetaryShieldTech().name()));
         if ((bases > 0) && (bases >= maxBases) && col.defense().missileBasesUpgraded())
@@ -144,10 +146,13 @@ public class AIGovernor implements Base, Governor {
         if (!col.locked(DEFENSE))
             col.setAllocation(DEFENSE,  min(orderedDef, maxDef));
         
-        // 3. Unless we have just completed building a stargate, ensure that SHIP spending 
+        // 3. Unless we have just completed building a stargate or reached a ship
+        // limit, ensure that SHIP spending 
         // is maintained. Ship spending is never allocated for player colonies by the AI 
         //Governor so any spending here must be treated similarly to a player order
-        if (!col.locked(SHIP) && !col.shipyard().stargateCompleted())
+        if (!col.locked(SHIP) 
+        && !col.shipyard().stargateCompleted()
+        && !col.shipyard().shipLimitReached())
             col.setAllocation(SHIP, prevShip);
  
         // 4. now fill any remaining build requirements for ind/eco/def
@@ -171,18 +176,21 @@ public class AIGovernor implements Base, Governor {
         // if there is defense left to build, go there next
         if (!col.locked(DEFENSE))
             col.setAllocation(DEFENSE, maxDef);
+        // if there is population to grow, go there
+        if (!col.locked(ECOLOGY))
+            col.setAllocation(ECOLOGY, maxEco2);
 
         // if research not locked go there
         if (!col.locked(RESEARCH))
             col.addAllocation(RESEARCH, col.allocationRemaining());
-        else if (!col.locked(SHIP)) // else try ships
-            col.addAllocation(SHIP, col.allocationRemaining());
         else if (!col.locked(INDUSTRY)) 
             col.addAllocation(INDUSTRY, col.allocationRemaining());
         else if (!col.locked(ECOLOGY)) 
             col.addAllocation(ECOLOGY, col.allocationRemaining());
         else if (!col.locked(DEFENSE))
             col.addAllocation(DEFENSE, col.allocationRemaining());
+        else if (!col.locked(SHIP))
+            col.addAllocation(SHIP, col.allocationRemaining());
     }
     private void baseSetColonyAllocations(Colony col) {                
         int maxAllocation = ColonySpendingCategory.MAX_TICKS;
@@ -211,7 +219,7 @@ public class AIGovernor implements Base, Governor {
             return;
         }
         
-        // for systems that are flagged as rush defense, do that and forget
+        // for systems that are flagged as rush ship, do that and forget
         // everything else until the project is done
         if (empire.generalAI().rushShipSystems().contains(col.starSystem())) {
             float totalProd = col.totalIncome();
@@ -262,6 +270,24 @@ public class AIGovernor implements Base, Governor {
             col.pct(SHIP, 0);
         }
 
+        // modnar: set 70% research overhead for inner colonies >85% full production
+		// or 20% research overhead for non-inner colonies >90% full production (not just border colonies)
+		// not applicable to rich/ultra-rich
+		// no need to allocate anything here, should be added in automatically to research at the end
+		int bases = (int) col.defense().bases();
+        int maxBases = col.defense().maxBases();
+		float resOverhead = 0.1f*netProd;
+		StarSystem sys = col.starSystem();
+		float prodPct = col.currentProductionCapacity();
+		if (bases >= maxBases) { // only if missile bases are in place
+			if ((prodPct > 0.85) && empire.sv.isInnerSystem(sys.id) && !col.planet().isResourceRich() && !col.planet().isResourceUltraRich()) { 
+				netProd -= 7*resOverhead;
+			}
+			if ((prodPct > 0.9) && !empire.sv.isInnerSystem(sys.id) && !col.planet().isResourceRich() && !col.planet().isResourceUltraRich()) { 
+				netProd -= 2*resOverhead;
+			}
+		}
+		
         // ship spending, if requested
         if (!col.shipyard().buildingObsoleteDesign()
         && (col.shipyard().desiredShips() > 0)
@@ -300,8 +326,8 @@ public class AIGovernor implements Base, Governor {
         if (col.totalAmountAllocated() >= maxAllocation)
             return;
 
-        // def spending gets up to 50% of planet's remaining net prod
-        float defCost = min((netProd * .5f), col.defense().maxSpendingNeeded());
+        // modnar: reduce defense spending, "up to 30%" (previous 50%)
+        float defCost = min((netProd * .3f), col.defense().maxSpendingNeeded());
         col.pct(DEFENSE, defCost/totalProd);
         defCost = col.pct(DEFENSE) * totalProd;
 
@@ -313,8 +339,9 @@ public class AIGovernor implements Base, Governor {
         col.allocation(RESEARCH, maxAllocation - totalAlloc);
 
         // check to allocate reserve
+        // modnar: reduce to 0%, since it's taken care of by the AICTreasurer (?)
         if (col.planet().noArtifacts() && (col.pct(RESEARCH) > 0.5) ) {
-            int rsvAmt = (int) Math.min(.05, col.pct(RESEARCH) - 0.5);
+            int rsvAmt = (int) Math.min(0.0, col.pct(RESEARCH) - 0.5);
             col.addPct(RESEARCH, -rsvAmt);
             col.addPct(INDUSTRY, rsvAmt);
         }
@@ -341,9 +368,9 @@ public class AIGovernor implements Base, Governor {
         if (sys == null)  // this can happen at startup
             col.defense().maxBases(0);
         else if (empire.sv.isAttackTarget(sys.id))
-            col.defense().maxBases(max(currBases, (int)(col.production()/20)));
+            col.defense().maxBases(max(currBases, (int)(col.production()/30))); // modnar: reduce base count
         else if (empire.sv.isBorderSystem(sys.id))
-            col.defense().maxBases(max(currBases, (int)(col.production()/30)));
+            col.defense().maxBases(max(currBases, (int)(col.production()/40))); // modnar: reduce base count
         else
             col.defense().maxBases(max(currBases, (int)(col.production()/50)));
     }

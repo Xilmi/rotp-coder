@@ -72,7 +72,7 @@ public class AIFleetCommander implements Base, FleetCommander {
     }
     @Override
     public boolean inExpansionMode() {
-        return empire.tech().shipRange() < 5;
+        return empire.tech().shipRange() < 6;
     }
     @Override
     public float transportPriority(StarSystem sv) {
@@ -210,8 +210,8 @@ public class AIFleetCommander implements Base, FleetCommander {
     }
     private void reviseFleetPlan(int sysId) {        
         Galaxy gal = galaxy();
-        int scoutRange = empire.scoutRange();
-        int shipRange = empire.shipRange();
+        float scoutRange = empire.scoutRange();
+        float shipRange = empire.shipRange();
         // if out of scout range, forget it
         if (!empire.sv.withinRange(sysId, scoutRange)) 
             return;

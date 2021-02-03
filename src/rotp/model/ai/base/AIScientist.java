@@ -77,6 +77,8 @@ public class AIScientist implements Base, Scientist {
     @Override
     public void setTechTreeAllocations() {
         // invoked after nextTurn() processing is complete on each civ's turn
+        
+        // Otherwise, go for the defaults modulo future tech adjustments
         int futureTechs = 0;
         for (int j=0; j<TechTree.NUM_CATEGORIES; j++) {
             if (empire.tech().category(j).studyingFutureTech())
@@ -196,8 +198,12 @@ public class AIScientist implements Base, Scientist {
             return;
 
         if (empire.isPlayerControlled() ) {
-            session().addTurnNotification(new SelectTechNotification(cat));
-            return;
+            Tech firstTech = techs.get(0);
+            // we stop asking for user selection once we finished Future Tech 1
+            if (firstTech.futureTechLevel() < 2) {
+                session().addTurnNotification(new SelectTechNotification(cat));
+                return;
+            }
         }
 
         Tech.comparatorCiv = empire;
@@ -262,7 +268,7 @@ public class AIScientist implements Base, Scientist {
         // armor has both offensive & defensive benefits... everyone gets broad adj
         val *= 2;
         // extra important for races with ground attack bonuses
-        if (empire.race().groundAttackBonus() > 0)
+        if (empire.groundAttackBonus() > 0)
             val *= 1.5;
         // armor has wartime value: multiply by current war enemies
         val *= Math.sqrt(empire.numEnemies()+1);
@@ -303,7 +309,7 @@ public class AIScientist implements Base, Scientist {
         if (currMark >= t.mark)
             return 0;
 
-        // scale add'l prevention assuming mark 15 is best (level 50)
+        // scale add'l prevention assuming mark 11 is best (level 50)
         // note there is no reduction in value for existing battle computers
         // since older computer levels become worthless
         float val = 50 / 11.0f * t.mark;
@@ -385,7 +391,6 @@ public class AIScientist implements Base, Scientist {
     }
     @Override
     public float baseValue(TechBlackHole t) {
-        // scale add'l prevention assuming 70 dmg is best (level 50)
         float val = t.level;
 
         if (empire.leader().isAggressive())
@@ -393,7 +398,7 @@ public class AIScientist implements Base, Scientist {
         if (empire.leader().isMilitarist())
             val *= 1.5;
 
-        // bombs have wartime value: multiply by current war enemies
+        // BHG has wartime value: multiply by current war enemies
         val *= Math.sqrt(empire.numEnemies()+1);
 
         return val;
@@ -429,30 +434,30 @@ public class AIScientist implements Base, Scientist {
         if (empire.leader().isTechnologist())
             adj *= 1.5;
         if (empire.tech().topCloningTech() == null)
-            return adj * t.level / empire.race().growthRateMod();
+            return adj * t.level / empire.growthRateMod();
         else
-            return adj * (t.level - empire.tech().topCloningTech().level) / empire.race().growthRateMod();
+            return adj * (t.level - empire.tech().topCloningTech().level) / empire.growthRateMod();
     }
     @Override
     public float baseValue(TechCombatTransporter t) {
         float val = t.level;
         // extra important for races with ground attack bonuses
-        if (empire.race().groundAttackBonus() > 0)
+        if (empire.groundAttackBonus() > 0)
             val *= 1.5;
-        // pacifists love shields! xenos, too
+        // Combat Transporter is priority for aggressive and militarist
         if (empire.leader().isAggressive())
             val *= 2;
         if (empire.leader().isMilitarist())
             val *= 1.5;
 
-        // shields have wartime value: multiply by current war enemies
+        // Combat Transporter have wartime value: multiply by current war enemies
         val *= Math.sqrt(empire.numEnemies()+1);
 
         return val;
     }
     @Override
     public float baseValue(TechControlEnvironment t) {
-        if (empire.race().ignoresPlanetEnvironment())
+        if (empire.ignoresPlanetEnvironment())
             return 0;
         // obsolete?
         if (t.environment() <= empire.tech().minColonyLevel())
@@ -471,6 +476,8 @@ public class AIScientist implements Base, Scientist {
 
         int numRaces = empire.contactedEmpires().size() + 1;
         // multiply tech level by # new planets possible vs. # known races
+        // modnar: further prioritize enviroment tech
+        adj *= 2;
         return (newPlanets / numRaces) * adj * t.level;
     }
     @Override
@@ -488,6 +495,10 @@ public class AIScientist implements Base, Scientist {
             val *= 1.5;
         if (empire.leader().isMilitarist())
             val *= 1.5;
+
+        // modnar: add in wartime scaling
+        // Shields have wartime value: multiply by current war enemies
+        val *= Math.sqrt(empire.numEnemies()+1);
 
         return val;
     }
@@ -512,13 +523,15 @@ public class AIScientist implements Base, Scientist {
     }
     @Override
     public float baseValue(TechEcoRestoration t) {
-        if (empire.race().ignoresPlanetEnvironment())
+        if (empire.ignoresPlanetEnvironment())
             return 0;
 
         float adj = 1.0f;
         if (empire.leader().isEcologist())
             adj *= 2;
-
+        // modnar: wasteCleanupTechMod() = 4 * factoryWasteMod() / wasteElimination()
+        // in TechTree.java
+        // wasteCleanupTechMod goes from 1.6 (initially) to 0 (best)
         return adj * t.level() * empire.tech().wasteCleanupTechMod();
     }
     @Override
@@ -530,22 +543,57 @@ public class AIScientist implements Base, Scientist {
 
         float  val = t.level * t.warp() / curr.warp();
         float adj = 1.0f;
-        if (empire.leader().isMilitarist())
-            adj *= 1.5;
-
+        
+        // Major breakpoints in warp technology:
+        // The first warp tech you find is a critical tech
+        if (curr.warp() == 1)
+            adj *= 3;
+        // The first warp above 2 significantly aids troops and expansion
+        if (curr.warp() == 2) {
+            if (empire.leader().isMilitarist())
+                adj *= 1.25;
+            if (empire.leader().isAggressive())
+                adj *= 1.25;
+            if (empire.leader().isExpansionist())
+                adj *= 1.5;
+        }
+        // Even numbered warps have military value
+        // modnar: debatable, very limited value, commenting out
+        /*
+        if (t.warp() % 2 == 0) {
+            if (empire.leader().isAggressive())
+                adj *= 1.5;
+            if (empire.leader().isRuthless())
+                adj *= 1.5;
+            if (empire.leader().isMilitarist())
+                adj *= 1.5;
+        }
+        */
+        
         return adj * val;
     }
     @Override
     public float baseValue(TechFuelRange t) {
         TechFuelRange curr = empire.tech().topFuelRangeTech();
-        int currRange = curr == null ? 3 : curr.range();
+        float currRange = curr == null ? 3 : curr.range();
         // obsolete?
         if (currRange >= t.range())
             return 0;
+        
+        // limit max range, use 13 instead of 10, for Range-inf scaling
+        float newRange = min(13,t.range());
+        
+        // Count new planets this gets us to
+        List<StarSystem> possible = empire.uncolonizedPlanetsInRange(currRange);
+        List<StarSystem> newPossible = empire.uncolonizedPlanetsInRange(t.range());
+        int newPlanets = newPossible.size() - possible.size();
 
-        int newRange = min(10,t.range());
-
-        float val = 7 * (newRange-currRange);
+        // New planets from fuel cells are very high value (don't even need to design new colony ships).
+        // Otherwise they have occasional tiny incremental values, but barely more than 0.
+        // modnar: the incremental value may not be tiny (invading other empires, etc.)
+        // modnar: combine both valuations, approx scaling up to Range-10 (level 29) and Range-inf (level 41)
+        float val = 4 * (newRange-currRange) + 4 * newPlanets;
+        
         float adj = 1.0f;
         if (empire.leader().isExpansionist())
             adj *= 2;
@@ -565,7 +613,7 @@ public class AIScientist implements Base, Scientist {
         // scale add'l prevention assuming 30 dmg is best (level 50)
         float val = 1.67f * (t.combatMod-topCombatMod);
         // extra important for races with ground attack bonuses
-        if (empire.race().groundAttackBonus() > 0)
+        if (empire.groundAttackBonus() > 0)
             val *= 1.5;
         // pacifists love shields! xenos, too
         if (empire.leader().isAggressive())
@@ -573,7 +621,7 @@ public class AIScientist implements Base, Scientist {
         if (empire.leader().isMilitarist())
             val *= 1.5;
 
-        // shields have wartime value: multiply by current war enemies
+        // troop weapons have wartime value: multiply by current war enemies
         val *= Math.sqrt(empire.numEnemies()+1);
 
         return val;
@@ -618,13 +666,16 @@ public class AIScientist implements Base, Scientist {
     }
     @Override
     public float baseValue(TechIndustrialWaste t) {
-        if (empire.race().ignoresPlanetEnvironment())
+        if (empire.ignoresPlanetEnvironment())
             return 0;
 
         float adj = 1.0f;
         if (empire.leader().isEcologist())
             adj *= 2;
-
+        
+        // modnar: wasteCleanupTechMod() = 4 * factoryWasteMod() / wasteElimination()
+        // in TechTree.java
+        // wasteCleanupTechMod goes from 1.6 (initially) to 0 (best)
         return adj * t.level() * empire.tech().wasteCleanupTechMod();
     }
     @Override
@@ -666,7 +717,7 @@ public class AIScientist implements Base, Scientist {
         if (empire.leader().isMilitarist())
             val *= 1.5;
 
-        // bombs have wartime value: multiply by current war enemies
+        // missiles have wartime value: multiply by current war enemies
         val *= Math.sqrt(empire.numEnemies()+1);
 
         return val;
@@ -692,7 +743,7 @@ public class AIScientist implements Base, Scientist {
         // scale add'l prevention assuming 30 dmg prevented is best (level 50)
         float val = 1.67f * (t.groundAttackBonus-topBonus);
         // extra important for races with ground attack bonuses
-        if (empire.race().groundAttackBonus() > 0)
+        if (empire.groundAttackBonus() > 0)
             val *= 1.5;
         if (empire.leader().isAggressive())
             val *= 2;
@@ -701,7 +752,7 @@ public class AIScientist implements Base, Scientist {
         if (empire.leader().isMilitarist())
             val *= 1.5;
 
-        // shields have wartime value: multiply by current war enemies
+        // troop shields have wartime value: multiply by current war enemies
         val *= sqrt(empire.numEnemies()+1);
 
         return val;
@@ -724,7 +775,7 @@ public class AIScientist implements Base, Scientist {
         if (empire.leader().isXenophobic())
             val *= 1.5;
 
-        // shields have wartime value: multiply by current war enemies
+        // planet shields have wartime value: multiply by current war enemies
         val *= sqrt(empire.numEnemies()+1);
 
         return val;
@@ -738,8 +789,10 @@ public class AIScientist implements Base, Scientist {
             return 0;
 
         // scale add'l prevention assuming Mark 7 (starts with 2) prevented is best (level 50)
-        float val = 5 * (t.mark-currMark);
+        // modnar: scale robotic control tech correctly
+        float val = 10 * (t.mark-currMark);
         // robotic controls are just a generally valuable tech
+        // modnar: with corrected scaling, adjust up by *1.5 should be fine
         val *= 1.5;
         // industrialists love factories! economists, too
         if (empire.leader().isIndustrialist())
@@ -757,9 +810,9 @@ public class AIScientist implements Base, Scientist {
         // scale add'l prevention assuming 4 defense bonus is best (level 40)
         float val = 10 * (t.defenseBonus - topDefense);
         // ship combat centric races prefer this
-        if (empire.race().shipAttackBonus() > 0)
+        if (empire.shipAttackBonus() > 0)
             val *= 2.0;
-        if (empire.race().shipDefenseBonus() > 0)
+        if (empire.shipDefenseBonus() > 0)
             val *= 2.0;
         if (empire.leader().isMilitarist())
             val *= 1.5;
@@ -770,10 +823,14 @@ public class AIScientist implements Base, Scientist {
     public float baseValue(TechShipWeapon t) {
         TechShipWeapon curr = empire.tech().topShipWeaponTech();
 
-        // turns out this effectiveness formula equals about 50 for the
-        // highest value, so no need for a scaling factor to make it 50
-        float currVal = (curr.damageHigh() * curr.attacksPerRound) / curr.size;
-        float tVal = (t.damageHigh()*t.attacksPerRound) / t.size;
+        // modnar: renormalize weapon tech valuation by weapon damage
+        // normalize weapon damage by size, power, attacks, and enemyShieldMod (0.5)
+        // (average damage) * attacks / enemyShieldMod / (size + power); gives 0.1~0.2 for most weapons
+        // then scale by tech level * 7 to reach factor ~50 for best
+        // This method give ranking of: 1)GAUSS AUTO-CANNON , 2)PULSE PHASOR, 3)STELLAR CONVERTOR
+        // 4)TRI-FOCUS PLASMA CANNON, 5)MAULER DEVICE, 6)PARTICLE BEAM, 7)DEATH RAY
+        float currVal = curr.comparableDamageValue();
+        float tVal = t.comparableDamageValue();
 
         if (tVal <= currVal)
             return 0;
@@ -785,14 +842,14 @@ public class AIScientist implements Base, Scientist {
         if (empire.leader().isMilitarist())
             val *= 1.5;
 
-        // bombs have wartime value: multiply by current war enemies
+        // weapons have wartime value: multiply by current war enemies
         val *= Math.sqrt(empire.numEnemies()+1);
 
         return val;
     }
     @Override
     public float baseValue(TechSoilEnrichment t) {
-        if (empire.race().ignoresPlanetEnvironment())
+        if (empire.ignoresPlanetEnvironment())
             return 0;
         TechSoilEnrichment curr = empire.tech().topSoilEnrichmentTech();
         float topIncrease = curr == null ? 0 : curr.planetaryIncrease;

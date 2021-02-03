@@ -129,10 +129,12 @@ public final class Empire implements Base, NamedObject, Serializable {
     private float tradePiracyRate = 0;
     private NamedObject lastAttacker;
     private int defaultMaxBases = 1;
+    private final String dataRaceKey;
 
     private transient AI ai;
     private transient boolean[] canSeeShips;
     private transient Race race;
+    private transient Race dataRace;
     private transient BufferedImage shipImage;
     private transient BufferedImage shipImageLarge;
     private transient BufferedImage shipImageHuge;
@@ -148,6 +150,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     private transient float totalEmpireShipMaintenanceCost;
     private transient float totalEmpireStargateCost;
     private transient float totalEmpireMissileBaseCost;
+    private transient int inRange;
 
     public AI ai() {
         if (ai == null)
@@ -250,6 +253,11 @@ public final class Empire implements Base, NamedObject, Serializable {
             race = Race.keyed(raceKey);
         return race;
     }
+    public Race dataRace() {
+        if (dataRace == null)
+            dataRace = dataRaceKey == null ? Race.keyed(raceKey) : Race.keyed(dataRaceKey);
+        return dataRace;
+    }
     public BufferedImage scoutImage() {
         if (scoutImage == null)
             scoutImage = ShipLibrary.current().scoutImage(shipColorId());
@@ -335,13 +343,20 @@ public final class Empire implements Base, NamedObject, Serializable {
         status = new EmpireStatus(this);
         sv = new SystemInfo(this);
         // many things need to know if this is the player civ, so set it early
-        if (empId == 0)
+        if (empId == Empire.PLAYER_ID) 
             g.player(this);
 
+        // if not the player, we may randomize the race ability
+        if ((empId != Empire.PLAYER_ID) && options().randomizeAIAbility())
+            dataRaceKey = random(options().startingRaceOptions());
+        else
+            dataRaceKey = raceKey;
+        
         colorId(cId);
-        String raceName = race().nextAvailableName();
-        raceNameIndex = race().nameIndex(raceName);
-        String leaderName = name == null ? race.nextAvailableLeader() : name;
+        Race r = race();
+        String raceName = r.nextAvailableName();
+        raceNameIndex = r.nameIndex(raceName);
+        String leaderName = name == null ? r.nextAvailableLeader() : name;
         leader = new Leader(this, leaderName);
         shipLab = new ShipDesignLab();
     }
@@ -620,7 +635,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         return (sv.empire(sys.id) == this) && isEnvironmentHostile(sys);
     }
     public boolean isEnvironmentHostile(StarSystem  sys) {
-        return !race().ignoresPlanetEnvironment() && sys.planet().isEnvironmentHostile();
+        return !dataRace().ignoresPlanetEnvironment() && sys.planet().isEnvironmentHostile();
     }
     public boolean isEnvironmentFertile(StarSystem  sys) {
         return sys.planet().isEnvironmentFertile();
@@ -647,12 +662,12 @@ public final class Empire implements Base, NamedObject, Serializable {
         }
         return false;
     }
-    public int shipRange()              { return tech().shipRange(); }
-    public int scoutRange()             { return tech().scoutRange(); }
-    public int researchingShipRange()   { return tech().researchingShipRange(); }
-    public int researchingScoutRange()  { return tech().researchingScoutRange(); }
-    public int learnableShipRange()     { return tech().learnableShipRange(); }
-    public int learnableScoutRange()    { return tech().learnableScoutRange(); }
+    public float shipRange()              { return tech().shipRange(); }
+    public float scoutRange()             { return tech().scoutRange(); }
+    public float researchingShipRange()   { return tech().researchingShipRange(); }
+    public float researchingScoutRange()  { return tech().researchingScoutRange(); }
+    public float learnableShipRange()     { return tech().learnableShipRange(); }
+    public float learnableScoutRange()    { return tech().learnableScoutRange(); }
     public float shipReach(int turns)   { return min(shipRange(), turns*tech().topSpeed()); }
     public float scoutReach(int turns)  { return min(scoutRange(), turns*tech().topSpeed()); }
     
@@ -682,7 +697,7 @@ public final class Empire implements Base, NamedObject, Serializable {
             return false;
         if (pt.isAsteroids())
             return false;
-        if (race().ignoresPlanetEnvironment())
+        if (ignoresPlanetEnvironment())
             return true;
         return tech().canColonize(pt);
     }
@@ -691,7 +706,7 @@ public final class Empire implements Base, NamedObject, Serializable {
             return false;
         if (pt.isAsteroids())
             return false;
-        if (race().ignoresPlanetEnvironment())
+        if (ignoresPlanetEnvironment())
             return true;
         return tech().isLearningToColonize(pt);
     }
@@ -700,7 +715,7 @@ public final class Empire implements Base, NamedObject, Serializable {
             return false;
         if (pt.isAsteroids())
             return false;
-        if (race().ignoresPlanetEnvironment())
+        if (ignoresPlanetEnvironment())
             return true;
         return tech().canLearnToColonize(pt);
     }
@@ -755,11 +770,12 @@ public final class Empire implements Base, NamedObject, Serializable {
     public void postNextTurn() {
         log(this + ": postNextTurn");
         float civProd = totalPlanetaryProduction();
+        float spyMod = spySpendingModifier();
 
         // assign funds/costs for diplomatic activities
         for (EmpireView v : empireViews()) {
           if ((v!= null) && v.embassy().contact())
-                v.nextTurn(civProd);
+                v.nextTurn(civProd, spyMod);
         }
     }
     public void assessTurn() {
@@ -1832,7 +1848,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     }
     public boolean inEconomicRange(int empId) {
         Empire e = galaxy().empire(empId);
-        int range = max(e.scoutRange(), scoutRange());
+        float range = max(e.scoutRange(), scoutRange());
         for (StarSystem sys: e.allColonizedSystems()) {
             if (sv.distance(sys.id) <= range)
                 return true;
@@ -2171,6 +2187,16 @@ public final class Empire implements Base, NamedObject, Serializable {
     }
     public boolean hasAnyContact() {  return !contactedEmpires().isEmpty(); }
 
+    public boolean inRangeOfAnyEmpire() {
+        if (inRange < 0) {
+            inRange = 0;
+            for (EmpireView v: empireViews()) {
+                if ((v!= null) && v.embassy().contact() && v.inEconomicRange())
+                    inRange = 1;
+            }
+        }
+        return inRange == 1;        
+    }
     public List<Empire> contactedEmpires() {
         List<Empire> r = new ArrayList<>();
 
@@ -2204,13 +2230,23 @@ public final class Empire implements Base, NamedObject, Serializable {
         }
         return count;
     }
-    public float totalSpyCostPct() {
+    public float requestedTotalSpyCostPct() {
         float sum = 0;
         for (EmpireView ev : empireViews()) {
             if (ev != null)
                 sum += ev.spies().allocationCostPct();
         }
         return sum;
+    }
+    public float totalSpyCostPct() {
+        float requested = requestedTotalSpyCostPct();
+        return min(0.5f, requested);
+    }
+    public float spySpendingModifier() {
+        float requested = requestedTotalSpyCostPct();
+        if (requested > 0.5f)
+            return 0.5f / requested;
+        return 1.0f;
     }
     public int totalActiveSpies() {
         int sum = 0;
@@ -2238,8 +2274,11 @@ public final class Empire implements Base, NamedObject, Serializable {
         }
         internalSecurity(MAX_SECURITY_TICKS);
     }
+    public float requestedSecurityCostPct() {
+        return MAX_SECURITY_PCT*securityAllocation/MAX_SECURITY_TICKS/2;
+    }
     public float totalInternalSecurityPct() {
-        return  MAX_SECURITY_PCT*securityAllocation/MAX_SECURITY_TICKS;
+        return inRangeOfAnyEmpire() ? MAX_SECURITY_PCT*securityAllocation/MAX_SECURITY_TICKS : 0;
     }
     public float internalSecurityCostPct() {
         return (totalInternalSecurityPct()/2);
@@ -2248,7 +2287,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         return totalSpyCostPct() + internalSecurityCostPct();
     }
     public float baseSpyCost() {
-        return (25 + (tech.computer().techLevel()*2)) * race().spyCostMod();
+        return (25 + (tech.computer().techLevel()*2)) * dataRace().spyCostMod();
     }
     public float troopKillRatio(StarSystem s) {
 		// modnar: this old estimate gives completely wrong results for ground combat
@@ -2641,7 +2680,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         }
         return systems;
     }
-    public List<StarSystem> uncolonizedPlanetsInRange(int range) {
+    public List<StarSystem> uncolonizedPlanetsInRange(float range) {
         Galaxy gal = galaxy();
         List<StarSystem> systems = new ArrayList<>();
         for (int i=0;i<sv.count();i++) {
@@ -2807,15 +2846,35 @@ public final class Empire implements Base, NamedObject, Serializable {
             }
         }
     }
+    public int preferredShipSize()             { return dataRace().preferredShipSize(); }
+    public int diplomacyBonus()                { return dataRace().diplomacyBonus(); }
+    public int robotControlsAdj()              { return dataRace().robotControlsAdj(); }
+    public float councilBonus()                { return dataRace().councilBonus(); }
+    public float baseRelations(Empire e)       { return dataRace().baseRelations(e.dataRace()); }
+    public float tradePctBonus()               { return dataRace().tradePctBonus(); }
+    public float researchBonusPct()            { return dataRace().researchBonusPct(); }
+    public float techDiscoveryPct()            { return dataRace().techDiscoveryPct(); }
+    public float growthRateMod()               { return dataRace().growthRateMod(); }
+    public float workerProductivityMod()       { return dataRace().workerProductivityMod(); }
+    public float internalSecurityAdj()         { return dataRace().internalSecurityAdj(); }
+    public float spyInfiltrationAdj()          { return dataRace().spyInfiltrationAdj(); }
+    public float techMod(int cat)              { return dataRace().techMod[cat]; }
+    public int groundAttackBonus()             { return dataRace().groundAttackBonus(); }
+    public int shipAttackBonus()               { return dataRace().shipAttackBonus(); }
+    public int shipDefenseBonus()              { return dataRace().shipDefenseBonus(); }
+    public int shipInitiativeBonus()           { return dataRace().shipInitiativeBonus(); }
+    public boolean ignoresPlanetEnvironment()  { return dataRace().ignoresPlanetEnvironment(); }
+    public boolean ignoresFactoryRefit()       { return dataRace().ignoresFactoryRefit(); }
+    public boolean canResearch(Tech t)         { return t.canBeResearched(dataRace()); }
     public int maxRobotControls() {
-        return tech.baseRobotControls() + race().robotControlsAdj();
+        return tech.baseRobotControls() + robotControlsAdj();
     }
     public int baseRobotControls() {
-        return TechRoboticControls.BASE_ROBOT_CONTROLS + race().robotControlsAdj();
+        return TechRoboticControls.BASE_ROBOT_CONTROLS + robotControlsAdj();
     }
     public float workerProductivity() {
         float bookFormula = ((tech.planetology().techLevel() * 3) + 50) / 100;
-        return bookFormula * race().workerProductivityMod();
+        return bookFormula * workerProductivityMod();
     }
     public float totalIncome()                { return netTradeIncome() + totalPlanetaryIncome(); }
     public float netIncome()                  { return totalIncome() - totalShipMaintenanceCost() - totalStargateCost(); }
@@ -2825,7 +2884,9 @@ public final class Empire implements Base, NamedObject, Serializable {
         else
             return totalTaxablePlanetaryProduction() * empireTaxPct() / 2; 
     }
-    public float empireInternalSecurityCost() { return totalTaxablePlanetaryProduction() * internalSecurityCostPct(); }
+    public float empireInternalSecurityCost() {
+        return inRangeOfAnyEmpire() ? totalTaxablePlanetaryProduction() * internalSecurityCostPct() : 0f;
+    }
     public float empireExternalSpyingCost()   { return totalTaxablePlanetaryProduction() * totalSpyCostPct(); }
     
     public boolean incrementEmpireTaxLevel()  { return empireTaxLevel(empireTaxLevel+1); }
@@ -2983,6 +3044,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         totalEmpireShipMaintenanceCost = -999;
         totalEmpireStargateCost = -999;
         totalEmpireMissileBaseCost = -999;
+        inRange = -1;
     }
     public Float totalPlanetaryProduction() {
         if (totalEmpireProduction <= 0) {
@@ -3275,6 +3337,15 @@ public final class Empire implements Base, NamedObject, Serializable {
     public List<StarSystem> orderedShipConstructingColonies() {
         List<StarSystem> list = new ArrayList<>(shipBuildingSystems);
         Collections.sort(list, IMappedObject.MAP_ORDER);
+        return list;
+    }
+    public List<ShipFleet> allFleets() {
+        List<ShipFleet> list = new ArrayList<>();
+        List<ShipFleet> fleets = galaxy().ships.allFleets(id);
+        for (ShipFleet fl: fleets) {
+            if (!fl.isEmpty())
+                list.add(fl);
+        }
         return list;
     }
     public List<ShipFleet> orderedFleets() {
