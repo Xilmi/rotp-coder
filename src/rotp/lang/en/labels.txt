@@ -1350,6 +1350,7 @@ SHIP_DESIGN_UNNAMED_DESIGN        | Unnamed
 SHIP_DESIGN_COMPONENT_NONE        | None
 SHIP_DESIGN_AUTO_SCOUT            | Auto Scout
 SHIP_DESIGN_AUTO_COLONIZE         | Auto Colonize
+SHIP_DESIGN_AUTO_ATTACK           | Auto Attack
 
 
 // ship design selection dialogs

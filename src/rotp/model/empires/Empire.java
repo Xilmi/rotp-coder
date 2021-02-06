@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import rotp.model.ai.AI;
 import rotp.model.ai.interfaces.Diplomat;
@@ -48,6 +49,7 @@ import rotp.model.colony.MissileBase;
 import rotp.model.empires.SpyNetwork.FleetView;
 import rotp.model.events.SystemColonizedEvent;
 import rotp.model.events.SystemHomeworldEvent;
+import rotp.model.game.GameSession;
 import rotp.model.game.GovernorOptions;
 import rotp.model.ships.ShipSpecialColony;
 import rotp.ui.notifications.*;
@@ -878,8 +880,10 @@ public final class Empire implements Base, NamedObject, Serializable {
         } else {
             autospend();
             autotransport();
-            autoscout();
+            // colonize first, then attack, then scout
             autocolonize();
+            autoattack();
+            autoscout();
             // If planets are governed, redo allocations now
             for (int i = 0; i < this.sv.count(); ++i) {
                 if (this.sv.empire(i) == this && this.sv.isColonized(i)) {
@@ -910,13 +914,12 @@ public final class Empire implements Base, NamedObject, Serializable {
         }
 
         List<Colony> colonies = new LinkedList<>();
-        for (int i = 0; i < this.sv.count(); ++i) {
-            if (this.sv.empire(i) == this && this.sv.isColonized(i)) {
-                Colony c = this.sv.colony(i);
-                if (c.isGovernor() && c.maxReserveNeeded() >= 1) {
-                    if (!c.industry().isCompleted() || !c.ecology().isCompleted()) {
-                        colonies.add(c);
-                    }
+
+        for (StarSystem ss: this.colonizedSystems) {
+            Colony c = ss.colony();
+            if (c.isGovernor() && c.maxReserveNeeded() >= 1) {
+                if (!c.industry().isCompleted() || !c.ecology().isCompleted()) {
+                    colonies.add(c);
                 }
             }
         }
@@ -1017,12 +1020,10 @@ public final class Empire implements Base, NamedObject, Serializable {
             Colony c = colonies.get(0);
             float neededPopulation = (int) (c.planet().currentSize() - c.expectedPopulation());
             // Sort donors by distance
-            Collections.sort(donors,
-                    (Colony o1, Colony o2) -> (int)Math.signum(
-                            o1.travelTime(o1, c, this.tech().transportTravelSpeed()) -
+            Colony donor = Collections.min(donors, (Colony o1, Colony o2) -> (int) Math.signum(
+                    o1.travelTime(o1, c, this.tech().transportTravelSpeed()) -
                             o2.travelTime(o2, c, this.tech().transportTravelSpeed())));
             if (neededPopulation > options.getTransportPopulation()) {
-                Colony donor = donors.get(0);
                 float transportTime = donor.travelTime(donor, c, this.tech().transportTravelSpeed());
                 // limit max transport time
                 double maxTime = c.starSystem().inNebula() ? options.getTransportMaxTurns() * 1.5 : options.getTransportMaxTurns();
@@ -1044,16 +1045,16 @@ public final class Empire implements Base, NamedObject, Serializable {
                     continue;
                 }
 
-                System.out.println("Will transport from "+donor.name()+" to "+c.name());
-                System.out.println("Before transport expectedPopulation= "+c.expectedPopulation());
+//                System.out.println("Will transport from "+donor.name()+" to "+c.name());
+//                System.out.println("Before transport expectedPopulation= "+c.expectedPopulation());
                 int populationToTransport = options.getTransportPopulation();
                 // if this option is set, transport 2x population from poor planets
                 if (options.isTransportPoorDouble() && (c.planet().isResourcePoor() || c.planet().isResourceUltraPoor()) ) {
                     populationToTransport *= 2;
                 }
                 donor.scheduleTransportsToSystem(c.starSystem(), populationToTransport);
-                System.out.println("After transport expectedPopulation="+c.expectedPopulation());
-                donors.remove(0);
+//                System.out.println("After transport expectedPopulation="+c.expectedPopulation());
+                donors.remove(donor);
             } else {
                 colonies.remove(c);
             }
@@ -1095,7 +1096,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         return targets;
     }
 
-    private List<ShipFleet> filterFleets(List<ShipDesign> designs) {
+    private List<ShipFleet> filterFleets(List<ShipDesign> designs, int shipCount, BiPredicate<ShipFleet, ShipDesign> extraFilter) {
         List<ShipFleet> fleets = new LinkedList<>();
         List<ShipFleet> allFleets = galaxy().ships.notInTransitFleets(id);
         for (ShipFleet sf : allFleets) {
@@ -1103,9 +1104,17 @@ public final class Empire implements Base, NamedObject, Serializable {
                 // we only use idle (orbiting) fleets
                 continue;
             }
+            // don't send ships orbiting enemy planets, they are obviously needed there!
+            // It's ok to send ships orbiting empty systems
+            if (sf.system().empire() != this && !PlanetType.NONE.equals(sf.system().planet().type().key())) {
+                continue;
+            }
             for (ShipDesign sd: designs) {
-                if (sf.hasShip(sd)) {
-                    fleets.add(sf);
+                // must have at least minimum number of ships
+                if (sf.num(sd.id()) >= shipCount) {
+                    if (extraFilter.test(sf, sd)) {
+                        fleets.add(sf);
+                    }
                     break;
                 }
             }
@@ -1113,21 +1122,21 @@ public final class Empire implements Base, NamedObject, Serializable {
         return fleets;
     }
 
-    // Total count of ships of given designs in all given fleets
-    private int shipCount(List<ShipFleet> fleets, List<ShipDesign> designs) {
+    // Total count of fleets we can send, with given count of ships in each, of given designs in all given fleets
+    private int fleetCount(List<ShipFleet> fleets, List<ShipDesign> designs, int sendCount) {
         int count = 0;
         for (ShipFleet sf : fleets ) {
             for (ShipDesign sd: designs) {
-                count += sf.num(sd.id());
+                count += sf.num(sd.id()) / sendCount;
             }
         }
         return count;
     }
 
-    private int warpSpeed(ShipFleet sf, List<ShipDesign> designs) {
+    private int warpSpeed(ShipFleet sf, List<ShipDesign> designs, int sendCount) {
         int minWarpSpeed = -1;
         for (ShipDesign sd: designs) {
-            if (sf.hasShip(sd)) {
+            if (sf.num(sd.id()) >= sendCount) {
                 if (minWarpSpeed < 0 || sd.warpSpeed() < minWarpSpeed) {
                     minWarpSpeed = sd.warpSpeed();
                 }
@@ -1158,20 +1167,27 @@ public final class Empire implements Base, NamedObject, Serializable {
         return false;
     }
 
-    private boolean deploy(ShipFleet sf,  ShipDesign sd, int target) {
+    private boolean deploy(ShipFleet sf,  ShipDesign sd, int target, int sendCount) {
         int[] counts = new int[ShipDesignLab.MAX_DESIGNS];
-        counts[sd.id()] = 1;
+        counts[sd.id()] = sendCount;
+
+        boolean entireFleet = true;
+        for (int i = 0; i < ShipDesignLab.MAX_DESIGNS; i++) {
+            if (sf.num(i) != counts[i]) {
+                entireFleet = false;
+            }
+        }
 
         boolean success;
-        if (sf.isOneShip()) {
+        if (entireFleet) {
             galaxy().ships.deployFleet(sf, sv.system(target).id);
-            System.out.println("Deployed one ship fleet "+sv.descriptiveName(sf.sysId())+" "+sv.name(sf.sysId())
+            System.out.println("Deployed entire ship fleet "+sv.descriptiveName(sf.sysId())+" "+sv.name(sf.sysId())
                     +" to "+sv.descriptiveName(target)+" "+sv.name(target)+
                     " design "+sd.name());
             success = true;
         } else {
             success = galaxy().ships.deploySubfleet(sf, counts, sv.system(target).id);
-            System.out.println("Deploy one ship from "+sv.descriptiveName(sf.sysId())+" "+sv.name(sf.sysId())
+            System.out.println("Deploy subfleet from "+sv.descriptiveName(sf.sysId())+" "+sv.name(sf.sysId())
                     +" to "+sv.descriptiveName(target)+" "+sv.name(target)+
                     " design "+sd.name()+" success="+success);
         }
@@ -1194,10 +1210,12 @@ public final class Empire implements Base, NamedObject, Serializable {
 
     public void autoSendShips(List<ShipDesign> designs, List<Integer> targets,
                               SystemsSorter systemsSorter, FleetsSorter fleetsSorter,
-                              BiPredicate<ShipDesign, Integer> designFitForSystem) {
+                              BiPredicate<ShipDesign, Integer> designFitForSystem,
+                              BiPredicate<ShipFleet, ShipDesign> extraFleetFilter,
+                              int sendCount) {
 
         // find fleets that have the required designs
-        List<ShipFleet> fleets = filterFleets(designs);
+        List<ShipFleet> fleets = filterFleets(designs, sendCount, extraFleetFilter);
         if (fleets.isEmpty()) {
             System.out.println("No idle ships to send");
             return;
@@ -1206,9 +1224,10 @@ public final class Empire implements Base, NamedObject, Serializable {
             System.out.println("Suitable fleet "+sf+" "+sf.system().name());
         }
 
-        int shipCount = shipCount(fleets, designs);
+        // number of fleets we can send, we are sending more than one ship in a fleet now
+        int fleetCount = fleetCount(fleets, designs, sendCount);
 
-        if (targets.size() > shipCount) {
+        if (targets.size() > fleetCount) {
             System.out.println("MORE TARGET SYSTEMS THAN SHIPS");
             // we have more stars to explore than we have ships, so
             // we take ships and send them to closest systems.
@@ -1217,7 +1236,7 @@ public final class Empire implements Base, NamedObject, Serializable {
                     break;
                 }
                 System.out.println("Deploying ships from Fleet " + sf + " " + sf.system().name());
-                int warpSpeed = warpSpeed(sf, designs);
+                int warpSpeed = warpSpeed(sf, designs, sendCount);
                 systemsSorter.sort(sf.sysId(), targets, warpSpeed);
 
                 for (ShipDesign sd: designs) {
@@ -1229,21 +1248,23 @@ public final class Empire implements Base, NamedObject, Serializable {
                     // entire fleet gets redirected and it will keep returning 1 ship available as it's the same fleet
                     // with same 1 ship, resulting in continued loop.
                     int numShipsAvailable = sf.num(sd.id());
-                    for (Iterator<Integer> it = targets.iterator(); it.hasNext() && numShipsAvailable > 0; ) {
+                    for (Iterator<Integer> it = targets.iterator(); it.hasNext() && numShipsAvailable >= sendCount ; ) {
                         int si = it.next();
                         if (alreadyHasDesignsOrbiting(si, designs, designFitForSystem)) {
                             continue;
                         }
                         boolean deployed = false;
-                        if (!sd.isExtendedRange() && sv.inShipRange(si) && designFitForSystem.test(sd, si)) {
+                        if (!sd.isExtendedRange() && sv.inShipRange(si) &&
+                                designFitForSystem.test(sd, si) && extraFleetFilter.test(sf, sd)) {
                             // deploy
-                            deployed = deploy(sf, sd, si);
-                        } else if (sd.isExtendedRange() && sv.inScoutRange(si) && designFitForSystem.test(sd, si)) {
+                            deployed = deploy(sf, sd, si, sendCount);
+                        } else if (sd.isExtendedRange() && sv.inScoutRange(si) &&
+                                designFitForSystem.test(sd, si) && extraFleetFilter.test(sf, sd)) {
                             // deploy
-                            deployed = deploy(sf, sd, si);
+                            deployed = deploy(sf, sd, si, sendCount);
                         }
                         if (deployed) {
-                            numShipsAvailable--;
+                            numShipsAvailable -= sendCount;
                             // remove this system as it has a ship assigned already
                             it.remove();
                         }
@@ -1279,16 +1300,18 @@ public final class Empire implements Base, NamedObject, Serializable {
                     for (ShipDesign sd : designs) {
                         int count = sf.num(sd.id());
                         System.out.println("We have " + count + " ships of design " + sd.name());
-                        if (count <= 0) {
+                        if (count < sendCount) {
                             continue;
                         }
                         boolean deployed = false;
-                        if (!sd.isExtendedRange() && sv.inShipRange(si) && designFitForSystem.test(sd, si)) {
+                        if (!sd.isExtendedRange() && sv.inShipRange(si) &&
+                                designFitForSystem.test(sd, si) && extraFleetFilter.test(sf, sd)) {
                             // deploy
-                            deployed = deploy(sf, sd, si);
-                        } else if (sd.isExtendedRange() && sv.inScoutRange(si) && designFitForSystem.test(sd, si)) {
+                            deployed = deploy(sf, sd, si, sendCount);
+                        } else if (sd.isExtendedRange() && sv.inScoutRange(si) &&
+                                designFitForSystem.test(sd, si) && extraFleetFilter.test(sf, sd)) {
                             // deploy
-                            deployed = deploy(sf, sd, si);
+                            deployed = deploy(sf, sd, si, sendCount);
                         }
                         if (deployed) {
                             // remove this system as it has a ship assigned already
@@ -1390,7 +1413,10 @@ public final class Empire implements Base, NamedObject, Serializable {
                 (int)Math.signum(f1.travelTime(sv.system(targetSysten), warpSpeed) -
                         f2.travelTime(sv.system(targetSysten), warpSpeed)) );
 
-        autoSendShips(designs, targets, systemsSorter, fleetsSorter, (d, si) -> true);
+        int sendCount = GameSession.instance().getGovernorOptions().getAutoScoutShipCount();
+        // don't send out armed scout ships when enemy fleet is incoming, hence the need for defend predicate
+        autoSendShips(designs, targets, systemsSorter, fleetsSorter, (d, si) -> true, defendFirstPredicate(),
+                sendCount);
     }
 
     private ShipSpecialColony bestColonyShipSpecial(List<ShipDesign> designs) {
@@ -1403,9 +1429,6 @@ public final class Empire implements Base, NamedObject, Serializable {
         return bestColonyShip;
     }
 
-    // similar to autoscout. Always assume more planets than colony ships, i.e. prioritize ships first
-    // colonize closest planets first. I know we should prioritize by planet value
-    // but for first version, just go for it.
     public void autocolonize() {
         GovernorOptions options = session().getGovernorOptions();
         if (isAIControlled() || !options.isAutoColonize()) {
@@ -1507,11 +1530,169 @@ public final class Empire implements Base, NamedObject, Serializable {
                 (int)Math.signum(f1.travelTime(sv.system(targetSysten), warpSpeed) -
                         f2.travelTime(sv.system(targetSysten), warpSpeed)) );
 
-        autoSendShips(designs, targets, new ColonizePriority(), fleetsSorter,
-                designFitForSystem);
+        int sendCount = GameSession.instance().getGovernorOptions().getAutoColonyShipCount();
+        // don't send out armed colony ships when enemy fleet is incoming, hence the need for defend predicate
+        autoSendShips(designs, targets, new ColonizePriority("toColonize"), fleetsSorter,
+                designFitForSystem, defendFirstPredicate(), sendCount);
+    }
+
+    // similar to autocolonize. Send ships to enemy planets and systems with enemy ships in orbit
+    public void autoattack() {
+        GovernorOptions options = session().getGovernorOptions();
+        if (isAIControlled() || !options.isAutoAttack()) {
+            return;
+        }
+
+        List<ShipDesign> designs = new ArrayList<>();
+
+        for (ShipDesign sd: shipLab().designs()) {
+            // ignore design if it doesn't have weapons
+            if (sd.isAutoAttack() && sd.isArmed()) {
+                designs.add(sd);
+            }
+        }
+        // non-extended range to extended range
+        // Cheapest to most expensive
+        // sort ships fastest to slowest, send out fastest colony ships first
+        designs.sort((d1, d2) -> {
+            int rangeDiff = Boolean.compare(d1.isExtendedRange(), d2.isExtendedRange() );
+            // desc order
+            int warpDiff = d2.warpSpeed() - d1.warpSpeed();
+            // asc order, cheapest first
+            int costDiff = d1.cost() - d2.cost();
+            if (rangeDiff != 0) {
+                return rangeDiff;
+            } else if (warpDiff != 0) {
+                return warpDiff;
+            } else {
+                return costDiff;
+            }
+        } );
+
+        // no colony ship designs
+        if (designs.isEmpty()) {
+            System.out.println("No Attack ship designs");
+            return;
+        } else {
+            for (ShipDesign sd: designs) {
+                System.out.println("Attack Design "+sd.name()+" "+sd.isExtendedRange()+" sz="+sd.sizeDesc()+" warp="+sd.warpSpeed());
+            }
+        }
+
+        BiPredicate<ShipDesign, Integer> designFitForSystem = (sd, si) -> true;
+
+        boolean extendedRange = hasExtendedRange(designs);
+        List<Integer> hostileEmpires = new ArrayList<>();
+        for (EmpireView enemy: this.enemyViews()) {
+            System.out.println("autoattack Enemy "+enemy.toString());
+            hostileEmpires.add(enemy.empId());
+        }
+        int sendCount = GameSession.instance().getGovernorOptions().getAutoAttackShipCount();
+        List<Integer> targets = filterTargets(i -> {
+            // only consider scouted systems
+            if (sv.view(i).scouted()) {
+                boolean inRange;
+                if (extendedRange) {
+                    inRange = sv.inScoutRange(i);
+                } else {
+                    inRange = sv.inShipRange(i);
+                }
+                if (!inRange) {
+                    return false;
+                }
+                List<ShipFleet> fleets = sv.orbitingFleets(i);
+                if (fleets != null) {
+                    for (ShipFleet sf: fleets) {
+                        if (sf.empire() == this && sf.isArmed()) {
+                            // don't target planets which already have own armed fleets in orbit
+                            return false;
+                        }
+                    }
+                }
+                // armed ships already on route- no need to send more
+                for (ShipFleet sf: this.ownFleetsTargetingSystem(sv.system(i))) {
+                    for (ShipDesign sd: designs) {
+                        // attack fleet already on its way, don't send more
+                        if (sf.num(sd.id()) >= sendCount) {
+                            return false;
+                        }
+                    }
+                }
+                if (sv.empire(i) != null && hostileEmpires.contains(sv.empire(i).id)) {
+                    System.out.println("System "+sv.name(i)+" belongs to enemy empire, targeting");
+                    return true;
+                }
+                // This will send ships to own colonies that have enemy ships in order. I guess that's OK
+                for (ShipFleet f: fleets) {
+                    if (hostileEmpires.contains(f.empId) && !f.retreating()) {
+                        System.out.println("System "+sv.name(i)+" has enemy ships, targeting");
+                        return true;
+                    }
+                }
+                return false;
+            } else {
+                return false;
+            }
+        });
+
+        // No systems to colonize
+        if (targets.isEmpty()) {
+            return;
+        }
+        for (Integer i: targets) {
+            System.out.println("ToAttack "+sv.name(i) + " scouted="+sv.view(i).scouted()+" extrange="+sv.inScoutRange(i)+" range="+sv.inShipRange(i));
+        }
+
+        FleetsSorter fleetsSorter = (targetSysten, fleets, warpSpeed) -> fleets.sort((f1, f2) ->
+                (int)Math.signum(f1.travelTime(sv.system(targetSysten), warpSpeed) -
+                        f2.travelTime(sv.system(targetSysten), warpSpeed)) );
+
+
+        autoSendShips(designs, targets, new ColonizePriority("toAttack"), fleetsSorter,
+                designFitForSystem, defendFirstPredicate(), sendCount);
+    }
+
+    private BiPredicate<ShipFleet, ShipDesign> defendFirstPredicate() {
+        // check if we have hostile incoming fleets. If so, don't send out ships
+        // there's no method to do that, so let's build one.
+        Set<Integer> systemHasHostileIncoming = new HashSet<>();
+        Set<Integer> hostiles = hostiles().stream()
+                .map(h -> h.empId())
+                .collect(Collectors.toSet());
+        for (ShipFleet sf : galaxy().ships.inTransitFleets()) {
+            if (sf.destination().empire() != null && sf.destination().empire() == this && hostiles.contains(sf.empire().id)) {
+                if (sf.destination().name().equalsIgnoreCase("Baham")) {
+                    System.out.println("Important Baham");
+                }
+                System.out.println("Must defend system "+sf.destination().name());
+                systemHasHostileIncoming.add(sf.destSysId());
+            }
+        }
+
+        // also, don't send out fleet if orbiting enemy planet
+        BiPredicate<ShipFleet, ShipDesign> defendFirst = (sf,sd) -> {
+            // unarmed ships don't contribute to defence
+            if (!sd.isArmed()) {
+                return true;
+            }
+            if (systemHasHostileIncoming.contains(sf.system().id)) {
+                return false;
+            } else if (sf.system().empire() != this) {
+                return false;
+            } else {
+                return true;
+            }
+        };
+        return defendFirst;
     }
 
     private class ColonizePriority implements SystemsSorter {
+        private final String message;
+
+        public ColonizePriority(String message) {
+            this.message = message;
+        }
+
         @Override
         public void sort(Integer sourceSystem, List<Integer> targets, int warpSpeed) {
             // ok, let's use both distance and value of planet to prioritize colonization, 50% and 50%
@@ -1533,7 +1714,7 @@ public final class Empire implements Base, NamedObject, Serializable {
             if (Math.abs(maxDistance) <= 0.1) {
                 maxDistance = 1;
             }
-            System.out.println("Autocolonize maxDistance =" + maxDistance + " maxValue=" + maxValue);
+            System.out.println(message+" maxDistance =" + maxDistance + " maxValue=" + maxValue);
 
             float maxDistance1 = maxDistance;
             float maxValue1 = maxValue;
@@ -1542,7 +1723,7 @@ public final class Empire implements Base, NamedObject, Serializable {
                     - autocolonizeWeight(source, s2, maxDistance1, maxValue1, warpSpeed)));
             for (int si : targets) {
                 double weight = autocolonizeWeight(source, si, maxDistance, maxValue, warpSpeed);
-                System.out.format("toColonize System %d %s travel=%.1f value=%.1f weight=%.2f%n",
+                System.out.format(message+" System %d %s travel=%.1f value=%.1f weight=%.2f%n",
                         si, sv.name(si), source.travelTimeTo(sv.system(si), warpSpeed),
                         planetValue(si), weight);
             }

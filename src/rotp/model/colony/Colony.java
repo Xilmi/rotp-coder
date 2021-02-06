@@ -1179,6 +1179,15 @@ public final class Colony implements Base, IMappedObject, Serializable {
         loser.sv.refreshFullScan(starSystem().id);
         empire.sv.refreshFullScan(starSystem().id);
 
+        // if system was captured, clear shipbuilding, we don't want systems just captured building ships
+        // Do that if governor is on by default, otherwise stick to default behaviour
+        if (tr.empire().isPlayerControlled() && GameSession.instance().getGovernorOptions().isGovernorOnByDefault()) {
+            System.out.println("System captured "+name()+", clearing shipbuilding");
+            locked(SHIP, false);
+            locked(INDUSTRY, false);
+            setAllocation(SHIP, 0);
+        }
+
         if (loser.numColonies() == 0)
             loser.goExtinct();
     }

@@ -38,6 +38,12 @@ public class GovernorOptions implements Serializable {
     private boolean autoScout = true;
     // if true, automatically colonize new planets
     private boolean autoColonize = true;
+    // if true, send ships to enemy colonies
+    private boolean autoAttack = false;
+    // How many ships should Auto* missions send?
+    private int autoScoutShipCount = 1;
+    private int autoColonyShipCount = 1;
+    private int autoAttackShipCount = 1;
 
     public GovernorOptions() {
     }
@@ -162,4 +168,35 @@ public class GovernorOptions implements Serializable {
         this.transportPoorDouble = transportPoorDouble;
     }
 
+    public boolean isAutoAttack() {
+        return autoAttack;
+    }
+
+    public void setAutoAttack(boolean autoAttack) {
+        this.autoAttack = autoAttack;
+    }
+
+    public int getAutoScoutShipCount() {
+        return autoScoutShipCount;
+    }
+
+    public void setAutoScoutShipCount(int autoScoutShipCount) {
+        this.autoScoutShipCount = autoScoutShipCount;
+    }
+
+    public int getAutoColonyShipCount() {
+        return autoColonyShipCount;
+    }
+
+    public void setAutoColonyShipCount(int autoColonyShipCount) {
+        this.autoColonyShipCount = autoColonyShipCount;
+    }
+
+    public int getAutoAttackShipCount() {
+        return autoAttackShipCount;
+    }
+
+    public void setAutoAttackShipCount(int autoAttackShipCount) {
+        this.autoAttackShipCount = autoAttackShipCount;
+    }
 }
