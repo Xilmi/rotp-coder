@@ -41,7 +41,9 @@ public class GovernorOptions implements Serializable {
     // if true, send ships to enemy colonies
     private boolean autoAttack = false;
     // How many ships should Auto* missions send?
-    private int autoShipCount = 1;
+    private int autoScoutShipCount = 1;
+    private int autoColonyShipCount = 1;
+    private int autoAttackShipCount = 1;
 
     public GovernorOptions() {
     }
@@ -174,11 +176,27 @@ public class GovernorOptions implements Serializable {
         this.autoAttack = autoAttack;
     }
 
-    public int getAutoShipCount() {
-        return autoShipCount;
+    public int getAutoScoutShipCount() {
+        return autoScoutShipCount;
     }
 
-    public void setAutoShipCount(int autoShipCount) {
-        this.autoShipCount = autoShipCount;
+    public void setAutoScoutShipCount(int autoScoutShipCount) {
+        this.autoScoutShipCount = autoScoutShipCount;
+    }
+
+    public int getAutoColonyShipCount() {
+        return autoColonyShipCount;
+    }
+
+    public void setAutoColonyShipCount(int autoColonyShipCount) {
+        this.autoColonyShipCount = autoColonyShipCount;
+    }
+
+    public int getAutoAttackShipCount() {
+        return autoAttackShipCount;
+    }
+
+    public void setAutoAttackShipCount(int autoAttackShipCount) {
+        this.autoAttackShipCount = autoAttackShipCount;
     }
 }

@@ -914,13 +914,12 @@ public final class Empire implements Base, NamedObject, Serializable {
         }
 
         List<Colony> colonies = new LinkedList<>();
-        for (int i = 0; i < this.sv.count(); ++i) {
-            if (this.sv.empire(i) == this && this.sv.isColonized(i)) {
-                Colony c = this.sv.colony(i);
-                if (c.isGovernor() && c.maxReserveNeeded() >= 1) {
-                    if (!c.industry().isCompleted() || !c.ecology().isCompleted()) {
-                        colonies.add(c);
-                    }
+
+        for (StarSystem ss: this.colonizedSystems) {
+            Colony c = ss.colony();
+            if (c.isGovernor() && c.maxReserveNeeded() >= 1) {
+                if (!c.industry().isCompleted() || !c.ecology().isCompleted()) {
+                    colonies.add(c);
                 }
             }
         }
@@ -1021,12 +1020,10 @@ public final class Empire implements Base, NamedObject, Serializable {
             Colony c = colonies.get(0);
             float neededPopulation = (int) (c.planet().currentSize() - c.expectedPopulation());
             // Sort donors by distance
-            Collections.sort(donors,
-                    (Colony o1, Colony o2) -> (int)Math.signum(
-                            o1.travelTime(o1, c, this.tech().transportTravelSpeed()) -
+            Colony donor = Collections.min(donors, (Colony o1, Colony o2) -> (int) Math.signum(
+                    o1.travelTime(o1, c, this.tech().transportTravelSpeed()) -
                             o2.travelTime(o2, c, this.tech().transportTravelSpeed())));
             if (neededPopulation > options.getTransportPopulation()) {
-                Colony donor = donors.get(0);
                 float transportTime = donor.travelTime(donor, c, this.tech().transportTravelSpeed());
                 // limit max transport time
                 double maxTime = c.starSystem().inNebula() ? options.getTransportMaxTurns() * 1.5 : options.getTransportMaxTurns();
@@ -1048,16 +1045,16 @@ public final class Empire implements Base, NamedObject, Serializable {
                     continue;
                 }
 
-                System.out.println("Will transport from "+donor.name()+" to "+c.name());
-                System.out.println("Before transport expectedPopulation= "+c.expectedPopulation());
+//                System.out.println("Will transport from "+donor.name()+" to "+c.name());
+//                System.out.println("Before transport expectedPopulation= "+c.expectedPopulation());
                 int populationToTransport = options.getTransportPopulation();
                 // if this option is set, transport 2x population from poor planets
                 if (options.isTransportPoorDouble() && (c.planet().isResourcePoor() || c.planet().isResourceUltraPoor()) ) {
                     populationToTransport *= 2;
                 }
                 donor.scheduleTransportsToSystem(c.starSystem(), populationToTransport);
-                System.out.println("After transport expectedPopulation="+c.expectedPopulation());
-                donors.remove(0);
+//                System.out.println("After transport expectedPopulation="+c.expectedPopulation());
+                donors.remove(donor);
             } else {
                 colonies.remove(c);
             }
@@ -1099,7 +1096,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         return targets;
     }
 
-    private List<ShipFleet> filterFleets(List<ShipDesign> designs, int shipCount, Predicate<ShipFleet> extraFilter) {
+    private List<ShipFleet> filterFleets(List<ShipDesign> designs, int shipCount, BiPredicate<ShipFleet, ShipDesign> extraFilter) {
         List<ShipFleet> fleets = new LinkedList<>();
         List<ShipFleet> allFleets = galaxy().ships.notInTransitFleets(id);
         for (ShipFleet sf : allFleets) {
@@ -1107,10 +1104,15 @@ public final class Empire implements Base, NamedObject, Serializable {
                 // we only use idle (orbiting) fleets
                 continue;
             }
+            // don't send ships orbiting enemy planets, they are obviously needed there!
+            // It's ok to send ships orbiting empty systems
+            if (sf.system().empire() != this && !PlanetType.NONE.equals(sf.system().planet().type().key())) {
+                continue;
+            }
             for (ShipDesign sd: designs) {
                 // must have at least minimum number of ships
                 if (sf.num(sd.id()) >= shipCount) {
-                    if (extraFilter.test(sf)) {
+                    if (extraFilter.test(sf, sd)) {
                         fleets.add(sf);
                     }
                     break;
@@ -1209,10 +1211,10 @@ public final class Empire implements Base, NamedObject, Serializable {
     public void autoSendShips(List<ShipDesign> designs, List<Integer> targets,
                               SystemsSorter systemsSorter, FleetsSorter fleetsSorter,
                               BiPredicate<ShipDesign, Integer> designFitForSystem,
-                              Predicate<ShipFleet> extraFleetFilter) {
+                              BiPredicate<ShipFleet, ShipDesign> extraFleetFilter,
+                              int sendCount) {
 
         // find fleets that have the required designs
-        int sendCount = GameSession.instance().getGovernorOptions().getAutoShipCount();
         List<ShipFleet> fleets = filterFleets(designs, sendCount, extraFleetFilter);
         if (fleets.isEmpty()) {
             System.out.println("No idle ships to send");
@@ -1252,10 +1254,12 @@ public final class Empire implements Base, NamedObject, Serializable {
                             continue;
                         }
                         boolean deployed = false;
-                        if (!sd.isExtendedRange() && sv.inShipRange(si) && designFitForSystem.test(sd, si)) {
+                        if (!sd.isExtendedRange() && sv.inShipRange(si) &&
+                                designFitForSystem.test(sd, si) && extraFleetFilter.test(sf, sd)) {
                             // deploy
                             deployed = deploy(sf, sd, si, sendCount);
-                        } else if (sd.isExtendedRange() && sv.inScoutRange(si) && designFitForSystem.test(sd, si)) {
+                        } else if (sd.isExtendedRange() && sv.inScoutRange(si) &&
+                                designFitForSystem.test(sd, si) && extraFleetFilter.test(sf, sd)) {
                             // deploy
                             deployed = deploy(sf, sd, si, sendCount);
                         }
@@ -1300,10 +1304,12 @@ public final class Empire implements Base, NamedObject, Serializable {
                             continue;
                         }
                         boolean deployed = false;
-                        if (!sd.isExtendedRange() && sv.inShipRange(si) && designFitForSystem.test(sd, si)) {
+                        if (!sd.isExtendedRange() && sv.inShipRange(si) &&
+                                designFitForSystem.test(sd, si) && extraFleetFilter.test(sf, sd)) {
                             // deploy
                             deployed = deploy(sf, sd, si, sendCount);
-                        } else if (sd.isExtendedRange() && sv.inScoutRange(si) && designFitForSystem.test(sd, si)) {
+                        } else if (sd.isExtendedRange() && sv.inScoutRange(si) &&
+                                designFitForSystem.test(sd, si) && extraFleetFilter.test(sf, sd)) {
                             // deploy
                             deployed = deploy(sf, sd, si, sendCount);
                         }
@@ -1407,7 +1413,10 @@ public final class Empire implements Base, NamedObject, Serializable {
                 (int)Math.signum(f1.travelTime(sv.system(targetSysten), warpSpeed) -
                         f2.travelTime(sv.system(targetSysten), warpSpeed)) );
 
-        autoSendShips(designs, targets, systemsSorter, fleetsSorter, (d, si) -> true, sf -> true);
+        int sendCount = GameSession.instance().getGovernorOptions().getAutoScoutShipCount();
+        // don't send out armed scout ships when enemy fleet is incoming, hence the need for defend predicate
+        autoSendShips(designs, targets, systemsSorter, fleetsSorter, (d, si) -> true, defendFirstPredicate(),
+                sendCount);
     }
 
     private ShipSpecialColony bestColonyShipSpecial(List<ShipDesign> designs) {
@@ -1521,8 +1530,10 @@ public final class Empire implements Base, NamedObject, Serializable {
                 (int)Math.signum(f1.travelTime(sv.system(targetSysten), warpSpeed) -
                         f2.travelTime(sv.system(targetSysten), warpSpeed)) );
 
+        int sendCount = GameSession.instance().getGovernorOptions().getAutoColonyShipCount();
+        // don't send out armed colony ships when enemy fleet is incoming, hence the need for defend predicate
         autoSendShips(designs, targets, new ColonizePriority("toColonize"), fleetsSorter,
-                designFitForSystem, sf -> true);
+                designFitForSystem, defendFirstPredicate(), sendCount);
     }
 
     // similar to autocolonize. Send ships to enemy planets and systems with enemy ships in orbit
@@ -1576,6 +1587,7 @@ public final class Empire implements Base, NamedObject, Serializable {
             System.out.println("autoattack Enemy "+enemy.toString());
             hostileEmpires.add(enemy.empId());
         }
+        int sendCount = GameSession.instance().getGovernorOptions().getAutoAttackShipCount();
         List<Integer> targets = filterTargets(i -> {
             // only consider scouted systems
             if (sv.view(i).scouted()) {
@@ -1591,8 +1603,17 @@ public final class Empire implements Base, NamedObject, Serializable {
                 List<ShipFleet> fleets = sv.orbitingFleets(i);
                 if (fleets != null) {
                     for (ShipFleet sf: fleets) {
-                        if (sf.empire() == this || sf.isArmed()) {
+                        if (sf.empire() == this && sf.isArmed()) {
                             // don't target planets which already have own armed fleets in orbit
+                            return false;
+                        }
+                    }
+                }
+                // armed ships already on route- no need to send more
+                for (ShipFleet sf: this.ownFleetsTargetingSystem(sv.system(i))) {
+                    for (ShipDesign sd: designs) {
+                        // attack fleet already on its way, don't send more
+                        if (sf.num(sd.id()) >= sendCount) {
                             return false;
                         }
                     }
@@ -1601,8 +1622,9 @@ public final class Empire implements Base, NamedObject, Serializable {
                     System.out.println("System "+sv.name(i)+" belongs to enemy empire, targeting");
                     return true;
                 }
+                // This will send ships to own colonies that have enemy ships in order. I guess that's OK
                 for (ShipFleet f: fleets) {
-                    if (hostileEmpires.contains(f.empId)) {
+                    if (hostileEmpires.contains(f.empId) && !f.retreating()) {
                         System.out.println("System "+sv.name(i)+" has enemy ships, targeting");
                         return true;
                     }
@@ -1625,6 +1647,12 @@ public final class Empire implements Base, NamedObject, Serializable {
                 (int)Math.signum(f1.travelTime(sv.system(targetSysten), warpSpeed) -
                         f2.travelTime(sv.system(targetSysten), warpSpeed)) );
 
+
+        autoSendShips(designs, targets, new ColonizePriority("toAttack"), fleetsSorter,
+                designFitForSystem, defendFirstPredicate(), sendCount);
+    }
+
+    private BiPredicate<ShipFleet, ShipDesign> defendFirstPredicate() {
         // check if we have hostile incoming fleets. If so, don't send out ships
         // there's no method to do that, so let's build one.
         Set<Integer> systemHasHostileIncoming = new HashSet<>();
@@ -1633,13 +1661,20 @@ public final class Empire implements Base, NamedObject, Serializable {
                 .collect(Collectors.toSet());
         for (ShipFleet sf : galaxy().ships.inTransitFleets()) {
             if (sf.destination().empire() != null && sf.destination().empire() == this && hostiles.contains(sf.empire().id)) {
+                if (sf.destination().name().equalsIgnoreCase("Baham")) {
+                    System.out.println("Important Baham");
+                }
                 System.out.println("Must defend system "+sf.destination().name());
                 systemHasHostileIncoming.add(sf.destSysId());
             }
         }
 
         // also, don't send out fleet if orbiting enemy planet
-        Predicate<ShipFleet> defendFirst = sf -> {
+        BiPredicate<ShipFleet, ShipDesign> defendFirst = (sf,sd) -> {
+            // unarmed ships don't contribute to defence
+            if (!sd.isArmed()) {
+                return true;
+            }
             if (systemHasHostileIncoming.contains(sf.system().id)) {
                 return false;
             } else if (sf.system().empire() != this) {
@@ -1648,9 +1683,7 @@ public final class Empire implements Base, NamedObject, Serializable {
                 return true;
             }
         };
-
-        autoSendShips(designs, targets, new ColonizePriority("toAttack"), fleetsSorter,
-                designFitForSystem, defendFirst);
+        return defendFirst;
     }
 
     private class ColonizePriority implements SystemsSorter {

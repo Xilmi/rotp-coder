@@ -48,7 +48,9 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         this.autoColonize.setSelected(options.isAutoColonize());
         this.completionist.setEnabled(isCompletionistEnabled());
         this.autoAttack.setSelected(options.isAutoAttack());
-        this.autoShipCount.setValue(options.getAutoShipCount());
+        this.autoScoutShipCount.setValue(options.getAutoScoutShipCount());
+        this.autoColonyShipCount.setValue(options.getAutoColonyShipCount());
+        this.autoAttackShipCount.setValue(options.getAutoAttackShipCount());
     }
 
     public boolean isCompletionistEnabled() {
@@ -128,8 +130,12 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         autoColonize = new javax.swing.JCheckBox();
         completionist = new javax.swing.JButton();
         autoAttack = new javax.swing.JCheckBox();
-        autoShipCount = new javax.swing.JSpinner();
-        autoShipCountLabel = new javax.swing.JLabel();
+        autoColonyShipCount = new javax.swing.JSpinner();
+        autoColonyShipCountLabel = new javax.swing.JLabel();
+        autoScoutShipCount = new javax.swing.JSpinner();
+        autoAttackShipCount = new javax.swing.JSpinner();
+        autoScoutShipCountLabel = new javax.swing.JLabel();
+        autoAttackShipCountLabel = new javax.swing.JLabel();
 
         governorDefault.setText("Governor is on by default");
 
@@ -137,7 +143,7 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
 
         autotransport.setText("Population automatically transported from colonies at max production capacity");
 
-        transportPop.setModel(new javax.swing.SpinnerNumberModel(10, 1, 10, 1));
+        transportPop.setModel(new javax.swing.SpinnerNumberModel(10, 1, 30, 1));
         transportPop.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 transportPopStateChanged(evt);
@@ -348,14 +354,32 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
 
         autoAttack.setText("Auto Attack");
 
-        autoShipCount.setModel(new javax.swing.SpinnerNumberModel(1, 1, 99, 1));
-        autoShipCount.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+        autoColonyShipCount.setModel(new javax.swing.SpinnerNumberModel(1, 1, 99, 1));
+        autoColonyShipCount.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
-                autoShipCountMouseWheelMoved(evt);
+                autoColonyShipCountMouseWheelMoved(evt);
             }
         });
 
-        autoShipCountLabel.setText("Number of ships to send on auto missions");
+        autoColonyShipCountLabel.setText("Number of colony ships to send");
+
+        autoScoutShipCount.setModel(new javax.swing.SpinnerNumberModel(1, 1, 99, 1));
+        autoScoutShipCount.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                autoScoutShipCountMouseWheelMoved(evt);
+            }
+        });
+
+        autoAttackShipCount.setModel(new javax.swing.SpinnerNumberModel(1, 1, 99, 1));
+        autoAttackShipCount.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                autoAttackShipCountMouseWheelMoved(evt);
+            }
+        });
+
+        autoScoutShipCountLabel.setText("Number of scout ships to send");
+
+        autoAttackShipCountLabel.setText("Number of colony ships to send");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -370,23 +394,6 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
                         .addComponent(allGovernorsOn)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(allGovernorsOff))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(governorDefault)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(12, 12, 12)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(autoShipCount, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(autoShipCountLabel))
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(autoScout)
-                                        .addGap(92, 92, 92)
-                                        .addComponent(autoColonize)
-                                        .addGap(82, 82, 82)
-                                        .addComponent(autoAttack)))))
-                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(12, 12, 12)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -411,7 +418,28 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(181, 181, 181)
                         .addComponent(completionist)
-                        .addGap(179, 179, 179)))
+                        .addGap(179, 179, 179))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(governorDefault)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(12, 12, 12)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(autoColonize)
+                                    .addComponent(autoScout)
+                                    .addComponent(autoAttack))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(autoAttackShipCount)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addComponent(autoScoutShipCount)
+                                        .addComponent(autoColonyShipCount)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(autoColonyShipCountLabel)
+                                    .addComponent(autoScoutShipCountLabel)
+                                    .addComponent(autoAttackShipCountLabel))))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -430,12 +458,18 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(autoScout)
-                    .addComponent(autoColonize)
-                    .addComponent(autoAttack))
+                    .addComponent(autoScoutShipCount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(autoScoutShipCountLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(autoShipCount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(autoShipCountLabel))
+                    .addComponent(autoColonize)
+                    .addComponent(autoColonyShipCount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(autoColonyShipCountLabel))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(autoAttack)
+                    .addComponent(autoAttackShipCount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(autoAttackShipCountLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(missileBases, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -525,7 +559,9 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         options.setAutoScout(autoScout.isSelected());
         options.setAutoColonize(autoColonize.isSelected());
         options.setAutoAttack(autoAttack.isSelected());
-        options.setAutoShipCount((Integer)autoShipCount.getValue());
+        options.setAutoScoutShipCount((Integer)autoScoutShipCount.getValue());
+        options.setAutoColonyShipCount((Integer)autoColonyShipCount.getValue());
+        options.setAutoAttackShipCount((Integer)autoAttackShipCount.getValue());
         frame.setVisible(false);
     }//GEN-LAST:event_okButtonActionPerformed
 
@@ -553,9 +589,17 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         performCompletionist();
     }//GEN-LAST:event_completionistActionPerformed
 
-    private void autoShipCountMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_autoShipCountMouseWheelMoved
-        mouseWheel(autoShipCount, evt);
-    }//GEN-LAST:event_autoShipCountMouseWheelMoved
+    private void autoColonyShipCountMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_autoColonyShipCountMouseWheelMoved
+        mouseWheel(autoColonyShipCount, evt);
+    }//GEN-LAST:event_autoColonyShipCountMouseWheelMoved
+
+    private void autoScoutShipCountMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_autoScoutShipCountMouseWheelMoved
+        mouseWheel(autoScoutShipCount, evt);
+    }//GEN-LAST:event_autoScoutShipCountMouseWheelMoved
+
+    private void autoAttackShipCountMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_autoAttackShipCountMouseWheelMoved
+        mouseWheel(autoAttackShipCount, evt);
+    }//GEN-LAST:event_autoAttackShipCountMouseWheelMoved
 
     private void changePopulationLabel() {
         int pop = (int)this.transportPop.getValue();
@@ -587,10 +631,14 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
     private javax.swing.JButton allGovernorsOff;
     private javax.swing.JButton allGovernorsOn;
     private javax.swing.JCheckBox autoAttack;
+    private javax.swing.JSpinner autoAttackShipCount;
+    private javax.swing.JLabel autoAttackShipCountLabel;
     private javax.swing.JCheckBox autoColonize;
+    private javax.swing.JSpinner autoColonyShipCount;
+    private javax.swing.JLabel autoColonyShipCountLabel;
     private javax.swing.JCheckBox autoScout;
-    private javax.swing.JSpinner autoShipCount;
-    private javax.swing.JLabel autoShipCountLabel;
+    private javax.swing.JSpinner autoScoutShipCount;
+    private javax.swing.JLabel autoScoutShipCountLabel;
     private javax.swing.JCheckBox autospend;
     private javax.swing.JCheckBox autotransport;
     private javax.swing.JButton cancelButton;
