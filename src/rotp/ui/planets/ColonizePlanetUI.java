@@ -467,6 +467,8 @@ public class ColonizePlanetUI extends FadeInPanel implements MouseListener, Mous
     }
     @Override
     public String ambienceSoundKey() {
+        return "";
+/*
         switch(displayMode) {
             case LANDING:
             case CLAIMING:
@@ -479,6 +481,7 @@ public class ColonizePlanetUI extends FadeInPanel implements MouseListener, Mous
                 else     
                     return "ColonizeNormalAmbience";
         }
+*/
     }
     @Override
     public void mouseReleased(MouseEvent e) {

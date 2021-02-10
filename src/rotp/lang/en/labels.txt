@@ -235,7 +235,9 @@ INC_TECH_EXCHANGE_DESC            | The [my_empire] taught the secrets of [techG
 INC_FINANCIAL_AID_TITLE           | Financial Aid
 INC_FINANCIAL_AID_DESC            | The [your_empire] has freely given [amt] BC to the [my_empire].
 INC_TECHNOLOGY_AID_TITLE          | Technological Aid
-INC_TECHNOLOGY_AID_DESC           | The [your_empire] has freely shared the secrets of [tech] to the [my_empire].
+INC_TECHNOLOGY_AID_DESC           | The [your_empire] has freely shared the secrets of [tech] with the [my_empire].
+INC_TECHNOLOGY_AID_DESC_MULT      | The [your_empire] has freely shared with the [my_empire] the secrets of the following technologies: [techs]
+INC_TECHNOLOGY_TECH_LIST_COMMA    | , 
 INC_ENEMY_AID_TITLE               | Aid to Enemy 
 INC_ENEMY_AID_MONEY_DESC          | The [your_empire] has given [amt] BC in aid to the [enemy_empire], an enemy of the [my_empire].
 INC_ENEMY_AID_TECH_DESC           | The [your_empire] has given the secrets of [tech] to the [enemy_empire], an enemy of the [my_empire].
@@ -315,9 +317,11 @@ GAME_SETTINGS_GRAPHICS_MED        | Medium
 GAME_SETTINGS_GRAPHICS_HIGH       | High
 GAME_SETTINGS_GRAPHICS_DESC       | Adjusts the graphics quality of game. Medium: Anti-Aliasing of images is off. Low: Animations are turned off.
 GAME_SETTINGS_TEXTURES            | Textures: %1
-GAME_SETTINGS_TEXTURES_YES        | Yes
 GAME_SETTINGS_TEXTURES_NO         | No
-GAME_SETTINGS_TEXTURES_DESC       | Toggle the use of textures on the various screens throughout the game.
+GAME_SETTINGS_TEXTURES_INTERFACE  | User Interface
+GAME_SETTINGS_TEXTURES_MAP        | Galaxy Map
+GAME_SETTINGS_TEXTURES_BOTH       | Interface and Map
+GAME_SETTINGS_TEXTURES_DESC       | Toggle the use of textures on the galaxy map or the various screens throughout the game.
 GAME_SETTINGS_MEMORY              | Show Memory Usage: %1
 GAME_SETTINGS_MEMORY_YES          | Yes
 GAME_SETTINGS_MEMORY_NO           | No
@@ -343,6 +347,10 @@ GAME_SETTINGS_AUTOBOMBARD_YES     | Always
 GAME_SETTINGS_AUTOBOMBARD_WAR     | Only War
 GAME_SETTINGS_AUTOBOMBARD_INVADE  | Only War and not Invading
 GAME_SETTINGS_AUTOBOMBARD_DESC    | Toggle to always prompt to bombard, never bombard, always bombard, only auto-bombard when at war, or only auto-bombard when at war with no invasion forces en route. 
+GAME_SETTINGS_BACKUP_OFF          | Off
+GAME_SETTINGS_BACKUP_ON           | Every %1 turns
+GAME_SETTINGS_BACKUP              | Backup: %1
+GAME_SETTINGS_BACKUP_DESC         | Enable to have your current game periodically saved in the backup folder with a unique name, allowing you to reload from previous turns.
 
 // Load Game UI
 LOAD_GAME_TITLE                   | Load Game
@@ -840,6 +848,7 @@ FLEETS_FLEETS_SELECTED            | %1  Fleets Selected
 FLEETS_MULTIPLE_DESIGNS           | Multiple
 FLEETS_RELOCATE_LABEL             | Set Rally Points
 FLEETS_TRANSPORTS_LABEL           | Send Transports
+FLEETS_SPENDING_LABEL             | Adjust Ship Spending
 FLEETS_HAS_ORDERS                 | Fleet is in transit
 FLEETS_HAS_NO_ORDERS              | Fleet is in orbit
 FLEETS_IS_RALLYING                | Fleet is rallying
@@ -852,6 +861,16 @@ FLEETS_SETTING_RALLY_POINTS       | Starting Rally Points
 FLEETS_START_RALLIES_DESC         | Select a system you control to send newly built ships from all selected systems.
 FLEETS_START_RALLIES              | Start Rallies
 FLEETS_SEND_TRANSPORTS            | Send Transports
+FLEETS_ADJUST_SPENDING_SELECT     | Select systems to set Ship spending 
+FLEETS_ADJUST_SPENDING_DESC       | Select the desired Ship spending levels for the %1 selected systems
+FLEETS_ADJUST_SPENDING_DESC2      | Other spending categories will be automatically adjusted.  Ecology will retain minimum spending required to clean pollution.
+FLEETS_ADJUST_SPENDING            | Adjust Ship Spending
+FLEETS_SPENDING_0                 | No Ship Spending
+FLEETS_SPENDING_25                | 25% Ship Spending
+FLEETS_SPENDING_50                | 50% Ship Spending
+FLEETS_SPENDING_75                | 75% Ship Spending
+FLEETS_SPENDING_MAX               | Maximum Ship Spending
+FLEETS_SPENDING_CANCEL            | Cancel
 FLEETS_CANCEL_TRANSPORTS_DESC     | %1 selected systems have already scheduled transports
 FLEETS_CANCEL_TRANSPORTS          | Cancel Transports
 FLEETS_DEPLOYING_TRANSPORTS_DESC  | Select a system within range to send colony transports or military troops to.
@@ -1193,7 +1212,7 @@ SETUP_NOT_AVAILABLE               | N/A
 
 
 // Advanced Settings
-SETTINGS_TITLE                    | Advanced Settings
+SETTINGS_TITLE                    | Advanced Game Options
 SETTINGS_DESCRIPTION              | Click to toggle each game setting.
 SETTINGS_ACCEPT                   | Accept
 SETTINGS_STAR_DENSITY             | Star Density: %1
@@ -1768,7 +1787,11 @@ COUNCIL_ADJOURN_TITLE             | The High Council Adjourns
 COUNCIL_ADJOURN                   | Voting has concluded and neither candidate has collected two-thirds of votes. No ruler has been named. The High Council will reconvene for another vote in 25 years.
 COUNCIL_SUMMARY_TITLE             | Voter Summary
 COUNCIL_SUMMARY                   | Votes are cast in order of population. %1 votes are required to win election.
-COUNCIL_BEGIN_VOTING              | Continue to Voting
+COUNCIL_BEGIN_VOTING              | Begin Voting
+COUNCIL_SHOW_VOTING               | Continue Voting
+COUNCIL_SKIP_TO_PLAYER            | Skip to %1 Vote
+COUNCIL_COMPLETE_VOTING           | Complete All Voting
+COUNCIL_SHOW_RESULTS              | Show Results
 COUNCIL_VIEW_SUMMARY              | View Voter Summary
 COUNCIL_VOTES_REQUIRED            | %1 votes required to win election.
 COUNCIL_CAST_PROMPT               | We must cast our %1 votes.

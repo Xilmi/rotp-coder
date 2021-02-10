@@ -794,6 +794,7 @@ public class DesignUI extends BasePanel {
             super.paintComponent(g);
             g.setFont(narrowFont(32));
 
+            int w = getWidth();
             int boxH = getHeight()-s10;
             int boxW = boxH*6/5;
             drawShip(g);
@@ -814,8 +815,10 @@ public class DesignUI extends BasePanel {
                 }
             }
             else {
+                String name = des.name();
                 g.setFont(narrowFont(18));
-                drawShadowedString(g, des.name(), 3, leftM, s20, SystemPanel.textShadowC, SystemPanel.whiteText);
+                scaledFont(g, name, w-leftM-s10, 18, 14);
+                drawShadowedString(g, name, 3, leftM, s20, SystemPanel.textShadowC, SystemPanel.whiteText);
                 g.setFont(narrowFont(14));
                 g.setColor(SystemPanel.blackText);
                 String desc = text("SHIP_DESIGN_SLOT_DESC");
@@ -1095,7 +1098,7 @@ public class DesignUI extends BasePanel {
             }
             g.setPaint(configGradient);
             g.fillRect(0, 0, getWidth(), getHeight());
-            if (UserPreferences.textures()) 
+            if (UserPreferences.texturesInterface()) 
                 drawTexture(g0,0, 0, getWidth(), getHeight());
 
             ShipDesign des = shipDesign();
@@ -1141,7 +1144,7 @@ public class DesignUI extends BasePanel {
             g2.setClip(rect);
             g2.fill(rect);  
             
-            if (UserPreferences.textures()) 
+            if (UserPreferences.texturesInterface()) 
                 drawTexture(g0, rect, x,y,w,h);       
             g2.setClip(null);
         }
@@ -1351,7 +1354,7 @@ public class DesignUI extends BasePanel {
             g.setFont(narrowFont(22));
             drawShadowedString(g, text("SHIP_DESIGN_COMBAT_STATS_TITLE"),3,x2+s5,y1,SystemPanel.textShadowC, SystemPanel.whiteText);
 
-            if (UserPreferences.textures()) 
+            if (UserPreferences.texturesInterface()) 
                 drawTexture(g,x, y0+s10, w, h-s85);
 
             // draw left side values
@@ -1670,7 +1673,7 @@ public class DesignUI extends BasePanel {
             int y9 = y8 + s17;
             g.drawString(text("SHIP_DESIGN_ENGINES_COST"), x0, y9);
 
-           if (UserPreferences.textures()) 
+           if (UserPreferences.texturesInterface()) 
                 drawTexture(g,x, y,w,h);
 
             // draw right side values
@@ -1807,7 +1810,7 @@ public class DesignUI extends BasePanel {
             g.setFont(narrowFont(20));
             drawShadowedString(g, title3, 3, x1, y4, SystemPanel.textShadowC, SystemPanel.whiteText);
 
-            if (UserPreferences.textures()) 
+            if (UserPreferences.texturesInterface()) 
                 drawTexture(g,x, y+s25, w0, h-s25);
 
             // computer field
@@ -2079,7 +2082,7 @@ public class DesignUI extends BasePanel {
             g.setFont(narrowFont(20));
             drawShadowedString(g, title2, 3, x1, y3, SystemPanel.textShadowC, SystemPanel.whiteText);
 
-            if (UserPreferences.textures()) 
+            if (UserPreferences.texturesInterface()) 
                 drawTexture(g,x, y+s25, w0, h-s25);
 
             // ecm field
@@ -2279,7 +2282,7 @@ public class DesignUI extends BasePanel {
             g.setFont(narrowFont(20));
             drawShadowedString(g, title1, 3, x1, y2, SystemPanel.textShadowC, SystemPanel.whiteText);
 
-            if (UserPreferences.textures()) 
+            if (UserPreferences.texturesInterface()) 
                 drawTexture(g,x, y+s25, w0, h-s25);
 
             List<ShipWeapon> comps = player().shipLab().weapons();
@@ -2438,7 +2441,7 @@ public class DesignUI extends BasePanel {
             g.setFont(narrowFont(20));
             drawShadowedString(g, title1, 3, x1, y2, SystemPanel.textShadowC, SystemPanel.whiteText);
 
-           if (UserPreferences.textures()) 
+           if (UserPreferences.texturesInterface()) 
                 drawTexture(g,x, y+s25, w0, h-s25);
 
             for (int i=0;i<ShipDesign.maxSpecials;i++) {
