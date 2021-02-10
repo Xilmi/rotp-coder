@@ -549,7 +549,7 @@
     </Component>
     <Component class="javax.swing.JLabel" name="autoAttackShipCountLabel">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Number of colony ships to send"/>
+        <Property name="text" type="java.lang.String" value="Number of attack ships to send"/>
       </Properties>
     </Component>
   </SubComponents>

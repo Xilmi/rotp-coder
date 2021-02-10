@@ -379,7 +379,7 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
 
         autoScoutShipCountLabel.setText("Number of scout ships to send");
 
-        autoAttackShipCountLabel.setText("Number of colony ships to send");
+        autoAttackShipCountLabel.setText("Number of attack ships to send");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);

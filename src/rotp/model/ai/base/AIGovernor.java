@@ -215,8 +215,8 @@ public class AIGovernor implements Base, Governor {
                 col.clearSpending();
                 col.pct(ECOLOGY, cleanCost/totalProd);
                 col.allocation(DEFENSE, maxAllocation - col.totalAmountAllocated());
+                return;
             }
-            return;
         }
         
         // for systems that are flagged as rush ship, do that and forget
@@ -312,7 +312,8 @@ public class AIGovernor implements Base, Governor {
             return;
 
         // eco spending gets up to 40% of planet's remaining net prod
-        float ecoCost = min((netProd * .4f), col.ecology().maxSpendingNeeded());
+        float nonCleanEcoCost = col.ecology().maxSpendingNeeded() - cleanCost;
+        float ecoCost = min((netProd * .4f), nonCleanEcoCost);
         col.pct(ECOLOGY, (ecoCost + cleanCost)/totalProd);
 
         if (col.pct(ECOLOGY) < 0) {

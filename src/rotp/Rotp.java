@@ -44,9 +44,10 @@ public class Rotp {
     public static int IMG_W = 1229;
     public static int IMG_H = 768;
     public static String jarFileName = "rotp-"+RotpGovernor.governorVersion()+RotpGovernor.miniSuffix()+".jar";
+    public static boolean countWords = false;
     private static String jarPath;
     private static JFrame frame;
-    public static String releaseId = "Beta 2.12a";
+    public static String releaseId = "Beta 2.13a";
     public static long startMs = System.currentTimeMillis();
     public static long maxHeapMemory = Runtime.getRuntime().maxMemory() / 1048576;
     public static long maxUsedMemory;
@@ -54,7 +55,7 @@ public class Rotp {
     private static float resizeAmt =  -1.0f;
     public static int actualAlloc = -1;
     public static boolean reloadRecentSave = false;
-
+    
     static GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
     public static void main(String[] args) {
         frame = new JFrame("Remnants of the Precursors");
