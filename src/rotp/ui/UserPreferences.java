@@ -63,7 +63,6 @@ public class UserPreferences {
     private static boolean alwaysThorium = false; // modnar: add option to always have Thorium Cells tech
     private static boolean challengeMode = false; // modnar: add option to give AI more initial resources
     private static boolean randomTechStart = false; // modnar: add option to start all Empires with 2 techs, no Artifacts
-    private static int autoSaveTurns = 5; // modnar: add option to auto-save every n-turns
     private static boolean autoColonize = false;
     private static String autoBombardMode = AUTOBOMBARD_NO;
     private static String displayMode = WINDOW_MODE;
@@ -145,8 +144,6 @@ public class UserPreferences {
     public static boolean alwaysThorium()    { return alwaysThorium; } // modnar: add option to always have Thorium Cells tech
     public static boolean challengeMode()    { return challengeMode; } // modnar: add option to give AI more initial resources
     public static boolean randomTechStart()  { return randomTechStart; } // modnar: add option to start all Empires with 2 techs, no Artifacts
-    public static int autoSaveTurns()       { return autoSaveTurns; } // modnar: add option to auto-save every n-turns
-    public static void autoSaveTurns(int i) { setAutoSaveTurns(i); } // modnar: add option to auto-save every n-turns
     public static int screenSizePct()       { return screenSizePct; }
     public static void screenSizePct(int i) { setScreenSizePct(i); }
     public static int backupTurns()         { return backupTurns; }
@@ -216,7 +213,6 @@ public class UserPreferences {
             out.println(keyFormat("ALWAYS_THORIUM")+ yesOrNo(alwaysThorium)); // modnar: add option to always have Thorium Cells tech
             out.println(keyFormat("CHALLENGE_MODE")+ yesOrNo(challengeMode)); // modnar: add option to give AI more initial resources
             out.println(keyFormat("RANDOM_TECH_START")+ yesOrNo(randomTechStart)); // modnar: add option to start all Empires with 2 techs, no Artifacts
-            out.println(keyFormat("AUTO_SAVE_TURNS")+ autoSaveTurns()); // modnar: add option to auto-save every n-turns
             out.println(keyFormat("LANGUAGE")+ languageDir());
             for (String raceKey: raceKeys) 
               out.println(keyFormat(raceKey)+raceNames.get(raceKey));
@@ -261,7 +257,6 @@ public class UserPreferences {
             case "ALWAYS_THORIUM": alwaysThorium = yesOrNo(val); return; // modnar: add option to always have Thorium Cells tech
             case "CHALLENGE_MODE": challengeMode = yesOrNo(val); return; // modnar: add option to give AI more initial resources
             case "RANDOM_TECH_START": randomTechStart = yesOrNo(val); return; // modnar: add option to start all Empires with 2 techs, no Artifacts
-            case "AUTO_SAVE_TURNS": autoSaveTurns(Integer.valueOf(val)); return; // modnar: add option to auto-save every n-turns
             case "LANGUAGE":     selectLanguage(val); return;
             default:
                 raceNames.put(key, val); break;
@@ -278,11 +273,6 @@ public class UserPreferences {
     }
     private static String languageDir() {
         return LanguageManager.selectedLanguageDir();
-    }
-    // modnar: add option to auto-save every n-turns
-    private static void setAutoSaveTurns(int i) {
-        // bound value to be at least 0 (meaning no auto-saves)
-        autoSaveTurns = (int)Math.max(0,i);
     }
     private static void setScreenSizePct(int i) {
         screenSizePct = Math.max(50,Math.min(i,100));
