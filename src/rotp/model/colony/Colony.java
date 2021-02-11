@@ -41,6 +41,7 @@ import rotp.model.incidents.ColonyInvadedIncident;
 import rotp.model.planet.Planet;
 import rotp.model.ships.Design;
 import rotp.model.ships.ShipDesign;
+import rotp.model.ships.ShipDesignLab;
 import rotp.model.tech.Tech;
 import rotp.model.tech.TechMissileWeapon;
 import rotp.model.tech.TechTree;
@@ -376,6 +377,9 @@ public final class Colony implements Base, IMappedObject, Serializable {
 	
 	public void setHomeworldValues() {
         Empire emp = empire();
+        ShipDesignLab lab = emp.shipLab();
+        ShipDesign scout = lab.scoutDesign();
+        ShipDesign colony = lab.colonyDesign();
 		
 		// modnar: normal resources for player or non-challengeMode
 		if (emp.isPlayer() || !challengeMode) {
@@ -384,8 +388,10 @@ public final class Colony implements Base, IMappedObject, Serializable {
         industry().factories(30);
         industry().previousFactories(30);
 
-        galaxy().ships.buildShips(emp.id, starSystem().id, empire().shipLab().scoutDesign().id(), 2);
-        galaxy().ships.buildShips(emp.id, starSystem().id, empire().shipLab().colonyDesign().id(), 1);
+        galaxy().ships.buildShips(emp.id, starSystem().id, scout.id(), 2);
+        galaxy().ships.buildShips(emp.id, starSystem().id, colony.id(), 1);
+        lab.recordConstruction(scout, 2);
+        lab.recordConstruction(colony, 1);
 		}
 		// modnar: add extra starting resources, if challengeMode and AI
 		// double initial ships, increase pop/factories to approximately double initial production
@@ -395,8 +401,10 @@ public final class Colony implements Base, IMappedObject, Serializable {
         industry().factories(80);
         industry().previousFactories(80);
 
-        galaxy().ships.buildShips(emp.id, starSystem().id, empire().shipLab().scoutDesign().id(), 4);
-        galaxy().ships.buildShips(emp.id, starSystem().id, empire().shipLab().colonyDesign().id(), 2);
+        galaxy().ships.buildShips(emp.id, starSystem().id, scout.id(), 4);
+        galaxy().ships.buildShips(emp.id, starSystem().id, colony.id(), 2);
+        lab.recordConstruction(scout, 4);
+        lab.recordConstruction(colony, 2);
 		}
     }
 

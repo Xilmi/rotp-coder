@@ -932,6 +932,7 @@ public class PlanetsUI extends BasePanel implements SystemViewer {
 
             g.setFont(narrowFont(36));
             String str = player().sv.name(sys.id);
+            scaledFont(g, str, w-s30, 36, 24);
             int y0 = s32; //modnar: move colony name up due to increase planet size
             int x0 = s25;
             drawBorderedString(g, str, 2, x0, y0, Color.black, SystemPanel.orangeText);
@@ -1232,7 +1233,7 @@ public class PlanetsUI extends BasePanel implements SystemViewer {
             g.setColor(sliderBoxBlue);
             g.setFont(narrowFont(18));
             String name = c.shipyard().design().name();
-            scaledFont(g, name, barW-s5, 18, 14);
+            scaledFont(g, name, barW-s5, 18, 8);
             int sw = g.getFontMetrics().stringWidth(name);
             int x0 = barX+((barW-sw)/2);
             g.drawString(name, x0, barY+s16);
@@ -1269,7 +1270,7 @@ public class PlanetsUI extends BasePanel implements SystemViewer {
                 if (click)
                     softClick();
                 c.shipyard().goToNextDesign();
-                parent.repaint();
+                instance.repaint();
             }
         }
         public void prevShipDesign(boolean click) {
@@ -1285,7 +1286,7 @@ public class PlanetsUI extends BasePanel implements SystemViewer {
                 if (click)
                     softClick();
                 c.shipyard().goToPrevDesign();
-                parent.repaint();
+                instance.repaint();
             }
         }
         private void incrementBuildLimit() {
