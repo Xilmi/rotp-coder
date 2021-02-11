@@ -53,7 +53,7 @@ public class UserPreferences {
     
     
     private static final String PREFERENCES_FILE = "Remnants.cfg";
-    private static final int MAX_BACKUP_TURNS = 10;
+    private static final int MAX_BACKUP_TURNS = 20; // modnar: change max turns between backups to 20
     private static final String keyFormat = "%-20s: ";
     private static boolean showMemory = false;
     private static boolean playMusic = true;
@@ -67,11 +67,11 @@ public class UserPreferences {
     private static String autoBombardMode = AUTOBOMBARD_NO;
     private static String displayMode = WINDOW_MODE;
     private static String graphicsMode = GRAPHICS_HIGH;
-    private static String texturesMode = TEXTURES_MAP; // modnar: set default texture only map, no interface
+    private static String texturesMode = TEXTURES_MAP; // modnar: set default texture to only map, no interface
     private static float uiTexturePct = 0.20f;
     private static int screenSizePct = 93;
     private static final HashMap<String, String> raceNames = new HashMap<>();
-    private static int backupTurns = 0;
+    private static int backupTurns = 5; // modnar: change default turns between backups to 5
 
     public static boolean showMemory()      { return showMemory; }
     public static void toggleMemory()       { showMemory = !showMemory; save(); }
@@ -154,10 +154,10 @@ public class UserPreferences {
         return prev != backupTurns;
     }
     public static void toggleBackupTurns() {
-        if (backupTurns >= MAX_BACKUP_TURNS)
+        if ((backupTurns >= MAX_BACKUP_TURNS) || (backupTurns < 0)) // modnar: add negative check
             backupTurns = 0;
-        else
-            backupTurns++;
+        else // modnar: change backupTurns to be: 0, 1, 5 ,10, 20
+            backupTurns = (int) Math.round(1.0f + 4.87f*backupTurns - 0.93f*Math.pow(backupTurns, 2) + 0.063f*Math.pow(backupTurns, 3) );
         save();
     }
     public static void toggleYearDisplay()    { displayYear = !displayYear; save(); }
