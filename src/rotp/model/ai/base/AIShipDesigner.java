@@ -29,25 +29,11 @@ import rotp.model.ships.ShipWeapon;
 import rotp.util.Base;
 
 public class AIShipDesigner implements Base, ShipDesigner {
-    private static final int OBS_DESTROYER_TURNS = 20;
-    private static final int OBS_FIGHTER_TURNS = 16;
-    private static final int OBS_BOMBER_TURNS = 12;
+    private static final int OBS_DESTROYER_TURNS = 10; // modnar: reduce obs_turns
+    private static final int OBS_FIGHTER_TURNS = 8; // modnar: reduce obs_turns
+    private static final int OBS_BOMBER_TURNS = 9; // modnar: reduce obs_turns
     private static final int OBS_COLONY_TURNS = 8;
     private static final int OBS_SCOUT_TURNS = 1;
-    
-    // modnar: scale military ship obsolete turn counts using the current turn
-    // attempt to allow AI more opportunities to use fleet before scraping
-    // (currentTurn + 100) / (currentTurn + 40))
-    // approx. 2.5 times as long before obsolete at Turn 1
-    // approx. 2.0 times as long before obsolete at Turn 20
-    // approx. 1.5 times as long before obsolete at Turn 80
-    // approx. 1.25 times as long before obsolete at Turn 200
-    private int currentTurn = galaxy().currentTurn();
-    private float obsolete_scale = (float) (currentTurn + 100)/(currentTurn + 40);
-    
-    private int OBS_DESTROYER_TURNS_scale = (int) Math.ceil(OBS_DESTROYER_TURNS * obsolete_scale);
-    private int OBS_FIGHTER_TURNS_scale = (int) Math.ceil(OBS_FIGHTER_TURNS * obsolete_scale);
-    private int OBS_BOMBER_TURNS_scale = (int) Math.ceil(OBS_BOMBER_TURNS * obsolete_scale);
 
     private final Empire empire;
     private int[] shipCounts;
@@ -189,24 +175,74 @@ public class AIShipDesigner implements Base, ShipDesigner {
         
         // recalculate current design's damage vs. current targets
         ShipDesign currDesign = lab.bomberDesign();
-
+        int currSlot = currDesign.id();
+        
         // if we don't have any faster engines
         if (currDesign.engine() == lab.fastestEngine()) {
+            // modnar: change this check to 15%, remove absolute free space check
             // and if the design has less than 10% free space or has less than 25/50/75/100 free space, we assume the redesign has no sense
             // 25/50/75/100 may be a too straight-line set of values
-            if ((currDesign.availableSpace()/(currDesign.totalSpace()) < 0.1f) || (currDesign.availableSpace() < (currDesign.size()+1) * 25)) {
+            if ((currDesign.availableSpace()/(currDesign.totalSpace()) < 0.15f)) {
                 // we're fairly certain AI packed the ship before and if the current modules haven't shrinked enough,
-                // that means we don't have enough new tech to make the new design markedly better            
-                currDesign.remainingLife++;
+                // that means we don't have enough new tech to make the new design markedly better
                 return;
             }
         }
-
-        int currSlot = currDesign.id();
         
         // find best hypothetical design vs current targets
         ShipDesign newDesign = newBomberDesign(currDesign.size());
-
+        
+        if (newDesign.matchesDesign(currDesign))
+            return;
+        
+        // modnar: use combined engine, shield, attack level, armor, and damage/BC to justify switching
+        // re-ordered to always check first
+        // one level increase in engine == ~1.22x (from warp-1 to warp 2), ~1.12x (from warp-3 to warp 4), ~1.07x (from warp-6 to warp 7)
+        // one level increase in shield or attack level == 1.1x
+        // one level increase in armor == ~1.22x to ~1.07x
+        float engineImprv = (float) Math.sqrt( (newDesign.warpSpeed() + 1) / (currDesign.warpSpeed() + 1) );
+        float shieldImprv = (float) ( 1.0f + (newDesign.shieldLevel() - currDesign.shieldLevel())/10.0f );
+        float hitChanceImprv = (float) ( 1.0f + (newDesign.attackLevel() - currDesign.attackLevel())/10.0f );
+        float armorImprv = (float) Math.sqrt(newDesign.hits() / currDesign.hits());
+        
+        // modnar: factor in cost with firepower
+        // modnar: NewShipTemplate.perTurnDamage was already done in NewShipTemplate to ensure better damage
+        // use slightly different damage measure for balance
+        float oppShield = lab.bestEnemyPlanetaryShieldLevel();
+        float newDmgPerBC = newDesign.firepower(oppShield) / newDesign.cost();
+        float currDmgPerBC = currDesign.firepower(oppShield) / currDesign.cost();
+        float dmgRatio = newDmgPerBC / currDmgPerBC;
+        
+        // switch to new design when damage is floatd
+        // more willing to upgrade when not at war
+        // modnar: adjust upgradeThreshold value
+        float upgradeThreshold = empire.atWar() ? 1.5f : 1.25f;
+        float upgradeChance = dmgRatio * engineImprv * shieldImprv * hitChanceImprv * armorImprv;
+        if (upgradeChance < upgradeThreshold)
+            return;
+        
+        // modnar: after passing combined check, mark current design obsolete
+        // mark existing design obsolete
+        currDesign.becomeObsolete(OBS_BOMBER_TURNS);
+        
+        // if we have very few fighters actually in use, go ahead and
+        // scrap/replace now
+        float bcValue = currDesign.cost()*shipCounts[currDesign.id()];
+        // modnar: scrap easier, 1/2 turn of total Empire production
+        float civProd = empire.totalPlanetaryProduction();
+        boolean easyToReplace = bcValue <= 0.5f*civProd;
+        
+        if (easyToReplace) {
+            // modnar: setting the design name here seems to cause the blank ship name issue seen, comment out
+            //newDesign.name(currDesign.name());
+            //if  (newDesign.size() == currDesign.size())
+            //    newDesign.iconKey(currDesign.iconKey());
+            lab.scrapDesign(currDesign);
+            log("Bomber easy to replace");
+            lab.setBomberDesign(newDesign, currSlot);
+            return;
+        }
+        
         // if currDesign is obsolete, replace it immediately
         if (currDesign.obsolete() && (currDesign.remainingLife() < 1)) {
             lab.scrapDesign(currDesign);
@@ -214,40 +250,7 @@ public class AIShipDesigner implements Base, ShipDesigner {
             lab.setBomberDesign(newDesign, currSlot);
             return;            
         }
-
-        if (currDesign.matchesDesign(newDesign))
-            return;
-
-        float oppShield = lab.bestEnemyPlanetaryShieldLevel();
-        float bcValue = currDesign.cost()*shipCounts[currDesign.id()];
-        boolean easyToReplace = bcValue <= 500; // modnar: scrap easier, change from 100
         
-        if (easyToReplace) {
-            lab.scrapDesign(currDesign);
-            log("Bomber easy to replace");
-            lab.setBomberDesign(newDesign, currSlot);
-            return;
-        }
-            
-        // WE HAVE BOMBERS IN USE... VERIFY THIS UPGRADE JUSTIFIES SWITCHING OVER
-        boolean betterEngine = (newDesign.engine().warp() > currDesign.engine().warp());
-        boolean betterArmor = (newDesign.armor().sequence() > currDesign.armor().sequence());
-
-        float computerAdj = (newDesign.computer().level()+1) / (currDesign.computer().level()+1);
-        float manvAdj = (newDesign.maneuver().level()+1) / (currDesign.maneuver().level()+1);
-        float dmgRatio = newDesign.firepower(oppShield)/ currDesign.firepower(oppShield);
-
-        // multiply various upgrade conditions... (1.05 * 1.25 * ... etc)
-        // more willing to upgrade when not at war
-        float upgradeThreshold = empire.atWar() ? 2 : 1.5f;
-        float upgradeChance = dmgRatio * computerAdj * manvAdj;
-
-        if (!betterEngine && !betterArmor && (upgradeChance < upgradeThreshold) )
-            return;
-
-        // mark existing design obsolete
-        currDesign.becomeObsolete(OBS_BOMBER_TURNS_scale); // modnar: use scaled OBS_TURNS
-
         // check for an available slot for the new design
         int slot = lab.availableDesignSlot();
         
@@ -260,7 +263,7 @@ public class AIShipDesigner implements Base, ShipDesigner {
             lab.setBomberDesign(newDesign, currSlot);
             return;
         }
-       
+        
         // if there is a slot available, use it for the new design
         if (slot > 0) {
             log("Slot available: Bomber upgrade chance:"+upgradeChance);
@@ -273,24 +276,76 @@ public class AIShipDesigner implements Base, ShipDesigner {
         
         // recalculate current design's damage vs. current targets
         ShipDesign currDesign = lab.fighterDesign();
-
+        int currSlot = currDesign.id();
+        
         // if we don't have any faster engines
         if (currDesign.engine() == lab.fastestEngine()) {
+            // modnar: change this check to 15%, remove absolute free space check
             // and if the design has less than 10% free space or has less than 25/50/75/100 free space, we assume the redesign has no sense
             // 25/50/75/100 may be a too straight-line set of values
-            if ((currDesign.availableSpace()/(currDesign.totalSpace()) < 0.1f) || (currDesign.availableSpace() < (currDesign.size()+1) * 25)) {
+            if ((currDesign.availableSpace()/(currDesign.totalSpace()) < 0.15f)) {
                 // we're fairly certain AI packed the ship before and if the current modules haven't shrinked enough,
                 // that means we don't have enough new tech to make the new design markedly better
                 return;
             }
         }
-
-        int currSlot = currDesign.id();
-    //    ShipFighterTemplate.setPerTurnDamage(currDesign, empire());
-        NewShipTemplate.setPerTurnShipDamage(currDesign, empire());
-
+        
+        // ShipFighterTemplate.setPerTurnDamage(currDesign, empire());
+        // NewShipTemplate.setPerTurnShipDamage(currDesign, empire()); // modnar: not needed
+        
         // find best hypothetical design vs current targets
         ShipDesign newDesign = newFighterDesign(currDesign.size());
+        
+        if (currDesign.matchesDesign(newDesign))
+            return;
+        
+        // modnar: use combined engine, shield, attack level, armor, and damage/BC to justify switching
+        // re-ordered to always check first
+        // one level increase in engine == ~1.22x (from warp-1 to warp 2), ~1.12x (from warp-3 to warp 4), ~1.07x (from warp-6 to warp 7)
+        // one level increase in shield or attack level == 1.1x
+        // one level increase in armor == ~1.22x to ~1.07x
+        float engineImprv = (float) Math.sqrt( (newDesign.warpSpeed() + 1) / (currDesign.warpSpeed() + 1) );
+        float shieldImprv = (float) ( 1.0f + (newDesign.shieldLevel() - currDesign.shieldLevel())/10.0f );
+        float hitChanceImprv = (float) ( 1.0f + (newDesign.attackLevel() - currDesign.attackLevel())/10.0f );
+        float armorImprv = (float) Math.sqrt(newDesign.hits() / currDesign.hits());
+        
+        // modnar: use firepowerAntiShip, factor in cost
+        // modnar: NewShipTemplate.perTurnDamage was already done in NewShipTemplate to ensure better damage
+        // use slightly different damage measure for balance
+        float oppShield = lab.bestEnemyShieldLevel();
+        float newDmgPerBC = newDesign.firepowerAntiShip(oppShield) / newDesign.cost();
+        float currDmgPerBC = currDesign.firepowerAntiShip(oppShield) / currDesign.cost();
+        float dmgRatio = newDmgPerBC / currDmgPerBC;
+        
+        // switch to new design when damage is floatd
+        // more willing to upgrade when not at war
+        // modnar: adjust upgradeThreshold value
+        float upgradeThreshold = empire.atWar() ? 1.5f : 1.25f;
+        float upgradeChance = dmgRatio * engineImprv * shieldImprv * hitChanceImprv * armorImprv;
+        if (upgradeChance < upgradeThreshold)
+            return;
+        
+        // modnar: after passing combined check, mark current design obsolete
+        // mark existing design obsolete
+        currDesign.becomeObsolete(OBS_FIGHTER_TURNS);
+        
+        // if we have very few fighters actually in use, go ahead and
+        // scrap/replace now
+        float bcValue = currDesign.cost()*shipCounts[currDesign.id()];
+        // modnar: scrap easier, 1/2 turn of total Empire production
+        float civProd = empire.totalPlanetaryProduction();
+        boolean easyToReplace = bcValue <= 0.5f*civProd;
+        
+        if (easyToReplace) {
+            // modnar: setting the design name here seems to cause the blank ship name issue seen, comment out
+            //newDesign.name(currDesign.name());
+            //if  (newDesign.size() == currDesign.size())
+            //    newDesign.iconKey(currDesign.iconKey());
+            lab.scrapDesign(currDesign);
+            log("Fighter easy to replace");
+            lab.setFighterDesign(newDesign, currSlot);
+            return;
+        }
         
         // if currDesign is obsolete, replace it immediately with new design
         if (currDesign.obsolete() && (currDesign.remainingLife() < 1)) {
@@ -299,38 +354,7 @@ public class AIShipDesigner implements Base, ShipDesigner {
             lab.setFighterDesign(newDesign, currSlot);
             return;            
         }
-        if (currDesign.matchesDesign(newDesign))
-            return;
-
-        // if we have very few fighters actually in use, go ahead and
-        // scrap/replace now
-        float bcValue = currDesign.cost()*shipCounts[currDesign.id()];
-        boolean easyToReplace = bcValue <= 500; // modnar: scrap easier, change from 100
         
-        if (easyToReplace) {
-            lab.scrapDesign(currDesign);
-            log("Fighter easy to replace");
-            lab.setFighterDesign(newDesign, currSlot);
-            return;
-        }
-        
-        // WE HAVE FIGHTERS IN USE... VERIFY THIS UPGRADE JUSTIFIES SWITCHING OVER
-
-        // factor in speed improvements when determining if new design is better
-        // i.e. wrp 5, 100 dmg is better than wrp 3, 120 dmg
-        float engineImprv = (float) (newDesign.engine().warp()+1)/ currDesign.engine().warp();
-        float dmgRatio = newDesign.perTurnDamage() / currDesign.perTurnDamage();
-
-        // switch to new design when damage is floatd
-        // more willing to upgrade when not at war
-        float upgradeThreshold = empire.atWar() ? 2 : 1.5f;
-        float upgradeChance = dmgRatio * engineImprv;
-        if (upgradeChance < upgradeThreshold)
-            return;
-
-        // mark existing design obsolete
-        currDesign.becomeObsolete(OBS_FIGHTER_TURNS_scale); // modnar: use scaled OBS_TURNS
-
         // check for an available slot for the new design
         int slot = lab.availableDesignSlot();
         
@@ -343,7 +367,7 @@ public class AIShipDesigner implements Base, ShipDesigner {
             lab.setFighterDesign(newDesign, currSlot);
             return;
         }
-       
+        
         // if there is a slot available, use it for the new design
         if (slot > 0) {
             log("Slot available: Fighter upgrade chance:"+upgradeChance);
@@ -356,65 +380,85 @@ public class AIShipDesigner implements Base, ShipDesigner {
         
         // recalculate current design's damage vs. current targets
         ShipDesign currDesign = lab.destroyerDesign();
-
+        int currSlot = currDesign.id();
+        
         // if we don't have any faster engines
         if (currDesign.engine() == lab.fastestEngine()) {
+            // modnar: change this check to 15%, remove absolute free space check
             // and if the design has less than 10% free space or has less than 25/50/75/100 free space, we assume the redesign has no sense
             // 25/50/75/100 may be a too straight-line set of values
-            if ((currDesign.availableSpace()/(currDesign.totalSpace()) < 0.1f) || (currDesign.availableSpace() < (currDesign.size()+1) * 25)) {
+            if ((currDesign.availableSpace()/(currDesign.totalSpace()) < 0.15f)) {
                 // we're fairly certain AI packed the ship before and if the current modules haven't shrinked enough,
-                // that means we don't have enough new tech to make the new design markedly better            
-                currDesign.remainingLife++;
+                // that means we don't have enough new tech to make the new design markedly better
                 return;
             }
         }
-
-        int currSlot = currDesign.id();
+        
         // ShipDestroyerTemplate.setPerTurnDamage(currDesign, empire());
-        NewShipTemplate.setPerTurnShipDamage(currDesign, empire);
-
+        // NewShipTemplate.setPerTurnShipDamage(currDesign, empire); // modnar: not needed
+        
         // find best hypothetical design vs current targets
         ShipDesign newDesign = newDestroyerDesign(currDesign.size());
         
-       // if currDesign is obsolete, replace it immediately with new design
+        if (currDesign.matchesDesign(newDesign)) 
+            return;
+        
+        // modnar: use combined engine, shield, attack level, armor, and damage/BC to justify switching
+        // re-ordered to always check first
+        // one level increase in engine == ~1.22x (from warp-1 to warp 2), ~1.12x (from warp-3 to warp 4), ~1.07x (from warp-6 to warp 7)
+        // one level increase in shield or attack level == 1.1x
+        // one level increase in armor == ~1.22x to ~1.07x
+        float engineImprv = (float) Math.sqrt( (newDesign.warpSpeed() + 1) / (currDesign.warpSpeed() + 1) );
+        float shieldImprv = (float) ( 1.0f + (newDesign.shieldLevel() - currDesign.shieldLevel())/10.0f );
+        float hitChanceImprv = (float) ( 1.0f + (newDesign.attackLevel() - currDesign.attackLevel())/10.0f );
+        float armorImprv = (float) Math.sqrt(newDesign.hits() / currDesign.hits());
+        
+        // modnar: use firepowerAntiShip, factor in cost
+        // modnar: NewShipTemplate.perTurnDamage was already done in NewShipTemplate to ensure better damage
+        // use slightly different damage measure for balance
+        float oppShield = lab.bestEnemyShieldLevel();
+        float newDmgPerBC = newDesign.firepowerAntiShip(oppShield) / newDesign.cost();
+        float currDmgPerBC = currDesign.firepowerAntiShip(oppShield) / currDesign.cost();
+        float dmgRatio = newDmgPerBC / currDmgPerBC;
+        
+        // switch to new design when damage is floatd
+        // more willing to upgrade when not at war
+        // modnar: adjust upgradeThreshold value
+        float upgradeThreshold = empire.atWar() ? 1.5f : 1.25f;
+        float upgradeChance = dmgRatio * engineImprv * shieldImprv * hitChanceImprv * armorImprv;
+        if (upgradeChance < upgradeThreshold)
+            return;
+        
+        // modnar: after passing combined check, mark current design obsolete
+        // mark existing design obsolete
+        currDesign.becomeObsolete(OBS_DESTROYER_TURNS);
+        
+        // if we have very few destroyers actually in use, go ahead and
+        // scrap/replace now
+        float bcValue = currDesign.cost()*shipCounts[currDesign.id()];
+        // modnar: scrap easier, 1 turn of total Empire production
+        float civProd = empire.totalPlanetaryProduction();
+        boolean easyToReplace = bcValue <= 1.0f*civProd;
+        
+        if (easyToReplace) {
+            // modnar: setting the design name here seems to cause the blank ship name issue seen, comment out
+            //newDesign.name(currDesign.name());
+            //if  (newDesign.size() == currDesign.size())
+            //    newDesign.iconKey(currDesign.iconKey());
+            lab.scrapDesign(currDesign);
+            log("Destroyer easy to replace");
+            lab.setDestroyerDesign(newDesign, currSlot);
+            return;
+        }
+        
+        // if currDesign is obsolete, replace it immediately with new design
         if (currDesign.obsolete() && (currDesign.remainingLife() < 1)) {
             lab.scrapDesign(currDesign);
             log("Replacing obsolete destroyer design");
             lab.setDestroyerDesign(newDesign, currSlot);
             return;            
         }
-
-        if (currDesign.matchesDesign(newDesign)) 
-            return;
         
-        // if we have very few destroyers actually in use, go ahead and
-        // scrap/replace now
-        float bcValue = currDesign.cost()*shipCounts[currDesign.id()];
-        boolean easyToReplace = bcValue <= 2000; // modnar: scrap easier, change from 1000
-        
-        if (easyToReplace) {
-            lab.scrapDesign(currDesign);
-            log("Destroyer easy to replace");
-            lab.setDestroyerDesign(newDesign, currSlot);
-            return;
-        }
-
-        // WE HAVE DESTROYERS IN USE... VERIFY THIS UPGRADE JUSTIFIES SWITCHING OVER
-
-        // factor in speed improvements when determining if new design is better
-        // i.e. wrp 5, 100 dmg is better than wrp 3, 120 dmg
-        float engineImprv = (float) newDesign.engine().warp() / currDesign.engine().warp();
-        float dmgRatio = newDesign.perTurnDamage() / currDesign.perTurnDamage();
-
-        // switch to new design when damage is floatd
-        float upgradeChance = dmgRatio * engineImprv;
-        float upgradeThreshold = currDesign.buildCount() == 0 ? 1.1f : 2.0f;
-        if (upgradeChance <= upgradeThreshold)
-            return;
-     
-        // mark existing design obsolete
-        currDesign.becomeObsolete(OBS_DESTROYER_TURNS_scale); // modnar: use scaled OBS_TURNS
-
         // check for an available slot for the new design
         int slot = lab.availableDesignSlot();
         
@@ -427,7 +471,7 @@ public class AIShipDesigner implements Base, ShipDesigner {
             lab.setDestroyerDesign(newDesign, currSlot);
             return;
         }
-       
+        
         // if there is a slot available, use it for the new design
         if (slot > 0) {
             log("Slot available: Destroyer upgrade chance:"+upgradeChance);
@@ -543,7 +587,7 @@ public class AIShipDesigner implements Base, ShipDesigner {
     //    ShipDesign design = ShipFighterTemplate.newDesign(this);
         ShipDesign design = NewShipTemplate.newFighterDesign(this);
         design.mission(ShipDesign.FIGHTER);
-        design.maxUnusedTurns(OBS_FIGHTER_TURNS_scale); // modnar: use scaled OBS_TURNS
+        design.maxUnusedTurns(OBS_FIGHTER_TURNS);
         return design;
     }
     @Override
@@ -551,7 +595,7 @@ public class AIShipDesigner implements Base, ShipDesigner {
     //    ShipDesign design = ShipBomberTemplate.newDesign(this);
         ShipDesign design = NewShipTemplate.newBomberDesign(this);
         design.mission(ShipDesign.BOMBER);
-        design.maxUnusedTurns(OBS_BOMBER_TURNS_scale); // modnar: use scaled OBS_TURNS
+        design.maxUnusedTurns(OBS_BOMBER_TURNS);
         return design;
     }
     @Override
@@ -559,7 +603,7 @@ public class AIShipDesigner implements Base, ShipDesigner {
     //    ShipDesign design = ShipDestroyerTemplate.newDesign(this);
         ShipDesign design = NewShipTemplate.newDestroyerDesign(this);
         design.mission(ShipDesign.DESTROYER);
-        design.maxUnusedTurns(OBS_DESTROYER_TURNS_scale); // modnar: use scaled OBS_TURNS
+        design.maxUnusedTurns(OBS_DESTROYER_TURNS);
         return design;
     }
     @Override

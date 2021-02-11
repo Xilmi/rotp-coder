@@ -46,10 +46,11 @@ public class AISpyMaster implements Base, SpyMaster {
         for (EmpireView cv : empire.empireViews()) {
             if ((cv != null) && cv.embassy().contact()) {
                 alone = false;
+                // modnar: more internal security paranoia, scale with difficulty level
                 if (cv.embassy().anyWar())
-                    paranoia += 3; // modnar: more internal security paranoia
+                    paranoia += (int) Math.floor(3 * options().aiProductionModifier());
                 if (cv.embassy().noTreaty())
-                    paranoia += 2; // modnar: more internal security paranoia
+                    paranoia += (int) Math.floor(2 * options().aiProductionModifier());
             }
         }
         if ((paranoia == 0) && !alone)
@@ -91,6 +92,9 @@ public class AISpyMaster implements Base, SpyMaster {
         else   // unity() or alliance()
             maxSpiesNeeded = 0;
 
+        // modnar: scale number of spies with difficulty level
+        maxSpiesNeeded = (int) Math.floor((maxSpiesNeeded * Math.sqrt( options().aiProductionModifier() )));
+        
         // modnar: reduce allocation to 1 tick per spy needed, better for larger games with more empires
         // 0.5% (1 tick) spending for each spy needed
         if (v.spies().numActiveSpies() >= maxSpiesNeeded)

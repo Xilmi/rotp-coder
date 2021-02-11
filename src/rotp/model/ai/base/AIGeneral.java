@@ -294,7 +294,7 @@ public class AIGeneral implements Base, General {
         float bcMultiplier = 1 + (empire.sv.hostilityLevel(sys.id));
         
         // modnar: include enemyFleetSize, factoring in relative tech levels
-        float bcNeeded = (baseBCPresent*4 + 2*enemyFleetSize)*(targetTech+10.0f)/(civTech+10.0f) + bcMultiplier*civProd/16;
+        float bcNeeded = (baseBCPresent*3 + 1.5f*enemyFleetSize)*(targetTech+10.0f)/(civTech+10.0f) + bcMultiplier*civProd/6;
         
         // modnar: balance invasion fleet to use 50% destroyers, 30% bombers, and 20% fighters
         int destroyersNeeded = (int) Math.ceil(0.5f*bcNeeded/empire.shipLab().destroyerDesign().cost());
@@ -442,7 +442,7 @@ public class AIGeneral implements Base, General {
         float bcMultiplier = 1 + (empire.sv.hostilityLevel(sys.id)/2);
         
         // modnar: test fleet sizes, include enemyFleetSize, factoring in relative tech levels
-        float bcNeeded = (baseBCPresent*4 + 2*fleetSize)*(targetTech+10.0f)/(civTech+10.0f) + bcMultiplier*civProd/16;
+        float bcNeeded = (baseBCPresent*3 + 1.5f*fleetSize)*(targetTech+10.0f)/(civTech+10.0f) + bcMultiplier*civProd/6;
         
         // modnar: bombing fleet to use 50% destroyers, 30% bombers, and 20% fighters
         int destroyersNeeded = (int) Math.ceil(0.5f*bcNeeded/empire.shipLab().destroyerDesign().cost());
@@ -472,7 +472,7 @@ public class AIGeneral implements Base, General {
         float bcMultiplier = 1 + (empire.sv.hostilityLevel(sys.id)/2);
         
         // modnar: test fleet sizes, include enemyFleetSize, factoring in relative tech levels
-        float bcNeeded = (baseBCPresent*4 + 2*fleetSize)*(targetTech+10.0f)/(civTech+10.0f) + bcMultiplier*civProd/24;
+        float bcNeeded = (baseBCPresent*3 + 1.5f*fleetSize)*(targetTech+10.0f)/(civTech+10.0f) + bcMultiplier*civProd/10;
         
         // modnar: bombing fleet to use 50% destroyers, 30% bombers, and 20% fighters
         int destroyersNeeded = (int) Math.ceil(0.5f*bcNeeded/empire.shipLab().destroyerDesign().cost());

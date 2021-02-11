@@ -366,14 +366,28 @@ public class AIGovernor implements Base, Governor {
         }
         StarSystem sys = col.starSystem();
         int currBases = col.defense().missileBases();
+        
+        // modnar: scale desired base count based on difficulty, rich-ness, and artifact level
+        // (no decrease with poor-ness, since they will become easy tech capture targets)
+        float baseMultiplier = options().aiProductionModifier();
+        if (empire.sv.isArtifact(sys.id))
+            baseMultiplier *= 1.5f;
+        else if (empire.sv.isOrionArtifact(sys.id))
+            baseMultiplier *= 2.5f;
+        
+        if (empire.sv.isUltraRich(sys.id))
+            baseMultiplier *= 2.5f;
+        else if (empire.sv.isRich(sys.id))
+            baseMultiplier *= 1.5f;
+        
         if (sys == null)  // this can happen at startup
             col.defense().maxBases(0);
         else if (empire.sv.isAttackTarget(sys.id))
-            col.defense().maxBases(max(currBases, (int)(col.production()/30))); // modnar: reduce base count
+            col.defense().maxBases(max(currBases, (int)(baseMultiplier * col.production()/30))); 
         else if (empire.sv.isBorderSystem(sys.id))
-            col.defense().maxBases(max(currBases, (int)(col.production()/40))); // modnar: reduce base count
+            col.defense().maxBases(max(currBases, (int)(baseMultiplier * col.production()/40)));
         else
-            col.defense().maxBases(max(currBases, (int)(col.production()/50)));
+            col.defense().maxBases(max(currBases, (int)(baseMultiplier * col.production()/50)));
     }
     @Override
     public int suggestedEmpireTaxLevel() {

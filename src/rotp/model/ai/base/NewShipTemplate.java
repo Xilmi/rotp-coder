@@ -115,23 +115,45 @@ public class NewShipTemplate implements Base {
 
         // race's design cost multiplier for each hull size (set in definition.txt file)
         float[] costMultiplier = new float[5];
-        costMultiplier[0] = race.shipDesignMods[COST_MULT_S];
-        costMultiplier[1] = race.shipDesignMods[COST_MULT_M];
-        costMultiplier[2] = race.shipDesignMods[COST_MULT_L];
-        costMultiplier[3] = race.shipDesignMods[COST_MULT_H];       
+        costMultiplier[0] = (float) Math.sqrt(race.shipDesignMods[COST_MULT_S]); // modnar: scale down cost multiplier
+        costMultiplier[1] = (float) Math.sqrt(race.shipDesignMods[COST_MULT_M]); // modnar: scale down cost multiplier
+        costMultiplier[2] = (float) Math.sqrt(race.shipDesignMods[COST_MULT_L]); // modnar: scale down cost multiplier
+        costMultiplier[3] = (float) Math.sqrt(race.shipDesignMods[COST_MULT_H]); // modnar: scale down cost multiplier
         // add another entry for the current design, using the cost multiplier for its size
-        costMultiplier[4] = costMultiplier[currentDesign.size()];
+        costMultiplier[4] = 100f*costMultiplier[currentDesign.size()];
 
+        // modnar: scale Fighter costs to favor smaller hull sizes
+        // otherwise it could often be the same size or larger than Destroyers
+        if (role == DesignType.FIGHTER) {
+            costMultiplier[0] *= 0.90f;
+            costMultiplier[1] *= 0.95f;
+            costMultiplier[2] *= 1.00f;
+            costMultiplier[3] *= 1.05f;
+            costMultiplier[4] = (float) (costMultiplier[4] * (1.0f + 0.05f*(currentDesign.size() - 2)));
+        }
+        
         // how many ships of each design can we build for virtual tests?
         // use top 5 colonies, with 50% production for ships
-        float shipBudgetBC = shipProductionBudget(ai, 5, 0.5f); 
+        
+        // modnar: this does not make sense, 50% of top 5 colonies and whole counts would mean
+        // only ships which can be built in ~5 turns at 50% production will be considered,
+        // so almost all Huge designs will not be, and Large designs will depend heavily
+        // on the exact budget/cost divisions.
+        // instead, first see if at least one can be build with 3 times that budget.
+        // meaning, do not consider if a Huge ship cannot be built in ~15 turns at 50% production.
+        // then, consider and sort the fractional damage/BC to determine best.
+        float shipBudgetBC = 3.0f * shipProductionBudget(ai, 5, 0.5f); 
 
         SortedMap<Float, ShipDesign> designSorter = new TreeMap<>();
         
         for (int i = 0; i<costMultiplier.length; i++) {
             ShipDesign design = shipDesigns[i];
             // number of whole designs we can build within our budget
-            int count = (int) (shipBudgetBC / (design.cost() * costMultiplier[i]));
+            // modnar: change to float, in order to consider fractional damage/BC
+            float count = (float) (shipBudgetBC / (design.cost() * costMultiplier[i]));
+            // modnar: do not consider designs which cannot be build with shipBudgetBC
+            if (count < 1.0f)
+                count = 0.0f;
             // total damage output for this design
             float designDamage = count * design.perTurnDamage(); 
             designSorter.put(designDamage, design);
@@ -144,17 +166,28 @@ public class NewShipTemplate implements Base {
         ShipDesign d = ai.lab().newBlankDesign(size);
         // engines are always the priority in MOO1 mechanics
         setFastestEngine(ai, d);
+        // modnar: best normal armor is very cost/space efficient for all hull sizes, always set
+        setBestNormalArmor(ai, d);
         // battle computers are always the priority in MOO1 mechanics
-        setBestBattleComputer(ai, d); 
+        // modnar: due to possible cost/space issues at different hull sizes,
+        // don't set best computer, and don't set computers here
+        //setBestBattleComputer(ai, d); 
         
         float totalSpace = d.availableSpace();
         Race race = ai.empire().dataRace();
 
         // initial separation of the free space left onto weapons and non-weapons/specials
-        float moduleSpaceRatio = race.shipDesignMods[MODULE_SPACE];        
+        // modnar: adjust moduleSpaceRatio by ship size
+        // smaller hulls can't fit too many modules/components, should instead try to fit weapons
+        // fine for moduleSpaceRatio to be low, will get weapon leftover with second "loop" below
+        // moduleSpaceRatio += (size - 3)/18
+        float moduleSpaceRatio = race.shipDesignMods[MODULE_SPACE];
+        moduleSpaceRatio = (float) ( moduleSpaceRatio + (size - 3.0f)/18.0f );
         float modulesSpace = totalSpace * moduleSpaceRatio;
 
         // arbitrary initial weighting of what isn't weapons
+        // modnar: set general Computer Weight to be 3
+        int computerWeight = 3;
         // Shield Weight: default 2, bombers/humans 4
         int shieldWeight = role == DesignType.DESTROYER ? (int) race.shipDesignMods[SHIELD_WEIGHT_D]: (int) race.shipDesignMods[SHIELD_WEIGHT_FB] ;
         // ECM Weight: default 1, bombers 3
@@ -163,6 +196,8 @@ public class NewShipTemplate implements Base {
         int maneuverWeight = role == DesignType.FIGHTER ? (int) race.shipDesignMods[MANEUVER_WEIGHT_F]: (int) race.shipDesignMods[MANEUVER_WEIGHT_BD];
         // Armor Weight: default 2, destroyers/bulrathi/silicoid 3
         int armorWeight = role == DesignType.DESTROYER ? (int) race.shipDesignMods[ARMOR_WEIGHT_D]: (int) race.shipDesignMods[ARMOR_WEIGHT_FB]; 
+        // modnar: best armor already set above, reduce armorWeight here to zero
+        armorWeight = 0;
         // Specials Weight: default 1, adjust elsewhere for ship size
         int specialsWeight = (int) race.shipDesignMods[SPECIALS_WEIGHT]; 
         // Same Speed Allowed Flag: default false, alkari/mrrshan true
@@ -187,8 +222,11 @@ public class NewShipTemplate implements Base {
 
         // the sum of shield, ECM, maneuver and armor weights may be not exactly equal to modulesSpace
         // however, unless it isn't 1.0 or close to it of available space after engines and BC, it doesn't matter
-        int weightsSum = shieldWeight + ecmWeight + maneuverWeight + armorWeight + specialsWeight;
+        // modnar: add in computerWeight
+        int weightsSum = computerWeight + shieldWeight + ecmWeight + maneuverWeight + armorWeight + specialsWeight;
 
+        // modnar: add in computerSpace
+        float computerSpace = modulesSpace * computerWeight / weightsSum;
         float shieldSpace = modulesSpace * shieldWeight / weightsSum;
         float ecmSpace = modulesSpace * ecmWeight / weightsSum;
         float maneuverSpace = modulesSpace * maneuverWeight / weightsSum;
@@ -198,33 +236,44 @@ public class NewShipTemplate implements Base {
         // after installing a system we'll inevitably have leftovers
         // so the order of placing the systems will have a minor impact on the ship's design
         // the systems that come first will be most tightly constrained, the systems that come in the end will be more free
+        
+        // modnar: seems like only the first system in the order will be constrained
+        // other later systems will have extra space but the amount will be uncertain
+        // (depending on how well the previous component was able to fit)
+        // therefore, "loop" through key components a second time
+        // after putting on weapons to see if better components could fit
         float leftovers = 0f;
 
         // branches made in the ugly way for clarity
         // specials will be skipped for smaller hulls in the early game, bringing a bit more allowance to the second fitting
         ArrayList<ShipSpecial> raceSpecials = buildRacialSpecialsList(ai);
 
+        // modnar: re-order and add in setFittingBattleComputer, comment out setFittingArmor
+        // there will be second "loop" after weapon fitting
         switch (role) {
             case BOMBER:
+                //leftovers += setFittingArmor(ai, d, armorSpace + leftovers, reinforcedArmorAllowed);
                 leftovers += setFittingSpecial(ai, d, specialsSpace, raceSpecials);
+                leftovers += setFittingBattleComputer(ai, d, computerSpace + leftovers);
                 leftovers += setFittingShields(ai, d, shieldSpace + leftovers);
-                leftovers += setFittingArmor(ai, d, armorSpace + leftovers, reinforcedArmorAllowed);
                 leftovers += setFittingManeuver(ai, d, maneuverSpace + leftovers, sameSpeedAllowed);
                 setFittingECM(ai, d, ecmSpace + leftovers);
                 break;
             case FIGHTER:
+                //leftovers += setFittingArmor(ai, d, armorSpace + leftovers, reinforcedArmorAllowed);
                 leftovers += setFittingSpecial(ai, d, specialsSpace, raceSpecials);
-                leftovers += setFittingArmor(ai, d, armorSpace + leftovers, reinforcedArmorAllowed);
-                leftovers += setFittingECM(ai, d, ecmSpace + leftovers);
+                leftovers += setFittingBattleComputer(ai, d, computerSpace + leftovers);
                 leftovers += setFittingShields(ai, d, shieldSpace + leftovers);
-                setFittingManeuver(ai, d, maneuverSpace + leftovers, sameSpeedAllowed);
+                leftovers += setFittingManeuver(ai, d, maneuverSpace + leftovers, sameSpeedAllowed);
+                setFittingECM(ai, d, ecmSpace + leftovers);
                 break;
             case DESTROYER: 
+                //leftovers += setFittingArmor(ai, d, armorSpace + leftovers, reinforcedArmorAllowed);
                 leftovers += setFittingSpecial(ai, d, specialsSpace, raceSpecials);
-                leftovers += setFittingECM(ai, d, ecmSpace + leftovers);
-                leftovers += setFittingManeuver(ai, d, maneuverSpace + leftovers, sameSpeedAllowed);
+                leftovers += setFittingBattleComputer(ai, d, computerSpace + leftovers);
                 leftovers += setFittingShields(ai, d, shieldSpace + leftovers);
-                setFittingArmor(ai, d, armorSpace + leftovers, reinforcedArmorAllowed);
+                leftovers += setFittingManeuver(ai, d, maneuverSpace + leftovers, sameSpeedAllowed);
+                setFittingECM(ai, d, ecmSpace + leftovers);
                 break;
         }
 
@@ -287,6 +336,29 @@ public class NewShipTemplate implements Base {
                 break;
         }
         
+        // modnar: "loop" through key components a second time
+        // allow same speed maneuver
+        switch (role) {
+            case BOMBER:
+                setFittingManeuver(ai, d, d.availableSpaceForManeuverSlot(), true);
+                setFittingBattleComputer(ai, d, d.availableSpaceForComputerSlot());
+                setFittingECM(ai, d, d.availableSpaceForECMSlot());
+                setFittingShields(ai, d, d.availableSpaceForShieldSlot());
+                break;
+            case FIGHTER:
+                setFittingManeuver(ai, d, d.availableSpaceForManeuverSlot(), true);
+                setFittingBattleComputer(ai, d, d.availableSpaceForComputerSlot());
+                setFittingShields(ai, d, d.availableSpaceForShieldSlot());
+                setFittingECM(ai, d, d.availableSpaceForECMSlot());
+                break;
+            case DESTROYER:
+                setFittingManeuver(ai, d, d.availableSpaceForManeuverSlot(), true);
+                setFittingBattleComputer(ai, d, d.availableSpaceForComputerSlot());
+                setFittingShields(ai, d, d.availableSpaceForShieldSlot());
+                setFittingECM(ai, d, d.availableSpaceForECMSlot());
+                break;
+        }
+        
         ai.lab().nameDesign(d);
         ai.lab().iconifyDesign(d);
         return d;
@@ -308,6 +380,21 @@ public class NewShipTemplate implements Base {
                 return;
         }
     }
+    
+    // modnar: add setFittingBattleComputer
+    private float setFittingBattleComputer(ShipDesigner ai, ShipDesign d, float spaceAllowed) {
+        float initialSpace = d.availableSpace();
+
+        boolean foundIt = false;
+        List<ShipComputer> comps = ai.lab().computers();
+        for (int i=comps.size()-1; (i >= 0) && (!foundIt); i--) {
+            d.computer(comps.get(i));
+            // modnar: add check for availableSpace for doing second "loop"
+            if ( ((initialSpace - d.availableSpace()) <= spaceAllowed) && (d.availableSpace() >= 0.0f) )
+                foundIt = true;
+        }
+        return (spaceAllowed - (initialSpace - d.availableSpace()));
+    }
 
     private float setFittingManeuver(ShipDesigner ai, ShipDesign d, float spaceAllowed, boolean sameSpeedAllowed) {
         float initialSpace = d.availableSpace();
@@ -318,7 +405,8 @@ public class NewShipTemplate implements Base {
             
             d.maneuver(manv);
 
-            if ((initialSpace - d.availableSpace()) > spaceAllowed) {
+            // modnar: add check for availableSpace for doing second "loop"
+            if ( ((initialSpace - d.availableSpace()) > spaceAllowed) || (d.availableSpace() < 0.0f) ) {
                 d.maneuver(prevManv);
             }
             else if ((d.combatSpeed() == prevSpeed) && (!sameSpeedAllowed)) {
@@ -328,6 +416,19 @@ public class NewShipTemplate implements Base {
         return (spaceAllowed - (initialSpace - d.availableSpace()));
     }
 
+    // modnar: add setBestNormalArmor, only normal armor
+    private void setBestNormalArmor(ShipDesigner ai, ShipDesign d){
+        List<ShipArmor> armors = ai.lab().armors();
+        for (int i=armors.size()-1; i >=0; i--) {
+            ShipArmor arm = armors.get(i);
+            if (!arm.reinforced()) {
+                d.armor(armors.get(i));
+                if (d.availableSpace() >= 0)
+                    return;
+            }
+        }
+    }
+    
     private float setFittingArmor(ShipDesigner ai, ShipDesign d, float spaceAllowed, boolean reinforcedArmorAllowed){
         float initialSpace = d.availableSpace();
 
@@ -341,7 +442,8 @@ public class NewShipTemplate implements Base {
             // some races will just never use reinforced armor, I believe, the ones that prefer smaller ships
             if (!arm.reinforced() || (reinforcedArmorAllowed)) {
                 d.armor(armors.get(i));
-                if ((initialSpace - d.availableSpace()) <= spaceAllowed)
+                // modnar: add check for availableSpace for doing second "loop"
+                if ( ((initialSpace - d.availableSpace()) <= spaceAllowed) && (d.availableSpace() >= 0.0f) )
                     foundIt = true;
             }
         }
@@ -355,7 +457,8 @@ public class NewShipTemplate implements Base {
         List<ShipShield> shields = ai.lab().shields();
         for (int i=shields.size()-1; (i >= 0) && (!foundIt); i--) {
             d.shield(shields.get(i));
-            if ((initialSpace - d.availableSpace()) <= spaceAllowed)
+            // modnar: add check for availableSpace for doing second "loop"
+            if ( ((initialSpace - d.availableSpace()) <= spaceAllowed) && (d.availableSpace() >= 0.0f) )
                 foundIt = true;
         }
         return (spaceAllowed - (initialSpace - d.availableSpace()));
@@ -368,7 +471,8 @@ public class NewShipTemplate implements Base {
         List<ShipECM> ecm = ai.lab().ecms();
         for (int i=ecm.size()-1; (i >=0) && (!foundIt); i--) {
             d.ecm(ecm.get(i));
-            if ((initialSpace - d.availableSpace()) <= spaceAllowed)
+            // modnar: add check for availableSpace for doing second "loop"
+            if ( ((initialSpace - d.availableSpace()) <= spaceAllowed) && (d.availableSpace() >= 0.0f) )
                 foundIt = true;
         }
         return (spaceAllowed - (initialSpace - d.availableSpace()));

@@ -335,7 +335,14 @@ public class AIFleetCommander implements Base, FleetCommander {
         // assume that we will terraform  the planet
         value += empire.tech().terraformAdj();
         //multiply *2 for artifacts, *3 for super-artifacts
-        value *= (1+empire.sv.artifactLevel(id));
+        //value *= (1+empire.sv.artifactLevel(id));
+        // modnar: artifactLevel returns 0/6/7 for normal/artifact/orion
+        // replace with explicit *2 and *3
+        if (empire.sv.isArtifact(id))
+            value *= 2;
+        else if (empire.sv.isOrionArtifact(id))
+            value *= 3;
+        
         if (empire.sv.isUltraRich(id))
             value *= 3;
         else if (empire.sv.isRich(id))
