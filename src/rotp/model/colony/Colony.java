@@ -154,6 +154,10 @@ public final class Colony implements Base, IMappedObject, Serializable {
         rebellion = false;
     }
     public float currentProductionCapacity() {
+        // modnar: use direct production capacity formula
+        // formula below is not accurate
+        return production()/maxProduction();
+        /*
         // returns a pct (0 to 1) representing the colony's current
         // production vs its maximum possible formula
         float maxFactories = industry().maxFactories();
@@ -165,6 +169,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         float maxProd = maxFactories + (maxPop * workerProd);
         float currProd = factories + (pop*workerProd);
         return currProd/maxProd;
+        */
     }
     public boolean creatingWaste() {
         int needed = ecology().cleanupAllocationNeeded();
