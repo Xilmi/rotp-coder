@@ -10,7 +10,7 @@ This RotP MOD contains many gameplay additions/changes from the official game ve
 
 - [**coder111 governor mod**](https://github.com/coder111111/rotp-public)
     - [**Automatically Adjusts Colony Spending**](https://i.imgur.com/AhXNE73.png)
-- **Better AI**
+- **Better AI** (many AI Improvements from this MOD has been Integrated into the Base Game with Beta 2.12)
 - [**Many New Map Shapes**](https://i.imgur.com/115jnZb.png)
     - [**Text allows custom player input map shape**](https://i.imgur.com/J5Wr3yL.png) (text/unicode in the Homeworld name [**A**](https://i.imgur.com/UUpH1TK.png), [**B**](https://i.imgur.com/JsZp69f.png), [**C**](https://i.imgur.com/tjkhdYP.png), [**Multi-Line**](https://i.imgur.com/Uf4X8gj.png))
 - [**6 New Playable Races**](https://i.imgur.com/Iza3WpE.jpg)
@@ -18,7 +18,7 @@ This RotP MOD contains many gameplay additions/changes from the official game ve
 - [**Options in Remnants.cfg for New Game Modes**](https://i.imgur.com/OhyMaKj.png)
 - [**New Space Pirates Random Event**](https://i.imgur.com/jBu21Pt.png)
 - [**Quality of Life Improvements**](https://i.imgur.com/lBAVLpV.png)
-    - [**Auto-Saves**](https://i.imgur.com/TfAXG2P.png)
+    - **Turns between Backup Saves Changed to 0, 1, 5, 10, 20**
     - **Increased Minimum Empire Homeworld Separation** (**10 ly**, up from 6 ly in the official version)
         - Reduce Max Number of Empires for Map Sizes
     - **Colony Map Info Shorthand**
