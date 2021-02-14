@@ -1104,14 +1104,19 @@ public final class Empire implements Base, NamedObject, Serializable {
                 // we only use idle (orbiting) fleets
                 continue;
             }
-            // don't send ships orbiting enemy planets, they are obviously needed there!
-            // It's ok to send ships orbiting empty systems
-            if (sf.system().empire() != this && !PlanetType.NONE.equals(sf.system().planet().type().key())) {
-                continue;
-            }
             for (ShipDesign sd: designs) {
                 // must have at least minimum number of ships
                 if (sf.num(sd.id()) >= shipCount) {
+                    // don't send ships orbiting enemy planets, they are obviously needed there!
+                    // It's ok to send ships orbiting empty systems
+                    // Ok, let's make it OK to send away scouts & colony ships, but not "autoattack" ships
+                    if (sd.isArmed() && sd.isAutoAttack()) {
+                        if (sf.system().empire() != this &&
+                                !PlanetType.NONE.equals(sf.system().planet().type().key())) {
+                            continue;
+                        }
+                    }
+
                     if (extraFilter.test(sf, sd)) {
                         fleets.add(sf);
                     }
