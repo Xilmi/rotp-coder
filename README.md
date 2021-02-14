@@ -52,6 +52,8 @@ text in the planetary spending screen. Since version 1.8 Governor is on by defau
 
 Additional features / changelog
 
+* 2.13.3. Merge v2.13b Beta. Fix AutoScout to send out ships from uncolonized systems.
+
 * 2.12.2. Merge v2.12a Beta. Add autoattack option. Make AutoScout, AutoColonize or AutoAttack number of ships 
   configurable. This allows sending several armed ships, not just one. Some tweaks to auto* features- now armed 
   ships won't be sent out if enemy fleet is incoming.
