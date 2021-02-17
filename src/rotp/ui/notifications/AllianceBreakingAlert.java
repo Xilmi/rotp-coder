@@ -16,22 +16,18 @@
 package rotp.ui.notifications;
 
 import rotp.model.empires.Empire;
-import rotp.model.galaxy.StarSystem;
 import rotp.model.game.GameSession;
 
-public class TransportsPerishedAlert extends GameAlert {
+public class AllianceBreakingAlert  extends GameAlert {
     private final Empire empire;
-    private final StarSystem system;
-    public static void create(Empire e, StarSystem s) {
-        GameSession.instance().addAlert(new TransportsPerishedAlert(e,s));
+    public static void create(Empire e) {
+        GameSession.instance().addAlert(new AllianceBreakingAlert(e));
     }
     @Override
     public String description() {
-        return text("MAIN_ALERT_TRANSPORTS_PERISHED", systemName());
+        return text("MAIN_ALERT_ALLIANCE_BREAKING", empire.name());
     }
-    private String systemName() { return player().sv.name(system.id); }
-    private TransportsPerishedAlert(Empire e, StarSystem s) {
+    private AllianceBreakingAlert(Empire e) {
         empire = e;
-        system = s;
     }
 }

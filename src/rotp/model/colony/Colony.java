@@ -108,7 +108,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
             new ColonyIndustry(), new ColonyEcology(), new ColonyResearch() };
 
     private boolean underSiege = false;
-    private boolean keepEcoLockedToClean;
+    private boolean keepEcoLockedToClean; 
     private transient boolean hasNewOrders = false;
     private transient int cleanupAllocation = 0;
     private transient boolean recalcSpendingForNewTaxRate;
@@ -237,10 +237,11 @@ public final class Colony implements Base, IMappedObject, Serializable {
     public int allocationRemaining()              { return MAX_TICKS - totalAmountAllocated(); }
     public float totalPlanetaryResearch()         { 
         float totalBC = research().totalSpending();
+        float productAdj = planet().productionAdj();
         if (empire.divertColonyExcessToResearch()) {
-            totalBC += shipyard().excessSpending();
-            totalBC += defense().excessSpending();
-            totalBC += industry().excessSpending();
+            totalBC += shipyard().excessSpending() / productAdj;
+            totalBC += defense().excessSpending() / productAdj;
+            totalBC += industry().excessSpending() / productAdj;
             totalBC += ecology().excessSpending();
         }        
         float totalRP = totalBC * research().researchBonus();
@@ -248,10 +249,11 @@ public final class Colony implements Base, IMappedObject, Serializable {
     }
     public float totalPlanetaryResearchSpending() { 
         float totalBC = research().totalSpending(); 
+        float productAdj = planet().productionAdj();
         if (empire.divertColonyExcessToResearch()) {
-            totalBC += shipyard().excessSpending();
-            totalBC += defense().excessSpending();
-            totalBC += industry().excessSpending();
+            totalBC += shipyard().excessSpending() / productAdj;
+            totalBC += defense().excessSpending() / productAdj;
+            totalBC += industry().excessSpending() / productAdj;
             totalBC += ecology().excessSpending();
         }
         return totalBC;
@@ -478,9 +480,9 @@ public final class Colony implements Base, IMappedObject, Serializable {
         log("Colony: ", empire.sv.name(starSystem().id),  ": NextTurn [" , shipyard().design().name() , "|" ,str(shipyard().allocation()) , "-"
                     , str(defense().allocation()) , "-" , str(industry().allocation()) , "-" , str(ecology().allocation()) , "-"
                     , str(research().allocation()) , "]");
+        keepEcoLockedToClean = empire().isPlayer() && (allocation[ECOLOGY] <= cleanupAllocation());
         previousPopulation = population;
         reallocationRequired = false;          
-
         ensureProperSpendingRates();
         // if rebelling, nothing happens (only enough prod assumed to clean new
         // waste and maintain existing structures)
@@ -488,7 +490,6 @@ public final class Colony implements Base, IMappedObject, Serializable {
             return;
 
         // after turn is over, we may need to reset ECO spending to adjust for cleanup
-        keepEcoLockedToClean = empire().isPlayer() && (allocation[ECOLOGY] >= cleanupAllocation());
         // make sure that the colony's expenses aren't too high
         empire().governorAI().lowerExpenses(this);
 
@@ -562,12 +563,25 @@ public final class Colony implements Base, IMappedObject, Serializable {
     }
     public void checkEcoAtClean() {
         recalcSpendingForNewTaxRate = false;
-        if (!locked[ECOLOGY]) {
-            int newAlloc = ecology().cleanupAllocationNeeded();
-            if (allocation[ECOLOGY] < newAlloc) {
-                allocation[ECOLOGY] = cleanupAllocation = newAlloc;
-                cleanupSpending(ecology());
-            }        
+        if (locked[ECOLOGY]) 
+            return;
+        
+        int cleanAlloc = ecology().cleanupAllocationNeeded();
+        if (allocation[ECOLOGY] == cleanAlloc)
+            return;
+        
+        // always ensure we are at least at clean
+        if (allocation[ECOLOGY] < cleanAlloc) {
+            allocation[ECOLOGY] = cleanupAllocation = cleanAlloc;
+            cleanupSpending(ecology());
+            return;
+        }
+        
+        // if we are over clean but the colony started its turn at clean
+        // then lower
+        if ((allocation[ECOLOGY] > cleanAlloc) && keepEcoLockedToClean) {
+            allocation[ECOLOGY] = cleanupAllocation = cleanAlloc;
+            cleanupSpending(ecology());
         }
     }
     public void lowerECOToCleanIfEcoComplete() {

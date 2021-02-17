@@ -70,9 +70,11 @@ public interface Diplomat {
     DiplomaticReply acceptOfferAlliance(Empire e);
     DiplomaticReply refuseOfferAlliance(Empire e);
     DiplomaticReply acceptOfferJointWar(Empire e, Empire target);
-    DiplomaticReply refuseOfferJointWar(Empire e);
+    DiplomaticReply refuseOfferJointWar(Empire e, Empire target);
 
     boolean willingToOfferAlliance(Empire e);
+    boolean wantToDeclareWarOfHate(EmpireView v);
+    boolean wantToDeclareWarOfOpportunity(EmpireView v);
     
     List<Tech> techsAvailableForRequest(Empire emp);
     List<Tech> techsRequestedForCounter(Empire emp, Tech t);

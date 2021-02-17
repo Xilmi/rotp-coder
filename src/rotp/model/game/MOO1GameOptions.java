@@ -79,6 +79,7 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
     private String selectedTerraformingOption;
     private String selectedFuelRangeOption;
     private String selectedRandomizeAIOption;
+    private String selectedAIHostilityOption;
 
     private transient GalaxyShape galaxyShape;
 
@@ -141,27 +142,27 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
     @Override
     public void selectedGameDifficulty(String s) { selectedGameDifficulty = s; }
     @Override
-    public String selectedResearchRate()         { return selectedResearchRate; }
+    public String selectedResearchRate()         { return selectedResearchRate == null ? RESEARCH_NORMAL : selectedResearchRate; }
     @Override
     public void selectedResearchRate(String s)   { selectedResearchRate = s; }
     @Override
-    public String selectedTechTradeOption()         { return selectedTechTradeOption; }
+    public String selectedTechTradeOption()         { return selectedTechTradeOption == null ? TECH_TRADING_YES : selectedTechTradeOption; }
     @Override
     public void selectedTechTradeOption(String s)   { selectedTechTradeOption = s; }
     @Override
-    public String selectedRandomEventOption()       { return selectedRandomEventOption; }
+    public String selectedRandomEventOption()       { return selectedRandomEventOption == null ? RANDOM_EVENTS_ON : selectedRandomEventOption; }
     @Override
     public void selectedRandomEventOption(String s) { selectedRandomEventOption = s; }
     @Override
-    public String selectedWarpSpeedOption()         { return selectedWarpSpeedOption; }
+    public String selectedWarpSpeedOption()         { return selectedWarpSpeedOption == null ? WARP_SPEED_NORMAL : selectedWarpSpeedOption; }
     @Override
     public void selectedWarpSpeedOption(String s)   { selectedWarpSpeedOption = s; }
     @Override
-    public String selectedNebulaeOption()           { return selectedNebulaeOption; }
+    public String selectedNebulaeOption()           { return selectedNebulaeOption == null ? NEBULAE_NORMAL : selectedNebulaeOption; }
     @Override
     public void selectedNebulaeOption(String s)     { selectedNebulaeOption = s; }
     @Override
-    public String selectedCouncilWinOption()        { return selectedCouncilWinOption; }
+    public String selectedCouncilWinOption()        { return selectedCouncilWinOption == null ? COUNCIL_REBELS : selectedCouncilWinOption; }
     @Override
     public void selectedCouncilWinOption(String s)  { selectedCouncilWinOption = s; }
     @Override
@@ -184,6 +185,10 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
     public String selectedRandomizeAIOption()       { return selectedRandomizeAIOption == null ? RANDOMIZE_AI_NONE : selectedRandomizeAIOption; }
     @Override
     public void selectedRandomizeAIOption(String s) { selectedRandomizeAIOption = s; }
+    @Override
+    public String selectedAIHostilityOption()       { return selectedAIHostilityOption == null ? AI_HOSTILITY_NORMAL : selectedAIHostilityOption; }
+    @Override
+    public void selectedAIHostilityOption(String s) { selectedAIHostilityOption = s; }
     @Override
     public int selectedNumberOpponents()         { return selectedNumberOpponents; }
     @Override
@@ -250,6 +255,7 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         selectedTerraformingOption = opt.selectedTerraformingOption;
         selectedFuelRangeOption = opt.selectedFuelRangeOption;
         selectedRandomizeAIOption = opt.selectedRandomizeAIOption;
+        selectedAIHostilityOption = opt.selectedAIHostilityOption;
         
         if (opt.player != null) 
             player.copy(opt.player);
@@ -422,6 +428,19 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
                 return amt;                   // no additional slowing. 
         }
     }
+    @Override
+    public  int baseAIRelationsAdj()       { 
+        switch(selectedAIHostilityOption()) {
+            case AI_HOSTILITY_LOWEST:  return 30;
+            case AI_HOSTILITY_LOWER:   return 20;
+            case AI_HOSTILITY_LOW:     return 10;
+            case AI_HOSTILITY_HIGH:    return -10;
+            case AI_HOSTILITY_HIGHER:  return -20;
+            case AI_HOSTILITY_HIGHEST: return -30;
+            default: return 0;
+        } 
+    }
+
     @Override
     public boolean canTradeTechs(Empire e1, Empire e2) {
         switch(selectedTechTradeOption()) {
@@ -723,6 +742,18 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         return list;
     }
     @Override
+    public List<String> aiHostilityOptions() {
+        List<String> list = new ArrayList<>();
+        list.add(AI_HOSTILITY_LOWEST);
+        list.add(AI_HOSTILITY_LOWER);
+        list.add(AI_HOSTILITY_LOW);
+        list.add(AI_HOSTILITY_NORMAL);
+        list.add(AI_HOSTILITY_HIGH);
+        list.add(AI_HOSTILITY_HIGHER);
+        list.add(AI_HOSTILITY_HIGHEST);
+        return list;
+    }
+    @Override
     public List<String> planetQualityOptions() {
         List<String> list = new ArrayList<>();
         list.add(PLANET_QUALITY_POOR);
@@ -782,18 +813,27 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         selectedGalaxySize = SIZE_SMALL;
         selectedGalaxyShape = galaxyShapeOptions().get(0);
         selectedGalaxyAge = galaxyAgeOptions().get(1);
-        selectedGameDifficulty(gameDifficultyOptions().get(0));
         selectedNumberOpponents = maximumOpponentsOptions();
         selectedPlayerRace(random(startingRaceOptions()));
         selectedGameDifficulty = DIFFICULTY_NORMAL;
+        setToDefault();
+        generateGalaxy();
+    }
+    @Override
+    public void setToDefault() {
+        selectedGalaxyAge = GALAXY_AGE_NORMAL;
+        selectedPlanetQualityOption = PLANET_QUALITY_NORMAL;
+        selectedTerraformingOption = TERRAFORMING_NORMAL;
         selectedResearchRate = RESEARCH_NORMAL;
         selectedTechTradeOption = TECH_TRADING_YES;
         selectedRandomEventOption = RANDOM_EVENTS_ON;
         selectedWarpSpeedOption = WARP_SPEED_NORMAL;
+        selectedFuelRangeOption = FUEL_RANGE_NORMAL;
         selectedNebulaeOption = NEBULAE_NORMAL;
         selectedCouncilWinOption = COUNCIL_REBELS;
         selectedStarDensityOption = STAR_DENSITY_NORMAL;
-        generateGalaxy();
+        selectedRandomizeAIOption = RANDOMIZE_AI_NONE;
+        selectedAIHostilityOption = AI_HOSTILITY_NORMAL;
     }
     private void generateGalaxy() {
         galaxyShape().quickGenerate();

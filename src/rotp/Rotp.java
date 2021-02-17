@@ -43,11 +43,11 @@ public class Rotp {
     private static final int MB = 1048576;
     public static int IMG_W = 1229;
     public static int IMG_H = 768;
-    public static String jarFileName = "RotP-2.13b_modnar_MOD23b"+RotpGovernor.miniSuffix()+".jar";
+    public static String jarFileName = "RotP-2.14_modnar_MOD24"+RotpGovernor.miniSuffix()+".jar";
     public static boolean countWords = false;
     private static String jarPath;
     private static JFrame frame;
-    public static String releaseId = "Beta 2.13b modnar_MOD23b";
+    public static String releaseId = "Beta 2.14 modnar_MOD24";
     public static long startMs = System.currentTimeMillis();
     public static long maxHeapMemory = Runtime.getRuntime().maxMemory() / 1048576;
     public static long maxUsedMemory;
@@ -103,6 +103,12 @@ public class Rotp {
 
         if (reloadRecentSave)
             GameSession.instance().loadRecentSession(false);
+        
+        // this will not catch 32-bit JREs on all platforms, but better than nothing
+        String bits = System.getProperty("sun.arch.data.model").trim();
+        if (bits.equals("32"))
+            RotPUI.instance().mainUI().showJava32BitPrompt();
+
         frame.setVisible(true);
     }
     public static BufferedImage toBufferedImage(Image img)

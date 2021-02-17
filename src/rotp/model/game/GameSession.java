@@ -16,7 +16,7 @@
 package rotp.model.game;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -41,6 +40,9 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 import rotp.Rotp;
 import rotp.model.empires.Empire;
 import rotp.model.empires.EmpireView;
@@ -62,6 +64,7 @@ import rotp.ui.UserPreferences;
 import rotp.ui.notifications.GameAlert;
 import rotp.ui.notifications.SabotageNotification;
 import rotp.ui.notifications.ShipConstructionNotification;
+import rotp.ui.notifications.SpyCapturedNotification;
 import rotp.ui.notifications.StealTechNotification;
 import rotp.ui.notifications.SystemsScoutedNotification;
 import rotp.ui.notifications.TurnNotification;
@@ -74,7 +77,7 @@ public final class GameSession implements Base, Serializable {
     public static final String SAVEFILE_DIRECTORY = ".";
     public static final String BACKUP_DIRECTORY = "backup";
     public static final String SAVEFILE_EXTENSION = ".rotp";
-    public static final String RECENT_SAVEFILE = "recent.rotp";
+    public static final String RECENT_SAVEFILE = "recent"+SAVEFILE_EXTENSION;
     public static final SimpleDateFormat dateFmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     public static final Object ONE_GAME_AT_A_TIME = new Object();
     private static GameSession instance = new GameSession();
@@ -99,13 +102,17 @@ public final class GameSession implements Base, Serializable {
     private Galaxy galaxy;
     private final GameStatus status = new GameStatus();
     private long id;
+    private transient boolean spiesCaptured = false;
+    
     public GameStatus status()                   { return status; }
     public long id()                             { return id; }
     public ExecutorService smallSphereService()  { return smallSphereService; }
 
     public void pauseNextTurnProcessing(String s)   {
-        log("Pausing Next Turn: ", s);
-        suspendNextTurn = true;
+        if (performingTurn) {
+            log("Pausing Next Turn: ", s);
+            suspendNextTurn = true;
+        }
     }
     public void resumeNextTurnProcessing()  {
         log("Resuming Next Turn");
@@ -179,6 +186,12 @@ public final class GameSession implements Base, Serializable {
         int existingCount = shipsConstructed().containsKey(design) ? shipsConstructed().get(design) : 0;
         shipsConstructed().put(design, existingCount+newCount);
     }
+    public void addSpiesCapturedNotification() {
+        if (!spiesCaptured) {
+            spiesCaptured = true;
+            addTurnNotification(new SpyCapturedNotification());
+        }
+    }
     public void addSystemScouted(StarSystem sys) {
         systemsScouted().get("Scouts").add(sys);
     }
@@ -239,6 +252,7 @@ public final class GameSession implements Base, Serializable {
             clearScoutedSystems();
             systemsToAllocate().clear();
             shipsConstructed().clear();
+            spiesCaptured = false;
             galaxy().startGame();
             saveRecentSession(false);
             saveBackupSession(1);
@@ -356,6 +370,7 @@ public final class GameSession implements Base, Serializable {
                 systemsToAllocate().clear();
                 clearScoutedSystems();
                 shipsConstructed().clear();
+                spiesCaptured = false;
                 clearAlerts();
                 RotPUI.instance().repaint();
                 processNotifications();
@@ -758,23 +773,33 @@ public final class GameSession implements Base, Serializable {
         else
             return text("MAIN_ADVANCING_TURN", galaxy().currentTurn()+1);
     }
-    public void saveSession(String filename, String dir) throws Exception {
-        log("Saving game as file: ", dir+"/"+filename);
+    public void saveSession(String filename, boolean backup) throws Exception {
+        log("Saving game as file: ", filename, "  backup: "+backup);
         GameSession currSession = GameSession.instance();        
-        log("Session started");
-        File theDir = new File(concat(Rotp.jarPath(),"/",dir));
+        File theDir = backup ? new File(backupDir()) : new File(saveDir());
         if (!theDir.exists())
             theDir.mkdirs();
-        File saveFile = saveFileNamed(dir+"/"+filename);
-        OutputStream fileOut = new FileOutputStream(saveFile);
-        OutputStream buffer = new BufferedOutputStream(fileOut);
-        ObjectOutput output = new ObjectOutputStream(buffer);
+        File saveFile = backup ? backupFileNamed(filename) : saveFileNamed(filename);
+        ZipOutputStream out = new ZipOutputStream(new FileOutputStream(saveFile));
+        ZipEntry e = new ZipEntry("GameSession.dat");
+        out.putNextEntry(e);
 
-        output.writeObject(currSession);
-        output.flush();
-        output.close();
-        buffer.close();
-        fileOut.close();
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream objOut = null;
+        try {
+            objOut = new ObjectOutputStream(bos);
+            objOut.writeObject(currSession);
+            objOut.flush();
+            byte[] data = bos.toByteArray();
+            out.write(data, 0, data.length);
+        }
+        finally {
+            try {
+            bos.close();
+            out.close();
+            }
+            catch(IOException ex) {}            
+        }
     }
     private void loadPreviousSession(GameSession gs, boolean startUp) {
         stopCurrentGame();
@@ -785,11 +810,20 @@ public final class GameSession implements Base, Serializable {
             RotPUI.instance().selectMainPanel();
         }
     }
+    public String saveDir() {
+        return UserPreferences.saveDirectoryPath();
+    }
+    public String backupDir() {
+        return concat(saveDir(),"/",GameSession.BACKUP_DIRECTORY);
+    }
     public File saveFileNamed(String fileName) {
-        return new File(Rotp.jarPath(), fileName);
+        return new File(saveDir(), fileName);
+    }
+    public File backupFileNamed(String fileName) {
+        return new File(backupDir(), fileName);
     }
     public File recentSaveFile() {
-        return new File(Rotp.jarPath(), GameSession.RECENT_SAVEFILE);
+        return new File(saveDir(), GameSession.RECENT_SAVEFILE);
     }
     private String backupFileName(int num) {
         Empire pl = player();
@@ -801,12 +835,12 @@ public final class GameSession implements Base, Serializable {
         String turn = "T"+pad4.format(num);
         String opp = "vs"+options().selectedNumberOpponents();
         String dash = "-";               
-        return concat(leader,dash,race,dash,gShape,dash,gSize,dash,diff,dash,opp,dash,turn,".rotp");
+        return concat(leader,dash,race,dash,gShape,dash,gSize,dash,diff,dash,opp,dash,turn,SAVEFILE_EXTENSION);
     }
     public void saveRecentSession(boolean endOfTurn) {
         String filename = RECENT_SAVEFILE;
         try {
-            saveSession(filename, SAVEFILE_DIRECTORY);
+            saveSession(filename, false);
             if (endOfTurn)
                saveBackupSession(galaxy().currentTurn());
         }
@@ -823,7 +857,7 @@ public final class GameSession implements Base, Serializable {
             if (backupTurns > 0) {
                 if ((turn == 1) || (turn % backupTurns == 0)) {
                     filename = backupFileName(turn);
-                    saveSession(filename, SAVEFILE_DIRECTORY+"/"+BACKUP_DIRECTORY);
+                    saveSession(filename, true);
                 }
             }
         }
@@ -843,27 +877,50 @@ public final class GameSession implements Base, Serializable {
         return true;
     }
     public void loadRecentSession(boolean startUp) {
-        loadSession(RECENT_SAVEFILE, startUp);
+        loadSession(saveDir(), RECENT_SAVEFILE, startUp);
     }
-    public void loadSession(String filename, boolean startUp) {
+    public void loadSession(String dir, String filename, boolean startUp) {
         try {
             log("Loading game from file: ", filename);
-            File saveFile = saveFileNamed(filename);
-            InputStream file = new FileInputStream(saveFile);
-            InputStream buffer = new BufferedInputStream(file);
-            ObjectInput input = new ObjectInputStream(buffer);
-            GameSession newSession = (GameSession) input.readObject();
+            File saveFile = new File(dir, filename);
+            GameSession newSession;
+            // assume the file is not zipped, load it directly
+            try (InputStream file = new FileInputStream(saveFile)) {
+                newSession = loadObjectData(file);
+            }
+            
+            // if newSession is null, see if it is zipped
+            if (newSession == null) {
+                try (ZipFile zipFile = new ZipFile(saveFile)) {
+                    ZipEntry ze = zipFile.entries().nextElement();
+                    InputStream zis = zipFile.getInputStream(ze);
+                    newSession = loadObjectData(zis);
+                    if (newSession == null) 
+                        throw new RuntimeException(text("LOAD_GAME_BAD_VERSION", filename));
+                }
+            }
+            
             GameSession.instance = newSession;
             newSession.validate();
             newSession.validateOnLoadOnly();
-            input.close();
-            buffer.close();
-            file.close();
             loadPreviousSession(newSession, startUp);
             saveRecentSession(false);
         }
-        catch(IOException | ClassNotFoundException e) {
+        catch(IOException e) {
             throw new RuntimeException(text("LOAD_GAME_BAD_VERSION", filename));
+        }
+    }
+    private GameSession loadObjectData(InputStream is) {
+        try {
+            GameSession newSession;
+            try (InputStream buffer = new BufferedInputStream(is)) {
+                ObjectInput input = new ObjectInputStream(buffer);
+                newSession = (GameSession) input.readObject();
+            }
+            return newSession;
+        }
+        catch (IOException | ClassNotFoundException e) {
+            return null;
         }
     }
     private void validate() {
