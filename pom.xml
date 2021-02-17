@@ -7,7 +7,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.rayfowler</groupId>
 
-    <version>2.13b_modnar_MOD23b</version>
+    <version>2.14_modnar_MOD24</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
