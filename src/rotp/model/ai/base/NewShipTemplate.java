@@ -148,14 +148,22 @@ public class NewShipTemplate implements Base {
         
         for (int i = 0; i<costMultiplier.length; i++) {
             ShipDesign design = shipDesigns[i];
+            
             // number of whole designs we can build within our budget
             // modnar: change to float, in order to consider fractional damage/BC
             float count = (float) (shipBudgetBC / (design.cost() * costMultiplier[i]));
             // modnar: do not consider designs which cannot be build with shipBudgetBC
             if (count < 1.0f)
                 count = 0.0f;
+            
+            // modnar: add in warp speed improvement factor here
+            // otherwise a faster ship design would never make it out for the ship designer to consider!
+            // one level increase in engine == ~1.22x (from warp-1 to warp 2), ~1.12x (from warp-3 to warp 4), ~1.07x (from warp-6 to warp 7)
+            float engineImprv = (float) Math.sqrt( (design.warpSpeed() + 1) / (currentDesign.warpSpeed() + 1) );
+            
             // total damage output for this design
-            float designDamage = count * design.perTurnDamage(); 
+            // modnar: adjust by warp speed improvement factor
+            float designDamage = count * design.perTurnDamage() * engineImprv; 
             designSorter.put(designDamage, design);
         }     
         // lastKey is design with greatest damage
