@@ -1418,7 +1418,7 @@ public final class Empire implements Base, NamedObject, Serializable {
                 (int)Math.signum(f1.travelTime(sv.system(targetSysten), warpSpeed) -
                         f2.travelTime(sv.system(targetSysten), warpSpeed)) );
 
-        int sendCount = GameSession.instance().getGovernorOptions().getAutoScoutShipCount();
+        int sendCount = Math.max(1, GameSession.instance().getGovernorOptions().getAutoScoutShipCount());
         // don't send out armed scout ships when enemy fleet is incoming, hence the need for defend predicate
         autoSendShips(designs, targets, systemsSorter, fleetsSorter, (d, si) -> true, defendFirstPredicate(),
                 sendCount);
@@ -1535,7 +1535,7 @@ public final class Empire implements Base, NamedObject, Serializable {
                 (int)Math.signum(f1.travelTime(sv.system(targetSysten), warpSpeed) -
                         f2.travelTime(sv.system(targetSysten), warpSpeed)) );
 
-        int sendCount = GameSession.instance().getGovernorOptions().getAutoColonyShipCount();
+        int sendCount = Math.max(1, GameSession.instance().getGovernorOptions().getAutoColonyShipCount());
         // don't send out armed colony ships when enemy fleet is incoming, hence the need for defend predicate
         autoSendShips(designs, targets, new ColonizePriority("toColonize"), fleetsSorter,
                 designFitForSystem, defendFirstPredicate(), sendCount);
@@ -1592,7 +1592,7 @@ public final class Empire implements Base, NamedObject, Serializable {
             System.out.println("autoattack Enemy "+enemy.toString());
             hostileEmpires.add(enemy.empId());
         }
-        int sendCount = GameSession.instance().getGovernorOptions().getAutoAttackShipCount();
+        int sendCount = Math.max(1, GameSession.instance().getGovernorOptions().getAutoAttackShipCount());
         List<Integer> targets = filterTargets(i -> {
             // only consider scouted systems
             if (sv.view(i).scouted()) {
@@ -1682,7 +1682,10 @@ public final class Empire implements Base, NamedObject, Serializable {
             }
             if (systemHasHostileIncoming.contains(sf.system().id)) {
                 return false;
-            } else if (sf.system().empire() != this) {
+            } else if (sf.system().empire() != null && sf.system().empire() != this) {
+                // Don't send out armed ships orbiting enemy systems.
+                // It's OK to send away armed ships orbiting uncolonized planets if there are no incoming
+                // enemy fleets and that's checked above.
                 return false;
             } else {
                 return true;
