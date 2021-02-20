@@ -51,6 +51,7 @@ import rotp.ui.BasePanel;
 import rotp.ui.BaseTextField;
 import rotp.ui.NoticeMessage;
 import rotp.ui.RotPUI;
+import rotp.ui.UserPreferences;
 import rotp.ui.main.SystemPanel;
 
 public final class SaveGameUI extends BasePanel implements MouseListener, MouseWheelListener {
@@ -117,7 +118,7 @@ public final class SaveGameUI extends BasePanel implements MouseListener, MouseW
         saveSizes.add(0L);
         saveDates.add("");
 
-        File curDir = new File(Rotp.jarPath());
+        File curDir = new File(UserPreferences.saveDirectoryPath());
         File[] filesList = curDir.listFiles();
         
         switch(sortOrder) {
@@ -184,7 +185,7 @@ public final class SaveGameUI extends BasePanel implements MouseListener, MouseW
         g.drawImage(back, 0, 0, getWidth(), getHeight(), 0, 0, imgW, imgH, this);
     }
     private void initModel() {
-        newFileField.setLimit(40);
+        newFileField.setLimit(255);
         listingPanel = new FileListingPanel();
         setLayout(new BorderLayout());
         add(listingPanel, BorderLayout.CENTER);
@@ -294,7 +295,7 @@ public final class SaveGameUI extends BasePanel implements MouseListener, MouseW
         buttonClick();
         final Runnable save = () -> {
             try {
-                GameSession.instance().saveSession(s, GameSession.SAVEFILE_DIRECTORY);
+                GameSession.instance().saveSession(s, false);
                 RotPUI.instance().selectGamePanel();
             }
             catch(Exception e) {
@@ -363,7 +364,7 @@ public final class SaveGameUI extends BasePanel implements MouseListener, MouseW
 
             end = min(saveFiles.size(), start+saveFiles.size());
 
-            int w0 = scaled(550);
+            int w0 = scaled(650);
             int x0 = (w-w0)/2;
             int h0 = s5+(MAX_FILES*lineH);
             int y0 = scaled(180);
@@ -391,6 +392,10 @@ public final class SaveGameUI extends BasePanel implements MouseListener, MouseW
                     int boxIndex = i-start;
                     if (boxIndex == selectIndex) {
                         g.setPaint(GameUI.loadHoverBackground());
+                        g.fillRect(x0+s20, lineY-s4, w0-s40, lineH);
+                    }
+                    else if (i % 2 == 1) {
+                        g.setPaint(GameUI.loadHiBackground());
                         g.fillRect(x0+s20, lineY-s4, w0-s40, lineH);
                     }
                     if (i<end) {
@@ -503,20 +508,26 @@ public final class SaveGameUI extends BasePanel implements MouseListener, MouseW
                 scrollDown();
             }
         }
-        private void drawSaveGame(Graphics2D g, int index, String s, long sz, String dt, int x, int y, int w, int h) {
+        private void drawSaveGame(Graphics2D g, int index, String filename, long sz, String dt, int x, int y, int w, int h) {
             Color c0 = (index != selectIndex) && (hoverBox == gameBox[index]) ? GameUI.loadHoverBackground() : Color.black;
             g.setColor(c0);
             g.setFont(narrowFont(20));
-            g.drawString(s, x+s30, y+h-s8);
+            int sw0 = g.getFontMetrics().stringWidth(filename);
+            int maxW = w-scaled(250);
+            g.setClip(x+s25, y+h-s30, maxW, s30);
+            g.drawString(filename, x+s30, y+h-s8);
+            g.setClip(null);
+            if (sw0 > maxW)
+                g.drawString(text("LOAD_GAME_TOO_LONG"), x+s25+maxW, y+h-s8);
 
             if (sz > 0) {
                 String szStr = shortFmt(sz);
-                int sw0 = g.getFontMetrics().stringWidth(szStr);
-                g.drawString(szStr, x+w-scaled(150)-sw0, y+h-s8);
+                int sw1 = g.getFontMetrics().stringWidth(szStr);
+                g.drawString(szStr, x+w-scaled(150)-sw1, y+h-s8);
             }
 
-            int sw = g.getFontMetrics().stringWidth(dt);
-            g.drawString(dt, x+w-s30-sw, y+h-s8);
+            int sw2 = g.getFontMetrics().stringWidth(dt);
+            g.drawString(dt, x+w-s30-sw2, y+h-s8);
         }
         @Override
         public void mouseDragged(MouseEvent e) {

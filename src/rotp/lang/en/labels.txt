@@ -196,7 +196,7 @@ INC_CLOSED_EMBASSY_DESC           | The [your_empire] ceased diplomatic relation
 INC_BROKE_ALLIANCE_TITLE          | Broke Alliance
 INC_BROKE_ALLIANCE_DESC           | The [your_empire] broke their Alliance with the [my_empire].
 INC_BROKE_PACT_TITLE              | Broke Non-Aggression Pact
-INC_BROKE_PACT_DESC               | The[your_empire] broke their Non-Aggression Pact with the [my_empire].
+INC_BROKE_PACT_DESC               | The [your_empire] broke their Non-Aggression Pact with the [my_empire].
 INC_BROKE_TRADE_TITLE             | Broke Trade Treaty
 INC_BROKE_TRADE_DESC              | The [your_empire] broke their Trade Treaty with the [my_empire].
 INC_ATTACKED_COLONY_TITLE         | Attacked Colony
@@ -298,7 +298,9 @@ GAME_ENLARGE                      | Expand
 
 // Game Settings UI
 GAME_SETTINGS_TITLE               | Game Settings
-GAME_SETTINGS_DESCRIPTION         | Click to toggle each game setting. To reset settings, delete the Remnants.cfg file.
+GAME_SETTINGS_DESCRIPTION         | Click to toggle each game setting. 
+GAME_SETTINGS_EXIT                | Exit
+GAME_SETTINGS_DEFAULT             | Set to Default
 GAME_SETTINGS_DISPLAY_MODE        | Display Mode: %1
 GAME_SETTINGS_WINDOWED            | Windowed
 GAME_SETTINGS_BORDERLESS          | Borderless
@@ -344,10 +346,17 @@ GAME_SETTINGS_BACKUP_OFF          | Off
 GAME_SETTINGS_BACKUP_ON           | Every %1 turns
 GAME_SETTINGS_BACKUP              | Backup: %1
 GAME_SETTINGS_BACKUP_DESC         | Enable to have your current game periodically saved in the backup folder with a unique name, allowing you to reload from previous turns.
+GAME_SETTINGS_SAVEDIR             | Save Directory: %1
+GAME_SETTINGS_SAVEDIR_DEFAULT     | Default
+GAME_SETTINGS_SAVEDIR_CUSTOM      | Custom
+GAME_SETTINGS_SAVEDIR_DESC1       | The save directory is currently set to the same directory as the game.
+GAME_SETTINGS_SAVEDIR_DESC2       | The save directory is currently set to: %1
 
 // Load Game UI
 LOAD_GAME_TITLE                   | Load Game
 LOAD_GAME_AUTOSAVE                | Most Recent Autosave
+LOAD_GAME_BACKUP_DIR              | Backup Directory: %1 files
+LOAD_GAME_SAVE_DIR                | Save Directory: %1 files
 LOAD_GAME_FILENAME                | Sort by Filename
 LOAD_GAME_DATE                    | by Date
 LOAD_GAME_SIZE                    | by Size
@@ -355,6 +364,7 @@ LOAD_GAME_LOADING                 | Loading...
 LOAD_GAME_BAD_VERSION             | Cannot load saved game file: %1. This file may be corrupt or outdated.
 LOAD_GAME_CANCEL                  | Cancel
 LOAD_GAME_OK                      | Load
+LOAD_GAME_TOO_LONG                | ...
 
 // Save Game UI
 SAVE_GAME_TITLE                   | Save Game
@@ -668,6 +678,14 @@ MAIN_ALLOCATE_CLOSE               | Close
 MAIN_FLEET_PRODUCTION_TITLE       | Fleet Production Summary
 MAIN_FLEET_SHIP_COUNT             | %1/%2
 
+// 32-bit Java Warning
+MAIN_JAVA_32BIT_TITLE             | Warning! 32-bit Java in use
+MAIN_JAVA_32BIT_DESC              | You are running this game with a 32-bit version of Java. This can greatly reduce available memory and impact game performance.
+MAIN_JAVA_32BIT_DESC_2            | Although Remnants of the Precursors will function in this mode, upgrading to 64-bit Java will improve the gameplay experience.
+MAIN_JAVA_32BIT_DESC_3            | If you need assistance in upgrading Java, please go online to www.reddit.com/r/rotp and ask for assistance.
+MAIN_JAVA_32BIT_OK                | OK
+
+
 // Memory Low Warning
 MAIN_MEMORY_LOW_TITLE             | Warning! Game Memory Low
 MAIN_MEMORY_LOW_DESC              | Memory available for this game is running low. This can be caused by extended play or not starting with enough free memory.
@@ -683,22 +701,17 @@ MAIN_AUTOSAVE_FAILED_DESC_2       | The message provided to the game for this er
 MAIN_AUTOSAVE_FAILED_DESC_3       | If you see this message frequently, please go online to www.reddit.com/r/rotp and post this screenshot.
 MAIN_AUTOSAVE_FAILED_OK           | OK
 
-// Spy Capture display (during next turn)
-MAIN_SPIES_CAUGHT_TITLE           | Spies Caught
-MAIN_SPIES_CAUGHT_YOURS           | Yours
-MAIN_SPIES_CAUGHT_THEIRS          | Theirs
-
 // Alerts
 MAIN_ALERT_TITLE                  | Alert 
 MAIN_ALERT_TITLE_COUNT            | Alert - %1 of %2
 MAIN_ALERT_TECH_STOLEN            | Internal security has uncovered espionage activities by %1 spies.
-MAIN_ALERT_SPY_CAPTURED           | We have captured a spy from the %1, forcing a confession of their %2 activities.
-MAIN_ALERT_SPY_CONFESSED          | The %1 have captured one of our spies, forcing a confession of our %2 activities.
+//MAIN_ALERT_SPY_CAPTURED           | We have captured a spy from the %1, forcing a confession of their %2 activities.
+//MAIN_ALERT_SPY_CONFESSED          | The %1 have captured one of our spies, forcing a confession of our %2 activities.
 MAIN_ALERT_FACTORIES_DESTROYED    | Agents working for the %1 have destroyed %2 factories in the %3 system.
 MAIN_ALERT_BASES_DESTROYED        | Agents working for the %1 have destroyed %2 missile bases defending the %3 system.
 MAIN_ALERT_FACTORIES_DESTROYED2   | Unknown saboteurs have destroyed %1 factories in the %2 system.
 MAIN_ALERT_BASES_DESTROYED2       | Unknown saboteurs have destroyed %1 missile bases defending the %2 system.
-MAIN_ALERT_TRANSPORTS_PERISHED    | The %1 colony in %2 has been destroyed. Our transports attempting to land there have perished.
+MAIN_ALERT_TRANSPORTS_PERISHED    | The colony in the %1 system has been destroyed. Our transports attempting to land there have perished.
 MAIN_ALERT_TRANSPORTS_CAPTURED    | Our %3 transports arriving in the %2 system have surrendered to %1 forces.
 MAIN_ALERT_TRANSPORTS_KILLED      | Our %3 transports attempting to reach %2 have been destroyed by defending %1 forces.
 MAIN_ALERT_INVADERS_CAPTURED      | %3 %1 transports arriving in the %2 system have surrendered to our defensive forces.
@@ -707,7 +720,8 @@ MAIN_ALERT_TRESPASSING1           | %1 ships have been spotted trespassing near 
 MAIN_ALERT_TRESPASSING2           | The %1 ambassador protests our ships trespassing in the %2 system.
 MAIN_ALERT_TRADE_MATURED          | Our trade treaty with the %1 has reached its maximum value of %2 BC.
 MAIN_ALERT_SPY_NEW_TECH           | Our spies inform us that the %1 knows the secrets of %2.
-
+MAIN_ALERT_ALLIANCE_WEAKENING     | Our alliance with the %1 is weakening.
+MAIN_ALERT_ALLIANCE_BREAKING      | Our alliance with the %1 is on the verge of collapse!
 
 // Colony Listing UI
 PLANETS_TITLE                     | %1 Colonies
@@ -943,6 +957,13 @@ NOTICE_ESPIONAGE_FOOTER           | If noticed, this may cause a Diplomatic Inci
 NOTICE_ESPIONAGE_FRAME_TITLE      | Our spies have managed to frame another race for the theft.
 NOTICE_ESPIONAGE_FRAME_SUBTITLE   | Choose the victim race:
 
+// Spy Capture display (during next turn)
+NOTICE_SPIES_TITLE             | Current Spy Report
+NOTICE_SPIES_CAUGHT               | Spies Captured
+NOTICE_SPIES_CAUGHT_OURS          | Ours
+NOTICE_SPIES_CAUGHT_THEIRS        | Theirs
+NOTICE_SPIES_CAUGHT_NONE          | No meaningful spy activity has been observed.
+
 // Ground Combat UI
 INVASION_LANDING                  | %1 out of %2 %3 transports penetrate %4 defenses.
 INVASION_LANDING_REBELS           | %1 transports land to reclaim the %2 colony at %3.
@@ -1107,6 +1128,13 @@ SETUP_STAR_DENSITY_NORMAL         | Normal
 SETUP_STAR_DENSITY_HIGH           | High
 SETUP_STAR_DENSITY_HIGHER         | Higher
 SETUP_STAR_DENSITY_HIGHEST        | Highest
+SETUP_AI_HOSTILITY_LOWEST         | Nicest
+SETUP_AI_HOSTILITY_LOWER          | Nicer
+SETUP_AI_HOSTILITY_LOW            | Nice
+SETUP_AI_HOSTILITY_NORMAL         | Normal
+SETUP_AI_HOSTILITY_HIGH           | Angry
+SETUP_AI_HOSTILITY_HIGHER         | Angrier
+SETUP_AI_HOSTILITY_HIGHEST        | Angriest
 SETUP_GAME_NUMBER_OPPONENTS       | Opponents
 SETUP_PLANET_QUALITY_POOR         | Poor
 SETUP_PLANET_QUALITY_MEDIOCRE     | Mediocre
@@ -1164,7 +1192,8 @@ SETUP_VOID_4                      | Void 4
 // Advanced Settings
 SETTINGS_TITLE                    | Advanced Game Options
 SETTINGS_DESCRIPTION              | Click to toggle each game setting.
-SETTINGS_ACCEPT                   | Accept
+SETTINGS_EXIT                     | Exit
+SETTINGS_DEFAULT                  | Set to Default
 SETTINGS_STAR_DENSITY             | Star Density: %1
 SETTINGS_RANDOM_EVENTS            | Random Events: %1
 SETTINGS_RESEARCH_RATE            | Research Rate: %1
@@ -1177,6 +1206,7 @@ SETTINGS_NEBULAE                  | Nebulae: %1
 SETTINGS_PLANET_QUALITY           | Planet Quality: %1
 SETTINGS_TERRAFORMING             | Hostile Terraforming: %1
 SETTINGS_FUEL_RANGE               | Fuel Range: %1
+SETTINGS_AI_HOSTILITY             | Hostility: %1
 SETTINGS_RANDOM_EVENTS_DESC       | Space Monsters are random events and considerable mid-game threats. Turn off space monsters or all random events. 
 SETTINGS_WARP_SPEED_DESC          | Increase the speed of more advanced warp technologies. This can be desirable on very large maps.
 SETTINGS_GALAXY_AGE_DESC          | Compared to normal galaxies, young galaxies have more white and blue stars while old galaxies have more red and neutron stars.
@@ -1189,6 +1219,7 @@ SETTINGS_TERRAFORMING_DESC        | Reduce or eliminate the benefits of the Impr
 SETTINGS_COUNCIL_DESC             | Disable the council victory condition or allow enemy empires to rebel against a player victory.
 SETTINGS_RANDOMIZE_AI_DESC        | Randomize the AI player personalities, racial abilities, or both.
 SETTINGS_FUEL_RANGE_DESC          | Increase the range of fuel range technologies and reserve fuel tanks.
+SETTINGS_AI_HOSTILITY_DESC        | Increase or decrease the general level of hostility between alien races.
 
 // Tech UI labels
 TECH_RESEARCH                     | Technology Research
@@ -1865,7 +1896,7 @@ DIPLOMACY_THREATEN_MENU_BR        | Break Trade Treaty
 DIPLOMACY_THREATEN_MENU_5         | Declare War
 DIPLOMACY_ACCEPT_OFFER            | Accept
 DIPLOMACY_ACCEPT_JOIN_WAR         | Accept (Joins War)
-DIPLOMACY_ACCEPT_END_WAR          | Accept (Ends War)
+DIPLOMACY_ACCEPT_END_WAR          | Accept (Ends War, Recalls Forces)
 DIPLOMACY_ACCEPT_FORM_PACT        | Accept (Forms Pact)
 DIPLOMACY_ACCEPT_FORM_ALLIANCE    | Accept (Forms Alliance)
 DIPLOMACY_ACCEPT_ESTABLISH_TRADE  | Accept (Establishes Trade)

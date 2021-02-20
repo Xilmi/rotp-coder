@@ -27,7 +27,9 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.io.File;
 import java.util.List;
+import javax.swing.JFileChooser;
 import rotp.ui.BasePanel;
 import static rotp.ui.BasePanel.s100;
 import static rotp.ui.BasePanel.s20;
@@ -48,6 +50,7 @@ public class GameSettingsUI extends BasePanel implements MouseListener, MouseMot
     
     Rectangle hoverBox;
     Rectangle okBox = new Rectangle();
+    Rectangle defaultBox = new Rectangle();
     BasePanel parent;
     BaseText displayModeText;
     BaseText texturesText;
@@ -58,6 +61,7 @@ public class GameSettingsUI extends BasePanel implements MouseListener, MouseMot
     BaseText graphicsText;
     BaseText autoBombardText;
     BaseText backupTurnsText;
+    BaseText saveDirText;
     
     public GameSettingsUI() {
         init0();
@@ -74,6 +78,7 @@ public class GameSettingsUI extends BasePanel implements MouseListener, MouseMot
         musicText =        new BaseText(this, false, 20, 20,-78,  textC, textC, hoverC, depressedC, textC, 0, 0, 0);
         autoBombardText =  new BaseText(this, false, 20, 20,-78,  textC, textC, hoverC, depressedC, textC, 0, 0, 0);
         backupTurnsText =  new BaseText(this, false, 20, 20,-78,  textC, textC, hoverC, depressedC, textC, 0, 0, 0);
+        saveDirText =      new BaseText(this, false, 20, 20,-78,  textC, textC, hoverC, depressedC, textC, 0, 0, 0);
         addMouseListener(this);
         addMouseMotionListener(this);
         addMouseWheelListener(this);
@@ -88,6 +93,7 @@ public class GameSettingsUI extends BasePanel implements MouseListener, MouseMot
         graphicsText.displayText(graphicsStr());
         autoBombardText.displayText(autoBombardStr());
         backupTurnsText.displayText(backupTurnsStr());
+        saveDirText.displayText(saveDirStr());
     }
     public void open(BasePanel p) {
         parent = p;
@@ -96,6 +102,11 @@ public class GameSettingsUI extends BasePanel implements MouseListener, MouseMot
     }
     public void close() {
         disableGlassPane();
+    }
+    public void setToDefault() {
+        UserPreferences.setToDefault();
+        init();
+        repaint();
     }
     @Override
     public void paintComponent(Graphics g0) {
@@ -300,6 +311,24 @@ public class GameSettingsUI extends BasePanel implements MouseListener, MouseMot
             g.drawString(line, x2+s20, y3);
         }
         
+        y2 += (h2+s20);
+        g.setColor(SystemPanel.blackText);
+        g.drawRect(x2, y2, w2, h2);
+        g.setPaint(GameUI.settingsSetupBackground(w));
+        g.fillRect(x2+s10, y2-s10, saveDirText.stringWidth(g)+s30,s30);
+        saveDirText.setScaledXY(x2+s20, y2+s7);
+        saveDirText.draw(g);
+        String saveDir = UserPreferences.saveDir();
+        desc = saveDir.isEmpty() ? text("GAME_SETTINGS_SAVEDIR_DESC1") : text("GAME_SETTINGS_SAVEDIR_DESC2", saveDir);
+        g.setColor(SystemPanel.blackText);
+        g.setFont(descFont);
+        lines = this.wrappedLines(g,desc, w2-s30);
+        y3 = y2+s10;
+        for (String line: lines) {
+            y3 += lineH;
+            g.drawString(line, x2+s20, y3);
+        }
+        
         g.setStroke(prev);
 
         // draw settings button
@@ -307,10 +336,10 @@ public class GameSettingsUI extends BasePanel implements MouseListener, MouseMot
         int smallButtonH = s30;
         int smallButtonW = scaled(180);
         okBox.setBounds(w-scaled(289), scaled(640), smallButtonW, smallButtonH);
-        g.setPaint(GameUI.buttonLeftBackground());
+        g.setColor(GameUI.buttonBackgroundColor());
         g.fillRoundRect(okBox.x, okBox.y, smallButtonW, smallButtonH, cnr, cnr);
         g.setFont(narrowFont(20));
-        String text6 = text("SETTINGS_ACCEPT");
+        String text6 = text("GAME_SETTINGS_EXIT");
         int sw6 = g.getFontMetrics().stringWidth(text6);
         int x6 = okBox.x+((okBox.width-sw6)/2);
         int y6 = okBox.y+okBox.height-s8;
@@ -321,6 +350,21 @@ public class GameSettingsUI extends BasePanel implements MouseListener, MouseMot
         g.drawRoundRect(okBox.x, okBox.y, okBox.width, okBox.height, cnr, cnr);
         g.setStroke(prev);
 
+        String text7 = text("GAME_SETTINGS_DEFAULT");
+        int sw7 = g.getFontMetrics().stringWidth(text7);
+        smallButtonW = sw7+s30;
+        defaultBox.setBounds(okBox.x-smallButtonW-s30, scaled(640), smallButtonW, smallButtonH);
+        g.setColor(GameUI.buttonBackgroundColor());
+        g.fillRoundRect(defaultBox.x, defaultBox.y, smallButtonW, smallButtonH, cnr, cnr);
+        g.setFont(narrowFont(20));
+        int x7 = defaultBox.x+((defaultBox.width-sw7)/2);
+        int y7 = defaultBox.y+defaultBox.height-s8;
+        Color c7 = hoverBox == defaultBox ? Color.yellow : GameUI.borderBrightColor();
+        drawShadowedString(g, text7, 2, x7, y7, GameUI.borderDarkColor(), c7);
+        prev = g.getStroke();
+        g.setStroke(stroke1);
+        g.drawRoundRect(defaultBox.x, defaultBox.y, defaultBox.width, defaultBox.height, cnr, cnr);
+        g.setStroke(prev);
     }
     private String texturesStr() {
         String opt = text(UserPreferences.texturesMode());
@@ -381,6 +425,11 @@ public class GameSettingsUI extends BasePanel implements MouseListener, MouseMot
         
         return text("GAME_SETTINGS_BACKUP", val+"   ");
     }
+    private String saveDirStr() {
+        String saveDir = UserPreferences.saveDirStr();
+        
+        return text("GAME_SETTINGS_SAVEDIR", text(saveDir));
+    }
     private void toggleDisplayMode() {
         softClick();
         UserPreferences.toggleDisplayMode();
@@ -400,9 +449,9 @@ public class GameSettingsUI extends BasePanel implements MouseListener, MouseMot
     }
     private void scrollSounds(boolean up) {
         if (up)
-            SoundManager.current().increaseSoundLevel();
+            UserPreferences.increaseSoundLevel();
         else
-            SoundManager.current().decreaseSoundLevel();
+            UserPreferences.decreaseSoundLevel();
         soundsText.repaint(soundsStr());
     }
     private void toggleSounds() {
@@ -412,9 +461,9 @@ public class GameSettingsUI extends BasePanel implements MouseListener, MouseMot
     }
     private void scrollMusic(boolean up) {
         if (up)
-            SoundManager.current().increaseMusicLevel();
+            UserPreferences.increaseMusicLevel();
         else
-            SoundManager.current().decreaseMusicLevel();
+            UserPreferences.decreaseMusicLevel();
         musicText.repaint(musicStr());
     }
     private void toggleMusic() {
@@ -433,6 +482,19 @@ public class GameSettingsUI extends BasePanel implements MouseListener, MouseMot
     private void toggleBackupTurns() {
         UserPreferences.toggleBackupTurns();
         backupTurnsText.repaint(backupTurnsStr());
+    }
+    private void toggleSaveDir() {
+        final JFileChooser fc = new JFileChooser();
+        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        File saveDir = new File(UserPreferences.saveDirectoryPath());
+        fc.setCurrentDirectory(saveDir);
+        int returnVal = fc.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            String path = fc.getSelectedFile().getAbsolutePath();
+            UserPreferences.saveDir(path);
+            saveDirText.repaint(saveDirStr());
+            repaint();
+        }
     }
     private void toggleAutoColonize() {
         softClick();
@@ -488,8 +550,12 @@ public class GameSettingsUI extends BasePanel implements MouseListener, MouseMot
             hoverBox = graphicsText.bounds();
         else if (backupTurnsText.contains(x,y))
             hoverBox = backupTurnsText.bounds();
+        else if (saveDirText.contains(x,y))
+            hoverBox = saveDirText.bounds();
         else if (okBox.contains(x,y))
             hoverBox = okBox;
+        else if (defaultBox.contains(x,y))
+            hoverBox = defaultBox;
 		
         if (hoverBox != prevHover) {
             if (prevHover == texturesText.bounds())
@@ -510,6 +576,8 @@ public class GameSettingsUI extends BasePanel implements MouseListener, MouseMot
                 graphicsText.mouseExit();
             else if (prevHover == backupTurnsText.bounds())
                 backupTurnsText.mouseExit();
+            else if (prevHover == saveDirText.bounds())
+                saveDirText.mouseExit();
             if (hoverBox == texturesText.bounds())
                 texturesText.mouseEnter();
             else if (hoverBox == displayModeText.bounds())
@@ -528,6 +596,8 @@ public class GameSettingsUI extends BasePanel implements MouseListener, MouseMot
                 graphicsText.mouseEnter();
             else if (hoverBox == backupTurnsText.bounds())
                 backupTurnsText.mouseEnter();
+            else if (hoverBox == saveDirText.bounds())
+                saveDirText.mouseEnter();
             if (prevHover != null)
                 repaint(prevHover);
             if (hoverBox != null)
@@ -564,8 +634,12 @@ public class GameSettingsUI extends BasePanel implements MouseListener, MouseMot
             toggleGraphics(e);
         else if (hoverBox == backupTurnsText.bounds())
             toggleBackupTurns();
+        else if (hoverBox == saveDirText.bounds())
+            toggleSaveDir();
         else if (hoverBox == okBox)
             close();
+        else if (hoverBox == defaultBox)
+            setToDefault();
     }
     @Override
     public void mouseEntered(MouseEvent e) { }

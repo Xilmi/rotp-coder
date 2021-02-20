@@ -23,8 +23,8 @@ import rotp.model.tech.Tech;
 
 public class TechnologyAidIncident extends DiplomaticIncident {
     private static final long serialVersionUID = 1L;
-    final int empMe;
-    final int empYou;
+    public final int empMe;
+    public final int empYou;
     private final String techId;
     private List<String> techIds = new ArrayList<>();
     public static TechnologyAidIncident create(Empire emp, Empire donor, String techId) {
@@ -41,7 +41,7 @@ public class TechnologyAidIncident extends DiplomaticIncident {
         else
             emb.addIncident(inc);
         
-        for (Empire enemy: emp.enemies()) 
+        for (Empire enemy: emp.warEnemies()) 
             EnemyAidIncident.create(enemy, emp, donor, techId);
 
         return inc;
@@ -73,7 +73,7 @@ public class TechnologyAidIncident extends DiplomaticIncident {
             rpValue += emp.ai().scientist().researchBCValue(tech);
         }
         float pct = rpValue / emp.totalPlanetaryProduction();
-        severity = min(25,100*pct); 
+        severity = min(15,25*pct); 
     }
     @Override
     public String title()        { return text("INC_TECHNOLOGY_AID_TITLE"); }
@@ -85,7 +85,7 @@ public class TechnologyAidIncident extends DiplomaticIncident {
             return decode(text("INC_TECHNOLOGY_AID_DESC_MULT")); 
     }
     @Override
-    public String key()          { return "Technology Aid"; }
+    public String key()          { return "Technology Aid:"+dateOccurred; }
     @Override
     public String decode(String s) {
         String s1 = super.decode(s);

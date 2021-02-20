@@ -15,23 +15,13 @@
  */
 package rotp.ui.notifications;
 
-import rotp.model.empires.Empire;
-import rotp.model.galaxy.StarSystem;
-import rotp.model.game.GameSession;
+import rotp.ui.RotPUI;
 
-public class TransportsPerishedAlert extends GameAlert {
-    private final Empire empire;
-    private final StarSystem system;
-    public static void create(Empire e, StarSystem s) {
-        GameSession.instance().addAlert(new TransportsPerishedAlert(e,s));
-    }
+public class SpyCapturedNotification implements TurnNotification {
     @Override
-    public String description() {
-        return text("MAIN_ALERT_TRANSPORTS_PERISHED", systemName());
-    }
-    private String systemName() { return player().sv.name(system.id); }
-    private TransportsPerishedAlert(Empire e, StarSystem s) {
-        empire = e;
-        system = s;
+    public String displayOrder() { return SPIES_CAPTURED; }
+    @Override
+    public void notifyPlayer() {
+            RotPUI.instance().showSpiesCaptured();
     }
 }

@@ -331,6 +331,10 @@ public class RotPUI extends BasePanel implements ActionListener, KeyListener {
     public void selectMainPanel()      { selectMainPanel(false); }
     public void selectMainPanel(boolean pauseNextTurn)      {
         disableGlassPane();
+        if (!session().status().inProgress()) {
+            selectGameOverPanel();
+            return;
+        }
         mainUI.init(pauseNextTurn);
         selectPanel(MAIN_PANEL, mainUI());
         repaint();
@@ -597,9 +601,11 @@ public class RotPUI extends BasePanel implements ActionListener, KeyListener {
         session().waitUntilNextTurnCanProceed();
     }
     public void showSpiesCaptured() {
+        session().pauseNextTurnProcessing("Show Spies Captured");
         log("==MAIN UI==   show spies captured");
         mainUI().showSpiesCaptured();
         selectMainPanel();
+        session().waitUntilNextTurnCanProceed();
     }
     public void showShipConstruction() {
         session().pauseNextTurnProcessing("Show Ship Construction");

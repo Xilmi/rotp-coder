@@ -1,12 +1,12 @@
 /*
  * Copyright 2015-2020 Ray Fowler
- *
+ * 
  * Licensed under the GNU General Public License, Version 3 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *     https://www.gnu.org/licenses/gpl-3.0.html
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -81,7 +81,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     public static final int PLAYER_ID = 0;
     public static final int NULL_ID = -1;
     public static final int ABSTAIN_ID = -2;
-
+    
     public static final int SHAPE_CIRCLE = 0;
     public static final int SHAPE_SQUARE = 1;
     public static final int SHAPE_DIAMOND = 2;
@@ -89,7 +89,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     public static final int SHAPE_TRIANGLE2 = 4;
 
     public static Empire thePlayer() { return Galaxy.current().player(); }
-
+    
     public static long[] times = new long[6];
 
     public final int id;
@@ -165,7 +165,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     public SpyMaster spyMasterAI()                { return ai().spyMaster(); }
     public Scientist scientistAI()                { return ai().scientist(); }
     public ShipDesigner shipDesignerAI()          { return ai().shipDesigner(); }
-
+    
     public Leader leader()                        { return leader; }
     public ShipDesignLab shipLab()                { return shipLab; }
     public EmpireStatus status()                  { return status; }
@@ -213,17 +213,17 @@ public final class Empire implements Base, NamedObject, Serializable {
     public void scanPlanets(boolean b)            { scanPlanets = (scanPlanets || b); }
     public void setRecalcDistances()              { recalcDistances = true; }
     public int defaultMaxBases()                  { return defaultMaxBases; }
-    public boolean incrDefaultMaxBases()  {
+    public boolean incrDefaultMaxBases()  { 
         int maxBase=999;
         if (defaultMaxBases == maxBase)
             return false;
         defaultMaxBases = min(maxBase, defaultMaxBases+1);
         return true;
     }
-    public boolean decrDefaultMaxBases() {
-        if (defaultMaxBases == 0)
+    public boolean decrDefaultMaxBases() { 
+        if (defaultMaxBases == 0) 
             return false;
-        defaultMaxBases = max(0, defaultMaxBases-1);
+        defaultMaxBases = max(0, defaultMaxBases-1); 
         return true;
     }
 
@@ -238,12 +238,12 @@ public final class Empire implements Base, NamedObject, Serializable {
     public float maxY()                           { return maxY; }
     public boolean divertColonyExcessToResearch() { return divertColonyExcessToResearch; }
     public void toggleColonyExcessToResearch()    { divertColonyExcessToResearch = !divertColonyExcessToResearch; }
-
+    
     public boolean canSeeShips(int empId) {
         if (canSeeShips == null) {
             canSeeShips = new boolean[galaxy().numEmpires()];
-            for (int i=0;i<canSeeShips.length;i++)
-                canSeeShips[i] = (i == id) || viewForEmpire(i).embassy().unity();
+            for (int i=0;i<canSeeShips.length;i++) 
+                canSeeShips[i] = (i == id) || viewForEmpire(i).embassy().unity(); 
         }
         return canSeeShips[empId];
     }
@@ -338,12 +338,12 @@ public final class Empire implements Base, NamedObject, Serializable {
         log("creating empire for ",  rk);
         id = empId;
         raceKey = rk;
-        homeSysId = capitalSysId = s.id;
+        homeSysId = capitalSysId = s.id;     
         empireViews = new EmpireView[options().selectedNumberOpponents()+1];
         status = new EmpireStatus(this);
         sv = new SystemInfo(this);
         // many things need to know if this is the player civ, so set it early
-        if (empId == Empire.PLAYER_ID)
+        if (empId == Empire.PLAYER_ID) 
             g.player(this);
 
         // if not the player, we may randomize the race ability
@@ -351,7 +351,7 @@ public final class Empire implements Base, NamedObject, Serializable {
             dataRaceKey = random(options().startingRaceOptions());
         else
             dataRaceKey = raceKey;
-
+        
         colorId(cId);
         Race r = race();
         String raceName = r.nextAvailableName();
@@ -380,13 +380,13 @@ public final class Empire implements Base, NamedObject, Serializable {
     public int shipColorId()             { return colorId(); }
     @Override
     public String name()                 { return race().text("GOVT_EMPIRE", raceName()); }
-
+    
     public void chooseNewCapital() {
         // make list of every colony that is not the current capital
         StarSystem currentCapital = galaxy().system(capitalSysId);
         List<StarSystem> allExceptCapital = new ArrayList<>(allColonizedSystems());
         allExceptCapital.remove(currentCapital);
-
+        
         // from that, make a list of non-rebelling colonies
         List<StarSystem> possible = new ArrayList<>();
         for (StarSystem sys: allExceptCapital) {
@@ -396,16 +396,16 @@ public final class Empire implements Base, NamedObject, Serializable {
         // if EVERY colony is rebelling, then choose from any of them
         if (possible.isEmpty())
             possible.addAll(allExceptCapital);
-
+        
         // if still no other colonies, give it up (we are losing our capital and last colony)
         if (possible.isEmpty())
             return;
-
+        
         // sort based on production, choose highest(last), then end any rebellions on it
         Collections.sort(possible, StarSystem.BASE_PRODUCTION);
         StarSystem newHome = possible.get(possible.size()-1);
         capitalSysId = newHome.id;
-        newHome.colony().clearAllRebellion();
+        newHome.colony().clearAllRebellion();        
     }
     public int shipCount(int hullSize) {
         return galaxy().ships.hullSizeCount(id, hullSize);
@@ -419,10 +419,10 @@ public final class Empire implements Base, NamedObject, Serializable {
         for (String token: tokens) {
             String replString = concat("[",key, token,"]");
             // leader name is special case, not in dictionary
-            if (token.equals("_name"))
+            if (token.equals("_name")) 
                 s1 = s1.replace(replString, leader().name());
             else if (token.equals("_home"))
-                s1 = s1.replace(replString, sv.name(capitalSysId()));
+                s1 = s1.replace(replString, sv.name(capitalSysId()));              
             else {
                 List<String> values = substrings(race().text(token), ',');
                 String value = raceNameIndex < values.size() ? values.get(raceNameIndex) : values.get(0);
@@ -433,7 +433,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     }
     public String label(String token) {
         List<String> values = substrings(race().text(token), ',');
-        return raceNameIndex < values.size() ? values.get(raceNameIndex) : values.get(0);
+        return raceNameIndex < values.size() ? values.get(raceNameIndex) : values.get(0);      
     }
     public boolean canSendTransportsFrom(StarSystem sys) {
         if (sys == null)
@@ -448,12 +448,12 @@ public final class Empire implements Base, NamedObject, Serializable {
             return false;
         if (allColonizedSystems().size() > 1)
             return true;
-
+        
         for (StarSystem abSys: galaxy().abandonedSystems()) {
             if (sv.inShipRange(abSys.id) && canColonize(abSys))
                 return true;
         }
-
+            
         return false;
     }
     public boolean canAbandonTo(StarSystem sys) {
@@ -542,7 +542,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         List<StarSystem> systems = allColonizedSystems();
         sv.stopRally(dest.id);
         for (StarSystem sys: systems) {
-            if (sv.rallySystem(sys.id) == dest)
+            if (sv.rallySystem(sys.id) == dest) 
                 sv.stopRally(sys.id);
         }
     }
@@ -572,7 +572,7 @@ public final class Empire implements Base, NamedObject, Serializable {
             Colony col = sys.colony();
             col.addColonyOrder(order, amt);
             if (col.reallocationRequired)
-                governorAI().setColonyAllocations(col);
+                governorAI().setColonyAllocations(col);     
         }
     }
     public void addColonizedSystem(StarSystem s) {
@@ -580,7 +580,7 @@ public final class Empire implements Base, NamedObject, Serializable {
             colonizedSystems.add(s);
             setRecalcDistances();
             for (Empire ally: allies())
-                ally.setRecalcDistances();
+                ally.setRecalcDistances();       
         }
     }
     public void removeColonizedSystem(StarSystem s) {
@@ -588,7 +588,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         setRecalcDistances();
         for (Empire ally: allies())
             ally.setRecalcDistances();
-
+        
         if (colonizedSystems.isEmpty())
             goExtinct();
     }
@@ -670,7 +670,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     public float learnableScoutRange()    { return tech().learnableScoutRange(); }
     public float shipReach(int turns)   { return min(shipRange(), turns*tech().topSpeed()); }
     public float scoutReach(int turns)  { return min(scoutRange(), turns*tech().topSpeed()); }
-
+    
     public String rangeTechNeededToScout(int sysId) {
         float dist = sv.distance(sysId);
         return tech().rangeTechNeededToScoutDistance(dist);
@@ -678,13 +678,13 @@ public final class Empire implements Base, NamedObject, Serializable {
     public String rangeTechNeededToReach(int sysId) {
         float dist = sv.distance(sysId);
         return tech().rangeTechNeededToReachDistance(dist);
-    }
+    }    
     public String environmentTechNeededToColonize(int sysId) {
         if (canColonize(sysId))
             return null;
         int hostility = sv.planetType(sysId).hostility();
         return tech().environmentTechNeededToColonize(hostility);
-    }
+    }    
     public boolean canColonize(int sysId) {
         StarSystem sys = galaxy().system(sysId);
         return canColonize(sys.planet().type());
@@ -739,7 +739,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         return income / empireBC;
     }
     public void nextTurn() {
-        log(this + ": NextTurn");
+        log(this + ": NextTurn");       
         shipBuildingSystems.clear();
         newSystems.clear();
         recalcPlanetaryProduction();
@@ -748,7 +748,7 @@ public final class Empire implements Base, NamedObject, Serializable {
             if (d != null)
                 d.preNextTurn();
         }
-
+        
         List<StarSystem> allColonies = allColonizedSystems();
         List<Transport> transports = transports();
 
@@ -779,7 +779,10 @@ public final class Empire implements Base, NamedObject, Serializable {
         }
     }
     public void assessTurn() {
-        log(this + ": AssessTurn");
+         log(this + ": AssessTurn");
+        // have to assess trade & security views
+        // before colonies since taxes may change
+        empireViewsAssessTurn();
         recalcPlanetaryProduction();
 
         if (status() != null)
@@ -795,6 +798,14 @@ public final class Empire implements Base, NamedObject, Serializable {
         for (StarSystem sys: systems) {
             if (sys.isColonized())
                 sys.colony().lowerECOToCleanIfEcoComplete();
+        }
+    }
+    public void empireViewsAssessTurn() {
+        for (EmpireView v : empireViews()) {
+            if ((v!= null) && v.embassy().contact()) {
+                v.embassy().assessTurn();
+                v.trade().assessTurn();
+            }
         }
     }
     public void makeDiplomaticOffers() {
@@ -825,7 +836,7 @@ public final class Empire implements Base, NamedObject, Serializable {
             if (fl.isOrbiting()) {
                 StarSystem orbitSys = fl.system();
                 if (orbitSys.empId() == empId) {
-                    StarSystem dest = shipCaptain.retreatSystem(orbitSys);
+                    StarSystem dest = shipCaptain.retreatSystem(orbitSys); 
                     if (dest != null)
                         shipMgr.retreatFleet(fl, dest.id);
                 }
@@ -847,11 +858,11 @@ public final class Empire implements Base, NamedObject, Serializable {
     }
     public void makeNextTurnDecisions() {
         recalcPlanetaryProduction();
-
+        
         log(this + ": make NextTurnDecisions");
         NoticeMessage.setSubstatus(text("TURN_SCRAP_SHIPS"));
         shipLab.nextTurn();
-
+        
         // empire settings
         if (isAIControlled()) {
             scientistAI().setTechTreeAllocations();
@@ -1803,7 +1814,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     public int transportsInTransit(StarSystem s) {
         Galaxy gal = galaxy();
         int transports = s.orbitingTransports(id);
-
+        
         for (Transport tr: gal.transports()) {
             if ((tr.empId() == id) && (tr.destSysId() == s.id))
                 transports += tr.size();
@@ -1813,7 +1824,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     public float transportTravelSpeed(IMappedObject fr, IMappedObject to) {
         if (!fr.passesThroughNebula(fr, to))
             return tech().transportTravelSpeed();
-
+        
         float dist = fr.distanceTo(to);
         float time = fr.travelTime(fr, to, tech().transportTravelSpeed());
         return dist/time;
@@ -1830,7 +1841,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         // this is a different and less extreme mechanic than the one described 
         // in the OSG (which was never implemented in actual MOO1 code anyway) 
         // and will scale better for really large maps. 
-
+        
         // build a list of rebelling systems
         List<StarSystem> allSystems = allColonizedSystems();
         List<StarSystem> rebellingSystems = new ArrayList<>();
@@ -1876,10 +1887,10 @@ public final class Empire implements Base, NamedObject, Serializable {
             if (view != null)
                 view.breakAllTreaties();
         }
-
+        
         // end all rebellions
-        for (StarSystem sys: allColonizedSystems())
-            sys.colony().rebels(0);
+        for (StarSystem sys: allColonizedSystems()) 
+            sys.colony().rebels(0);    
 
         if (viewForEmpire(player()).embassy().contact()) {
             String leaderDesc = text("LEADER_PERSONALITY_FORMAT", leader.personality(),leader.objective());
@@ -1979,7 +1990,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     public void setVisibleShips() {
         Galaxy gal = galaxy();
         visibleShips.clear();
-
+        
         float scanRange = planetScanningRange();
         // get ships orbiting visible systems
 
@@ -2048,7 +2059,7 @@ public final class Empire implements Base, NamedObject, Serializable {
                     return true;
             }
         }
-
+        
         float shipRange = shipScanningRange();
         if (shipRange > 0) {
             for (Ship sh: ships) {
@@ -2187,7 +2198,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     public EmpireView viewForEmpire(int empId) {
         if ((empId < 0) || (empId >= empireViews.length) || (empId == id))
             return null;
-
+        
         return empireViews[empId];
     }
     public boolean hasContact(Empire c) {
@@ -2236,7 +2247,7 @@ public final class Empire implements Base, NamedObject, Serializable {
                     inRange = 1;
             }
         }
-        return inRange == 1;
+        return inRange == 1;        
     }
     public List<Empire> contactedEmpires() {
         List<Empire> r = new ArrayList<>();
@@ -2333,7 +2344,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     public float troopKillRatio(StarSystem s) {
 		// modnar: this old estimate gives completely wrong results for ground combat
         //float killRatio = (50 + tech.troopCombatAdj(false)) / (50 + sv.defenderCombatAdj(s.id));
-
+		
 		// modnar: correct ground combat ratio estimates
 		float killRatio = 1.0f;
 		if (sv.defenderCombatAdj(s.id) >= tech.troopCombatAdj(false)) {
@@ -2381,6 +2392,15 @@ public final class Empire implements Base, NamedObject, Serializable {
                 n++;
         }
         return n;
+    }
+    public List<Empire> warEnemies() {
+        List<Empire> r = new ArrayList<>();
+        for (EmpireView v : empireViews()) {
+            if ((v!= null) && !v.empire().extinct
+            && v.embassy().anyWar())
+                r.add(v.empire());
+        }
+        return r;
     }
     public List<Empire> enemies() {
         List<Empire> r = new ArrayList<>();
@@ -2489,7 +2509,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         EmpireView v = viewForEmpire(empId);
         if (v == null)
             return false;
-
+        
         if (v.embassy().peaceTreatyInEffect())
             return false;
         return v.embassy().canAttackWithoutPenalty();
@@ -2616,7 +2636,7 @@ public final class Empire implements Base, NamedObject, Serializable {
             return StarSystem.NULL_ID;
         if (closestSystems.size() == 1)
             return closestSystems.get(0).id;
-
+       
         // if there is more than one system within the minimum travel turns, 
         // choose the one closest, by distance
         StarSystem.TARGET_SYSTEM = sys;
@@ -2648,14 +2668,14 @@ public final class Empire implements Base, NamedObject, Serializable {
         }
         if (closestSystems.isEmpty())
             return StarSystem.NULL_ID;
-
+        
         if (closestSystems.size() == 1)
             return closestSystems.get(0).id;
-
+        
         Empire targetEmpire = target.empire();
-        if (targetEmpire == null)
+        if (targetEmpire == null) 
             return alliedColonyNearestToSystem(target, speed);
-
+        
         float maxDistance = Float.MIN_VALUE;
         StarSystem bestStagingPoint = null;
         for (StarSystem stage: closestSystems) {
@@ -2671,7 +2691,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         Galaxy gal = galaxy();
         List<StarSystem> systems = new ArrayList<>();
         for (int i=0;i<sv.count();i++) {
-            if (sv.empire(i) == emp)
+            if (sv.empire(i) == emp) 
                 systems.add(gal.system(i));
         }
         return systems;
@@ -2764,7 +2784,7 @@ public final class Empire implements Base, NamedObject, Serializable {
             return true;
         for (Empire emp : contactedEmpires()) {
             EmpireView v = this.viewForEmpire(emp.id);
-            if (v.inEconomicRange() && emp.hasContacted(e.id))
+            if (v.inEconomicRange() && emp.hasContacted(e.id)) 
                 return true;
         }
         return false;
@@ -2875,7 +2895,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         int levelDiff = isOrion ? 25: 10;
         int minLevel = isOrion ? 20: 1;
         s.planet().plunderBonusTech();
-
+        
         for (int i=0;i<numTechs;i++) {
             Tech t = tech().randomUnknownTech(minLevel, levelDiff);
             if (t == null) // if none found, then break out of loop
@@ -2919,24 +2939,24 @@ public final class Empire implements Base, NamedObject, Serializable {
     }
     public float totalIncome()                { return netTradeIncome() + totalPlanetaryIncome(); }
     public float netIncome()                  { return totalIncome() - totalShipMaintenanceCost() - totalStargateCost(); }
-    public float empireTaxRevenue()           {
+    public float empireTaxRevenue()           { 
         if (empireTaxOnlyDeveloped())
-            return totalTaxableDevelopedPlanetaryProduction() * empireTaxPct() / 2;
+            return totalTaxableDevelopedPlanetaryProduction() * empireTaxPct() / 2; 
         else
-            return totalTaxablePlanetaryProduction() * empireTaxPct() / 2;
+            return totalTaxablePlanetaryProduction() * empireTaxPct() / 2; 
     }
     public float empireInternalSecurityCost() {
         return inRangeOfAnyEmpire() ? totalTaxablePlanetaryProduction() * internalSecurityCostPct() : 0f;
     }
     public float empireExternalSpyingCost()   { return totalTaxablePlanetaryProduction() * totalSpyCostPct(); }
-
+    
     public boolean incrementEmpireTaxLevel()  { return empireTaxLevel(empireTaxLevel+1); }
     public boolean decrementEmpireTaxLevel()  { return empireTaxLevel(empireTaxLevel-1); }
     public float empireTaxPct()               { return (float) empireTaxLevel / 100; }
     public float maxEmpireTaxPct()            { return (float) maxEmpireTaxLevel()/100; }
     public int empireTaxLevel()               { return empireTaxLevel; }
     public boolean empireTaxOnlyDeveloped()   { return empireTaxOnlyDeveloped; }
-    public void toggleEmpireTaxOnlyDeveloped(){
+    public void toggleEmpireTaxOnlyDeveloped(){ 
         empireTaxOnlyDeveloped = !empireTaxOnlyDeveloped;
         if (empireTaxLevel > 0)
             flagColoniesToRecalcSpending();
@@ -2945,7 +2965,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     public boolean empireTaxLevel(int i)      {
         int prevLevel = empireTaxLevel;
         empireTaxLevel = bounds(0,i,maxEmpireTaxLevel());
-
+        
         if (empireTaxLevel != prevLevel)
             flagColoniesToRecalcSpending();
         return empireTaxLevel != prevLevel;
@@ -3009,7 +3029,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     public Float totalFleetSize() {
         float pts = 0;
         List<ShipFleet> fleets = galaxy().ships.allFleets(id);
-        for (ShipFleet fl: fleets)
+        for (ShipFleet fl: fleets) 
             pts += fl.hullPoints();
         return pts;
     }
@@ -3018,7 +3038,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         int[] counts = galaxy().ships.shipDesignCounts(id);
         for (int i=0;i<ShipDesignLab.MAX_DESIGNS; i++) {
             ShipDesign d = shipLab().design(i);
-            if (d.active() && d.isArmed() && !d.isColonyShip())
+            if (d.active() && d.isArmed() && !d.isColonyShip()) 
                 pts += (counts[i] *d.hullPoints());
         }
         return pts;
@@ -3112,11 +3132,11 @@ public final class Empire implements Base, NamedObject, Serializable {
         if (totalEmpireShipMaintenanceCost < 0) {
             int[] counts = galaxy().ships.shipDesignCounts(id);
             float cost = 0;
-            for (int i=0;i<counts.length;i++)
-                cost += (counts[i] * shipLab.design(i).cost());
+            for (int i=0;i<counts.length;i++) 
+                cost += (counts[i] * shipLab.design(i).cost());      
             totalEmpireShipMaintenanceCost = cost * SHIP_MAINTENANCE_PCT;
         }
-
+        
         return totalEmpireShipMaintenanceCost;
     }
     public float totalStargateCost() {
@@ -3206,7 +3226,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         // prevent double notifications
         if (extinct)
             return;
-
+        
         if (lastAttacker instanceof Empire)
             GenocideIncident.create(this, (Empire) lastAttacker);
         GNNGenocideNotice.create(this, lastAttacker);
@@ -3228,14 +3248,14 @@ public final class Empire implements Base, NamedObject, Serializable {
         if (g.council().finalWar()) {
             g.council().removeEmpire(this);
         }
-        else {
+        else { 
             List<Empire> activeEmpires = galaxy().activeEmpires();
             // if no empires left, the player has been killed in a solo game
             // by a monster or by abandoning all of his colonies simultaneously 
             if (activeEmpires.isEmpty())
                 session().status().loseMilitary();
             else if (isPlayer() && (lastAttacker == null))
-                session().status().loseNoColonies();
+                session().status().loseNoColonies();                
             // if only one empire is left...
             else if (activeEmpires.size() == 1) {
                 if (isPlayer())
@@ -3244,16 +3264,10 @@ public final class Empire implements Base, NamedObject, Serializable {
                     session().status().winMilitary();
             }
             else {
-                boolean allAlliedWithPlayer = true;
-                int playerId = player().id;
-                for (Empire emp: activeEmpires) {
-                    if (!emp.alliedWith(playerId))
-                        allAlliedWithPlayer = false;
-                }
-                if (allAlliedWithPlayer)
+                if (galaxy().allAlliedWithPlayer())
                     session().status().winMilitaryAlliance();
             }
-        }
+        }            
         status.assessTurn();
     }
     public ShipView shipViewFor(ShipDesign d ) {
@@ -3419,11 +3433,11 @@ public final class Empire implements Base, NamedObject, Serializable {
                     StarSystem sys = g.system(sh.destSysId());
                     if (sys != null) {
                         // don't care about ships going to already-added systems or AI systems
-                        if (!list.contains(sys) && (sys.empire() == pl)) {
+                        if (!list.contains(sys) && (sys.empire() == pl)) { 
                             Empire emp = g.empire(sh.empId());
                             // add if incoming fleet is hostile to player
                             if (emp.aggressiveWith(pl.id)) {
-                                boolean showShip = showUnarmed
+                                boolean showShip = showUnarmed 
                                         || (showTransports && (sh instanceof Transport)) || sh.isPotentiallyArmed(pl);
                                 if (showShip)
                                     list.add(sys);
