@@ -43,11 +43,11 @@ public class Rotp {
     private static final int MB = 1048576;
     public static int IMG_W = 1229;
     public static int IMG_H = 768;
-    public static String jarFileName = "RotP-2.14_modnar_MOD24"+RotpGovernor.miniSuffix()+".jar";
+    public static String jarFileName = "RotP-2.15a_modnar_MOD25"+RotpGovernor.miniSuffix()+".jar";
     public static boolean countWords = false;
     private static String jarPath;
     private static JFrame frame;
-    public static String releaseId = "Beta 2.14 modnar_MOD24";
+    public static String releaseId = "Beta 2.15a modnar_MOD25";
     public static long startMs = System.currentTimeMillis();
     public static long maxHeapMemory = Runtime.getRuntime().maxMemory() / 1048576;
     public static long maxUsedMemory;

@@ -17,41 +17,56 @@ package rotp.ui.diplomacy;
 
 import java.util.ArrayList;
 import java.util.List;
+import rotp.model.ai.interfaces.Diplomat;
 import rotp.model.empires.Empire;
 import rotp.model.empires.EmpireView;
 import rotp.ui.RotPUI;
 
-public class DiplomacyDeclareWarMenu extends DiplomaticMessage {
+public class DiplomacyThreatenMenu extends DiplomaticMessage {
     private final List<Integer> options = new ArrayList<>();
-    public DiplomacyDeclareWarMenu(String  s) {
+    public DiplomacyThreatenMenu(String  s) {
         messageType = s;
     }
     @Override
-    public void diplomat(Empire emp)               { 
+    public void diplomat(Empire emp) { 
         super.diplomat(emp); 
-        EmpireView v = player().viewForEmpire(emp);
+        
+        Diplomat plAI = player().diplomatAI();
+        Empire dip = diplomat();
+        
         options.clear();
-        options.add(DECLARE_WAR);
+        if (plAI.canEvictSpies(dip))
+            options.add(EVICT_SPIES);
+        if (plAI.canThreatenSpying(dip))
+            options.add(STOP_SPYING);
+        if (plAI.canThreatenAttacking(dip))
+            options.add(STOP_ATTACKING);
+        if (plAI.canDeclareWar(dip))
+            options.add(WAR_MENU);
+        
         options.add(EXIT);
     }
     @Override
-    public boolean showTalking()        { return false; }
+    public boolean showTalking()                { return false; }
     @Override
-    public int numReplies()             { return 2; }
+    public int numReplies()       		{ return options.size(); }
     @Override
-    public String reply(int i) { 
+    public String reply(int i) {
         if (i >= options.size())
             return "";
         
         int choice = options.get(i);
         switch(choice) {
-            case DECLARE_WAR          : return text("DIPLOMACY_MENU_DECLARE_WAR");
-            case EXIT                 : return text("DIPLOMACY_MENU_FORGET_IT"); 
+            case EVICT_SPIES      : return text("DIPLOMACY_MENU_EVICT_SPIES");
+            case STOP_SPYING      : return text("DIPLOMACY_MENU_STOP_SPYING");
+            case STOP_ATTACKING   : return text("DIPLOMACY_MENU_STOP_ATTACKING");
+            case WAR_MENU         : return text("DIPLOMACY_MENU_DECLARE_WAR");
+            case EXIT             : return text("DIPLOMACY_MENU_FORGET_IT"); 
         }
         return "";
     }
     @Override
-    public boolean enabled(int i)        { return i < options.size();  }
+    public boolean enabled(int i)  { return i < options.size(); }
     @Override
     public void select(int i) {
         if (!enabled(i))
@@ -62,20 +77,21 @@ public class DiplomacyDeclareWarMenu extends DiplomaticMessage {
         int choice = options.get(i);
         DiplomaticReply reply;
         switch(choice) {
-            case DECLARE_WAR          : reply = diplomat().diplomatAI().receiveDeclareWar(player());    break;
-            case EXIT                 : escape(); return;
-            default                   : escape(); return;
+            case EVICT_SPIES     : reply = diplomat().diplomatAI().receiveThreatEvictSpies(player());    break;
+            case STOP_SPYING     : reply = diplomat().diplomatAI().receiveThreatStopSpying(player());    break;
+            case STOP_ATTACKING  : reply = diplomat().diplomatAI().receiveThreatStopAttacking(player());     break;
+            case WAR_MENU        : DiplomaticMessage.show(view(), DialogueManager.DIPLOMACY_DECLARE_WAR_MENU, returnToMap()); return;
+            case EXIT            : escape(); return;
+            default              : escape(); return;
         }
-
         // get return menu for reply (after it's clicked)
         EmpireView diplomatView = diplomat().viewForEmpire(player());
         if (!diplomatView.diplomats())
             reply.returnMenu(null);
         else
             reply.returnMenu(DialogueManager.DIPLOMACY_MAIN_MENU);
-        
-        reply.returnToMap(returnToMap());
 
+        reply.returnToMap(returnToMap);
         // show reply
         DiplomaticMessage.reply(DiplomacyRequestReply.create(diplomat(), reply));	
     }

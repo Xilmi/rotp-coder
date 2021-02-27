@@ -52,6 +52,9 @@ public class DiplomaticEmbassy implements Base, Serializable {
     private static final long serialVersionUID = 1L;
     public static final float MAX_ADJ_POWER = 10;
 
+    public static final int TIMER_SPY_WARNING = 0;
+    public static final int TIMER_ATTACK_WARNING = 1;
+
     public static final int TECH_DELAY = 1;
     public static final int TRADE_DELAY = 10;
     public static final int PEACE_DELAY = 10;
@@ -93,11 +96,13 @@ public class DiplomaticEmbassy implements Base, Serializable {
     private int requestCount = 0;
     private int minimumPraiseLevel = 0;
     private int minimumWarnLevel = 0;
+    private boolean threatened = false;
 
     public Empire empire()                               { return view.empire(); }
     public Empire owner()                                { return view.owner(); }
     public float treatyDate()                            { return treatyDate; }
     public DiplomaticTreaty treaty()                     { return treaty; }
+    public String treatyStatus()                         { return treaty.status(owner()); }
     public Collection<DiplomaticIncident> allIncidents() { return incidents.values(); }
     public int requestCount()                            { return requestCount; }
     public float relations()                             { return relations; }
@@ -112,6 +117,8 @@ public class DiplomaticEmbassy implements Base, Serializable {
         warFooting = true;
         casusBelli = cb;
         casusBelliInc = inc;
+        view.spies().ignoreThreat();
+        ignoreThreat();
     }
     public void endWarPreparations() {
         warFooting = false;
@@ -166,7 +173,21 @@ public class DiplomaticEmbassy implements Base, Serializable {
             if (inc.isSpying())
                 sev += inc.currentSeverity();
         }
-        return max(-100,sev);
+        return max(-50,sev);
+    }
+    public boolean hasCurrentSpyIncident() {
+        for (DiplomaticIncident inc: allIncidents()) {
+            if (inc.isSpying() && (inc.turnOccurred() == galaxy().currentTurn()))
+                return true;
+        }
+        return false;
+    }
+    public boolean hasCurrentAttackIncident() {
+        for (DiplomaticIncident inc: allIncidents()) {
+            if (inc.isAttacking() && (inc.turnOccurred() == galaxy().currentTurn()))
+                return true;
+        }
+        return false;
     }
     public void nextTurn(float prod) {
         peaceDuration--;
@@ -220,16 +241,15 @@ public class DiplomaticEmbassy implements Base, Serializable {
     }
     public int minimumWarnLevel()           { return max(10, minimumWarnLevel); }
     public void praiseSent()                { minimumPraiseLevel = minimumPraiseLevel()+10;  }
-    public void warningSent(DiplomaticIncident inc) { 
+    public void logWarning(DiplomaticIncident inc) { 
         minimumWarnLevel = minimumWarnLevel()+5;  
         int timerKey = inc.timerKey();
         if (timerKey >= 0) {
             int duration = inc.duration();
-            // increment timer by double the incident duration
-            timers[timerKey] += (2*duration);
+            timers[timerKey] += duration;
         }
     }
-    public boolean warningAlreadySent(int timerKey) {
+    public boolean timerIsActive(int timerKey) {
         return (timerKey >= 0) && (timers[timerKey] > 0);
     }
     public void resetTimer(int index) {
@@ -244,6 +264,10 @@ public class DiplomaticEmbassy implements Base, Serializable {
             currentMaxRequests--;
         requestCount++;
     }
+    public void heedThreat()          { threatened = true; }
+    public void ignoreThreat()        { threatened = false; }
+    public boolean threatened()       { return threatened; }
+    
     public boolean tooManyRequests()        { return requestCount > currentMaxRequests; }
     public float otherRelations()          { return otherEmbassy().relations(); }
     public int contactAge()                 { return (galaxy().currentYear() - contactYear); }
@@ -328,6 +352,12 @@ public class DiplomaticEmbassy implements Base, Serializable {
         for (int i=0;i<timers.length;i++) 
             timers[i] = max(0, timers[i]-1);
         
+        // check if any threat timers have aged out
+        if (!timerIsActive(TIMER_ATTACK_WARNING))
+            ignoreThreat();
+        if (!timerIsActive(TIMER_SPY_WARNING))
+            view.spies().ignoreThreat();
+        
         diplomatGoneTimer--;
         requestCount = 0;
         currentMaxRequests = min(currentMaxRequests+1, MAX_REQUESTS_TURN);
@@ -368,8 +398,9 @@ public class DiplomaticEmbassy implements Base, Serializable {
         view.otherView().setSuggestedAllocations();
     }
     public boolean isFriend()    { return pact() || alliance() || unity(); }
+    public boolean isEnemy()     { return anyWar() || onWarFooting(); }
     public boolean anyWar()      { return war() || finalWar(); }
-    public boolean atPeace()     { return !anyWar() && peaceTreatyInEffect(); }
+    public boolean atPeace()     { return peaceTreatyInEffect(); }
 
     public DiplomaticIncident exchangeTechnology(Tech offeredTech, Tech requestedTech) {
         // civ() is the requestor, and will be learning the requested tech
@@ -440,8 +471,8 @@ public class DiplomaticEmbassy implements Base, Serializable {
             }
         }
 
-        resetTimer(DiplomaticIncident.SPY_WARNING);
-        resetTimer(DiplomaticIncident.ATTACK_WARNING);
+        resetTimer(TIMER_SPY_WARNING);
+        resetTimer(TIMER_ATTACK_WARNING);
         resetPeaceTimer(3);
         withdrawAmbassador();
         otherEmbassy().withdrawAmbassador();

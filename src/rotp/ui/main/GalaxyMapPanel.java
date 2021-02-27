@@ -55,6 +55,7 @@ import rotp.ui.sprites.FlightPathSprite;
 import rotp.ui.sprites.GridCircularDisplaySprite;
 import rotp.ui.sprites.RangeDisplaySprite;
 import rotp.ui.sprites.ShipDisplaySprite;
+import rotp.ui.sprites.SpyReportSprite;
 import rotp.ui.sprites.SystemNameDisplaySprite;
 import rotp.ui.sprites.TechStatusSprite;
 import rotp.ui.sprites.TreasurySprite;
@@ -281,6 +282,9 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
             baseControls.add(new TechStatusSprite(TechCategory.CONSTRUCTION, x0+70,y0, 30,30));
             baseControls.add(new TechStatusSprite(TechCategory.COMPUTER,     x0+35,y0, 30,30));
             baseControls.add(new TreasurySprite(x0,y0, 30,30));
+
+            // modnar: shift spy report with horizontal TreasuryResearchBar
+            baseControls.add(new SpyReportSprite(x0,y0-50, 30,30));
         }
         
         addMouseListener(this);
