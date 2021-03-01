@@ -52,6 +52,8 @@ text in the planetary spending screen. Since version 1.8 Governor is on by defau
 
 Additional features / changelog
 
+* 2.15.2. Merge v2.15b Beta. Fix AutoColonize for games with restricted colonization option.
+
 * 2.14.1. Merge v2.14 Beta. Fix AutoScout to send out armed ships from uncolonized systems as well if no enemy inbound.
 
 * 2.13.3. Merge v2.13b Beta. Fix AutoScout to send out ships from uncolonized systems.

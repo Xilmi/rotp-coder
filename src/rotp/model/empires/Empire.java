@@ -1446,16 +1446,6 @@ public final class Empire implements Base, NamedObject, Serializable {
                 sendCount);
     }
 
-    private ShipSpecialColony bestColonyShipSpecial(List<ShipDesign> designs) {
-        ShipSpecialColony bestColonyShip = null;
-        for (ShipDesign sd: designs) {
-            if (bestColonyShip == null || bestColonyShip.tech().environment() < sd.colonySpecial().tech().environment()) {
-                bestColonyShip = sd.colonySpecial();
-            }
-        }
-        return bestColonyShip;
-    }
-
     public void autocolonize() {
         GovernorOptions options = session().getGovernorOptions();
         if (isAIControlled() || !options.isAutoColonize()) {
@@ -1497,10 +1487,9 @@ public final class Empire implements Base, NamedObject, Serializable {
         }
 
         BiPredicate<ShipDesign, Integer> designFitForSystem =
-            (sd, si) -> race().ignoresPlanetEnvironment() || sd.colonySpecial().canColonize(sv.system(si).planet().type());
+            (sd, si) -> race().ignoresPlanetEnvironment() ||
+                    (canColonize(si) && sd.colonySpecial().canColonize(sv.system(si).planet().type()));
 
-        ShipSpecialColony bestColonyShip = bestColonyShipSpecial(designs);
-        System.out.println("Best colony ship special "+bestColonyShip.tech().name());
         boolean extendedRange = hasExtendedRange(designs);
         List<Integer> targets = filterTargets(i -> {
             // only colonize scouted systems, systems with planets, unguarded systems.
@@ -1508,9 +1497,20 @@ public final class Empire implements Base, NamedObject, Serializable {
             // TODO: Exclude systems that have enemy fleets orbiting?
             if (!sv.view(i).isColonized() && sv.view(i).scouted() && !PlanetType.NONE.equals(sv.view(i).planetType().key())
                     && !sv.isGuarded(i) && sv.view(i).empire() == null ) {
+
                 // if we don't have tech or ships to colonize this planet, ignore it.
-                if (!race().ignoresPlanetEnvironment() && !bestColonyShip.canColonize(sv.system(i).planet().type())) {
-                    return false;
+                // Since 2.15, for a game with restricted colonization option, we have to check each design if it can colonize
+                if (!race().ignoresPlanetEnvironment()) {
+                    boolean canColonize = false;
+                    for (ShipDesign sd: designs) {
+                        if (this.canColonize(i) && sd.colonySpecial().canColonize(sv.system(i).planet().type())) {
+                            canColonize = true;
+                            break;
+                        }
+                    }
+                    if (!canColonize) {
+                        return false;
+                    }
                 }
 
                 boolean inRange;
