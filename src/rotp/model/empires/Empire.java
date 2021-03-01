@@ -749,6 +749,12 @@ public final class Empire implements Base, NamedObject, Serializable {
                 d.preNextTurn();
         }
         
+        // assign funds/costs for diplomatic activities
+        for (EmpireView v : empireViews()) {
+          if ((v!= null) && v.embassy().contact())
+                v.spies().report().clear();
+        }
+
         List<StarSystem> allColonies = allColonizedSystems();
         List<Transport> transports = transports();
 
@@ -814,10 +820,15 @@ public final class Empire implements Base, NamedObject, Serializable {
                 v.makeDiplomaticOffers();
         }
     }
-    public void stopSpyingAgainst(int empId) {
+    public void hideSpiesAgainst(int empId) {
         EmpireView v = viewForEmpire(empId);
         if (v != null)
             v.spies().beginHide();
+    }
+    public void shutdownSpyNetworksAgainst(int empId) {
+        EmpireView v = viewForEmpire(empId);
+        if (v != null) 
+            v.spies().shutdownSpyNetworks();
     }
     public StarSystem retreatSystem(StarSystem from) {
         return shipCaptainAI().retreatSystem(from);
@@ -2190,6 +2201,12 @@ public final class Empire implements Base, NamedObject, Serializable {
             }
         }
     }
+    public DiplomaticTreaty treatyWithEmpire(int empId) {
+        if ((empId < 0) || (empId >= empireViews.length) || (empId == id))
+            return null;
+        
+        return empireViews[empId].embassy().treaty();
+    }
     public EmpireView viewForEmpire(Empire emp) {
         if ((emp != null) && (emp != this))
             return empireViews[emp.id];
@@ -3462,4 +3479,6 @@ public final class Empire implements Base, NamedObject, Serializable {
     public static Comparator<Empire> TOTAL_PRODUCTION = (Empire o1, Empire o2) -> o2.totalPlanetaryProduction().compareTo(o1.totalPlanetaryProduction());
     public static Comparator<Empire> AVG_TECH_LEVEL   = (Empire o1, Empire o2) -> o2.tech.avgTechLevel().compareTo(o1.tech.avgTechLevel());
     public static Comparator<Empire> TOTAL_FLEET_SIZE = (Empire o1, Empire o2) -> o2.totalFleetSize().compareTo(o1.totalFleetSize());
+    public static Comparator<Empire> RACE_NAME        = (Empire o1,   Empire o2)   -> o1.raceName().compareTo(o2.raceName());
+
 }

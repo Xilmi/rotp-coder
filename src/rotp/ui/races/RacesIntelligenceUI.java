@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import rotp.model.empires.DiplomaticEmbassy;
 import rotp.model.empires.Empire;
 import rotp.model.empires.EmpireView;
 import rotp.model.incidents.DiplomaticIncident;
@@ -290,14 +291,14 @@ public final class RacesIntelligenceUI extends BasePanel implements MouseListene
         float spyMod = player().spySpendingModifier();
         if (view.embassy().unity())
             desc = text("RACES_INTEL_SPENDING_DESC_UNITY");
+        else if (!view.inEconomicRange())
+            desc = text("RACES_INTEL_SPENDING_RANGE");
         else if (spyMod < 1) {
             int pct = (int) (Math.ceil((1-spyMod)*100));
             desc = text("RACES_INTEL_SPENDING_CAPPED", pct);
         }
-        else if (view.inEconomicRange())
-            desc = text("RACES_INTEL_SPENDING_DESC");
         else
-            desc = text("RACES_INTEL_SPENDING_RANGE");
+            desc = text("RACES_INTEL_SPENDING_DESC");
         List<String> lines = wrappedLines(g, desc, w-s50);
 
         int y4 = y3+s20;
@@ -662,14 +663,20 @@ public final class RacesIntelligenceUI extends BasePanel implements MouseListene
         
         boolean treatyBreak = false;
         boolean triggerWar = false;
-        if (!view.spies().isHide() && pl.alliedWith(emp.id))
-            treatyBreak = true;
-        else if (view.spies().isSabotage() && pl.pactWith(emp.id))
-            treatyBreak = true;  
+        if (view.spies().maxSpies() > 0) {
+            if (!view.spies().isHide() && pl.alliedWith(emp.id))
+                treatyBreak = true;
+            else if (view.spies().isSabotage() && pl.pactWith(emp.id))
+                treatyBreak = true;  
+        }
         
-        if (!view.spies().isHide() && !view.embassy().anyWar() 
-        && view.otherView().embassy().warningAlreadySent(DiplomaticIncident.SPY_WARNING))
-            triggerWar = true;
+        if (!view.embassy().anyWar() && (view.spies().maxSpies() > 0)
+        && view.otherView().embassy().timerIsActive(DiplomaticEmbassy.TIMER_SPY_WARNING)) {
+            if (!view.spies().isHide()
+            || (view.empire().leader().isXenophobic())) {
+                triggerWar = true;
+            }
+        }
 
         g.setColor(RacesUI.darkBrown);
         g.fillRect(x, y, w, h);
@@ -684,7 +691,7 @@ public final class RacesIntelligenceUI extends BasePanel implements MouseListene
        
         int y1 = y0+s10;
         int sliderH = s20;
-        drawSpiesMissionButton(g, emp, treatyBreak, x+s40,y1,w-s80,sliderH);
+        drawSpiesMissionButton(g, emp, treatyBreak || triggerWar, x+s40,y1,w-s80,sliderH);
         
         int y2 = y1+sliderH+s10;
 

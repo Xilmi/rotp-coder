@@ -15,6 +15,7 @@
  */
 package rotp.model.incidents;
 
+import rotp.model.empires.DiplomaticEmbassy;
 import rotp.model.empires.Empire;
 import rotp.model.empires.EmpireView;
 import rotp.model.empires.EspionageMission;
@@ -33,7 +34,7 @@ public class EspionageTechIncident extends DiplomaticIncident {
         severity = max(-20,ev.embassy().currentSpyIncidentSeverity());
 
         dateOccurred = galaxy().currentYear();
-        duration = 10;
+        duration = ev.empire().leader().isTechnologist()? 20 : 10;
         
         // empSpy is the actual spy
         // empThief is the suspected spy (the one who was framed)
@@ -46,7 +47,7 @@ public class EspionageTechIncident extends DiplomaticIncident {
     @Override
     public boolean isSpying()         { return true; }
     @Override
-    public int timerKey()           { return SPY_WARNING; }
+    public int timerKey()           { return DiplomaticEmbassy.TIMER_SPY_WARNING; }
     @Override
     public String title()             { return text("INC_TECH_STOLEN_TITLE"); }
     @Override

@@ -40,6 +40,7 @@ SPY_HIDE                          | Hide
 SPY_ESPIONAGE                     | Espionage
 SPY_SABOTAGE                      | Sabotage
 SPY_FRAMED                        | [You were framed.]
+SPY_FORCED_CONFESSION             | [A false confession was forced.]
 SPY_WARNING                       | [You have been warned.]
 
 ARID_DESC_BIOLOGICAL              | Arid Planets are dry, terrestrial worlds with limited vegetation and no more than 40% water surface area.
@@ -193,6 +194,8 @@ INC_AT_WAR_WITH_ALLY_TITLE        | At War with Ally
 INC_AT_WAR_WITH_ALLY_DESC         | You are at war with the [other_empire], an ally of the [my_empire].
 INC_CLOSED_EMBASSY_TITLE          | Recalled Ambassador
 INC_CLOSED_EMBASSY_DESC           | The [your_empire] ceased diplomatic relations with the [my_empire].
+INC_EVICTED_SPIES_TITLE           | Evicted Diplomats
+INC_EVICTED_SPIES_DESC            | The [your_empire] evicted all non-essential diplomats from the [my_empire].
 INC_BROKE_ALLIANCE_TITLE          | Broke Alliance
 INC_BROKE_ALLIANCE_DESC           | The [your_empire] broke their Alliance with the [my_empire].
 INC_BROKE_PACT_TITLE              | Broke Non-Aggression Pact
@@ -270,6 +273,7 @@ INC_SKIRMISH_DESC                 | [my_race] and [your_race] fleets engaged in 
 INC_SPY_CONFESSION_TITLE          | Spy Confession
 INC_SPY_CONFESS_ESPIONAGE_DESC    | A spy for the [spy_empire] was captured and confessed to ongoing espionage activities planned against the [victim_empire].
 INC_SPY_CONFESS_SABOTAGE_DESC     | A spy for the [spy_empire] was captured and confessed to ongoing sabotage activities planned against the [victim_empire].
+INC_SPY_CAPTURED_DESC             | A spy for the [spy_empire] was captured and forced to confess to ongoing sabotage activities planned against the [victim_empire].
 INC_TRADE_INCOME_TITLE            | Trade Profit
 INC_TRADE_INCOME_DESC             | Trade between the [your_empire] and [my_empire] has resulted in a profit of [amt] BC.
 INC_TRESPASSING_TITLE             | Trespass
@@ -390,6 +394,7 @@ MAIN_NAVIGATION_NEXT_TURN         | Next Turn
 MAIN_NAVIGATION_NEXT_YEAR         | Next Year
 MAIN_YEAR_DISPLAY                 | Year  %1
 MAIN_TURN_DISPLAY                 | Turn  %1
+MAIN_SPY_REPORT                   | Spy
 MAIN_TECH_NONE                    | No Research
 MAIN_TECH_COMPLETED               | Research Completed
 MAIN_TECH_RP_REMAINING            | %1 RP Remaining
@@ -958,18 +963,35 @@ NOTICE_ESPIONAGE_FRAME_TITLE      | Our spies have managed to frame another race
 NOTICE_ESPIONAGE_FRAME_SUBTITLE   | Choose the victim race:
 
 // Spy Capture display (during next turn)
-NOTICE_SPIES_TITLE             | Current Spy Report
-NOTICE_SPIES_CAUGHT               | Spies Captured
-NOTICE_SPIES_CAUGHT_OURS          | Ours
-NOTICE_SPIES_CAUGHT_THEIRS        | Theirs
-NOTICE_SPIES_CAUGHT_NONE          | No meaningful spy activity has been observed.
+NOTICE_SPIES_TITLE                | Current Spy Report
+NOTICE_SPIES_NO_ACTIVITY          | No meaningful spy activity has been observed.
+NOTICE_SPIES_ACTIVITY             | Current Activity:
+NOTICE_SPIES_LOST_DESC            | • The %2 shut down %1 of our spy networks.
+NOTICE_SPIES_LOST_CONFESSED       | Our spies confessed to ongoing sabotage activities.
+NOTICE_SPIES_LOST_CONFESSED2      | Our spies confessed to ongoing espionage activities.
+NOTICE_SPIES_LOST_CONFESSED3      | Our spies were forced to confess to ongoing sabotage activities.
+NOTICE_SPIES_CAUGHT_DESC          | • Our internal security forces shut down %1 spy networks of the %2.
+NOTICE_SPIES_CAUGHT_CONFESSED     | Their spies confessed to ongoing sabotage activities.
+NOTICE_SPIES_CAUGHT_CONFESSED2    | Their spies confessed to ongoing espionage activities.
+NOTICE_SPIES_FRAMED               | • We were framed for espionage activities within the %2.
+NOTICE_SPIES_ESPIONAGE            | • Our spies have stolen the secrets of %1 from the %2.
+NOTICE_SPIES_ESPIONAGE_FRAME      | We successfully framed the %1 for this theft.
+NOTICE_SPIES_SABOTAGE_FACTORIES   | • Our spies successfully destroyed %1 factories in the %2 system.
+NOTICE_SPIES_SABOTAGE_BASES       | • Our spies successfully destroyed %1 missile bases protecting the %2 system.
+NOTICE_SPIES_SABOTAGE_REBELS      | • Our spies successfully incited rebels in the %2 system.
+NOTICE_SPIES_SABOTAGE_REBELLION   | • Our spies successfully triggered rebellion in the %2 system.
+NOTICE_SPIES_LEARNED_TECH         | • Our spies report that the %1 has recently learned the following technologies unknown to us: %2
+NOTICE_SPIES_MULTIPLE_TECHS       | %1, %2
+NOTICE_SPIES_THREATEN             | Threaten
+NOTICE_SPIES_MANAGE               | Manage Spies
+NOTICE_SPIES_CLOSE                | Close
 
 // Ground Combat UI
 INVASION_LANDING                  | %1 out of %2 %3 transports penetrate %4 defenses.
 INVASION_LANDING_REBELS           | %1 transports land to reclaim the %2 colony at %3.
 INVASION_BATTLE                   | In the Year %1, the %2 and %3 battle for %4.
 INVASION_BATTLE_REBELS            | In the Year %1, the %2 and rebels battle for %3.
-INVASION_TROOPS_LANDED            | %1 %2 troops landed.
+INVASION_TROOPS_LANDED            | %1 %2 troops landed. 
 INVASION_SOME_TROOPS_LANDED       | %1 of %2 %3 troops landed.
 INVASION_WIN                      | %1 transports capture %2.
 INVASION_LOSS                     | %1 troops successfully defend %2.
@@ -1144,6 +1166,8 @@ SETUP_PLANET_QUALITY_GREAT        | Great
 SETUP_TERRAFORMING_NORMAL         | Normal
 SETUP_TERRAFORMING_REDUCED        | Reduced
 SETUP_TERRAFORMING_NONE           | None
+SETUP_COLONIZING_NORMAL           | Normal
+SETUP_COLONIZING_RESTRICTED       | Restricted
 SETUP_FUEL_RANGE_NORMAL           | Normal
 SETUP_FUEL_RANGE_HIGH             | High
 SETUP_FUEL_RANGE_HIGHER           | Higher
@@ -1205,6 +1229,7 @@ SETTINGS_WARP_SPEED               | Warp Speed: %1
 SETTINGS_NEBULAE                  | Nebulae: %1
 SETTINGS_PLANET_QUALITY           | Planet Quality: %1
 SETTINGS_TERRAFORMING             | Hostile Terraforming: %1
+SETTINGS_COLONIZING               | Colonizing: %1
 SETTINGS_FUEL_RANGE               | Fuel Range: %1
 SETTINGS_AI_HOSTILITY             | Hostility: %1
 SETTINGS_RANDOM_EVENTS_DESC       | Space Monsters are random events and considerable mid-game threats. Turn off space monsters or all random events. 
@@ -1216,6 +1241,7 @@ SETTINGS_RESEARCH_RATE_DESC       | Slow the research rate of new technologies, 
 SETTINGS_NEBULAE_DESC             | Nebulae slow down ship travel and render shields useless. Increase or decrease their frequency.
 SETTINGS_PLANET_QUALITY_DESC      | Increases or decreases the frequency of higher quality planets.
 SETTINGS_TERRAFORMING_DESC        | Reduce or eliminate the benefits of the Improved Terraforming technologies on hostile planets.
+SETTINGS_COLONIZING_DESC          | Restrict the colonization of systems to only those for which you have acquired the specific technology.
 SETTINGS_COUNCIL_DESC             | Disable the council victory condition or allow enemy empires to rebel against a player victory.
 SETTINGS_RANDOMIZE_AI_DESC        | Randomize the AI player personalities, racial abilities, or both.
 SETTINGS_FUEL_RANGE_DESC          | Increase the range of fuel range technologies and reserve fuel tanks.
@@ -1288,11 +1314,14 @@ SHIP_DESIGN_SLOTS                 | Design Slots
 SHIP_DESIGN_AVAILABLE             | Available
 SHIP_DESIGN_AVAILABLE_DESC        | Select this design slot to begin work on a new ship design.
 SHIP_DESIGN_AVAILABLE_DESC2       | Deploy this design to allow construction on colonies.
+SHIP_DESIGN_PROTOTYPE             | Prototype
+SHIP_DESIGN_PROTOTYPE_DESC        | Prototype designs cannot be deployed
 SHIP_DESIGN_SLOT_DESC             | Total in fleet:
 SHIP_DESIGN_SLOT_DESC2            | In Orbit:
 SHIP_DESIGN_SLOT_DESC3            | In Transit:
 SHIP_DESIGN_SLOT_DESC4            | Colonies Building:
 SHIP_DESIGN_NEW                   | New Ship Design
+SHIP_DESIGN_PROTOTYPE_TITLE       | Ship Design Prototype
 SHIP_DESIGN_SIZE_SMALL            | Small
 SHIP_DESIGN_SIZE_MEDIUM           | Medium
 SHIP_DESIGN_SIZE_LARGE            | Large
@@ -1467,9 +1496,18 @@ SHIP_COMBAT_MISS                  | Miss
 SHIP_COMBAT_DEFLECTED             | Deflected
 SHIP_COMBAT_DESTROYED             | Destroyed!
 SHIP_COMBAT_STASIS                | Stasis
+SHIP_COMBAT_TITLE                 | Battle at %1
+SHIP_COMBAT_TITLE_UNNAMED         | Battle in unexplored system
+SHIP_COMBAT_SYSTEM_POP            | Population
+SHIP_COMBAT_SYSTEM_FACT           | Factories
+SHIP_COMBAT_SYSTEM_BASE           | Bases
+SHIP_COMBAT_TITLE_VICTORIOUS      | VICTORIOUS
 SHIP_COMBAT_RESULTS               | The %1 fleet was victorious at %2!
 SHIP_COMBAT_RESULTS_MONSTER       | The %1 was victorious at %2!
 SHIP_COMBAT_RESULTS_UNNAMED       | The %1 fleet was victorious!
+SHIP_COMBAT_SHIP_TOTALS           | %1 🡒 %2
+SHIP_COMBAT_RESULTS_RETREATED     | RETREATED
+SHIP_COMBAT_RESULTS_DESTROYED     | DESTROYED
 SHIP_COMBAT_RETREAT_ALL           | Retreat All
 SHIP_COMBAT_NEXT                  | Next Ship
 SHIP_COMBAT_AUTO_RESOLVE          | Auto-Resolve Battle
@@ -1870,13 +1908,17 @@ DIPLOMACY_MENU_ACCEPT             | Accept
 DIPLOMACY_MENU_ACCEPT_NEED_BC     | Accept (not enough funds)
 DIPLOMACY_MENU_FORGET_IT          | Forget It
 DIPLOMACY_TRADE_LEVEL             | %1 BC / Year
-DIPLOMACY_MENU_TREATIES           | Diplomatic Actions
+DIPLOMACY_MENU_TREATIES           | Propose Treaty
 DIPLOMACY_MENU_TRADE              | Trade Agreement
 DIPLOMACY_MENU_TECHNOLOGY         | Exchange Technology
 DIPLOMACY_MENU_OFFER_AID          | Offer Aid
 DIPLOMACY_MENU_AMT                | %1 BC
 DIPLOMACY_MENU_OFFER_TECHS        | Offer Technology
+DIPLOMACY_MENU_THREATEN           | Threaten
 DIPLOMACY_MENU_DECLARE_WAR        | Declare War
+DIPLOMACY_MENU_EVICT_SPIES        | Remove All Spies (lowers relations)
+DIPLOMACY_MENU_STOP_SPYING        | Stop Spying Activities
+DIPLOMACY_MENU_STOP_ATTACKING     | Stop Attacking
 DIPLOMACY_MENU_GOODBYE            | Good Bye
 DIPLOMACY_MENU_PACT               | Propose Non-Aggression Pact
 DIPLOMACY_MENU_ALLIANCE           | Propose Alliance
@@ -1903,6 +1945,7 @@ DIPLOMACY_ACCEPT_ESTABLISH_TRADE  | Accept (Establishes Trade)
 DIPLOMACY_DECLINE_OFFER           | Decline
 DIPLOMACY_DECLINE_BREAK_ALLIANCE  | Decline (Breaks Alliance)
 DIPLOMACY_IGNORE_THREAT           | Ignore Threat
+DIPLOMACY_SHUTDOWN_SPIES          | Shutdown all spy networks in the %1 
 DIPLOMACY_HIDE_SPIES              | Order all spies in the %1 to Hide
 DIPLOMACY_RETREAT_SHIPS           | Order all ships orbiting or in transit to %1 systems to Retreat
 
