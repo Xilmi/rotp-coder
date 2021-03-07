@@ -1440,20 +1440,10 @@ public final class Empire implements Base, NamedObject, Serializable {
                 (int)Math.signum(f1.travelTime(sv.system(targetSysten), warpSpeed) -
                         f2.travelTime(sv.system(targetSysten), warpSpeed)) );
 
-        int sendCount = GameSession.instance().getGovernorOptions().getAutoScoutShipCount();
+        int sendCount = Math.max(1, GameSession.instance().getGovernorOptions().getAutoScoutShipCount());
         // don't send out armed scout ships when enemy fleet is incoming, hence the need for defend predicate
         autoSendShips(designs, targets, systemsSorter, fleetsSorter, (d, si) -> true, defendFirstPredicate(),
                 sendCount);
-    }
-
-    private ShipSpecialColony bestColonyShipSpecial(List<ShipDesign> designs) {
-        ShipSpecialColony bestColonyShip = null;
-        for (ShipDesign sd: designs) {
-            if (bestColonyShip == null || bestColonyShip.tech().environment() < sd.colonySpecial().tech().environment()) {
-                bestColonyShip = sd.colonySpecial();
-            }
-        }
-        return bestColonyShip;
     }
 
     public void autocolonize() {
@@ -1497,10 +1487,9 @@ public final class Empire implements Base, NamedObject, Serializable {
         }
 
         BiPredicate<ShipDesign, Integer> designFitForSystem =
-            (sd, si) -> race().ignoresPlanetEnvironment() || sd.colonySpecial().canColonize(sv.system(si).planet().type());
+            (sd, si) -> race().ignoresPlanetEnvironment() ||
+                    (canColonize(si) && sd.colonySpecial().canColonize(sv.system(si).planet().type()));
 
-        ShipSpecialColony bestColonyShip = bestColonyShipSpecial(designs);
-        System.out.println("Best colony ship special "+bestColonyShip.tech().name());
         boolean extendedRange = hasExtendedRange(designs);
         List<Integer> targets = filterTargets(i -> {
             // only colonize scouted systems, systems with planets, unguarded systems.
@@ -1508,9 +1497,20 @@ public final class Empire implements Base, NamedObject, Serializable {
             // TODO: Exclude systems that have enemy fleets orbiting?
             if (!sv.view(i).isColonized() && sv.view(i).scouted() && !PlanetType.NONE.equals(sv.view(i).planetType().key())
                     && !sv.isGuarded(i) && sv.view(i).empire() == null ) {
+
                 // if we don't have tech or ships to colonize this planet, ignore it.
-                if (!race().ignoresPlanetEnvironment() && !bestColonyShip.canColonize(sv.system(i).planet().type())) {
-                    return false;
+                // Since 2.15, for a game with restricted colonization option, we have to check each design if it can colonize
+                if (!race().ignoresPlanetEnvironment()) {
+                    boolean canColonize = false;
+                    for (ShipDesign sd: designs) {
+                        if (this.canColonize(i) && sd.colonySpecial().canColonize(sv.system(i).planet().type())) {
+                            canColonize = true;
+                            break;
+                        }
+                    }
+                    if (!canColonize) {
+                        return false;
+                    }
                 }
 
                 boolean inRange;
@@ -1557,7 +1557,7 @@ public final class Empire implements Base, NamedObject, Serializable {
                 (int)Math.signum(f1.travelTime(sv.system(targetSysten), warpSpeed) -
                         f2.travelTime(sv.system(targetSysten), warpSpeed)) );
 
-        int sendCount = GameSession.instance().getGovernorOptions().getAutoColonyShipCount();
+        int sendCount = Math.max(1, GameSession.instance().getGovernorOptions().getAutoColonyShipCount());
         // don't send out armed colony ships when enemy fleet is incoming, hence the need for defend predicate
         autoSendShips(designs, targets, new ColonizePriority("toColonize"), fleetsSorter,
                 designFitForSystem, defendFirstPredicate(), sendCount);
@@ -1614,7 +1614,7 @@ public final class Empire implements Base, NamedObject, Serializable {
             System.out.println("autoattack Enemy "+enemy.toString());
             hostileEmpires.add(enemy.empId());
         }
-        int sendCount = GameSession.instance().getGovernorOptions().getAutoAttackShipCount();
+        int sendCount = Math.max(1, GameSession.instance().getGovernorOptions().getAutoAttackShipCount());
         List<Integer> targets = filterTargets(i -> {
             // only consider scouted systems
             if (sv.view(i).scouted()) {
@@ -1704,7 +1704,10 @@ public final class Empire implements Base, NamedObject, Serializable {
             }
             if (systemHasHostileIncoming.contains(sf.system().id)) {
                 return false;
-            } else if (sf.system().empire() != this) {
+            } else if (sf.system().empire() != null && sf.system().empire() != this) {
+                // Don't send out armed ships orbiting enemy systems.
+                // It's OK to send away armed ships orbiting uncolonized planets if there are no incoming
+                // enemy fleets and that's checked above.
                 return false;
             } else {
                 return true;
