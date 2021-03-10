@@ -59,6 +59,7 @@ import rotp.ui.UserPreferences;
 import rotp.ui.notifications.GameAlert;
 import rotp.ui.notifications.SabotageNotification;
 import rotp.ui.notifications.ShipConstructionNotification;
+import rotp.ui.notifications.SpyReportAlert;
 import rotp.ui.notifications.StealTechNotification;
 import rotp.ui.notifications.SystemsScoutedNotification;
 import rotp.ui.notifications.TurnNotification;
@@ -180,7 +181,7 @@ public final class GameSession implements Base, Serializable {
         int existingCount = shipsConstructed().containsKey(design) ? shipsConstructed().get(design) : 0;
         shipsConstructed().put(design, existingCount+newCount);
     }
-    public void addSpiesCapturedNotification() {
+    public void enableSpyReport() {
         spyActivity = true;
     }
     public boolean spyActivity()            { return spyActivity; }
@@ -372,7 +373,7 @@ public final class GameSession implements Base, Serializable {
                 }
                 // all diplomatic fallout: praise, warnings, treaty offers, war declarations
                 gal.assessTurn();
-
+                
                 if (processNotifications()){
                     log("Notifications processed 4 - back to MainPanel");
                     RotPUI.instance().selectMainPanel();
@@ -388,10 +389,14 @@ public final class GameSession implements Base, Serializable {
                 if (!systemsToAllocate().isEmpty())
                     RotPUI.instance().allocateSystems();
 
+                if (spyActivity)
+                    SpyReportAlert.create();
+
                 log("Refreshing Player Views");
                 NoticeMessage.resetSubstatus(text("TURN_REFRESHING"));
                 validate();
                 gal.refreshEmpireViews(player());
+                player().setEmpireMapAvgCoordinates();
 
                 log("Autosaving post-turn");
                 log("NEXT TURN PROCESSING TIME: ", str(timeMs()-startMs));
@@ -681,7 +686,7 @@ public final class GameSession implements Base, Serializable {
                 techs.add(tech(random(view.empire().tech().category(i).allTechs())));
             techs.remove(random(techs)); // one blank category
             Spy spy = (new Spy(view.spies())).makeSuper();
-            EspionageMission mission = new EspionageMission(view.spies(), spy, techs,espionageSystem);
+            EspionageMission mission = new EspionageMission(view.spies(), spy, techs,espionageSystem, techs);
             StealTechNotification.create(mission, espionageEmpire.id);
             for (EmpireView v: player().empireViews())
                 if ((v != null) && (v.empire() != view.empire()))
@@ -755,7 +760,7 @@ public final class GameSession implements Base, Serializable {
         startExecutors();
         RotPUI.instance().mainUI().checkMapInitialized();
         if (!startUp) {
-            RotPUI.instance().selectMainPanel();
+            RotPUI.instance().selectMainPanelLoadGame();
         }
     }
     public String saveDir() {
@@ -896,6 +901,8 @@ public final class GameSession implements Base, Serializable {
 
         Galaxy gal = this.galaxy();
         Empire pl = player();
+        pl.setEmpireMapAvgCoordinates();
+        
         float minX = gal.width();
         float minY = gal.height();
         float maxX = 0;

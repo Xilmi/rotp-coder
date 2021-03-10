@@ -185,7 +185,7 @@ public class MainUI extends BasePanel implements IMapHandler {
         map.setScale(saveScale);
         map.centerX(saveX);
         map.centerY(saveY);
-        map.clearRangeMap();
+        map.resetRangeAreas();
         map.clearHoverSprite();
         clickedSprite((Sprite) sessionVar("MAINUI_SAVE_CLICKED"));
         showDisplayPanel();
@@ -201,6 +201,7 @@ public class MainUI extends BasePanel implements IMapHandler {
         baseControls.add(alertDismissSprite);
         baseControls.add(helpSprite);
     }
+    @Override
     public boolean showAlerts() {
         return (session().currentAlert() != null) && displayPanel.isVisible();
     }

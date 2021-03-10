@@ -225,7 +225,7 @@ INC_ENCROACHING_TITLE             | Encroachment
 INC_ENCROACHING_DESC              | The [your_empire] colonized the system [system], encroaching upon the borders of the [my_empire].
 INC_TECH_STOLEN_TITLE             | Technology Stolen
 INC_TECH_STOLEN_DESC              | [spy_race] spies stole the secrets of [tech] from the [victim_race].
-INC_TECH_FRAMED_DESC              | Unknown spies stole the secrets of [tech] from the [victim_race]. (you were framed)
+INC_TECH_FRAMED_DESC              | Unknown spies stole technological secrets from the [victim_race]. (you were framed)
 INC_TECH_EXCHANGE_TITLE           | Technology Exchanged
 INC_TECH_EXCHANGE_DESC            | The [my_empire] taught the secrets of [techGiven] to the [your_empire] in exchange for the secrets of [techReceived].
 INC_FINANCIAL_AID_TITLE           | Financial Aid
@@ -282,6 +282,7 @@ INC_TRESPASSING_DESC              | [your_race] fleets are trespassing in the [s
 // generic click to skip or continue messages
 CLICK_SKIP                        | Escape or Click to Skip Animation
 CLICK_CONTINUE                    | Click or Escape to Continue...
+CLICK_EXIT                        | Click or Escape to Exit...
 BUTTON_EXIT                       | Exit
 
 // GAME/SETUP UI 
@@ -690,7 +691,6 @@ MAIN_JAVA_32BIT_DESC_2            | Although Remnants of the Precursors will fun
 MAIN_JAVA_32BIT_DESC_3            | If you need assistance in upgrading Java, please go online to www.reddit.com/r/rotp and ask for assistance.
 MAIN_JAVA_32BIT_OK                | OK
 
-
 // Memory Low Warning
 MAIN_MEMORY_LOW_TITLE             | Warning! Game Memory Low
 MAIN_MEMORY_LOW_DESC              | Memory available for this game is running low. This can be caused by extended play or not starting with enough free memory.
@@ -709,9 +709,8 @@ MAIN_AUTOSAVE_FAILED_OK           | OK
 // Alerts
 MAIN_ALERT_TITLE                  | Alert 
 MAIN_ALERT_TITLE_COUNT            | Alert - %1 of %2
+MAIN_ALERT_SPY_REPORT             | Our intelligence bureau has provided a new report on recent spying activity.
 MAIN_ALERT_TECH_STOLEN            | Internal security has uncovered espionage activities by %1 spies.
-//MAIN_ALERT_SPY_CAPTURED           | We have captured a spy from the %1, forcing a confession of their %2 activities.
-//MAIN_ALERT_SPY_CONFESSED          | The %1 have captured one of our spies, forcing a confession of our %2 activities.
 MAIN_ALERT_FACTORIES_DESTROYED    | Agents working for the %1 have destroyed %2 factories in the %3 system.
 MAIN_ALERT_BASES_DESTROYED        | Agents working for the %1 have destroyed %2 missile bases defending the %3 system.
 MAIN_ALERT_FACTORIES_DESTROYED2   | Unknown saboteurs have destroyed %1 factories in the %2 system.
@@ -724,7 +723,6 @@ MAIN_ALERT_INVADERS_KILLED        | %3 %1 transports attempting to invade %2 hav
 MAIN_ALERT_TRESPASSING1           | %1 ships have been spotted trespassing near our colony in the %2 system.
 MAIN_ALERT_TRESPASSING2           | The %1 ambassador protests our ships trespassing in the %2 system.
 MAIN_ALERT_TRADE_MATURED          | Our trade treaty with the %1 has reached its maximum value of %2 BC.
-MAIN_ALERT_SPY_NEW_TECH           | Our spies inform us that the %1 knows the secrets of %2.
 MAIN_ALERT_ALLIANCE_WEAKENING     | Our alliance with the %1 is weakening.
 MAIN_ALERT_ALLIANCE_BREAKING      | Our alliance with the %1 is on the verge of collapse!
 
@@ -958,6 +956,8 @@ TECH_COMPLETED_VERIFY             | Verify that spending allocations in the rema
 // prompt for espionage
 NOTICE_ESPIONAGE_TITLE            | Our spies have infiltrated a %1 base.
 NOTICE_ESPIONAGE_SUBTITLE         | Select a technology type to steal.
+NOTICE_ESPIONAGE_NO_TECH          | No Available Technology
+NOTICE_ESPIONAGE_MANY_TECHS       | %1 Available Technologies
 NOTICE_ESPIONAGE_FOOTER           | If noticed, this may cause a Diplomatic Incident.
 NOTICE_ESPIONAGE_FRAME_TITLE      | Our spies have managed to frame another race for the theft.
 NOTICE_ESPIONAGE_FRAME_SUBTITLE   | Choose the victim race:
@@ -973,7 +973,7 @@ NOTICE_SPIES_LOST_CONFESSED3      | Our spies were forced to confess to ongoing 
 NOTICE_SPIES_CAUGHT_DESC          | • Our internal security forces shut down %1 spy networks of the %2.
 NOTICE_SPIES_CAUGHT_CONFESSED     | Their spies confessed to ongoing sabotage activities.
 NOTICE_SPIES_CAUGHT_CONFESSED2    | Their spies confessed to ongoing espionage activities.
-NOTICE_SPIES_FRAMED               | • We were framed for espionage activities within the %2.
+NOTICE_SPIES_FRAMED               | • We were framed for espionage activities within the %1.
 NOTICE_SPIES_ESPIONAGE            | • Our spies have stolen the secrets of %1 from the %2.
 NOTICE_SPIES_ESPIONAGE_FRAME      | We successfully framed the %1 for this theft.
 NOTICE_SPIES_SABOTAGE_FACTORIES   | • Our spies successfully destroyed %1 factories in the %2 system.
@@ -1729,6 +1729,7 @@ RACES_MILITARY_SPECIALS           | Special Devices
 RACES_STATUS_THE_EMPIRE           | The %1
 RACES_STATUS_VS                   | vs.
 RACES_STATUS_KNOWN_EMPIRES        | %1 Known Empires
+RACES_STATUS_HISTORY              | Show %1 History
 RACES_STATUS_NO_DATA              | No Data
 RACES_STATUS_OLD_DATA             | Old Data
 RACES_STATUS_FLEET_STRENGTH       | Fleet Strength
@@ -1738,6 +1739,9 @@ RACES_STATUS_PLANETS              | Planets
 RACES_STATUS_PRODUCTION           | Production
 RACES_STATUS_TOTAL_POWER          | Total Power
 RACES_UNKNOWN_DATA                | ???
+
+RACES_SET_COLOR_TITLE             | Choose new color for %1
+RACES_SET_COLOR_DESC              | If the selected color and shape are used by another empire, the colors will be switched.
 
 // Races UI help
 RACES_HELP_0A                     | OVERVIEW: This screen provides detailed information about each of the alien races that you have encountered.
@@ -1752,6 +1756,7 @@ RACES_HELP_1B                     | Provides direct access to diplomats for all 
 RACES_HELP_1C                     | Increase the security tax to improve your chances of thwarting enemy spies.
 RACES_HELP_1D                     | Provides direct access to manage your spies in all contacted empires.
 RACES_HELP_1E                     | Diplomatic incidents that affect how other empires react to you. The effects will move towards zero over time.
+RACES_HELP_1F                     | Click to change the color for a race displayed on the map
 RACES_HELP_2A                     | General information for selected empire.
 RACES_HELP_2B                     | Grants an audience with a diplomat for the selected empire.
 RACES_HELP_2C                     | Information about trade treaties signed with the selected empire.
@@ -1794,6 +1799,21 @@ SABOTAGE_FACTORIES                | factories
 NOTICE_SPYING_MISSION_HIDE        | Infiltration
 NOTICE_SPYING_MISSION_ESPIONAGE   | Espionage
 NOTICE_SPYING_MISSION_SABOTAGE    | Sabotage
+
+// History UI
+HISTORY_TITLE                     | Known Galactic History
+HISTORY_TITLE_ALL                 | Full Galactic History
+HISTORY_TURN_DESC                 | Turn %1 of %2
+HISTORY_FORWARD                   | Forward
+HISTORY_BACK                      | Back
+HISTORY_PLAY                      | Play
+HISTORY_PAUSE                     | Pause
+HISTORY_RESET                     | Reset
+HISTORY_EXIT                      | Exit
+HISTORY_EXTINCT                   | Extinct
+HISTORY_SYSTEMS                   | Systems
+HISTORY_EMPIRE                    | Empire
+
 
 
 // Council UIs
@@ -1872,6 +1892,7 @@ SYSTEMS_UNCOLONIZEABLE            | System cannot be colonized.
 SYSTEMS_EXPLOIT_PCT               | Colony at %1% total production capacity.
 SYSTEMS_EXPLOIT_WASTE             | Colony is creating industrial waste.
 SYSTEMS_EXPLOIT_COMPLETE          | Colony is at maximum production capacity.
+SYSTEMS_EXPLOIT_TRANSPORTS        | %1 transports are in transit.
 SYSTEMS_EXT_ENEMY                 | Enemy colony.
 SYSTEMS_EXT_ENEMY_FLEET           | Enemy fleet in orbit.
 SYSTEMS_EXT_ENEMY_FLEET_PLAYER    | Enemy fleet orbiting our colony.
@@ -1879,6 +1900,7 @@ SYSTEMS_EXT_ENEMY_FLEET_ALLY      | Enemy fleet orbiting an allied colony.
 SYSTEMS_EXT_INC_FLEET_PLAYER      | Enemy fleet in transit to our colony.
 SYSTEMS_EXT_INC_FLEET_ALLY        | Enemy fleet in transit to an allied colony.
 SYSTEMS_EXT_NEED_DEFENSE          | Defenses at this colony are not fully upgraded.
+SYSTEMS_EXT_INC_TRANSPORTS        | %1 %2 troops are in transit.
 SYSTEMS_HELP_1A                   | OVERVIEW - The purpose of this screen is to highlight systems in the galaxy that warrant attention by the player. Urgency or danger is denoted by color: flashing red is the highest, and green is the lowest.
 SYSTEMS_HELP_1B                   | Explore - shows unexplored systems within reach of scouts, or potentially with unresearched technologies.
 SYSTEMS_HELP_1C                   | Expand - shows colonizable systems within reach of ships, or potentially with unresearched technologies.
@@ -1963,6 +1985,9 @@ GAME_OVER_REBELLION_WIN           | Rebellion Win
 GAME_OVER_REBEL_ALLIANCE_WIN      | Rebel Alliance Win
 GAME_OVER_ALLIANCE_WIN            | Alliance Win
 GAME_OVER_NO_COLONIES_LOSS        | Societal Collapse Loss
+
+GAME_OVER_EXIT                    | Exit
+GAME_OVER_REPLAY                  | Replay
 
 // text for race-generic endings
 // %1 Game year, %2 player name, %3 player race, %4 player empire, %5 leader name, %6 leader race, %7 leader empire, %8 special text
