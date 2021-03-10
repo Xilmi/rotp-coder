@@ -18,6 +18,10 @@ package rotp.model.empires;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
+import java.awt.Rectangle;
+import java.awt.Shape;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -71,6 +75,7 @@ import rotp.model.tech.Tech;
 import rotp.model.tech.TechRoboticControls;
 import rotp.model.tech.TechTree;
 import rotp.ui.NoticeMessage;
+import rotp.ui.main.GalaxyMapPanel;
 import rotp.util.Base;
 
 public final class Empire implements Base, NamedObject, Serializable {
@@ -130,6 +135,8 @@ public final class Empire implements Base, NamedObject, Serializable {
     private NamedObject lastAttacker;
     private int defaultMaxBases = 1;
     private final String dataRaceKey;
+    
+    private transient float avgX, avgY, nameX1, nameX2;
 
     private transient AI ai;
     private transient boolean[] canSeeShips;
@@ -140,6 +147,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     private transient BufferedImage shipImageHuge;
     private transient BufferedImage scoutImage;
     private transient BufferedImage transportImage;
+    private transient Color nameColor;
     private transient Color ownershipColor;
     private transient Color selectionColor;
     private transient Color reachColor;
@@ -151,6 +159,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     private transient float totalEmpireStargateCost;
     private transient float totalEmpireMissileBaseCost;
     private transient int inRange;
+    public transient int numColoniesHistory;
 
     public AI ai() {
         if (ai == null)
@@ -230,7 +239,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     public Colony.Orders priorityOrders()         { return priorityOrders; }
     public void priorityOrders(Colony.Orders o)   { priorityOrders = o; }
     public int colorId()                          { return bannerColor; }
-    public void colorId(int i)                    { bannerColor = i; }
+    public void colorId(int i)                    { bannerColor = i; resetColors(); }
     public int shape()                            { return id / options().numColors(); }
     public float minX()                           { return minX; }
     public float maxX()                           { return maxX; }
@@ -239,6 +248,25 @@ public final class Empire implements Base, NamedObject, Serializable {
     public boolean divertColonyExcessToResearch() { return divertColonyExcessToResearch; }
     public void toggleColonyExcessToResearch()    { divertColonyExcessToResearch = !divertColonyExcessToResearch; }
     
+    public void changeColorId(int newColor) {
+        int oldColor = colorId();
+        
+        Empire emp = galaxy().empireMatching(newColor, shape());
+        if (emp != null)
+            emp.colorId(oldColor);
+        
+        colorId(newColor);
+    }
+    
+    private void resetColors() {
+        nameColor = null;
+        ownershipColor = null;
+        selectionColor = null;
+        reachColor = null;
+        shipBorderColor = null;
+        scoutBorderColor = null;
+        empireRangeColor = null;
+    }
     public boolean canSeeShips(int empId) {
         if (canSeeShips == null) {
             canSeeShips = new boolean[galaxy().numEmpires()];
@@ -282,6 +310,13 @@ public final class Empire implements Base, NamedObject, Serializable {
         if (transportImage == null)
             transportImage = ShipLibrary.current().transportImage(shipColorId());
         return transportImage;
+    }
+    public Color nameColor() {
+        if (nameColor == null) {
+            Color c = color();
+            nameColor = newColor(c.getRed(), c.getGreen(), c.getBlue(), 160);
+        }
+        return nameColor;
     }
     public Color ownershipColor() {
         if (ownershipColor == null) {
@@ -3267,23 +3302,21 @@ public final class Empire implements Base, NamedObject, Serializable {
         }
         else { 
             List<Empire> activeEmpires = galaxy().activeEmpires();
-            // if no empires left, the player has been killed in a solo game
-            // by a monster or by abandoning all of his colonies simultaneously 
-            if (activeEmpires.isEmpty())
-                session().status().loseMilitary();
-            else if (isPlayer() && (lastAttacker == null))
-                session().status().loseNoColonies();                
-            // if only one empire is left...
-            else if (activeEmpires.size() == 1) {
-                if (isPlayer())
-                    session().status().loseMilitary();
+            // Player has gone extinct. Determine loss condition
+            if (isPlayer()) {
+                // no one killed us... abandonment suicide
+                if (lastAttacker == null)
+                    session().status().loseNoColonies();   
                 else
-                    session().status().winMilitary();
+                    session().status().loseMilitary();                    
             }
-            else {
-                if (galaxy().allAlliedWithPlayer()) 
-                    session().status().winMilitaryAlliance();
-            }
+            // an AI empire has gone extinct.. see if player win 
+            // if only one empire is left then player must have won
+            else if (activeEmpires.size() == 1) 
+                session().status().winMilitary();
+            // multiple empires, all allied with player.. that's a win
+            else if (galaxy().allAlliedWithPlayer()) 
+                session().status().winMilitaryAlliance();
         }            
         status.assessTurn();
     }
@@ -3311,37 +3344,45 @@ public final class Empire implements Base, NamedObject, Serializable {
                 cv.spies().detectShip(fl.empire().shipLab().design(i));
         }
     }
-    public void drawShape(Graphics2D g, int x, int y, int w, int h) {
-        Color c = this.color();
+    public Shape drawShape(Graphics2D g, int x, int y, int w, int h) {
+        return drawShape(g,x,y,w,h,color());
+    }
+    public Shape drawShape(Graphics2D g, int x, int y, int w, int h, Color c) {
         Color c1 = new Color(c.getRed(),c.getGreen(),c.getBlue(),192);
         g.setColor(c);
         int m = w/10;
         switch(shape()) {
             case Empire.SHAPE_SQUARE:
-                g.fillRect(x+m,y+m,w-m-m,h-m-m); break;
+                Rectangle2D rect = new Rectangle2D.Float(x+m,y+m,w-m-m,h-m-m);
+                g.fill(rect); 
+                return rect;
             case Empire.SHAPE_DIAMOND:
                 Polygon p = new Polygon();
                 p.addPoint(x, y+h/2);
                 p.addPoint(x+w/2, y);
                 p.addPoint(x+w, y+h/2);
                 p.addPoint(x+w/2, y+h);
-                g.fill(p); break;
+                g.fill(p); 
+                return p;
             case Empire.SHAPE_TRIANGLE1:
                 Polygon p1 = new Polygon();
                 p1.addPoint(x+w/2, y);
                 p1.addPoint(x, y+h);
                 p1.addPoint(x+w,y+h);
-                g.fill(p1); break;
+                g.fill(p1);
+                return p1;
             case Empire.SHAPE_TRIANGLE2:
                 Polygon p2 = new Polygon();
                 p2.addPoint(x+w/2, y+h);
                 p2.addPoint(x, y);
                 p2.addPoint(x+w,y);
                 g.fill(p2);
-                break;
+                return p2;
             case Empire.SHAPE_CIRCLE:
             default:
-                g.fillOval(x,y,w,h); break;
+                Ellipse2D ell = new Ellipse2D.Float(x,y,w,h);
+                g.fill(ell); 
+                return ell;
         }
     }
     public void encounterFleet(ShipFleet fl) {
@@ -3475,10 +3516,79 @@ public final class Empire implements Base, NamedObject, Serializable {
         contacts.remove(e2);
         return contacts;
     }
+    public void setEmpireMapAvgCoordinates() {
+        Empire[] emps = galaxy().empires();
+        float[] xAvg = new float[emps.length];
+        float[] yAvg = new float[emps.length];
+        float[] xMin = new float[emps.length];
+        float[] xMax = new float[emps.length];
+        int[] num = new int[emps.length];
+        
+        for (int i=0;i<emps.length;i++) 
+            xMin[i] = Float.MAX_VALUE;
+        
+        int n = galaxy().numStarSystems();
+        for (int i=0;i<n;i++) {
+            int empId = sv.empId(i);
+            if (empId >= 0) {
+                if (!sv.name(i).isEmpty()) {
+                    StarSystem sys = sv.system(i);
+                    xAvg[empId] += sys.x();
+                    yAvg[empId] += sys.y();
+                    xMin[empId] = min(xMin[empId], sys.x());
+                    xMax[empId] = max(xMax[empId], sys.x());
+                    num[empId]++;
+                }
+            }
+        }
+        
+        for (Empire emp: emps) {
+            int id = emp.id;
+            emp.avgX = xAvg[id]/num[id];
+            emp.avgY = yAvg[id]/num[id];
+            emp.nameX1 =xMin[id];
+            emp.nameX2 = xMax[id];
+        }  
+    }
+    public void draw(GalaxyMapPanel map, Graphics2D g2) {
+        draw(map, g2, nameX1, nameX2, avgX, avgY);
+    }
+    public void draw(GalaxyMapPanel map, Graphics2D g2, float xMin, float xMax, float xAvg, float yAvg) {
+        if (map.hideSystemNames())
+            return;
+        
+        // old save: new var hasn't been calculated yet
+        if (avgX == 0)
+            return;
+        
+        float empW = (xMax-xMin)*2/3;
+        float adj = max(0,3-empW);
+        int x0 = map.mapX(xMin-adj);
+        int x1 = map.mapX(xMax+adj);
+         
+        
+        int mapX = map.mapX(xAvg);
+        int mapY = map.mapY(yAvg);
+        String longName = "XXXXXXXXXX";
+        String name = raceName();
+        int fontSize = scaledFont(g2,longName,x1-x0,60,12);
+        //int fontSize = max(12, min(40, (int) (50*(x1-x0)/scale)));
+        if (fontSize >= 12) {
+            if (!name.isEmpty()) {
+                g2.setFont(narrowFont(fontSize));
+                g2.setColor(nameColor());
+                int sw = g2.getFontMetrics().stringWidth(name);
+                int x = mapX - (sw/2);
+                int y = mapY - (fontSize/2);
+                g2.drawString(name, x, y);
+            }
+        }
+    }
+   
     public static Comparator<Empire> TOTAL_POPULATION = (Empire o1, Empire o2) -> o2.totalPlanetaryPopulation().compareTo(o1.totalPlanetaryPopulation());
     public static Comparator<Empire> TOTAL_PRODUCTION = (Empire o1, Empire o2) -> o2.totalPlanetaryProduction().compareTo(o1.totalPlanetaryProduction());
     public static Comparator<Empire> AVG_TECH_LEVEL   = (Empire o1, Empire o2) -> o2.tech.avgTechLevel().compareTo(o1.tech.avgTechLevel());
     public static Comparator<Empire> TOTAL_FLEET_SIZE = (Empire o1, Empire o2) -> o2.totalFleetSize().compareTo(o1.totalFleetSize());
     public static Comparator<Empire> RACE_NAME        = (Empire o1,   Empire o2)   -> o1.raceName().compareTo(o2.raceName());
-
+    public static Comparator<Empire> HISTORICAL_SIZE  = (Empire o1, Empire o2) -> Base.compare(o2.numColoniesHistory, o1.numColoniesHistory);
 }

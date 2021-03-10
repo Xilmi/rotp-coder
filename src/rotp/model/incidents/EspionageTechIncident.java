@@ -31,7 +31,7 @@ public class EspionageTechIncident extends DiplomaticIncident {
 
     public EspionageTechIncident(EmpireView ev, EspionageMission m) {
         ev.embassy().resetAllianceTimer();
-        severity = max(-30, -10+ev.embassy().currentSpyIncidentSeverity()); // modnar: increase tech steal severity
+        severity = max(-30,-10+ev.embassy().currentSpyIncidentSeverity()); // modnar: increase tech steal severity
 
         dateOccurred = galaxy().currentYear();
         duration = ev.empire().leader().isTechnologist()? 25 : 15; // modnar: increase tech steal duration

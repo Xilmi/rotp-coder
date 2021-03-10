@@ -105,6 +105,7 @@ public class ShipBattleUI extends FadeInPanel implements Base, MouseListener, Mo
     final Map<ShipDesign, Integer> counts = new LinkedHashMap<>();
     Empire leftEmpire;
     Empire rightEmpire;
+    SpaceMonster monster;
 
     Display mode;
     ShipCombatManager  mgr;
@@ -264,7 +265,8 @@ public class ShipBattleUI extends FadeInPanel implements Base, MouseListener, Mo
             throw new RuntimeException("Not exactly 2 empires in ship combat");
 
         Empire aiEmpire = emps.get(0).isPlayer() ? emps.get(1) : emps.get(0);
-
+        monster = null;
+        
         if (mgr.system().empire() == player()) {
             showPlanet = true;
             leftEmpire = player();
@@ -281,7 +283,9 @@ public class ShipBattleUI extends FadeInPanel implements Base, MouseListener, Mo
         }
 
         initFleetStacks(leftEmpire, leftFleet);
-        if (!mgr.results().isMonsterAttack())
+        if (mgr.results().isMonsterAttack())
+            monster = mgr.results().monster();
+        else
             initFleetStacks(rightEmpire, rightFleet);
         
         if (combatFlag == AUTO_RESOLVE) {
@@ -1671,7 +1675,6 @@ public class ShipBattleUI extends FadeInPanel implements Base, MouseListener, Mo
         }
         
         // right empire
-        SpaceMonster monster = mgr.results().monster();
         if (monster != null)
             empName = monster.name();
         else
@@ -1908,7 +1911,7 @@ public class ShipBattleUI extends FadeInPanel implements Base, MouseListener, Mo
     }
     public void finishAndResume() {
         finish();
-         session().resumeNextTurnProcessing();
+        session().resumeNextTurnProcessing();
     }
     public void finish() {
         if (mgr.combatIsFinished()) {
@@ -2016,7 +2019,10 @@ public class ShipBattleUI extends FadeInPanel implements Base, MouseListener, Mo
                 return;
             case KeyEvent.VK_E:
             case KeyEvent.VK_ESCAPE:
-                finish();
+                if (mgr.combatIsFinished())
+                    finishAndResume();
+                else
+                    finish();
         }
     }
     @Override

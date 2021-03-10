@@ -562,6 +562,7 @@ public class CombatStackShip extends CombatStack {
         fleet.removeShips(design.id(), shipsLost, true);
 
         // record losses
+        mgr.results().addShipDestroyed(design, shipsLost);
         empire.shipLab().recordDestruction(design, shipsLost);
         mgr.currentStack().recordKills(shipsLost);
     }

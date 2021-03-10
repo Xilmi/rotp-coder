@@ -27,7 +27,6 @@ import rotp.model.tech.Tech;
 import rotp.model.tech.TechTree;
 import rotp.ui.RotPUI;
 import rotp.ui.notifications.SabotageNotification;
-import rotp.ui.notifications.SpyNewTechAlert;
 import rotp.util.Base;
 
 public final class SpyNetwork implements Base, Serializable {
@@ -292,7 +291,7 @@ public final class SpyNetwork implements Base, Serializable {
         
         if (rpt.spiesLost() > 0) {
             if (view.owner().isPlayer() || view.empire().isPlayer())
-                session().addSpiesCapturedNotification();
+            session().enableSpyReport();
         }
         
         if (spyConfessed || activeSpies.isEmpty() || isHide())
@@ -324,7 +323,10 @@ public final class SpyNetwork implements Base, Serializable {
         if (owner.isPlayer()) {
             List<String> newPossible = new ArrayList<>(possibleTechs());
             newPossible.removeAll(prevPossible);
-            report().recordTechsLearned(newPossible);
+            if (!newPossible.isEmpty()) {
+                session().enableSpyReport();
+                report().recordTechsLearned(newPossible);
+            }
         }  
     }
     private boolean sendSpiesToInfiltrate() {
@@ -352,10 +354,8 @@ public final class SpyNetwork implements Base, Serializable {
         // make sure we don't try to steal any techs that we just traded for
         // but haven't received yet
         List<String> recentlyTradedTechs = owner().tech().tradedTechs();
-        for (String techId: recentlyTradedTechs) {
-            Tech traded = tech(techId);
-            possibleTechs().remove(traded);
-        }
+        for (String techId: recentlyTradedTechs) 
+            possibleTechs().remove(techId);
         
         // no unknown techs to potentially steal
         if (possibleTechs().isEmpty())
@@ -380,10 +380,12 @@ public final class SpyNetwork implements Base, Serializable {
         if (bestSpy == null)
             return;
 
+        List<Tech> allPossible = new ArrayList<>();
         // build list of techs at or below the steal number
         List<Tech> espionageChoices = new ArrayList<>();
         for (String tId: possibleTechs()) {
             Tech pTech = tech(tId);
+            allPossible.add(pTech);
             if (pTech.level() <= bestStealNumber)
                 espionageChoices.add(pTech);
         }
@@ -392,7 +394,7 @@ public final class SpyNetwork implements Base, Serializable {
         if (espionageChoices.isEmpty())
             return;
 
-        EspionageMission eMission = chooseTechToSteal(bestSpy, espionageChoices);
+        EspionageMission eMission = chooseTechToSteal(bestSpy, espionageChoices, allPossible);
         
         report().stolenTech(eMission.stolenTech());
         Empire framedEmpire = eMission.framedEmpire();
@@ -408,22 +410,25 @@ public final class SpyNetwork implements Base, Serializable {
             Empire victim = view.empire();
             Empire thief = eMission.thief();
             EmpireView victimView = victim.viewForEmpire(thief);
+            if (thief.isPlayer()) {
+                int i = 0;
+            }
             if (victimView != null)
                 victimView.embassy().addIncident(new EspionageTechIncident(victimView, eMission));
         }
         if (bestSpy.caught())
             checkForTreatyBreak();
     }
-    private EspionageMission chooseTechToSteal(Spy spy, List<Tech> techs) {
-        if (techs.isEmpty())
+    private EspionageMission chooseTechToSteal(Spy spy, List<Tech> topTechs, List<Tech> possibleTechs) {
+        if (topTechs.isEmpty())
             return null;
 
         StarSystem randomSystem = random(empire().allColonizedSystems());
-        EspionageMission eMission = new EspionageMission(this, spy, techs, randomSystem);
+        EspionageMission eMission = new EspionageMission(this, spy, topTechs, randomSystem, possibleTechs);
 
         // ai will choose now.. player choice is deferred until UI is displayed
         if (owner().isAIControlled()) {
-            eMission.stealTech(owner().ai().scientist().mostDesirableTech(techs));
+            eMission.stealTech(owner().ai().scientist().mostDesirableTech(topTechs));
             if (eMission.canFrame())
                 eMission.frameEmpire(owner().spyMasterAI().suggestToFrame(eMission.empiresToFrame()));
         }

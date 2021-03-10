@@ -30,6 +30,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
@@ -123,6 +124,10 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
     public Sprite hoverSprite;
     int backOffsetX = 0;
     int backOffsetY = 0;
+    float areaOffsetX = 0;
+    float areaOffsetY = 0;
+    Area shipRangeArea;
+    Area scoutRangeArea;
 
     private final Timer zoomTimer;
 
@@ -337,8 +342,10 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
     public void setScale(float scale) {
         int mapSizeX = getSize().width;
         int mapSizeY = getSize().height;
-        if (scaleY != scale)
+        if (scaleY != scale) {
             clearRangeMap();
+            resetRangeAreas();
+        }
         scaleY(scale);
         scaleX(scale*mapSizeX/mapSizeY);
     }
@@ -362,7 +369,7 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
         setScale(scaleY());
         //log("map scale:", fmt(scaleX(),2), "@", fmt(scaleY(),2), "  center:", fmt(center().x(),2), "@", fmt(center().y(),2), "  x-rng:", fmt(mapMinX()), "-", fmt(mapMaxX(),2), "  y-rng:", fmt(mapMinY()), "-", fmt(mapMaxY(),2));
         //drawBackground(g2); // modnar: not needed due to drawShipRanges below
-        if (showStars()) {
+        if (parent.drawBackgroundStars() && showStars()) {
             float alpha = 8/5*sizeX()/scaleX();
             Composite prev = g2.getComposite();
             if (alpha < 1) {
@@ -382,6 +389,7 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
 
         drawNebulas(g2);
         drawStarSystems(g2);
+        drawEmpireNames(g2);
         drawShips(g2);
         drawWorkingFlightPaths(g2);
         parent.drawYear(g2);
@@ -412,7 +420,14 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
             drawBackgroundNebula(sharedNebulaBackground);
         }
     }
-    public void clearRangeMap() {   redrawRangeMap = true; }
+    public void clearRangeMap()    { redrawRangeMap = true; }
+    public void resetRangeAreas() {
+        clearRangeMap();
+        shipRangeArea = null;
+        scoutRangeArea = null;
+        areaOffsetX = 0;
+        areaOffsetY = 0;
+    }
     private void setFocusToCenter() {
         currentFocus(new Location());
         currentFocus().setXY(sizeX()/2, sizeY()/2);
@@ -464,7 +479,8 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
                 setFontHints(g0);
                 g0.setColor(unreachableBackground);
                 g0.fillRect(0,0,getWidth(),getHeight());
-                drawExtendedRangeDisplay(g0);
+                if (parent.showShipRanges())
+                    drawExtendedRangeDisplay(g0);
                 drawOwnershipDisplay(g0);
             }
             g.drawImage(rangeMapBuffer,0,0,null);
@@ -497,7 +513,7 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
         Galaxy gal = galaxy();
         Empire pl = player();
         for (int id=0; id < pl.sv.count(); id++) {
-            Empire emp = pl.sv.empire(id);
+            Empire emp = parent.knownEmpire(id, pl);
             StarSystem sys = gal.system(id);
             //Shape sysCircle = new Ellipse2D.Float(mapX(sys.x())-ownerR, mapY(sys.y())-ownerR, 2*ownerR, 2*ownerR);
             if ((emp != null) && parent.showOwnership(sys)) {
@@ -562,33 +578,46 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
 
         float scale = getWidth()/scaleX();
 
+        AffineTransform prevXForm = g.getTransform();
+        
+        if ((areaOffsetX != 0) || (areaOffsetY != 0)) {
+            float ctrX = parent.mapFocus().x();
+            float ctrY = parent.mapFocus().y();
+            int mapOffsetX = mapX(ctrX)-mapX(ctrX-areaOffsetX);          
+            int mapOffsetY = mapY(ctrY)-mapY(ctrY-areaOffsetY);
+            AffineTransform areaOffsetXForm = g.getTransform();
+            areaOffsetXForm.setToIdentity();
+            areaOffsetXForm.translate(mapOffsetX, mapOffsetY);
+            g.setTransform(areaOffsetXForm);
+        }
         int extR = (int) (scoutRange*scale);
         int baseR = (int) (shipRange*scale);
-        Area clusterArea = new Area();
-                       
-        for (StarSystem sv: alliedSystems)
-            clusterArea.add(new Area( new Ellipse2D.Float(mapX(sv.x())-extR, mapY(sv.y())-extR, 2*extR, 2*extR) ));       
-        
-        for (StarSystem sv: systems)
-            clusterArea.add(new Area( new Ellipse2D.Float(mapX(sv.x())-extR, mapY(sv.y())-extR, 2*extR, 2*extR) ));       
-           
+        if (scoutRangeArea == null) {
+            scoutRangeArea = new Area();
+            for (StarSystem sv: alliedSystems)
+                scoutRangeArea.add(new Area( new Ellipse2D.Float(mapX(sv.x())-extR, mapY(sv.y())-extR, 2*extR, 2*extR) ));       
+            for (StarSystem sv: systems)
+                scoutRangeArea.add(new Area( new Ellipse2D.Float(mapX(sv.x())-extR, mapY(sv.y())-extR, 2*extR, 2*extR) ));       
+        }
         g.setColor(extendedBorder);
         g.setStroke(stroke2);
-        g.draw(clusterArea);   
-        clusterArea.reset();
-        
-        
-        for (StarSystem sv: alliedSystems)
-            clusterArea.add(new Area( new Ellipse2D.Float(mapX(sv.x())-baseR, mapY(sv.y())-baseR, 2*baseR, 2*baseR) ));       
-        
-        for (StarSystem sv: systems)
-            clusterArea.add(new Area( new Ellipse2D.Float(mapX(sv.x())-baseR, mapY(sv.y())-baseR, 2*baseR, 2*baseR) ));       
-                   
+        g.draw(scoutRangeArea);   
+
+
+        if (shipRangeArea == null) {
+            shipRangeArea = new Area();
+            for (StarSystem sv: alliedSystems)
+                shipRangeArea.add(new Area( new Ellipse2D.Float(mapX(sv.x())-baseR, mapY(sv.y())-baseR, 2*baseR, 2*baseR) ));       
+            for (StarSystem sv: systems)
+                shipRangeArea.add(new Area( new Ellipse2D.Float(mapX(sv.x())-baseR, mapY(sv.y())-baseR, 2*baseR, 2*baseR) ));       
+        }       
         g.setColor(normalBackground);
-        g.fill(clusterArea);
+        g.fill(shipRangeArea);
         g.setColor(normalBorder);
         g.setStroke(stroke2);
-        g.draw(clusterArea);   
+        g.draw(shipRangeArea);   
+        
+        g.setTransform(prevXForm);
 
     }
     private void drawGridCircularDisplayDark(Graphics2D g) {
@@ -685,6 +714,12 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
                 neb.draw(this, g);
         }
     }
+    public void drawEmpireNames(Graphics2D g) {
+        for (Empire emp: galaxy().empires()) {
+            if (parent.shouldDrawEmpireName(emp, scaleX())) 
+                parent.drawEmpireName(emp, this, g);
+        }
+    }
     public void drawStarSystems(Graphics2D g) {
         Galaxy gal = galaxy();
         for (int id=0; id< gal.numStarSystems();id++) {
@@ -698,6 +733,8 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
         }
     }
     public void drawShips(Graphics2D g) {
+        if (!parent.drawShips())
+            return;
         Empire pl = player();
         // comodification exception here without this copy
         List<Ship> visibleShips = new ArrayList<>(pl.visibleShips());
@@ -761,11 +798,11 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
             if (sprite.isSelectableAt(this, x1, y1))
                 return sprite;
         }
-        for (Sprite sprite: baseControls) {
+        for (Sprite sprite: parent.controlSprites()) {
             if (sprite.isSelectableAt(this, x1, y1))
                 return sprite;
         }
-        for (Sprite sprite: parent.controlSprites()) {
+        for (Sprite sprite: baseControls) {
             if (sprite.isSelectableAt(this, x1, y1))
                 return sprite;
         }
@@ -831,9 +868,22 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
     public void dragMap(int deltaX, int deltaY) {
         backOffsetX += deltaX/10;
         backOffsetY += deltaY/10;
+
+        float objX = parent.mapFocus().x();
+        float objY = parent.mapFocus().y();
         int focusX = mapX(parent.mapFocus().x());
         int focusY = mapY(parent.mapFocus().y());
-        recenterMap(objX(focusX-deltaX), objY(focusY-deltaY));
+        
+        // we need to recalculate the new focusX/Y before
+        // recentering so that we can have the proper pixel
+        // offset for the range areas
+        float newObjX = bounds(0, objX(focusX-deltaX), sizeX());
+        float newObjY = bounds(0, objY(focusY-deltaY), sizeY());      
+        areaOffsetX += (objX-newObjX);
+        areaOffsetY += (objY-newObjY);
+        
+        parent.mapFocus().setXY(newObjX, newObjY);
+        center(parent.mapFocus());
         clearRangeMap();
         repaint();
     }
