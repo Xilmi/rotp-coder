@@ -130,7 +130,7 @@ public final class RacesStatusUI extends BasePanel implements MouseListener, Mou
         int s370 = scaled(370);
         drawRaceIconBase(g, emp, s55, s25, s110, s110);
         drawRaceIconBase(g, emp, w-s65-s100, s25, s110, s110);
-        drawHistoryButton(g, player(), playerHistoryButton, s55, buttonTopY, s110, s25);
+        drawHistoryButton(g, player(), playerHistoryButton, s55, buttonTopY, s210, s25);
         aiHistoryButton.setBounds(0,0,0,0);
         drawAllRankingsLists(g, emp, s55, rankingTopY, w-s55-s55, h-rankingTopY-s10);
         if (UserPreferences.texturesInterface()) 
@@ -158,8 +158,8 @@ public final class RacesStatusUI extends BasePanel implements MouseListener, Mou
         int s370 = scaled(370);
         drawRaceIconBase(g, emp, s55, s25, s110, s110);
         drawRaceIconBase(g, emp, w-s65-s100, s25, s110, s110);
-        drawHistoryButton(g, player(), playerHistoryButton, s55, buttonTopY, s110, s25);
-        drawHistoryButton(g, emp, aiHistoryButton, w-s65-s100, buttonTopY, s110, s25);
+        drawHistoryButton(g, player(), playerHistoryButton, s55, buttonTopY, s210, s25);
+        drawHistoryButton(g, emp, aiHistoryButton, w-s65-s200, buttonTopY, s210, s25);
         drawVsRankingsLists(g, emp, s55, rankingTopY, w-s55-s55, h-rankingTopY-s10);
         if (UserPreferences.texturesInterface()) 
             drawTexture(g,0,0,w,h);

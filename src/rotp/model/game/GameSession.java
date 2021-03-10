@@ -340,13 +340,12 @@ public final class GameSession implements Base, Serializable {
 						+ String.format("%12.2f", e.totalPlanetaryPopulation()) 
 						+ String.format("%12.2f", e.totalPlanetaryProduction()) 
 						+ String.format("%12.0f", e.totalFleetSize()) 
-						// + String.format("%12.2f", e.totalShipMaintenanceCost())
 						+ String.format("%10.2f", 100*e.shipMaintCostPerBC()) + "%" 
-						+ String.format("%10.2f", 100*e.totalMissileBaseCostPct()) + "%" 
+						+ String.format("%10.2f", 100*e.missileBaseCostPerBC()) + "%" 
+                        + String.format("%10.2f", 100*e.totalSecurityCostPct()) + "%" 
 						+ String.format("%12.2f", e.totalPlanetaryResearch()) 
 						+ String.format("%8.2f", e.tech().avgTechLevel()) 
-						+ String.format("%10.2f", 100*e.totalSecurityCostPct()) + "%" 
-						+ String.format("%8.2f", relationToPlayer)
+						+ String.format("%6d", e.numEnemies())
 						/*
 						+ String.format("reserve %12.2f", e.totalReserve())
 						+ String.format("trade %12.2f", e.netTradeIncome())
