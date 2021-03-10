@@ -49,7 +49,7 @@ public class FleetPlan implements Base, Serializable {
     public static final int ASSIST_ALLY = 1300;   // ally colony under attack
     public static final int INVADE = 1200;
     public static final int BOMB_ENEMY = 1100;
-    public static final int COLONIZE = 1000;
+    public static final int COLONIZE = 1600;  // modnar: increase priority, original 1000
     public static final int SCOUT_TO_UNEXPLORED = 900;
     public static final int BOMB_ENCROACHMENT = 800;    // sneak attack bombing missions against untreatied systems that have encroaching fleets
     public static final int GUARD_ATTACK_TARGET = 700;  // send guard fleet to systems in range of enemy attacks

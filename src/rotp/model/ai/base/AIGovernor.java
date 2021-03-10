@@ -270,8 +270,8 @@ public class AIGovernor implements Base, Governor {
             col.pct(SHIP, 0);
         }
 
-        // modnar: set 70% research overhead for inner colonies >85% full production
-		// or 20% research overhead for non-inner colonies >90% full production (not just border colonies)
+        // modnar: set 90% research overhead for inner colonies >90% full production
+		// or 30% research overhead for non-inner colonies >90% full production (not just border colonies)
 		// not applicable to rich/ultra-rich
 		// no need to allocate anything here, should be added in automatically to research at the end
 		int bases = (int) col.defense().bases();
@@ -280,11 +280,11 @@ public class AIGovernor implements Base, Governor {
 		StarSystem sys = col.starSystem();
 		float prodPct = col.currentProductionCapacity();
 		if (bases >= maxBases) { // only if missile bases are in place
-			if ((prodPct > 0.85) && empire.sv.isInnerSystem(sys.id) && !col.planet().isResourceRich() && !col.planet().isResourceUltraRich()) { 
-				netProd -= 7*resOverhead;
+			if ((prodPct > 0.9) && empire.sv.isInnerSystem(sys.id) && !col.planet().isResourceRich() && !col.planet().isResourceUltraRich()) { 
+				netProd -= 9*resOverhead;
 			}
 			if ((prodPct > 0.9) && !empire.sv.isInnerSystem(sys.id) && !col.planet().isResourceRich() && !col.planet().isResourceUltraRich()) { 
-				netProd -= 2*resOverhead;
+				netProd -= 3*resOverhead;
 			}
 		}
 		
@@ -369,7 +369,7 @@ public class AIGovernor implements Base, Governor {
         
         // modnar: scale desired base count based on difficulty, rich-ness, and artifact level
         // (no decrease with poor-ness, since they will become easy tech capture targets)
-        float baseMultiplier = options().aiProductionModifier();
+        float baseMultiplier = (float) Math.sqrt(options().aiProductionModifier());
         if (empire.sv.isArtifact(sys.id))
             baseMultiplier *= 1.5f;
         else if (empire.sv.isOrionArtifact(sys.id))
@@ -383,11 +383,11 @@ public class AIGovernor implements Base, Governor {
         if (sys == null)  // this can happen at startup
             col.defense().maxBases(0);
         else if (empire.sv.isAttackTarget(sys.id))
-            col.defense().maxBases(max(currBases, (int)(baseMultiplier * col.production()/30))); 
+            col.defense().maxBases(max(currBases, (int)(baseMultiplier * col.production()/40))); // modnar: reduce
         else if (empire.sv.isBorderSystem(sys.id))
-            col.defense().maxBases(max(currBases, (int)(baseMultiplier * col.production()/40)));
+            col.defense().maxBases(max(currBases, (int)(baseMultiplier * col.production()/60))); // modnar: reduce
         else
-            col.defense().maxBases(max(currBases, (int)(baseMultiplier * col.production()/50)));
+            col.defense().maxBases((int)(baseMultiplier * col.production()/200)); // modnar: reduce and allow scrap
     }
     @Override
     public int suggestedEmpireTaxLevel() {

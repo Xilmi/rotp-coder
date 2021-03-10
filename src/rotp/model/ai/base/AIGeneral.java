@@ -121,10 +121,23 @@ public class AIGeneral implements Base, General {
         
         // modnar: killer instinct
         // higher value for the last few planets of an empire
-        int remainingSystems = galaxy().empire(empire.sv.empId(sysId)).numColonies();
+        int remainingSystems = empire.sv.empire(sysId).numColonies();
         if (remainingSystems <=4) {
             val *= ((remainingSystems + 7)/(remainingSystems + 1));
         }
+        
+        // modnar: increase value based on number of our colonies that are nearby
+        // more incentive to create contiguous Empires, less inter-penetrating Empires
+        int numNearby = 0;
+        int[] nearbySysIds = empire.sv.galaxy().system(sysId).nearbySystems();
+        for (int nearSysId: nearbySysIds) {
+            int nearEmpId = empire.sv.empId(nearSysId);
+            if (nearEmpId != Empire.NULL_ID) {
+                if (nearEmpId == empire.id)
+                    numNearby++;
+            }
+        }
+        val *= 4*(numNearby+1)/(nearbySysIds.length+1);
         
         // modnar: normalized to normal size-100 planet with 200 factories (115)
         return val/115;
@@ -142,8 +155,9 @@ public class AIGeneral implements Base, General {
         
         // modnar: killer instinct
         // higher priority to take out the last few planets of an empire
-        int remainingSystems = galaxy().empire(empire.sv.empId(sysId)).numColonies();
-        if (remainingSystems <=3) {
+        int remainingSystems = empire.sv.empire(sysId).numColonies();
+        if (remainingSystems <=4) {
+            pr += 1000;
             pr *= ((remainingSystems + 7)/(remainingSystems + 1));
         }
         
@@ -163,7 +177,21 @@ public class AIGeneral implements Base, General {
             pr *= 3;
         pr /= Math.sqrt(max(1,empire.sv.distance(sysId)));
         pr /= Math.sqrt(max(1,empire.sv.bases(sysId)));
-        return pr/10;
+        
+        // modnar: increase priority based on number of our colonies that are nearby
+        // more incentive to create contiguous Empires, less inter-penetrating Empires
+        int numNearby = 0;
+        int[] nearbySysIds = empire.sv.galaxy().system(sysId).nearbySystems();
+        for (int nearSysId: nearbySysIds) {
+            int nearEmpId = empire.sv.empId(nearSysId);
+            if (nearEmpId != Empire.NULL_ID) {
+                if (nearEmpId == empire.id)
+                    numNearby++;
+            }
+        }
+        pr *= 4*(numNearby+1)/(nearbySysIds.length+1);
+        
+        return pr; // modnar: increase invasion priority
     }
     public void reviseFleetPlan(StarSystem sys) {
         int sysId = sys.id;
@@ -278,12 +306,16 @@ public class AIGeneral implements Base, General {
         // modnar: scale up invasion multiplier with factories
         // to account for natural pop growth (enemy transport, etc.) with invasion troop travel time
         float size = empire.sv.currentSize(sys.id); // planet size
+        float pop = empire.sv.population(sys.id); // planet population
         float fact = empire.sv.factories(sys.id); // factory count
-        float mult = (1.0f + fact/(10.0f*size)); // invasion multiplier
+        float mult = (1.0f + fact/(10.0f*size) + (size-pop)/size); // invasion multiplier
         
         int sysId = sys.id;
         EmpireView ev = empire.viewForEmpire(empire.sv.empId(sysId));
         float targetTech = ev.spies().tech().avgTechLevel(); // modnar: target tech level
+        float targetProd = empire.sv.empire(sysId).totalPlanetaryProduction(); // modnar: target Empire production
+        float targetFleet = empire.sv.empire(sysId).totalFleetSize(); // modnar: target Empire fleet size
+        float targetPlanets = empire.sv.empire(sysId).numColonizedSystems(); // modnar: target Empire number of planets
         
         if (empire.sv.hasFleetForEmpire(sys.id, empire))
             launchGroundTroops(v, sys, mult);
@@ -291,15 +323,22 @@ public class AIGeneral implements Base, General {
             launchGroundTroops(v, sys, mult/empire.combatTransportPct());
 
         float baseBCPresent = empire.sv.bases(sys.id)*empire.tech().newMissileBaseCost();
-        float bcMultiplier = 1 + (empire.sv.hostilityLevel(sys.id));
+        float bcMultiplier = 1 + (empire.sv.hostilityLevel(sys.id)/2); // modnar: also use hostilityLevel/2 here
+        bcMultiplier *= Math.sqrt(options().aiProductionModifier()); // modnar: scale with difficulty
         
         // modnar: include enemyFleetSize, factoring in relative tech levels
-        float bcNeeded = (baseBCPresent*3 + 1.5f*enemyFleetSize)*(targetTech+10.0f)/(civTech+10.0f) + bcMultiplier*civProd/6;
+        // modnar: separate bomber BC, factor in target colony production, target Empire fleet, production, and planets
+        float scalePlanets = (float) Math.pow(targetPlanets, 2/3);
+        float harmonicFleet = 2.0f*(enemyFleetSize*16.0f*targetFleet*(targetProd/civProd)/scalePlanets)/(enemyFleetSize + 16.0f*targetFleet*(targetProd/civProd)/scalePlanets); // modnar: harmonic mean
+        float scaleTargetFleet = (float) Math.max(enemyFleetSize, harmonicFleet);
+        float bomberNeededBC = bcMultiplier * (baseBCPresent + 3.0f*fact) * (targetTech+10.0f)/(civTech+10.0f);
+        float bcNeeded = bcMultiplier * (scaleTargetFleet + 3.0f*fact) * (targetTech+10.0f)/(civTech+10.0f);
         
-        // modnar: balance invasion fleet to use 50% destroyers, 30% bombers, and 20% fighters
+        // modnar: balance invasion fleet to use 50% destroyers and 50% fighters
+        // modnar: bombers determined directly by target colony missile bases
         int destroyersNeeded = (int) Math.ceil(0.5f*bcNeeded/empire.shipLab().destroyerDesign().cost());
-        int bombersNeeded = (int) Math.ceil(0.3f*bcNeeded/empire.shipLab().bomberDesign().cost());
-        int fightersNeeded = (int) Math.ceil(0.2f*bcNeeded/empire.shipLab().fighterDesign().cost());
+        int bombersNeeded = (int) Math.ceil(bomberNeededBC/empire.shipLab().bomberDesign().cost());
+        int fightersNeeded = (int) Math.ceil(0.5f*bcNeeded/empire.shipLab().fighterDesign().cost());
 
         // set fleet orders for invasion...
         ShipDesignLab lab = empire.shipLab();
@@ -436,18 +475,29 @@ public class AIGeneral implements Base, General {
         int sysId = sys.id;
         EmpireView ev = empire.viewForEmpire(empire.sv.empId(sysId));
         float targetTech = ev.spies().tech().avgTechLevel(); // modnar: target tech level
+        float targetProd = empire.sv.empire(sysId).totalPlanetaryProduction(); // modnar: target Empire production
+        float targetFleet = empire.sv.empire(sysId).totalFleetSize(); // modnar: target Empire fleet size
+        float targetPlanets = empire.sv.empire(sysId).numColonizedSystems(); // modnar: target Empire number of planets
+        float fact = empire.sv.factories(sysId); // modnar: target colony factory count
         
         float baseBCPresent = empire.sv.bases(sys.id)*empire.tech().newMissileBaseCost();
         // set fleet orders for bombardment...
         float bcMultiplier = 1 + (empire.sv.hostilityLevel(sys.id)/2);
+        bcMultiplier *= Math.sqrt(options().aiProductionModifier()); // modnar: scale with difficulty
         
-        // modnar: test fleet sizes, include enemyFleetSize, factoring in relative tech levels
-        float bcNeeded = (baseBCPresent*3 + 1.5f*fleetSize)*(targetTech+10.0f)/(civTech+10.0f) + bcMultiplier*civProd/6;
+        // modnar: include enemyFleetSize, factoring in relative tech levels
+        // modnar: separate bomber BC, factor in target colony production, target Empire fleet, production, and planets
+        float scalePlanets = (float) Math.pow(targetPlanets, 2/3);
+        float harmonicFleet = 2.0f*(fleetSize*12.0f*targetFleet*(targetProd/civProd)/scalePlanets)/(fleetSize + 12.0f*targetFleet*(targetProd/civProd)/scalePlanets); // modnar: harmonic mean
+        float scaleTargetFleet = (float) Math.max(fleetSize, harmonicFleet);
+        float bomberNeededBC = bcMultiplier * (baseBCPresent + 3.0f*fact) * (targetTech+10.0f)/(civTech+10.0f);
+        float bcNeeded = bcMultiplier * (scaleTargetFleet + 3.0f*fact) * (targetTech+10.0f)/(civTech+10.0f);
         
-        // modnar: bombing fleet to use 50% destroyers, 30% bombers, and 20% fighters
+        // modnar: balance invasion fleet to use 50% destroyers and 50% fighters
+        // modnar: bombers determined directly by target colony missile bases
         int destroyersNeeded = (int) Math.ceil(0.5f*bcNeeded/empire.shipLab().destroyerDesign().cost());
-        int bombersNeeded = (int) Math.ceil(0.3f*bcNeeded/empire.shipLab().bomberDesign().cost());
-        int fightersNeeded = (int) Math.ceil(0.2f*bcNeeded/empire.shipLab().fighterDesign().cost());
+        int bombersNeeded = (int) Math.ceil(bomberNeededBC/empire.shipLab().bomberDesign().cost());
+        int fightersNeeded = (int) Math.ceil(0.5f*bcNeeded/empire.shipLab().fighterDesign().cost());
 
         ShipDesignLab lab = empire.shipLab();
         // modnar: should use min speed here (?)
@@ -467,17 +517,28 @@ public class AIGeneral implements Base, General {
         int sysId = sys.id;
         EmpireView ev = empire.viewForEmpire(empire.sv.empId(sysId));
         float targetTech = ev.spies().tech().avgTechLevel(); // modnar: target tech level
+        float targetProd = empire.sv.empire(sysId).totalPlanetaryProduction(); // modnar: target Empire production
+        float targetFleet = empire.sv.empire(sysId).totalFleetSize(); // modnar: target Empire fleet size
+        float targetPlanets = empire.sv.empire(sysId).numColonizedSystems(); // modnar: target Empire number of planets
+        float fact = empire.sv.factories(sysId); // modnar: target colony factory count
         
         float baseBCPresent = empire.sv.bases(sys.id)*empire.tech().newMissileBaseCost();
         float bcMultiplier = 1 + (empire.sv.hostilityLevel(sys.id)/2);
+        bcMultiplier *= Math.sqrt(options().aiProductionModifier()); // modnar: scale with difficulty
         
-        // modnar: test fleet sizes, include enemyFleetSize, factoring in relative tech levels
-        float bcNeeded = (baseBCPresent*3 + 1.5f*fleetSize)*(targetTech+10.0f)/(civTech+10.0f) + bcMultiplier*civProd/10;
+        // modnar: include enemyFleetSize, factoring in relative tech levels
+        // modnar: separate bomber BC, factor in target colony production, target Empire fleet, production, and planets
+        float scalePlanets = (float) Math.pow(targetPlanets, 2/3);
+        float harmonicFleet = 2.0f*(fleetSize*8.0f*targetFleet*(targetProd/civProd)/scalePlanets)/(fleetSize + 8.0f*targetFleet*(targetProd/civProd)/scalePlanets); // modnar: harmonic mean
+        float scaleTargetFleet = (float) Math.max(fleetSize, harmonicFleet);
+        float bomberNeededBC = bcMultiplier * (baseBCPresent + 3.0f*fact) * (targetTech+10.0f)/(civTech+10.0f);
+        float bcNeeded = bcMultiplier * (scaleTargetFleet + 3.0f*fact) * (targetTech+10.0f)/(civTech+10.0f);
         
-        // modnar: bombing fleet to use 50% destroyers, 30% bombers, and 20% fighters
+        // modnar: balance invasion fleet to use 50% destroyers and 50% fighters
+        // modnar: bombers determined directly by target colony missile bases
         int destroyersNeeded = (int) Math.ceil(0.5f*bcNeeded/empire.shipLab().destroyerDesign().cost());
-        int bombersNeeded = (int) Math.ceil(0.3f*bcNeeded/empire.shipLab().bomberDesign().cost());
-        int fightersNeeded = (int) Math.ceil(0.2f*bcNeeded/empire.shipLab().fighterDesign().cost());
+        int bombersNeeded = (int) Math.ceil(bomberNeededBC/empire.shipLab().bomberDesign().cost());
+        int fightersNeeded = (int) Math.ceil(0.5f*bcNeeded/empire.shipLab().fighterDesign().cost());
 
         ShipDesignLab lab = empire.shipLab();
         // modnar: should use min speed here (?)

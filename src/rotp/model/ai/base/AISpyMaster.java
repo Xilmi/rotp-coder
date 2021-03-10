@@ -59,6 +59,9 @@ public class AISpyMaster implements Base, SpyMaster {
             paranoia++;
         if (empire.leader().isXenophobic())
             paranoia *= 2;
+        // modnar: utilize xilmi's periodic spy-sweeps, 50% chance
+        if (random() < 0.5)
+            paranoia = 0;
         return min(10, paranoia); // modnar: change max to 10, MAX_SECURITY_TICKS = 10
     }
     @Override
@@ -101,7 +104,7 @@ public class AISpyMaster implements Base, SpyMaster {
             maxSpiesNeeded = 1;
 
         // modnar: scale number of spies with difficulty level
-        maxSpiesNeeded = (int) Math.floor((maxSpiesNeeded * Math.sqrt( options().aiProductionModifier() )));
+        maxSpiesNeeded = (int) Math.round((maxSpiesNeeded * Math.sqrt( options().aiProductionModifier() )));
         
         if (spies.numActiveSpies() >= maxSpiesNeeded)
             spies.allocation(0);
@@ -179,6 +182,7 @@ public class AISpyMaster implements Base, SpyMaster {
         }
         
         // if at war, defer to war strategy: 1) steal war techs, 2) sabotage, 3) steal techs
+        // modnar: even at war, prioritize espionage, check for tech steals before sabotage
         if (emb.anyWar()) {
             List<Tech> warTechs = new ArrayList<>();
             for (String tId: v.spies().possibleTechs()) {
@@ -188,10 +192,11 @@ public class AISpyMaster implements Base, SpyMaster {
             }
             if (!warTechs.isEmpty())
                 spies.beginEspionage();
+            // modnar: prioritize espionage, roll 75% check for espionage before sabotage
+            else if ((!v.spies().possibleTechs().isEmpty()) && (random() < 0.75))
+                spies.beginEspionage();
             else if (canSabotage)
                 spies.beginSabotage();
-            else if (!v.spies().possibleTechs().isEmpty())
-                spies.beginEspionage();
             else
                 spies.beginHide();
             return;
