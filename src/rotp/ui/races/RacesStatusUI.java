@@ -170,6 +170,8 @@ public final class RacesStatusUI extends BasePanel implements MouseListener, Mou
         drawAITitle(g, emp, w-s60-s100, s30+s100, 0, s50);
     }
     private void drawHistoryButton(Graphics2D g, Empire emp, Rectangle button, int x, int y, int w, int h) {
+        if (galaxy().numberTurns() == 0)
+            return;
         g.setColor(RacesUI.darkBrown);
         int cnr = min(w/8,h/8);
         Shape rect = new RoundRectangle2D.Float(x,y,w,h,cnr, cnr);
@@ -479,7 +481,7 @@ public final class RacesStatusUI extends BasePanel implements MouseListener, Mou
             int ptX = startX+(displayW*i/totalTurns);
             if ((ptX - prevX) > maxPtSpacing)
                 ptX = prevX + maxPtSpacing;
-            int ptY = startY-(displayH*empireVals[i]/maxYValue);
+            int ptY = startY-(int)((float)displayH*empireVals[i]/maxYValue);
             if (prevY >= 0)
                 g.drawLine(prevX, prevY, ptX, ptY);
             prevX = ptX;
@@ -495,7 +497,7 @@ public final class RacesStatusUI extends BasePanel implements MouseListener, Mou
             int ptX = startX+(displayW*i/totalTurns);
             if ((ptX - prevX) > maxPtSpacing)
                 ptX = prevX + maxPtSpacing;
-            int ptY = maxYValue == 0 ? 0 : startY-(displayH*playerVals[i]/maxYValue);
+            int ptY = maxYValue == 0 ? 0 : startY-(int)((float)displayH*playerVals[i]/maxYValue);
             if (prevY >= 0)
                 g.drawLine(prevX, prevY, ptX, ptY);
             prevX = ptX;
