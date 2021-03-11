@@ -726,9 +726,8 @@ public final class HistoryUI extends BasePanel implements MouseListener {
         public boolean shouldDrawEmpireName(Empire e, float scale)  { 
             if (scale == 0)
                 return false;
-            if (showAll)
-                return true;
-            return e.isPlayer() || player().hasContacted(e.id);
+            int i = empIndex(e.id, turn);
+            return (sysCount[i] > 0);
         }
         @Override
         public void drawEmpireName(Empire e, GalaxyMapPanel ui, Graphics2D g)  { 
@@ -736,6 +735,14 @@ public final class HistoryUI extends BasePanel implements MouseListener {
             float xAvg = sysCount[i] == 0 ? 0 : xSum[i]/sysCount[i];
             float yAvg = sysCount[i] == 0 ? 0 : ySum[i]/sysCount[i];
             e.draw(ui,g,xMin[i],xMax[i],xAvg,yAvg); 
+        }
+        @Override
+        public Color systemLabelColor(StarSystem s)    { 
+            int i = sysData(s.id, turn);
+            if (i == Empire.NULL_ID)
+                return Color.gray;
+            else
+                return galaxy().empire(i).color();
         }
         @Override
         public boolean showAlerts()                    { return false; }
