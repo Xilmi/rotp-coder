@@ -1651,50 +1651,46 @@ public final class Empire implements Base, NamedObject, Serializable {
         }
         int sendCount = Math.max(1, GameSession.instance().getGovernorOptions().getAutoAttackShipCount());
         List<Integer> targets = filterTargets(i -> {
-            // only consider scouted systems
-            if (sv.view(i).scouted()) {
-                boolean inRange;
-                if (extendedRange) {
-                    inRange = sv.inScoutRange(i);
-                } else {
-                    inRange = sv.inShipRange(i);
-                }
-                if (!inRange) {
-                    return false;
-                }
-                List<ShipFleet> fleets = sv.orbitingFleets(i);
-                if (fleets != null) {
-                    for (ShipFleet sf: fleets) {
-                        if (sf.empire() == this && sf.isArmed()) {
-                            // don't target planets which already have own armed fleets in orbit
-                            return false;
-                        }
-                    }
-                }
-                // armed ships already on route- no need to send more
-                for (ShipFleet sf: this.ownFleetsTargetingSystem(sv.system(i))) {
-                    for (ShipDesign sd: designs) {
-                        // attack fleet already on its way, don't send more
-                        if (sf.num(sd.id()) >= sendCount) {
-                            return false;
-                        }
-                    }
-                }
-                if (sv.empire(i) != null && hostileEmpires.contains(sv.empire(i).id)) {
-                    System.out.println("System "+sv.name(i)+" belongs to enemy empire, targeting");
-                    return true;
-                }
-                // This will send ships to own colonies that have enemy ships in order. I guess that's OK
-                for (ShipFleet f: fleets) {
-                    if (hostileEmpires.contains(f.empId) && !f.retreating()) {
-                        System.out.println("System "+sv.name(i)+" has enemy ships, targeting");
-                        return true;
-                    }
-                }
-                return false;
+            // consider both scouted and unscouted systems if they belong to the enemy
+            boolean inRange;
+            if (extendedRange) {
+                inRange = sv.inScoutRange(i);
             } else {
+                inRange = sv.inShipRange(i);
+            }
+            if (!inRange) {
                 return false;
             }
+            List<ShipFleet> fleets = sv.orbitingFleets(i);
+            if (fleets != null) {
+                for (ShipFleet sf: fleets) {
+                    if (sf.empire() == this && sf.isArmed()) {
+                        // don't target planets which already have own armed fleets in orbit
+                        return false;
+                    }
+                }
+            }
+            // armed ships already on route- no need to send more
+            for (ShipFleet sf: this.ownFleetsTargetingSystem(sv.system(i))) {
+                for (ShipDesign sd: designs) {
+                    // attack fleet already on its way, don't send more
+                    if (sf.num(sd.id()) >= sendCount) {
+                        return false;
+                    }
+                }
+            }
+            if (sv.empire(i) != null && hostileEmpires.contains(sv.empire(i).id)) {
+                System.out.println("System "+sv.name(i)+" belongs to enemy empire, targeting");
+                return true;
+            }
+            // This will send ships to own colonies that have enemy ships in orbit. I guess that's OK
+            for (ShipFleet f: fleets) {
+                if (hostileEmpires.contains(f.empId) && !f.retreating()) {
+                    System.out.println("System "+sv.name(i)+" has enemy ships, targeting");
+                    return true;
+                }
+            }
+            return false;
         });
 
         // No systems to colonize
