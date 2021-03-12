@@ -52,6 +52,9 @@ text in the planetary spending screen. Since version 1.8 Governor is on by defau
 
 Additional features / changelog
 
+* 2.16.3. Merge v2.16b Beta. Governor will not spend on defense (build shields) if missile base count is set to 0 
+  or lower than already built on the planet. Autoattack will attack enemy planets which haven't been scouted yet.
+
 * 2.15.2. Merge v2.15b Beta. Fix AutoColonize for games with restricted colonization option.
 
 * 2.14.1. Merge v2.14 Beta. Fix AutoScout to send out armed ships from uncolonized systems as well if no enemy inbound.
