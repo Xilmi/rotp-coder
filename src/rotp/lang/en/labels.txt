@@ -158,6 +158,8 @@ EVENT_SPACE_PIRATES               | A fleet of marauding Space Pirates have been
 EVENT_SPACE_PIRATES_1             | A fleet of marauding Space Pirates have been spotted approaching the uncolonized [system] system.
 EVENT_SPACE_PIRATES_2             | The dreaded Space Pirates have ravaged the population and pillaged all industry on the [race] colony in the [system] system, devastating the local ecology.
 EVENT_SPACE_PIRATES_3             | The Space Pirate fleet was destroyed by [race] defenders in the [system] system. Significant riches found in the wreckage have been seized by the [race] military to bolster their Planetary Reserve.
+// modnar: add Precursor Relic random event
+EVENT_RELIC_PLANETS               | A Precursor relic has mysteriously activated in [target_empire] space. Galaxy-wide scanners report the formation of new planets in multiple previously empty Star Systems after intense asteroid coalescence events. [target_race] scientists have also harvested several Construction technologies from the relic.
 
 SYSEVENT_HOMEWORLD                | Homeworld for the %1.
 SYSEVENT_SCOUTED                  | First scouted by the %1.

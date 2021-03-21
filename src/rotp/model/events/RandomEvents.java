@@ -110,6 +110,8 @@ public class RandomEvents implements Base, Serializable {
         addEvent(new RandomEventSpaceCrystal());
         // modnar: add space pirate random event
         addEvent(new RandomEventSpacePirates());
+        // modnar: add Precursor Relic random event
+        addEvent(new RandomEventPrecursorRelic());
     }
     private void addEvent(RandomEvent ev) {
         if (options().allowRandomEvent(ev))

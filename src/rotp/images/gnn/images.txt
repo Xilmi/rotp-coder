@@ -23,6 +23,8 @@ Green_GNN_Event_Amoeba        | images/gnn/Green_Space_Amoeba.png
 Green_GNN_Event_Crystal       | images/gnn/Green_Space_Crystal.png
 // modnar: add space pirate random event
 Green_GNN_Event_Pirates       | images/gnn/Green_Genocide.png
+// modnar: add Precursor Relic random event
+Green_GNN_Event_Relic_Planets | images/gnn/Green_Relic_Planets.png
 
 Lavender_GNN_Alliance_Broken  | images/gnn/Lavender_Rebellion.png
 Lavender_GNN_Alliance_Formed  | images/gnn/Lavender_Expansion.png
@@ -48,6 +50,8 @@ Lavender_GNN_Event_Amoeba     | images/gnn/Lavender_Space_Amoeba.png
 Lavender_GNN_Event_Crystal    | images/gnn/Lavender_Space_Crystal.png
 // modnar: add space pirate random event
 Lavender_GNN_Event_Pirates    | images/gnn/Lavender_Genocide.png
+// modnar: add Precursor Relic random event
+Lavender_GNN_Event_Relic_Planets | images/gnn/Lavender_Relic_Planets.png
 
 Orange_GNN_Alliance_Broken    | images/gnn/Orange_Rebellion.png
 Orange_GNN_Alliance_Formed    | images/gnn/Orange_Expansion.png
@@ -73,3 +77,5 @@ Orange_GNN_Event_Amoeba       | images/gnn/Orange_Space_Amoeba.png
 Orange_GNN_Event_Crystal      | images/gnn/Orange_Space_Crystal.png
 // modnar: add space pirate random event
 Orange_GNN_Event_Pirates      | images/gnn/Orange_Genocide.png
+// modnar: add Precursor Relic random event
+Orange_GNN_Event_Relic_Planets | images/gnn/Orange_Relic_Planets.png
