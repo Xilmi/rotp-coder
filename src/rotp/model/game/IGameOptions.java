@@ -474,22 +474,27 @@ public interface IGameOptions {
                 prevIndex = lastIndex;
         }
     }
+    // modnar: change difficulty production modifiers
+    // from 0.5, 0.75, 0.9, 1.0, 1.1, 1.4, 2.0
+    // to   0.7, 0.85, 1.0, 1.2, 1.4, 1.7, 2.0 (smoother step-to-step increases between 1.0 to 2.0)
     default float aiProductionModifier() {
         switch(selectedGameDifficulty()) {
-            case DIFFICULTY_EASIEST: return 0.5f;
-            case DIFFICULTY_EASIER:  return 0.75f;
-            case DIFFICULTY_EASY:    return 0.9f;
-            case DIFFICULTY_HARD:    return 1.1f;
-            case DIFFICULTY_HARDER:  return 1.4f;
+            case DIFFICULTY_EASIEST: return 0.7f;
+            case DIFFICULTY_EASIER:  return 0.85f;
+            case DIFFICULTY_EASY:    return 1.0f;
+            case DIFFICULTY_NORMAL:  return 1.2f;
+            case DIFFICULTY_HARD:    return 1.4f;
+            case DIFFICULTY_HARDER:  return 1.7f;
             case DIFFICULTY_HARDEST: return 2.0f;
             default: return 1.0f;
         }
     }
+    // modnar: change difficulty waste modifiers, with production changes above
     default float aiWasteModifier() {
         switch(selectedGameDifficulty()) {
-            case DIFFICULTY_EASIEST: return 0.5f;
-            case DIFFICULTY_EASIER:  return 0.75f;
-            case DIFFICULTY_EASY:    return 0.9f;
+            case DIFFICULTY_EASIEST: return 0.7f;
+            case DIFFICULTY_EASIER:  return 0.85f;
+            case DIFFICULTY_EASY:    return 1.0f;
             default: return 1.0f;
         }
     }
