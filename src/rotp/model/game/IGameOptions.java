@@ -162,7 +162,7 @@ public interface IGameOptions {
     public default float hostileTerraformingPct() { return 1.0f; }
     public default boolean restrictedColonization() { return selectedColonizingOption().equals(COLONIZING_RESTRICTED); }
     public default int baseAIRelationsAdj()       { return 0; }
-    public default int selectedAI(Empire e)       { return AI.BASE; }
+    public default int selectedAI(Empire e)       { return AI.MODNAR; } // modnar: default to modnar AI
     public default boolean randomizeAIPersonality()  { 
         switch (selectedRandomizeAIOption()) {
             case RANDOMIZE_AI_PERSONALITY:

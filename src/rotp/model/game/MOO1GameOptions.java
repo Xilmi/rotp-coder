@@ -199,7 +199,7 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
     @Override
     public void selectedAutoplayOption(String s)    { selectedAutoplayOption = s; }
     @Override
-    public String selectedOpponentAIOption()       { return selectedOpponentAIOption == null ? OPPONENT_AI_BASE : selectedOpponentAIOption; }
+    public String selectedOpponentAIOption()       { return selectedOpponentAIOption == null ? OPPONENT_AI_MODNAR : selectedOpponentAIOption; } // modnar: default to modnar AI
     @Override
     public void selectedOpponentAIOption(String s) { selectedOpponentAIOption = s; }
     @Override
@@ -424,7 +424,7 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
                 case AUTOPLAY_AI_XILMI:  return AI.XILMI;
                 case AUTOPLAY_OFF:
                 default:
-                    return AI.BASE;  // doesn't matter; won't be used if autoplay off
+                    return AI.MODNAR; // doesn't matter; won't be used if autoplay off
             }
         }
         else {
@@ -441,7 +441,7 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
                     }
             }
         }
-        return AI.BASE;
+        return AI.MODNAR; // modnar: default to modnar AI
     }
     @Override
     public float hostileTerraformingPct() { 
@@ -910,9 +910,9 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         selectedNumberOpponents = maximumOpponentsOptions();
         selectedPlayerRace(random(startingRaceOptions()));
         selectedGameDifficulty = DIFFICULTY_NORMAL;
-        selectedOpponentAIOption = OPPONENT_AI_BASE;
+        selectedOpponentAIOption = OPPONENT_AI_MODNAR; // modnar: default to modnar AI
         for (int i=0;i<specificOpponentAIOption.length;i++)
-            specificOpponentAIOption[i] = OPPONENT_AI_BASE;
+            specificOpponentAIOption[i] = OPPONENT_AI_MODNAR; // modnar: default to modnar AI
         setToDefault();
         generateGalaxy();
     }
