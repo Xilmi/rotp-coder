@@ -3382,22 +3382,24 @@ public class DesignUI extends BasePanel {
                         shipWeaponIncrement(i);
                     return;
                 }
+                // modnar: switch weapon count scrolling behavior back to:
+                // scrolling up increases count, scrolling down decreases count
                 if (hoverTarget == weaponCountArea[i]) {
                     if (count < 0) {
-                        if (shiftPressed) 
-                            shipWeaponCountDecrement(i,5);
-                        else if (ctrlPressed) 
-                            shipWeaponCountDecrement(i,20);
-                        else 
-                            shipWeaponCountDecrement(i,1);
-                    }
-                    else {
                         if (shiftPressed) 
                             shipWeaponCountIncrement(i,5);
                         else if (ctrlPressed) 
                             shipWeaponCountIncrement(i,20);
                         else 
                             shipWeaponCountIncrement(i,1);
+                    }
+                    else {
+                        if (shiftPressed) 
+                            shipWeaponCountDecrement(i,5);
+                        else if (ctrlPressed) 
+                            shipWeaponCountDecrement(i,20);
+                        else 
+                            shipWeaponCountDecrement(i,1);
                     }
                     return;
                 }

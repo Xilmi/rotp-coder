@@ -26,6 +26,7 @@ This RotP MOD contains many gameplay additions/changes from the official game ve
     - **Colony Map Info Shorthand**
         - P, F, and B in place of Pop, Fac, and Base
     - [**Weapon Count Modifier**](https://i.imgur.com/YHfMdMG.png)
+    - **Weapon Count Mouse Scrolling Changed to: scroll up to increase, scroll down to decrease.**
     - [**Additional Empire Colors**](https://i.imgur.com/3XH7OsF.png)
     - [**Improved Rendering Quality for In-Game Art**](https://i.imgur.com/Yinhuw5.png)
         - Should Improve All Art Instances
