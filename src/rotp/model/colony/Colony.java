@@ -150,10 +150,12 @@ public final class Colony implements Base, IMappedObject, Serializable {
         else
             return true;
     }
+    public float untargetedHitPoints()         { return UNTARGETED_DAMAGE_FOR_POPLOSS * population(); }
     public void clearAllRebellion() {
         rebels = 0;
         rebellion = false;
     }
+    public boolean isGovernor()                { return false; }
     public float currentProductionCapacity() {
         // modnar: use direct production capacity formula
         // formula below is not accurate
@@ -480,7 +482,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         log("Colony: ", empire.sv.name(starSystem().id),  ": NextTurn [" , shipyard().design().name() , "|" ,str(shipyard().allocation()) , "-"
                     , str(defense().allocation()) , "-" , str(industry().allocation()) , "-" , str(ecology().allocation()) , "-"
                     , str(research().allocation()) , "]");
-        keepEcoLockedToClean = empire().isPlayer() && (allocation[ECOLOGY] <= cleanupAllocation());
+        keepEcoLockedToClean = empire().isPlayerControlled() && (allocation[ECOLOGY] <= cleanupAllocation());
         previousPopulation = population;
         reallocationRequired = false;          
         ensureProperSpendingRates();
@@ -772,7 +774,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
     public float production() {
         if (inRebellion())
             return 0.0f;
-        float mod = empire().isPlayer() ? 1.0f : options().aiProductionModifier();
+        float mod = empire().isPlayerControlled() ? 1.0f : options().aiProductionModifier();
         float workerProd = workingPopulation() * empire.workerProductivity();
         return mod*(workerProd + usedFactories());
     }
@@ -847,14 +849,14 @@ public final class Colony implements Base, IMappedObject, Serializable {
     public float expectedPopPct() {
         return (expectedPopulation() / planet.currentSize());
     }
-    public int calcPopNeeded(float pct) {
-        return (int) ((planet.currentSize() * pct) - expectedPopulation());
+    public int calcPopNeeded(float desiredPct) {
+        return (int) ((planet.currentSize() * desiredPct) - expectedPopulation());
     }
-    public int calcPopToGive(float pct) {
+    public int calcPopToGive(float retainPct) {
         if (!canTransport())
             return 0;
         int p1 = maxTransportsAllowed();
-        int p2 = (int) (population() - (empire.ai().targetPopPct(starSystem()) * planet().currentSize()));
+        int p2 = (int) (population() - (retainPct * planet().currentSize()));
         return min(p1,p2);
     }
     public float newWaste() {
@@ -864,7 +866,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         if (empire.ignoresPlanetEnvironment())
             return 0;
         
-        float mod = empire().isPlayer() ? 1.0f : options().aiWasteModifier();
+        float mod = empire().isPlayerControlled() ? 1.0f : options().aiWasteModifier();
         return mod*(min(planet.maxWaste(), planet.waste()) + newWaste()) / tech().wasteElimination();
     }
     public float minimumCleanupCost() {
@@ -950,7 +952,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
             }
             setPopulation(population() - transport().size());
             transport = new Transport(starSystem());
-            if (empire.isPlayer())
+            if (empire.isPlayerControlled())
                 starSystem().transportSprite().launch();
         }
     }
@@ -981,7 +983,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         }
         checkEcoAtClean();
         // reset ship views
-        if (empire.isPlayer())
+        if (empire.isPlayerControlled())
             empire.setVisibleShips();
 
         // recalculate governor if transports are sent
@@ -1005,7 +1007,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         setPopulation(rebels);
 
         if (population() > 0) {
-            if (empire.isPlayer() || tr.empire().isPlayer())
+            if (empire.isPlayerControlled() || tr.empire().isPlayerControlled())
                 RotPUI.instance().selectGroundBattlePanel(this, tr);
             else
                 completeDefenseAgainstTransports(tr);
@@ -1096,9 +1098,9 @@ public final class Colony implements Base, IMappedObject, Serializable {
         // player notification only.
         if (tr.size() == 0) {
             log(concat(str(tr.launchSize()), " ", tr.empire().raceName(), " transports perished at ", name()));
-            if (tr.empire().isPlayer()) 
+            if (tr.empire().isPlayerControlled()) 
                 TransportsKilledAlert.create(empire(), starSystem(), tr.launchSize());
-            else if (empire().isPlayer()) 
+            else if (empire().isPlayerControlled()) 
                 InvadersKilledAlert.create(tr.empire(), starSystem(), tr.launchSize());
             return;
         }

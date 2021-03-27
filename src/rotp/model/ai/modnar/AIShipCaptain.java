@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package rotp.model.ai.base;
+package rotp.model.ai.modnar;
 
 import java.awt.*;
 import java.util.*;
@@ -429,7 +429,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
         else if (allyKills == 0)
             return true;
         else {
-            float retreatRatio = stack.empire.leader().retreatRatio(combat().system().empire());
+            float retreatRatio = stack.empire.diplomatAI().leaderRetreatRatio(combat().system().empire());
             log("retreat ratio: "+retreatRatio+"   enemyKillValue:"+enemyKills+"  allyKillValue:"+allyKills);
             return ((enemyKills / allyKills) > retreatRatio/1.2f); // modnar: adjust AI to accept less losses, more likely to retreat
         }

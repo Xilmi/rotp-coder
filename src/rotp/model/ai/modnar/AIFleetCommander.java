@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package rotp.model.ai.base;
+package rotp.model.ai.modnar;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -73,6 +73,8 @@ public class AIFleetCommander implements Base, FleetCommander {
 //            }
         }
     }
+    @Override
+    public float maxShipMaintainance()   { return MAX_ALLOWED_SHIP_MAINT; }
     @Override
     public boolean inExpansionMode() {
         return ((empire.tech().shipRange() < 6) || (empire.contacts().isEmpty())); // modnar: keep in expansion mode if not in any contact

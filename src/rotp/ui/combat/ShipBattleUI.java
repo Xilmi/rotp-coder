@@ -239,6 +239,7 @@ public class ShipBattleUI extends FadeInPanel implements Base, MouseListener, Mo
         renderedPlanetImage = null;
         mgr = m;
         mgr.ui(this);
+        mgr.showAnimations = true;
         mgr.setInitialPause();
         exited = false;
         mode = Display.INTRO;
@@ -1601,6 +1602,7 @@ public class ShipBattleUI extends FadeInPanel implements Base, MouseListener, Mo
         g.fillRect(x,y,w,h);
         g.setColor(Color.lightGray);
         String sysName =  player().sv.name(mgr.system().id);
+        mgr.showAnimations = false;
         
         Map<ShipDesign,Integer> destroyed = mgr.results().shipsDestroyed();
         Map<ShipDesign,Integer> retreated = mgr.results().shipsRetreated();
@@ -1901,7 +1903,7 @@ public class ShipBattleUI extends FadeInPanel implements Base, MouseListener, Mo
     private void retreatStack(CombatStack stack, boolean inCombat) {
         if (mgr.combatIsFinished() || mgr.autoResolve)
             return; 
-        if (!stack.canRetreat() || !stack.empire.isPlayer())
+        if (!stack.canRetreat() || !stack.empire.isPlayerControlled())
             return;
         StarSystem dest = player().ai().shipCaptain().retreatSystem(mgr.system());
         mgr.retreatStack((CombatStackShip)stack, dest);

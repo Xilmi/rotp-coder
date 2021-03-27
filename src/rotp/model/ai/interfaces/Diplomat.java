@@ -20,7 +20,9 @@ import rotp.model.combat.ShipCombatResults;
 import rotp.model.empires.Empire;
 import rotp.model.empires.EmpireView;
 import rotp.model.empires.GalacticCouncil;
+import rotp.model.empires.Leader.Personality;
 import rotp.model.incidents.DiplomaticIncident;
+import rotp.model.incidents.BioweaponIncident;
 import rotp.ui.diplomacy.DiplomaticReply;
 import rotp.model.tech.Tech;
 import rotp.ui.diplomacy.DiplomaticCounterReply;
@@ -87,4 +89,27 @@ public interface Diplomat {
     List<Tech> techsRequestedForCounter(Empire emp, Tech t);
     DiplomaticReply receiveRequestTech(Empire emp, Tech t);
     DiplomaticReply receiveCounterOfferTech(Empire e, Tech counter, Tech wanted);
+    float leaderExploitWeakerEmpiresRatio();
+    float leaderRetreatRatio(Empire c);
+    float leaderContemptDeclareWarMod(Empire e);
+    float leaderContemptAcceptPeaceMod(Empire e);
+    int leaderGenocideDurationMod();
+    float leaderBioweaponMod();
+    int leaderOathBreakerDuration();
+    float leaderDiplomacyAnnoyanceMod(EmpireView v);
+    float leaderDeclareWarMod();
+    float leaderAcceptPeaceTreatyMod();
+    float leaderAcceptPactMod(Empire other);
+    float leaderAcceptAllianceMod(Empire other);
+    float leaderAcceptTradeMod();
+    float leaderHateWarThreshold();
+    float leaderAcceptJointWarMod();
+    float leaderPreserveTreatyMod();
+    float leaderAffinityMod(Personality p1, Personality p2);
+    boolean leaderHatesAllSpies();
+    
+    // generic api for overriding diplomat incident settings
+    // create as needed for incidents, but always set default return false to false
+    // when overriding, set return to true.
+    default boolean setSeverityAndDuration(BioweaponIncident inc)  { return false; }
 }

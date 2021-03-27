@@ -38,7 +38,7 @@ public class SpyConfessionIncident extends DiplomaticIncident {
             missionType = 1;
             duration = 15; // modnar: increase spy confession duration
         }
-        else if (spies.isHide() && ev.owner().leader().isXenophobic()) {
+        else if (spies.isHide() && ev.owner().diplomatAI().leaderHatesAllSpies()) {
             mission = text("NOTICE_SPYING_MISSION_SABOTAGE");
             severity = max(-20, -10+ev.embassy().currentSpyIncidentSeverity());
             missionType = 0;
@@ -83,7 +83,7 @@ public class SpyConfessionIncident extends DiplomaticIncident {
     public boolean triggersWarning()    { return true; }
     @Override
     public String warningMessageId() {
-        if (galaxy().empire(empVictim).isPlayer())
+        if (galaxy().empire(empVictim).isPlayerControlled())
             return "";
         else if (missionType == 2)
             return DialogueManager.WARNING_SABOTAGE;

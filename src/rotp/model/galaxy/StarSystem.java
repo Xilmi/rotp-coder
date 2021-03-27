@@ -202,6 +202,7 @@ public class StarSystem implements Base, Sprite, IMappedObject, Serializable {
     }
     public List<ShipFleet> orbitingFleets()     { return galaxy().ships.orbitingFleets(id); }
     public List<ShipFleet> exitingFleets()      { return galaxy().ships.deployedFleets(id); }
+    public List<ShipFleet> incomingFleets()     { return galaxy().ships.incomingFleets(id); }
 
     public boolean isColonized()                { return planet().isColonized(); }
     public Colony becomeColonized(String n, Empire e) {

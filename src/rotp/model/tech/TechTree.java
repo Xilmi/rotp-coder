@@ -356,6 +356,13 @@ public final class TechTree implements Base, Serializable {
         else
             return pt.hostility() <= topHostilityAllowed();
     }
+    public boolean canColonize(PlanetType pt, int newHostilityLevel) {
+        int ptHostility = pt.hostility();
+        if (options().restrictedColonization())
+            return (ptHostility == newHostilityLevel) || knowsTechForHostility(ptHostility);
+        else
+            return (ptHostility <= newHostilityLevel) || (ptHostility <= topHostilityAllowed());
+    }
     public boolean isLearningToColonize(PlanetType pt) {
         int hostility = pt.hostility();
         if (options().restrictedColonization()) 
@@ -695,7 +702,7 @@ public final class TechTree implements Base, Serializable {
     public void acquireTechThroughTrade(String techId, int empId) {
         Tech t = tech(techId);
         tradedTechs().add(techId);
-        if (empire().isPlayer())
+        if (empire().isPlayerControlled())
             tradedTechNotifs().add(TradeTechNotification.create(techId, empId));
     }
     public boolean learnTech(String id) {

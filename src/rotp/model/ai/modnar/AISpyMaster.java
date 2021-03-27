@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package rotp.model.ai.base;
+package rotp.model.ai.modnar;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,7 +46,7 @@ public class AISpyMaster implements Base, SpyMaster {
         int paranoia = 0;
         boolean alone = true;
         for (EmpireView cv : empire.empireViews()) {
-            if ((cv != null) && cv.embassy().contact()) {
+            if ((cv != null) && cv.embassy().contact() && cv.inEconomicRange()) {
                 alone = false;
                 // modnar: more internal security paranoia, scale with difficulty level
                 if (cv.embassy().anyWar())

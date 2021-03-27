@@ -93,6 +93,7 @@ SPACE_AMOEBA                      | Space Amoeba
 SPACE_CRYSTAL                     | Space Crystal
 // modnar: add space pirate random event
 SPACE_PIRATES                     | Space Pirates
+ORION_GUARDIAN                    | Orion Guardian
 
 // Personality types (adjective)
 LEADER_ERRATIC                    | Erratic
@@ -331,6 +332,11 @@ GAME_SETTINGS_TEXTURES_INTERFACE  | User Interface
 GAME_SETTINGS_TEXTURES_MAP        | Galaxy Map
 GAME_SETTINGS_TEXTURES_BOTH       | Interface and Map
 GAME_SETTINGS_TEXTURES_DESC       | Toggle the use of textures on the galaxy map or the various screens throughout the game.
+GAME_SETTINGS_SENSITIVITY         | Hover Sensitivity: %1
+GAME_SETTINGS_SENSITIVITY_HIGH    | High
+GAME_SETTINGS_SENSITIVITY_MEDIUM  | Medium
+GAME_SETTINGS_SENSITIVITY_LOW     | Low
+GAME_SETTINGS_SENSITIVITY_DESC    | Toggle how quickly the galaxy map responds to mouse movement when updating the display panel.
 GAME_SETTINGS_MEMORY              | Show Memory Usage: %1
 GAME_SETTINGS_MEMORY_YES          | Yes
 GAME_SETTINGS_MEMORY_NO           | No
@@ -1129,6 +1135,15 @@ SETUP_GALAXY_MAX_OPPONENTS        | Maximum Opponents: %1
 SETUP_OPPONENTS_HEADER_1          | %1 vs.
 SETUP_OPPONENTS_HEADER_2          | Rival Empires
 SETUP_OPPONENT_RANDOM             | ???
+SETUP_OPPONENT_AI                 | Play against:
+SETUP_OPPONENT_AI_BASE            | AI: Base
+SETUP_OPPONENT_AI_MODNAR          | AI: Modnar
+SETUP_OPPONENT_AI_XILMI           | AI: Xilmi
+SETUP_OPPONENT_AI_SELECT          | AI: Selectable
+SETUP_AUTOPLAY_OFF                | Off
+SETUP_AUTOPLAY_AI_BASE            | AI: Base
+SETUP_AUTOPLAY_AI_MODNAR          | AI: Modnar
+SETUP_AUTOPLAY_AI_XILMI           | AI: Xilmi
 SETUP_GAME_DIFFICULTY_LABEL       | Difficulty
 SETUP_DIFFICULTY_EASIEST          | Easiest
 SETUP_DIFFICULTY_EASIER           | Easier
@@ -1275,6 +1290,7 @@ SETTINGS_RANDOM_EVENTS            | Random Events: %1
 SETTINGS_RESEARCH_RATE            | Research Rate: %1
 SETTINGS_COUNCIL_WIN              | Council Win: %1
 SETTINGS_RANDOMIZE_AI             | Randomize AI: %1
+SETTINGS_AUTOPLAY                 | Autoplay: %1
 SETTINGS_TECH_TRADING             | Tech Trading: %1
 SETTINGS_GALAXY_AGE               | Galaxy Age: %1
 SETTINGS_WARP_SPEED               | Warp Speed: %1
@@ -1296,6 +1312,8 @@ SETTINGS_TERRAFORMING_DESC        | Reduce or eliminate the benefits of the Impr
 SETTINGS_COLONIZING_DESC          | Restrict the colonization of systems to only those for which you have acquired the specific technology.
 SETTINGS_COUNCIL_DESC             | Disable the council victory condition or allow enemy empires to rebel against a player victory.
 SETTINGS_RANDOMIZE_AI_DESC        | Randomize the AI player personalities, racial abilities, or both.
+SETTINGS_AUTOPLAY_DESC            | Completely automate the game by having an AI play for the player. This is useful for a first-hand view of how the AI works.
+SETTINGS_AUTOPLAY_WARNING         | Warning! Autoplay is currently enabled which will prevent user gameplay. Use "Advanced Options" to disable.
 SETTINGS_FUEL_RANGE_DESC          | Increase the range of fuel range technologies and reserve fuel tanks. [Deactivated in modnar MOD]
 SETTINGS_AI_HOSTILITY_DESC        | Increase or decrease the general level of hostility between alien races.
 
@@ -1393,6 +1411,7 @@ SHIP_DESIGN_SPEED_VALUE           | Warp %1
 SHIP_DESIGN_COST_VALUE            | %1 BC
 SHIP_DESIGN_TOTAL_SPACE_LABEL     | Total Space
 SHIP_DESIGN_AVAIL_SPACE_LABEL     | Available Space
+SHIP_DESIGN_COLORS                | Tint
 SHIP_DESIGN_COMBAT_STATS_TITLE    | Combat Stats
 SHIP_DESIGN_HIT_POINTS_LABEL      | Hit Points
 SHIP_DESIGN_MISSILE_DEF_LABEL     | Missile Defense
@@ -1507,6 +1526,7 @@ SHIP_DESIGN_HELP_1H               | Missile Defense - defense level vs. missile 
 SHIP_DESIGN_HELP_1I               | Beam Defense - defense level vs. beam weapons in combat.
 SHIP_DESIGN_HELP_1J               | Attack Level - attack level for weapons in combat. 
 SHIP_DESIGN_HELP_1K               | Combat Speed - distance the ship can travel in combat, per turn.
+SHIP_DESIGN_HELP_1L               | Tint - alters the color of the ship.
 SHIP_DESIGN_HELP_2A               | Engine Type - the type of engine used to power this ship design.
 SHIP_DESIGN_HELP_2B               | Speed - travel speed provided by the engine.
 SHIP_DESIGN_HELP_2C               | Cost - the cost of each engine needed for power.
