@@ -155,7 +155,6 @@ public final class Colony implements Base, IMappedObject, Serializable {
         rebels = 0;
         rebellion = false;
     }
-    public boolean isGovernor()                { return false; }
     public float currentProductionCapacity() {
         // modnar: use direct production capacity formula
         // formula below is not accurate
