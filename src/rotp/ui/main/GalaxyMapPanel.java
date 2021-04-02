@@ -36,8 +36,12 @@ import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
+import org.apache.commons.math3.util.Pair;
 import rotp.model.Sprite;
 import rotp.model.empires.Empire;
 import rotp.model.galaxy.Galaxy;
@@ -565,12 +569,17 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
         int baseR = (int) (shipRange*scale);
         Area tmpRangeArea = scoutRangeArea;
         if (tmpRangeArea == null) {
-            tmpRangeArea = new Area();
+            long time1 = System.nanoTime();
+            List<Area> toAdd = new ArrayList<>();
             for (StarSystem sv: alliedSystems)
-                tmpRangeArea.add(new Area( new Ellipse2D.Float(mapX(sv.x())-extR, mapY(sv.y())-extR, 2*extR, 2*extR) ));       
+                toAdd.add(new Area( new Ellipse2D.Float(mapX(sv.x())-extR, mapY(sv.y())-extR, 2*extR, 2*extR) ));
             for (StarSystem sv: systems)
-                tmpRangeArea.add(new Area( new Ellipse2D.Float(mapX(sv.x())-extR, mapY(sv.y())-extR, 2*extR, 2*extR) ));       
+                toAdd.add(new Area( new Ellipse2D.Float(mapX(sv.x())-extR, mapY(sv.y())-extR, 2*extR, 2*extR) ));
+            tmpRangeArea = parallelAdd(toAdd);
             scoutRangeArea = tmpRangeArea;
+            long time2 = System.nanoTime();
+            double ms = (time2-time1) / 1_000_000.0;
+//            System.out.format("RRR scout %.2f ms\n", ms);
         }
         g.setColor(extendedBorder);
         g.setStroke(stroke2);
@@ -579,13 +588,18 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
 
         tmpRangeArea = shipRangeArea;
         if (tmpRangeArea == null) {
-            tmpRangeArea = new Area();
+            long time1 = System.nanoTime();
+            List<Area> toAdd = new ArrayList<>();
             for (StarSystem sv: alliedSystems)
-                tmpRangeArea.add(new Area( new Ellipse2D.Float(mapX(sv.x())-baseR, mapY(sv.y())-baseR, 2*baseR, 2*baseR) ));       
+                toAdd.add(new Area( new Ellipse2D.Float(mapX(sv.x())-baseR, mapY(sv.y())-baseR, 2*baseR, 2*baseR) ));
             for (StarSystem sv: systems)
-                tmpRangeArea.add(new Area( new Ellipse2D.Float(mapX(sv.x())-baseR, mapY(sv.y())-baseR, 2*baseR, 2*baseR) ));       
+                toAdd.add(new Area( new Ellipse2D.Float(mapX(sv.x())-baseR, mapY(sv.y())-baseR, 2*baseR, 2*baseR) ));
+            tmpRangeArea = parallelAdd(toAdd);
             shipRangeArea = tmpRangeArea;
-        }       
+            long time2 = System.nanoTime();
+            double ms = (time2-time1) / 1_000_000.0;
+//            System.out.format("RRR base %.2f ms\n", ms);
+        }
         
         g.setColor(normalBackground);
         g.fill(tmpRangeArea);
@@ -594,6 +608,36 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
         g.draw(tmpRangeArea);   
         
         g.setTransform(prevXForm);
+    }
+
+    static ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    static Function<Pair<Area, Area>, Area> add = areaPair -> {
+        if (areaPair.getValue() != null) {
+            areaPair.getKey().add(areaPair.getValue());
+        }
+        return areaPair.getKey();
+    };
+    private Area parallelAdd(List<Area> areas) {
+        if (areas == null || areas.isEmpty()) {
+            return new Area();
+        }
+        while (areas.size() > 1) {
+            List<Future<Area>> futures = new ArrayList<>();
+            for (int i = 0; i < areas.size() - 1; i += 2) {
+                Pair<Area, Area> pair = Pair.create(areas.get(i), areas.get(i + 1));
+                Future<Area> future = executor.submit(() -> add.apply(pair));
+                futures.add(future);
+            }
+            areas = futures.stream().map(f -> {
+                try {
+                    return f.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                    throw new RuntimeException(e.getMessage(), e);
+                }
+            }).collect(Collectors.toList());
+        }
+        return areas.get(0);
     }
     private void drawGridCircularDisplayDark(Graphics2D g) {
         Galaxy gal = galaxy();
