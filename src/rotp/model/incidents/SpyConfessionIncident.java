@@ -22,11 +22,11 @@ import rotp.ui.diplomacy.DialogueManager;
 
 public class SpyConfessionIncident extends DiplomaticIncident {
     private static final long serialVersionUID = 1L;
-    final int empVictim;
-    final int empSpy;
-    final int remainingSpies;
-    final int missionType;
-    final String mission;
+    public final int empVictim;
+    public final int empSpy;
+    public final int remainingSpies;
+    public final int missionType;
+    public final String mission;
     public SpyConfessionIncident(EmpireView ev, SpyNetwork spies) {
         remainingSpies = spies.numActiveSpies();
         empVictim = ev.owner().id;
@@ -34,11 +34,14 @@ public class SpyConfessionIncident extends DiplomaticIncident {
         
         if (spies.isEspionage()) {
             mission = text("NOTICE_SPYING_MISSION_ESPIONAGE");
-            severity = max(-20, -5+ev.embassy().currentSpyIncidentSeverity());
             missionType = 1;
+            
+            if (ev.owner().diplomatAI().setSeverityAndDuration(this, ev.embassy().currentSpyIncidentSeverity()))
+                return;
+            severity = max(-20, -5+ev.embassy().currentSpyIncidentSeverity());
             duration = 5;
         }
-        else if (spies.isHide() && ev.owner().leader().isXenophobic()) {
+        else if (spies.isHide() && ev.owner().diplomatAI().leaderHatesAllSpies()) {
             mission = text("NOTICE_SPYING_MISSION_SABOTAGE");
             severity = max(-20, -10+ev.embassy().currentSpyIncidentSeverity());
             missionType = 0;
@@ -83,7 +86,7 @@ public class SpyConfessionIncident extends DiplomaticIncident {
     public boolean triggersWarning()    { return true; }
     @Override
     public String warningMessageId() {
-        if (galaxy().empire(empVictim).isPlayer())
+        if (galaxy().empire(empVictim).isPlayerControlled())
             return "";
         else if (missionType == 2)
             return DialogueManager.WARNING_SABOTAGE;

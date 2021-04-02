@@ -47,7 +47,7 @@ DECLAREWAR_ATTACK_02       | You've done us quite the favor by bringing the figh
 DECLAREWAR_ATTACK_03       | I'd avoid arrogance if I were you, ambassador. The fury of our warriors will never be beaten by technology, no matter how strong you've made yours!
 //
 DECLAREWAR_OPPORTUNITY_01  | Your kind have long outlived their usefulness. But rest assured that you will provide adequate sport for the youngest and most inexperienced of our warriors as they hone their combat skills.
-DECLAREWAR_ASSASSIN_01     | I'm not shocked in the least that your kind would act so spinelessly. To assassinate an ambassador is the gravest dishonor you can ring upon yourself, and in their death throes your people will curse your name for ordering it done!
+DECLAREWAR_ASSASSIN_01     | I'm not shocked in the least that your kind would act so spinelessly. To assassinate an ambassador is the gravest dishonor you can bring upon yourself, and in their death throes your people will curse your name for ordering it done!
 
 
 OFFER_PEACE_01             | There's a time for everything ambassador, and the time now has come for an end to our hostilities. Keep your relics; peace is all we desire from you now!
@@ -80,4 +80,10 @@ PRAISE_ATTACKED_ENEMY_03   | It's obvious that you're only in this war for the r
 PRAISE_TRADE_01            | Remember when I began our trade agreement? I told you that we would see how much we would gain from each other, and I'm glad to see that the value gained has been mutual. 
 PRAISE_TRADE_02            | It's always more fun to fight for riches and head home with ships loaded with the spoils of victory! Ah well, I suppose that this trade agreement is at least a little bit more profitable when you factor in the costs. Be sure it stays that way, ambassador.
 PRAISE_REBELLING_WITH_01   | That's more like it! There's nothing like a good fight, eh? And so much loot begging to be acquired... I hope you don't mind that the Khanate wants to join in the fun! 
+
+ACCEPT_TRADE_01            | I suppose we can't loot every civilization we come across. You want to trade how much BC annually? [amt]? Fine..
+RESPOND_IGNORE_THREAT_01   | Forgive me for laughing, your threats are just comically empty. Run along now before our raiders decide to sharpen their claws on your colonies.
+RESPOND_STOP_SPYING_01     | You found a spy you say belongs to us? Surely not. We would never dream of spying on the exalted [your_empire]. Do what you want with the spy, it is of no consequence to us.
+RESPOND_STOP_ATTACKING_01  | Worried about a raid, [your_race]? Don't worry, we have no interest in what you possess. We'll move them now. We wouldn't want to scare you, after all.
+
 

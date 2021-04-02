@@ -62,7 +62,7 @@ public class CombatStackShip extends CombatStack {
         fleet = fl;
         empire = fl.empire();
         design = empire.shipLab().design(index);
-        usingAI = (empire == null) || empire.isAI();
+        usingAI = (empire == null) || empire.isAIControlled();
         captain = empire.ai().shipCaptain();
         origNum = num = fl.num(index);
         startingMaxHits = maxHits = design.hits();
@@ -195,10 +195,15 @@ public class CombatStackShip extends CombatStack {
         for (int i=0;i<weapons.size();i++) {
             ShipComponent wpn = weapons.get(i);
             // if we are bombing a planet, ignore other weapons
+            //ail: if we count specials as weapons, we'll never get close when we have long-range-specials but short range-weapons
+            if(wpn.isSpecial())
+                continue;
             if (tgt.isColony() || wpn.groundAttacksOnly())
                 return 1;
             else if (wpn.isMissileWeapon()) 
-                missileRange = (int) max(1, missileRange, weaponRange(wpn)-maxRetreatMove);
+                // missiles move by distance, not tiles, so adjust minimum range downward by sqrt(2)
+                // to account for diagonal movement
+                missileRange = (int) max(1, missileRange, ((weaponRange(wpn)/1.414f)-maxRetreatMove));
             else
                 weaponRange = max(weaponRange,weaponRange(wpn));
         }
@@ -263,6 +268,9 @@ public class CombatStackShip extends CombatStack {
         
         for (ShipComponent c: weapons)
             c.reload();
+        //ail: reset selectedWeaponIndex too, so that ship will consistently start from the same weapon each new turn
+        if (weapons.size() > 0)
+            selectedWeaponIndex = 0;
     }
     @Override
     public void endTurn() {

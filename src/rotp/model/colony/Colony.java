@@ -149,6 +149,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         else
             return true;
     }
+    public float untargetedHitPoints()         { return UNTARGETED_DAMAGE_FOR_POPLOSS * population(); }
     public void clearAllRebellion() {
         rebels = 0;
         rebellion = false;
@@ -297,7 +298,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
     public void setCleanupPct(float d) {
         // occurs when ai is reseting eco for minimum cleanup
         allocation(ECOLOGY, (int) Math.ceil(d*MAX_TICKS));
-        cleanupSpending(ecology());
+        redistributeReducedEcoSpending();
     }
     public boolean increment(int catNum, int amt) {
         if (!canAdjust(catNum))
@@ -410,11 +411,14 @@ public final class Colony implements Base, IMappedObject, Serializable {
         Empire pl = player();
         String message = null;
         if (empire == pl) {
-            message = text(messageKey, sys.name(), empire.name(), rebels);
+            message = text(messageKey, sys.name(), rebels);
+            message = empire.replaceTokens(message, "rebelling");
             galaxy().giveAdvice("MAIN_ADVISOR_REBELLION", sys.name());
         }
-        else if (empire.hasContact(pl) && pl.sv.isScouted(sys.id))
-            message = text("GNN_ALIEN_REBELLION", pl.sv.name(sys.id), empire.name(), rebels);
+        else if (empire.hasContact(pl) && pl.sv.isScouted(sys.id)) {
+            message = text("GNN_ALIEN_REBELLION", pl.sv.name(sys.id), rebels);
+            message = empire.replaceTokens(message, "rebelling");
+        }
         if (message != null)
             GNNNotification.notifyRebellion(message);
     }
@@ -454,7 +458,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         log("Colony: ", empire.sv.name(starSystem().id),  ": NextTurn [" , shipyard().design().name() , "|" ,str(shipyard().allocation()) , "-"
                     , str(defense().allocation()) , "-" , str(industry().allocation()) , "-" , str(ecology().allocation()) , "-"
                     , str(research().allocation()) , "]");
-        keepEcoLockedToClean = empire().isPlayer() && (allocation[ECOLOGY] <= cleanupAllocation());
+        keepEcoLockedToClean = empire().isPlayerControlled() && (allocation[ECOLOGY] <= cleanupAllocation());
         previousPopulation = population;
         reallocationRequired = false;          
         ensureProperSpendingRates();
@@ -547,7 +551,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         // always ensure we are at least at clean
         if (allocation[ECOLOGY] < cleanAlloc) {
             allocation[ECOLOGY] = cleanupAllocation = cleanAlloc;
-            cleanupSpending(ecology());
+            redistributeReducedEcoSpending();
             return;
         }
         
@@ -555,7 +559,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         // then lower
         if ((allocation[ECOLOGY] > cleanAlloc) && keepEcoLockedToClean) {
             allocation[ECOLOGY] = cleanupAllocation = cleanAlloc;
-            cleanupSpending(ecology());
+            redistributeReducedEcoSpending();
         }
     }
     public void lowerECOToCleanIfEcoComplete() {
@@ -672,7 +676,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
             }
         }
     }
-    public void cleanupSpending(ColonySpendingCategory cat) {
+    private void redistributeReducedEcoSpending() {
         int maxAllocation = ColonySpendingCategory.MAX_TICKS;
         // determine how much categories are over/under spent
         int spendingTotal = 0;
@@ -680,15 +684,16 @@ public final class Colony implements Base, IMappedObject, Serializable {
             spendingTotal += spending[i].allocation();
 
         int adj = maxAllocation - spendingTotal;
-
-        for (int i = 0; i < NUM_CATS; i++) {
-            ColonySpendingCategory currCat = spending[cleanupSeq[i]];
-            if ((currCat != cat) && !locked(cleanupSeq[i]))
-                adj -= currCat.adjustValue(adj);
-        }
-
-        // if any adj remaining, send back to original cat
-        cat.adjustValue(adj);
+        if (adj == 0)
+            return;
+        
+        // funnel excess to industry if it's not completed
+        if (!industry().isCompleted())
+            adj -= spending[INDUSTRY].adjustValue(adj);
+        
+        // put whatever is left in research
+        if (adj > 0)
+            spending[RESEARCH].adjustValue(adj);
     }
     public void realignSpending(ColonySpendingCategory cat) {
         int maxAllocation = ColonySpendingCategory.MAX_TICKS;
@@ -745,7 +750,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
     public float production() {
         if (inRebellion())
             return 0.0f;
-        float mod = empire().isPlayer() ? 1.0f : options().aiProductionModifier();
+        float mod = empire().isPlayerControlled() ? 1.0f : options().aiProductionModifier();
         float workerProd = workingPopulation() * empire.workerProductivity();
         return mod*(workerProd + usedFactories());
     }
@@ -820,14 +825,14 @@ public final class Colony implements Base, IMappedObject, Serializable {
     public float expectedPopPct() {
         return (expectedPopulation() / planet.currentSize());
     }
-    public int calcPopNeeded(float pct) {
-        return (int) ((planet.currentSize() * pct) - expectedPopulation());
+    public int calcPopNeeded(float desiredPct) {
+        return (int) ((planet.currentSize() * desiredPct) - expectedPopulation());
     }
-    public int calcPopToGive(float pct) {
+    public int calcPopToGive(float retainPct) {
         if (!canTransport())
             return 0;
         int p1 = maxTransportsAllowed();
-        int p2 = (int) (population() - (empire.ai().targetPopPct(starSystem()) * planet().currentSize()));
+        int p2 = (int) (population() - (retainPct * planet().currentSize()));
         return min(p1,p2);
     }
     public float newWaste() {
@@ -837,7 +842,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         if (empire.ignoresPlanetEnvironment())
             return 0;
         
-        float mod = empire().isPlayer() ? 1.0f : options().aiWasteModifier();
+        float mod = empire().isPlayerControlled() ? 1.0f : options().aiWasteModifier();
         return mod*(min(planet.maxWaste(), planet.waste()) + newWaste()) / tech().wasteElimination();
     }
     public float minimumCleanupCost() {
@@ -923,7 +928,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
             }
             setPopulation(population() - transport().size());
             transport = new Transport(starSystem());
-            if (empire.isPlayer())
+            if (empire.isPlayerControlled())
                 starSystem().transportSprite().launch();
         }
     }
@@ -954,7 +959,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         }
         checkEcoAtClean();
         // reset ship views
-        if (empire.isPlayer())
+        if (empire.isPlayerControlled())
             empire.setVisibleShips();
 
         // recalculate governor if transports are sent
@@ -978,7 +983,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         setPopulation(rebels);
 
         if (population() > 0) {
-            if (empire.isPlayer() || tr.empire().isPlayer())
+            if (empire.isPlayerControlled() || tr.empire().isPlayerControlled())
                 RotPUI.instance().selectGroundBattlePanel(this, tr);
             else
                 completeDefenseAgainstTransports(tr);
@@ -1069,9 +1074,9 @@ public final class Colony implements Base, IMappedObject, Serializable {
         // player notification only.
         if (tr.size() == 0) {
             log(concat(str(tr.launchSize()), " ", tr.empire().raceName(), " transports perished at ", name()));
-            if (tr.empire().isPlayer()) 
+            if (tr.empire().isPlayerControlled()) 
                 TransportsKilledAlert.create(empire(), starSystem(), tr.launchSize());
-            else if (empire().isPlayer()) 
+            else if (empire().isPlayerControlled()) 
                 InvadersKilledAlert.create(tr.empire(), starSystem(), tr.launchSize());
             return;
         }

@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import rotp.model.ai.AI;
 import rotp.model.empires.Empire;
 import rotp.model.empires.Race;
 import rotp.model.events.RandomEvent;
@@ -67,7 +68,10 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
     private String selectedRandomizeAIOption;
     private String selectedAIHostilityOption;
     private String selectedColonizingOption;
-
+    private String selectedOpponentAIOption;
+    private final String[] specificOpponentAIOption = new String[MAX_OPPONENTS+1];
+    private String selectedAutoplayOption;
+    
     private transient GalaxyShape galaxyShape;
 
     public MOO1GameOptions() {
@@ -102,10 +106,10 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
     public String selectedGalaxySize()           { return selectedGalaxySize; }
     @Override
     public void selectedGalaxySize(String s)     {
-        int prevMaxOpp = maximumOpponentsOptions();
+        int prevNumOpp = defaultOpponentsOptions();
         selectedGalaxySize = s; 
-        if (selectedNumberOpponents() == prevMaxOpp)
-            selectedNumberOpponents(maximumOpponentsOptions());
+        if (selectedNumberOpponents() == prevNumOpp)
+            selectedNumberOpponents(defaultOpponentsOptions());
         generateGalaxy();
     }
     @Override
@@ -177,6 +181,26 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
     @Override
     public void selectedRandomizeAIOption(String s) { selectedRandomizeAIOption = s; }
     @Override
+    public String selectedAutoplayOption()          { return selectedAutoplayOption == null ? AUTOPLAY_OFF : selectedAutoplayOption; }
+    @Override
+    public void selectedAutoplayOption(String s)    { selectedAutoplayOption = s; }
+    @Override
+    public String selectedOpponentAIOption()       { return selectedOpponentAIOption == null ? OPPONENT_AI_BASE : selectedOpponentAIOption; }
+    @Override
+    public void selectedOpponentAIOption(String s) { selectedOpponentAIOption = s; }
+    @Override
+    public String specificOpponentAIOption(int n)  { 
+            if ((specificOpponentAIOption == null) || (specificOpponentAIOption.length < n))
+                return selectedOpponentAIOption();
+            else
+                return specificOpponentAIOption[n];
+    }
+    @Override
+    public void specificOpponentAIOption(String s, int n) { 
+        if (n < specificOpponentAIOption.length)
+            specificOpponentAIOption[n] = s;
+    }
+    @Override
     public String selectedAIHostilityOption()       { return selectedAIHostilityOption == null ? AI_HOSTILITY_NORMAL : selectedAIHostilityOption; }
     @Override
     public void selectedAIHostilityOption(String s) { selectedAIHostilityOption = s; }
@@ -216,6 +240,12 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         return min(maxOpponents, maxEmpires-1);
     }
     @Override
+    public int defaultOpponentsOptions() {
+        int maxEmpires = min((int)Math.ceil(numberStarSystems()/16f), colors.size(), MAX_OPPONENT_TYPE*startingRaceOptions().size());
+        int maxOpponents = min(SetupGalaxyUI.MAX_DISPLAY_OPPS);
+        return min(maxOpponents, maxEmpires-1);
+    }
+    @Override
     public String name()                 { return "SETUP_RULESET_ORION"; }
     @Override
     public void copyOptions(IGameOptions o) { 
@@ -245,8 +275,13 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         selectedTerraformingOption = opt.selectedTerraformingOption;
         selectedFuelRangeOption = opt.selectedFuelRangeOption;
         selectedRandomizeAIOption = opt.selectedRandomizeAIOption;
+        selectedAutoplayOption = opt.selectedAutoplayOption;
         selectedAIHostilityOption = opt.selectedAIHostilityOption;
         selectedColonizingOption = opt.selectedColonizingOption;
+        selectedOpponentAIOption = opt.selectedOpponentAIOption;
+        
+        for (int i=0;i<specificOpponentAIOption.length;i++)
+            specificOpponentAIOption[i] = opt.specificOpponentAIOption[i];
         
         if (opt.player != null) 
             player.copy(opt.player);
@@ -257,7 +292,6 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
 
         generateGalaxy(); 
     }
-
     @Override
     public GalaxyShape galaxyShape()   {
         if (galaxyShape == null)
@@ -276,7 +310,6 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         }
         selectedGalaxyShapeOption1 = galaxyShape.defaultOption1();
         selectedGalaxyShapeOption2 = galaxyShape.defaultOption2();
-
     }
     @Override
     public int numGalaxyShapeOption1() {  return galaxyShape.numOptions1(); }
@@ -351,6 +384,34 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
             return 1;
         else 
             return min(10,sqrt(nStars/200f));
+    }
+    @Override
+    public int selectedAI(Empire e) {
+        if (e.isPlayer()) {
+            switch(selectedAutoplayOption()) {
+                case AUTOPLAY_AI_BASE:   return AI.BASE;
+                case AUTOPLAY_AI_MODNAR: return AI.MODNAR;
+                case AUTOPLAY_AI_XILMI:  return AI.XILMI;
+                case AUTOPLAY_OFF:
+                default:
+                    return AI.BASE;  // doesn't matter; won't be used if autoplay off
+            }
+        }
+        else {
+            switch(selectedOpponentAIOption()) {
+                case OPPONENT_AI_BASE:   return AI.BASE;
+                case OPPONENT_AI_MODNAR: return AI.MODNAR;
+                case OPPONENT_AI_XILMI:  return AI.XILMI;
+                case OPPONENT_AI_SELECTABLE:
+                    String specificAI = specificOpponentAIOption(e.id);
+                    switch(specificAI) {
+                        case OPPONENT_AI_BASE:   return AI.BASE;
+                        case OPPONENT_AI_MODNAR: return AI.MODNAR;
+                        case OPPONENT_AI_XILMI:  return AI.XILMI;
+                    }
+            }
+        }
+        return AI.BASE;
     }
     @Override
     public float hostileTerraformingPct() { 
@@ -729,6 +790,32 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         return list;
     }
     @Override
+    public List<String> autoplayOptions() {
+        List<String> list = new ArrayList<>();
+        list.add(AUTOPLAY_OFF);
+        list.add(AUTOPLAY_AI_BASE);
+        list.add(AUTOPLAY_AI_MODNAR);
+        list.add(AUTOPLAY_AI_XILMI);
+        return list;
+    }
+    @Override
+    public List<String> opponentAIOptions() {
+        List<String> list = new ArrayList<>();
+        list.add(OPPONENT_AI_BASE);
+        list.add(OPPONENT_AI_MODNAR);
+        list.add(OPPONENT_AI_XILMI);
+        list.add(OPPONENT_AI_SELECTABLE);
+        return list;
+    }
+    @Override
+    public List<String> specificOpponentAIOptions() {
+        List<String> list = new ArrayList<>();
+        list.add(OPPONENT_AI_BASE);
+        list.add(OPPONENT_AI_MODNAR);
+        list.add(OPPONENT_AI_XILMI);
+        return list;
+    }
+    @Override
     public List<String> startingRaceOptions() {
         List<String> list = new ArrayList<>();
         list.add("RACE_HUMAN");
@@ -751,9 +838,12 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         selectedGalaxySize = SIZE_SMALL;
         selectedGalaxyShape = galaxyShapeOptions().get(0);
         selectedGalaxyAge = galaxyAgeOptions().get(1);
-        selectedNumberOpponents = maximumOpponentsOptions();
+        selectedNumberOpponents = defaultOpponentsOptions();
         selectedPlayerRace(random(startingRaceOptions()));
         selectedGameDifficulty = DIFFICULTY_NORMAL;
+        selectedOpponentAIOption = OPPONENT_AI_BASE;
+        for (int i=0;i<specificOpponentAIOption.length;i++)
+            specificOpponentAIOption[i] = OPPONENT_AI_BASE;
         setToDefault();
         generateGalaxy();
     }
@@ -772,6 +862,7 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         selectedCouncilWinOption = COUNCIL_REBELS;
         selectedStarDensityOption = STAR_DENSITY_NORMAL;
         selectedRandomizeAIOption = RANDOMIZE_AI_NONE;
+        selectedAutoplayOption = AUTOPLAY_OFF;
         selectedAIHostilityOption = AI_HOSTILITY_NORMAL;
     }
     private void generateGalaxy() {

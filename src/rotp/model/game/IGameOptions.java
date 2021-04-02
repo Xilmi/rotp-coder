@@ -17,6 +17,7 @@ package rotp.model.game;
 
 import java.awt.Color;
 import java.util.List;
+import rotp.model.ai.AI;
 import rotp.model.empires.Empire;
 import rotp.model.empires.Race;
 import rotp.model.events.RandomEvent;
@@ -129,14 +130,26 @@ public interface IGameOptions {
     public static final String AI_HOSTILITY_HIGHER   = "SETUP_AI_HOSTILITY_HIGHER";
     public static final String AI_HOSTILITY_HIGHEST  = "SETUP_AI_HOSTILITY_HIGHEST";
     
-    public default boolean isAutoPlay()          { return false; }
+    public static final String OPPONENT_AI_BASE       = "SETUP_OPPONENT_AI_BASE";
+    public static final String OPPONENT_AI_MODNAR     = "SETUP_OPPONENT_AI_MODNAR";
+    public static final String OPPONENT_AI_XILMI      = "SETUP_OPPONENT_AI_XILMI";
+    public static final String OPPONENT_AI_SELECTABLE = "SETUP_OPPONENT_AI_SELECT";
+    
+    public static final String AUTOPLAY_OFF           = "SETUP_AUTOPLAY_OFF";
+    public static final String AUTOPLAY_AI_BASE       = "SETUP_AUTOPLAY_AI_BASE";
+    public static final String AUTOPLAY_AI_MODNAR     = "SETUP_AUTOPLAY_AI_MODNAR";
+    public static final String AUTOPLAY_AI_XILMI      = "SETUP_AUTOPLAY_AI_XILMI";
+    
+    public default boolean isAutoPlay()          { return !selectedAutoplayOption().equals(AUTOPLAY_OFF); }
     public default boolean communityAI()         { return false; }
+    public default boolean selectableAI()        { return selectedOpponentAIOption().equals(OPPONENT_AI_SELECTABLE); }
     public default boolean usingExtendedRaces()  { return (selectedNumberOpponents()+1) > startingRaceOptions().size(); }
     public default void communityAI(boolean b)   { }
     public default int maxOpponents()            { return MAX_OPPONENTS; }
     public default float hostileTerraformingPct() { return 1.0f; }
     public default boolean restrictedColonization() { return selectedColonizingOption().equals(COLONIZING_RESTRICTED); }
     public default int baseAIRelationsAdj()       { return 0; }
+    public default int selectedAI(Empire e)       { return AI.BASE; }
     public default boolean randomizeAIPersonality()  { 
         switch (selectedRandomizeAIOption()) {
             case RANDOMIZE_AI_PERSONALITY:
@@ -200,9 +213,13 @@ public interface IGameOptions {
     public List<String> colonizingOptions();
     public List<String> fuelRangeOptions();
     public List<String> randomizeAIOptions();
+    public List<String> autoplayOptions();
+    public List<String> opponentAIOptions();
+    public List<String> specificOpponentAIOptions();
 	
     public List<String> gameDifficultyOptions();
     public int maximumOpponentsOptions();
+    public int defaultOpponentsOptions();
     public List<String> startingRaceOptions();
 
     public String selectedGalaxySize();
@@ -237,6 +254,12 @@ public interface IGameOptions {
     public void selectedFuelRangeOption(String s);
     public String selectedRandomizeAIOption();
     public void selectedRandomizeAIOption(String s);
+    public String selectedOpponentAIOption();
+    public void selectedOpponentAIOption(String s);
+    public String specificOpponentAIOption(int empId);
+    public void specificOpponentAIOption(String s, int empId);
+    public String selectedAutoplayOption();
+    public void selectedAutoplayOption(String s);
 	
     public String selectedGalaxyShapeOption1();
     public void selectedGalaxyShapeOption1(String s);
@@ -344,6 +367,16 @@ public interface IGameOptions {
         int index = opts.indexOf(selectedGameDifficulty())-1;
         return index < 0 ? opts.get(0) : opts.get(index);
     }
+    default String nextOpponentAI() {
+        List<String> opts = opponentAIOptions();
+        int index = opts.indexOf(selectedOpponentAIOption())+1;
+        return index >= opts.size() ? opts.get(0) : opts.get(index);
+    }
+    default String prevOpponentAI() {
+        List<String> opts = opponentAIOptions();
+        int index = opts.indexOf(selectedOpponentAIOption())-1;
+        return index < 0 ? opts.get(opts.size()-1) : opts.get(index);
+    }
     default String nextResearchRate() {
         List<String> opts = researchRateOptions();
         int index = opts.indexOf(selectedResearchRate())+1;
@@ -408,6 +441,33 @@ public interface IGameOptions {
         List<String> opts = randomizeAIOptions();
         int index = opts.indexOf(selectedRandomizeAIOption())+1;
         return index >= opts.size() ? opts.get(0) : opts.get(index);
+    }
+    default String nextAutoplayOption() {
+        List<String> opts = autoplayOptions();
+        int index = opts.indexOf(selectedAutoplayOption())+1;
+        return index >= opts.size() ? opts.get(0) : opts.get(index);
+    }
+    default void nextSpecificOpponentAI(int i) {
+        List<String> allAIs = specificOpponentAIOptions();
+        String currAI = specificOpponentAIOption(i);
+        
+        int nextIndex = currAI == null ? 0 : allAIs.indexOf(currAI)+1;
+        if (nextIndex >= allAIs.size())
+            nextIndex = 0;
+        
+        String nextAI = allAIs.get(nextIndex);
+        specificOpponentAIOption(nextAI, i);
+    }
+    default void prevSpecificOpponentAI(int i) {
+        List<String> allAIs = specificOpponentAIOptions();
+        String currAI = specificOpponentAIOption(i);
+        
+        int nextIndex = currAI == null ? 0 : allAIs.indexOf(currAI)-1;
+        if (nextIndex < 0)
+            nextIndex = allAIs.size()-1;
+        
+        String nextAI = allAIs.get(nextIndex);
+        specificOpponentAIOption(nextAI, i);
     }
     default void nextOpponent(int i) {
         String player = selectedPlayerRace();

@@ -124,6 +124,7 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
     boolean dragSelecting = false;
     private int selectX0, selectY0, selectX1, selectY1;
     private int lastMouseX, lastMouseY;
+    private long lastMouseTime;
     private boolean redrawRangeMap = true;
     public Sprite hoverSprite;
     int backOffsetX = 0;
@@ -132,6 +133,7 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
     float areaOffsetY = 0;
     Area shipRangeArea;
     Area scoutRangeArea;
+    private int maxMouseVelocity = -1;
 
     private final Timer zoomTimer;
 
@@ -251,9 +253,9 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
     public GalaxyMapPanel(IMapHandler p) {
         parent = p;
         zoomTimer = new Timer(10, this);
-        init();
+        init0();
     }
-    private void init() {
+    private void init0() {
         setBackground(Color.BLACK);
         setOpaque(true);
 
@@ -408,6 +410,16 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
             drawBackgroundNebula(sharedNebulaBackground);
         }
     }
+    public void init() {
+        resetRangeAreas();
+        
+        if (UserPreferences.sensitivityMedium())
+            maxMouseVelocity = 500;
+        else if (UserPreferences.sensitivityLow())
+            maxMouseVelocity = 100;
+        else
+            maxMouseVelocity = -1;
+    }
     public void clearRangeMap()    { redrawRangeMap = true; }
     public void resetRangeAreas() {
         clearRangeMap();
@@ -428,8 +440,12 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
         float bestX = bounds(0, x, sizeX());
         float bestY = bounds(0, y, sizeY());
 
+        areaOffsetX += (currentFocus().x()-bestX);
+        areaOffsetY += (currentFocus().y()-bestY);
+        
         currentFocus().setXY(bestX, bestY);
         center(parent.mapFocus());
+        
         clearRangeMap();
     }
     public void adjustZoom(int z) {
@@ -979,14 +995,32 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
             dragMap(deltaX, deltaY);
             lastMouseX = x;
             lastMouseY = y;
+            lastMouseTime = System.currentTimeMillis();
         }
     }
     @Override
     public void mouseMoved(MouseEvent e) {
+        long prevTime = lastMouseTime;
+        int prevX = lastMouseX;
+        int prevY = lastMouseY;
         lastMouseX = e.getX();
         lastMouseY = e.getY();
+        lastMouseTime = System.currentTimeMillis();
         int x = e.getX();
         int y = e.getY();
+        
+        
+        if (maxMouseVelocity > 0) {
+            long timeS = (lastMouseTime - prevTime);
+            if (timeS == 0)
+                return;
+            // quick and dirty mouse speed test
+            int dist = Math.abs(lastMouseX-prevX)+Math.abs(lastMouseY-prevY);
+            long speed = dist*1000/timeS;
+            if (speed >= maxMouseVelocity)
+                return;
+        }
+        
 
         Sprite prevHover = hoverSprite;
         hoverSprite = spriteAt(x,y);

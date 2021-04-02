@@ -31,6 +31,8 @@ import rotp.ui.combat.ShipBattleUI;
 import rotp.ui.game.HelpUI;
 import rotp.ui.main.SystemPanel;
 import rotp.util.AnimationManager;
+import rotp.util.Base;
+import rotp.util.ImageColorizer;
 import rotp.util.Palette;
 
 public class DesignUI extends BasePanel {
@@ -38,6 +40,7 @@ public class DesignUI extends BasePanel {
     public static DesignUI instance;
     static Palette palette;
 
+    private static final int[] shipColors = { 0,1,3,4,5,6,8,9,10,11};
     private static final Color lightBrown = new Color(178,124,87);
     private static final Color brown = new Color(110,79,56);
     private static final Color darkBrown = new Color(112,85,68);
@@ -124,6 +127,7 @@ public class DesignUI extends BasePanel {
     private final Rectangle[] specialsFieldArea = new Rectangle[ShipDesign.maxSpecials];
     private final Polygon[] specialsFieldDecr = new Polygon[ShipDesign.maxSpecials];
     private final Polygon[] specialsFieldIncr = new Polygon[ShipDesign.maxSpecials];
+    private final Rectangle[] shipColorArea = new Rectangle[12];
 
     private final DesignComputerSelectionUI computerSelectionUI;
     private final DesignShieldSelectionUI shieldSelectionUI;
@@ -177,6 +181,8 @@ public class DesignUI extends BasePanel {
             specialsFieldDecr[i] = new Polygon();
             specialsFieldIncr[i] = new Polygon();
         }
+        for (int i=0;i<shipColorArea.length;i++)
+            shipColorArea[i] = new Rectangle();
     }
     public void init() {
         int pid = player().id;
@@ -355,6 +361,14 @@ public class DesignUI extends BasePanel {
         int y12 = scaled(300);
         HelpUI.HelpSpec sp12 = helpUI.addBrownHelpText(x12,y12,w12, 2, text("SHIP_DESIGN_HELP_1K"));
         sp12.setLine(scaled(690), y12, scaled(665), scaled(250));        
+
+        if (!configPanel.shipDesign().active()) {
+            int x13 = scaled(430);
+            int w13 = scaled(280);
+            int y13 = scaled(360);
+            HelpUI.HelpSpec sp13 = helpUI.addBrownHelpText(x13,y13,w13, 2, text("SHIP_DESIGN_HELP_1L"));
+            sp13.setLine(scaled(560), y13, scaled(540), scaled(275));
+        }
     }
     private void loadHelpFrame2() {
         HelpUI helpUI = RotPUI.helpUI();
@@ -852,6 +866,8 @@ public class DesignUI extends BasePanel {
             }
             else if (hoverBox == prototypeBox) {
                 selectedSlot = -1;
+                softClick();
+                configPanel.loadShipImages();
                 instance.repaint();
             }
         }
@@ -920,7 +936,7 @@ public class DesignUI extends BasePanel {
                 int y0 = s40;
                 for (String line: lines) {
                     g.drawString(line, leftM, y0);
-                    y0 += s15;
+                    y0 += s14;
                 }
             }
             else {
@@ -949,18 +965,18 @@ public class DesignUI extends BasePanel {
                 int maxSw = max(sw1,sw2,sw3);
                 int maxSwa = max(sw1a,sw2a,sw3a);
                 g.drawString(desc, leftM,  s38);
-                g.drawString(desc2, leftM, s55);
-                g.drawString(desc3, leftM, s70);
-                g.drawString(val1, leftM+maxSw+s5+maxSwa-sw1a, s38);
-                g.drawString(val2, leftM+maxSw+s5+maxSwa-sw2a, s55);
-                g.drawString(val3, leftM+maxSw+s5+maxSwa-sw3a, s70);
+                g.drawString(desc2, leftM, s54);
+                g.drawString(desc3, leftM, s68);
+                g.drawString(val1, leftM+maxSw+s5+maxSwa-sw1a, s40);
+                g.drawString(val2, leftM+maxSw+s5+maxSwa-sw2a, s54);
+                g.drawString(val3, leftM+maxSw+s5+maxSwa-sw3a, s68);
 
                 if (constructionCounts[des.id()] > 0) {
                     String desc4 = text("SHIP_DESIGN_SLOT_DESC4");
                     int sw4 = g.getFontMetrics().stringWidth(desc4);                
                     String val4= str(constructionCounts[des.id()]);
-                    g.drawString(desc4, leftM, s90);
-                    g.drawString(val4, leftM+sw4+s5, s90);
+                    g.drawString(desc4, leftM, s82);
+                    g.drawString(val4, leftM+sw4+s5, s82);
                 }
             }
             // draw copy button
@@ -1007,8 +1023,7 @@ public class DesignUI extends BasePanel {
             if (!des.active())
                 return;
 
-            ShipImage shipImage = des.shipImage();
-            Image img = icon(shipImage.nextIcon()).getImage();
+            Image img = des.image();
 
             int w0 = img.getWidth(null);
             int h0 = img.getHeight(null);
@@ -1135,6 +1150,7 @@ public class DesignUI extends BasePanel {
                 Image img = icon(key).getImage();
                 int w0 = img.getWidth(null);
                 int h0 = img.getHeight(null);
+
                 float scale = min((float)(shipW-s20)/w0, (float)(shipH-s20)/h0);
 
                 int w1 = (int)(scale*w0);
@@ -1261,6 +1277,9 @@ public class DesignUI extends BasePanel {
 
             BufferedImage img = shipImages.get(shipImageIndex);
 
+            if (des.shipColor() > 0)
+                img = Base.colorizer.makeColor(des.shipColor(), img);
+
             int w1 = img.getWidth();
             int h1 = img.getHeight();
 
@@ -1292,7 +1311,7 @@ public class DesignUI extends BasePanel {
             g0.setClip(null);
         }
         private void drawSummaryInfo(Graphics2D g, ShipDesign des, int x, int y, int w, int h) {
-            String name = "";
+            String name;
             if (selectedSlot < 0) 
                 name = text("SHIP_DESIGN_PROTOTYPE_TITLE");
             else if (des.active())
@@ -1328,6 +1347,9 @@ public class DesignUI extends BasePanel {
             if (des.availableSpace() < 0)
                 g.setColor(errorRedC);
             g.drawString(text("SHIP_DESIGN_AVAIL_SPACE_LABEL"), x1, y6);
+
+            if (!des.active())
+                drawColorOptions(g, x1, y6, w-s20, rowH);
 
             int autoScoutWidth;
             {
@@ -1879,6 +1901,41 @@ public class DesignUI extends BasePanel {
             str = ""+ (int) (engRequired*engCost);
             sw = g.getFontMetrics().stringWidth(str);
             g.drawString(str, x3-sw, y9);
+        }
+        private void drawColorOptions(Graphics2D g, int x, int y, int w, int h) {
+            ShipDesign des = shipDesign();
+            g.setColor(Color.black);
+            String s = text("SHIP_DESIGN_COLORS");
+            int sw = g.getFontMetrics().stringWidth(s);
+            g.drawString(s, x, y+h);
+            int w0 = w-sw-s20;
+            int boxW = w0/shipColors.length;
+            int boxH = h-s10;
+            int boxY = y+s10;
+            int boxX = x+sw+s20;
+            g.setColor(Color.white);
+            Stroke prev = g.getStroke();
+
+            for (int i=0;i<shipColors.length;i++) {
+                g.setStroke(stroke1);
+                int cIndex = shipColors[i];
+                shipColorArea[i].setBounds(boxX, boxY, boxW-s5, boxH);
+                if (cIndex > 0) {
+                    g.setColor(ImageColorizer.color(cIndex));
+                    g.fill(shipColorArea[i]);
+                }
+                if (hoverTarget == shipColorArea[i])
+                    g.setColor(Color.yellow);
+                else if (des.shipColor() == cIndex) {
+                    g.setStroke(stroke2);
+                    g.setColor(Color.white);
+                }
+                else
+                   g.setColor(Color.black);
+                g.draw(shipColorArea[i]);
+                boxX += boxW;
+            }
+            g.setStroke(prev);
         }
         private void drawLeftComponentInfo(Graphics2D g, ShipDesign des, int x, int y, int w0, int h) {
             g.setColor(darkBrown);
@@ -2852,60 +2909,20 @@ public class DesignUI extends BasePanel {
                 repaint();
             }
         }
-        private void shipWeaponCountDecrement(int i) {
-            ShipDesign des =  shipDesign();
+        private void shipWeaponCountDecrement(int i, int amt) {
+            ShipDesign des = shipDesign();
             if ((des.wpnCount(i) > 0) && !des.weapon(i).isNone()) {
-                des.wpnCount(i, des.wpnCount(i) - 1);
+                int newAmt = max(0, des.wpnCount(i)-amt);
+                des.wpnCount(i, newAmt);
                 repaint();
             }
         }
-        private void shipWeaponCountIncrement(int i) {
+        private void shipWeaponCountIncrement(int i, int amt) {
             ShipDesign des =  shipDesign();
             if (!des.weapon(i).isNone()) {
-                des.wpnCount(i, des.wpnCount(i) + 1);
+                des.wpnCount(i, des.wpnCount(i) + amt);
                 repaint();
             }
-        }
-		// modnar: add shift/ctrl modifiers for +5/+20
-		private void shipWeaponCountDecrement5(int i) {
-            ShipDesign des =  shipDesign();
-            if ((des.wpnCount(i) > 5) && !des.weapon(i).isNone()) {
-                des.wpnCount(i, des.wpnCount(i) - 5);
-                repaint();
-            }
-			else {
-				des.wpnCount(i, 0);
-                repaint();
-			}
-        }
-		// modnar: add shift/ctrl modifiers for +5/+20
-        private void shipWeaponCountIncrement5(int i) {
-            ShipDesign des =  shipDesign();
-            if (!des.weapon(i).isNone()) {
-                des.wpnCount(i, des.wpnCount(i) + 5);
-                repaint();
-            }
-        }
-		// modnar: add shift/ctrl modifiers for +5/+20
-		private void shipWeaponCountDecrement20(int i) {
-            ShipDesign des =  shipDesign();
-            if ((des.wpnCount(i) > 20) && !des.weapon(i).isNone()) {
-                des.wpnCount(i, des.wpnCount(i) - 20);
-                repaint();
-            }
-			else {
-				des.wpnCount(i, 0);
-                repaint();
-			}
-        }
-		// modnar: add shift/ctrl modifiers for +5/+20
-        private void shipWeaponCountIncrement20(int i) {
-            ShipDesign des =  shipDesign();
-            if (!des.weapon(i).isNone()) {
-                des.wpnCount(i, des.wpnCount(i) + 20);
-                repaint();
-            }
-			
         }
         private void openShipSpecialsDialog(int i) {
             specialSelectionUI.selectedDesign = shipDesign();
@@ -2930,6 +2947,10 @@ public class DesignUI extends BasePanel {
                 des.special(i, specials.get(index + 1));
                 repaint();
             }
+        }
+        private void setShipColor(int i) {
+            ShipDesign des =  shipDesign();
+            des.shipColor(shipColors[i]);
         }
         @Override
         public void mouseDragged(MouseEvent e) { }
@@ -3053,6 +3074,16 @@ public class DesignUI extends BasePanel {
                     }
                 }
             }
+
+            if (hoverTarget == null) {
+                for (int i = 0; i < shipColorArea.length; i++) {
+                    if (shipColorArea[i].contains(x, y)) {
+                        hoverTarget = shipColorArea[i];
+                        break;
+                    }
+                }
+            }
+
             if (prevHover != hoverTarget)
                 repaint();
         }
@@ -3061,7 +3092,10 @@ public class DesignUI extends BasePanel {
         @Override
         public void mousePressed(MouseEvent mouseEvent) { }
         @Override
-        public void mouseReleased(MouseEvent mouseEvent) {
+        public void mouseReleased(MouseEvent e) {
+            boolean shiftPressed = (e.getModifiers() & InputEvent.SHIFT_MASK) != 0;
+            boolean ctrlPressed = (e.getModifiers() & InputEvent.CTRL_MASK) != 0;
+
             if (hoverTarget == scrapButtonArea) {
                 softClick(); openScrapDialog(); return;
             }
@@ -3105,7 +3139,7 @@ public class DesignUI extends BasePanel {
                 }
                 return;
             }
-
+            
             if (shipDesign().active())
                 return;
             
@@ -3185,25 +3219,25 @@ public class DesignUI extends BasePanel {
                 if (hoverTarget == weaponFieldIncr[i]) {
                     softClick(); shipWeaponIncrement(i); return;
                 }
-				// modnar: add shift/ctrl modifiers for +5/+20
                 if (hoverTarget == weaponCountDecr[i]) {
-					if((mouseEvent.getModifiers() & InputEvent.SHIFT_MASK) != 0 ) {
-						softClick(); shipWeaponCountDecrement5(i); return;
-					}
-					if((mouseEvent.getModifiers() & InputEvent.CTRL_MASK) != 0 ) {
-						softClick(); shipWeaponCountDecrement20(i); return;
-					}
-                    softClick(); shipWeaponCountDecrement(i); return;
+                    softClick();
+                    if (shiftPressed)
+                        shipWeaponCountDecrement(i,5);
+                    else if (ctrlPressed)
+                        shipWeaponCountDecrement(i,20);
+                    else
+                        shipWeaponCountDecrement(i,1);
+                    return;
                 }
-				// modnar: add shift/ctrl modifiers for +5/+20
                 if (hoverTarget == weaponCountIncr[i]) {
-					if((mouseEvent.getModifiers() & InputEvent.SHIFT_MASK) != 0 ) {
-						softClick(); shipWeaponCountIncrement5(i); return;
-					}
-					if((mouseEvent.getModifiers() & InputEvent.CTRL_MASK) != 0 ) {
-						softClick(); shipWeaponCountIncrement20(i); return;
-					}
-                    softClick(); shipWeaponCountIncrement(i); return;
+                    softClick();
+                    if (shiftPressed)
+                        shipWeaponCountIncrement(i,5);
+                    else if (ctrlPressed)
+                        shipWeaponCountIncrement(i,20);
+                    else
+                        shipWeaponCountIncrement(i,1);
+                    return;
                 }
             }
             for (int i=0;i<specialsFieldArea.length;i++) {
@@ -3215,6 +3249,11 @@ public class DesignUI extends BasePanel {
                 }
                 if (hoverTarget == specialsFieldIncr[i]) {
                     softClick(); shipSpecialsIncrement(i); return;
+                }
+            }
+            for (int i=0;i<shipColorArea.length;i++) {
+                if (hoverTarget == shipColorArea[i]) {
+                    softClick(); setShipColor(i); return;
                 }
             }
         }
@@ -3233,6 +3272,9 @@ public class DesignUI extends BasePanel {
             if (shipDesign().active())
                 return;
             
+            boolean shiftPressed = (e.getModifiers() & InputEvent.SHIFT_MASK) != 0;
+            boolean ctrlPressed = (e.getModifiers() & InputEvent.CTRL_MASK) != 0;
+
             if (hoverTarget == shipImageArea) {
                 if (count < 0)
                     shipImageDecr();
@@ -3298,29 +3340,22 @@ public class DesignUI extends BasePanel {
                     return;
                 }
                 if (hoverTarget == weaponCountArea[i]) {
-					// modnar: add shift/ctrl modifiers for +5/+20
-                    if (count > 0) {
-						if((e.getModifiers() & InputEvent.SHIFT_MASK) != 0 ) {
-							shipWeaponCountDecrement5(i);
-						}
-						else if((e.getModifiers() & InputEvent.CTRL_MASK) != 0 ) {
-							shipWeaponCountDecrement20(i);
-						}
-                        else {
-							shipWeaponCountDecrement(i);
-						}
-					}
+                    if (count < 0) {
+                        if (shiftPressed)
+                            shipWeaponCountDecrement(i,5);
+                        else if (ctrlPressed)
+                            shipWeaponCountDecrement(i,20);
+                        else
+                            shipWeaponCountDecrement(i,1);
+                    }
                     else {
-						if((e.getModifiers() & InputEvent.SHIFT_MASK) != 0 ) {
-							shipWeaponCountIncrement5(i);
-						}
-						else if((e.getModifiers() & InputEvent.CTRL_MASK) != 0 ) {
-							shipWeaponCountIncrement20(i);
-						}
-                        else {
-							shipWeaponCountIncrement(i);
-						}
-					}
+                        if (shiftPressed)
+                            shipWeaponCountIncrement(i,5);
+                        else if (ctrlPressed)
+                            shipWeaponCountIncrement(i,20);
+                        else
+                            shipWeaponCountIncrement(i,1);
+                    }
                     return;
                 }
             }
