@@ -627,33 +627,44 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
     }
 
     static ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-    static Function<Pair<Area, Area>, Area> add = areaPair -> {
-        if (areaPair.getValue() != null) {
-            areaPair.getKey().add(areaPair.getValue());
+    static Function<List<Area>, Area> addAreas = list -> {
+        Area total = list.get(0);
+        for (int i = 1; i < list.size(); i ++) {
+            Area area = list.get(i);
+            total.add(area);
         }
-        return areaPair.getKey();
+        return total;
     };
     private Area parallelAdd(List<Area> areas) {
         if (areas == null || areas.isEmpty()) {
             return new Area();
         }
-        while (areas.size() > 1) {
-            List<Future<Area>> futures = new ArrayList<>();
-            for (int i = 0; i < areas.size() - 1; i += 2) {
-                Pair<Area, Area> pair = Pair.create(areas.get(i), areas.get(i + 1));
-                Future<Area> future = executor.submit(() -> add.apply(pair));
-                futures.add(future);
-            }
-            areas = futures.stream().map(f -> {
-                try {
-                    return f.get();
-                } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e.getMessage(), e);
-                }
-            }).collect(Collectors.toList());
+        // split areas into parts of X areas per per thread, and
+        int step = Math.max(2, areas.size() / Runtime.getRuntime().availableProcessors());
+        List<Future<Area>> futures = new ArrayList<>();
+        int i;
+        for (i = 0; i < areas.size() - step; i+= step) {
+            List<Area> part = areas.subList(i, i+step);
+            Future<Area> future = executor.submit(() -> addAreas.apply(part));
+            futures.add(future);
         }
-        return areas.get(0);
+        if (i < areas.size()) {
+            List<Area> part = areas.subList(i, areas.size());
+            Future<Area> future = executor.submit(() -> addAreas.apply(part));
+            futures.add(future);
+        }
+//        System.out.println("RRR Processed in "+futures.size()+" parts of "+step+" areas each");
+        try {
+            Area total = futures.get(0).get();
+            for (i = 1; i < futures.size(); i++) {
+                Area area = futures.get(i).get();
+                total.add(area);
+            }
+            return total;
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
     private void drawGridCircularDisplayDark(Graphics2D g) {
         Galaxy gal = galaxy();

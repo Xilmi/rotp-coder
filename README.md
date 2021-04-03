@@ -52,7 +52,9 @@ text in the planetary spending screen. Since version 1.8 Governor is on by defau
 
 Additional features / changelog
 
-* 0.9 Merge v0.9. Since we're no longer beta but march towards 1.0, there's a change in version numbers. I have
+* 3.09.2 Fix/improve parallel ship range display. Thanks Elkad for the bug report.
+
+* 3.09.1 Merge v0.9. Since we're no longer beta but march towards 1.0, there's a change in version numbers. I have
   changed Governor version numbers to be 3.xxx since I don't want numbers to decrease. Also, made a change to merge
   areas for ship range display on the map in parallel, which should result in some performance improvement if you have
   many cores.
