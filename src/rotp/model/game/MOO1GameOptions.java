@@ -120,10 +120,10 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
     public String selectedGalaxySize()           { return selectedGalaxySize; }
     @Override
     public void selectedGalaxySize(String s)     {
-        int prevMaxOpp = maximumOpponentsOptions();
+        int prevNumOpp = defaultOpponentsOptions();
         selectedGalaxySize = s; 
-        if (selectedNumberOpponents() == prevMaxOpp)
-            selectedNumberOpponents(maximumOpponentsOptions());
+        if (selectedNumberOpponents() == prevNumOpp)
+            selectedNumberOpponents(defaultOpponentsOptions());
         generateGalaxy();
     }
     @Override
@@ -251,6 +251,12 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
     public int maximumOpponentsOptions() {
         // modnar: change maxEmpires to be ~12 stars/empire, original ~8 stars/empire
         int maxEmpires = min(numberStarSystems()/12, colors.size(), MAX_OPPONENT_TYPE*startingRaceOptions().size());
+        int maxOpponents = min(SetupGalaxyUI.MAX_DISPLAY_OPPS);
+        return min(maxOpponents, maxEmpires-1);
+    }
+    @Override
+    public int defaultOpponentsOptions() {
+        int maxEmpires = min((int)Math.ceil(numberStarSystems()/16f), colors.size(), MAX_OPPONENT_TYPE*startingRaceOptions().size());
         int maxOpponents = min(SetupGalaxyUI.MAX_DISPLAY_OPPS);
         return min(maxOpponents, maxEmpires-1);
     }
@@ -907,7 +913,7 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         selectedGalaxySize = SIZE_SMALL;
         selectedGalaxyShape = galaxyShapeOptions().get(0);
         selectedGalaxyAge = galaxyAgeOptions().get(1);
-        selectedNumberOpponents = maximumOpponentsOptions();
+        selectedNumberOpponents = defaultOpponentsOptions();
         selectedPlayerRace(random(startingRaceOptions()));
         selectedGameDifficulty = DIFFICULTY_NORMAL;
         selectedOpponentAIOption = OPPONENT_AI_MODNAR; // modnar: default to modnar AI

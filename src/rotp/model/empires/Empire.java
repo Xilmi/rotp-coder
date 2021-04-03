@@ -159,6 +159,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     private transient float totalEmpireMissileBaseCost;
     private transient int inRange;
     public transient int numColoniesHistory;
+    private transient String empireName;
 
     public AI ai() {
         if (ai == null)
@@ -413,7 +414,11 @@ public final class Empire implements Base, NamedObject, Serializable {
     public Color color()                 { return options().color(bannerColor); }
     public int shipColorId()             { return colorId(); }
     @Override
-    public String name()                 { return race().text("GOVT_EMPIRE", raceName()); }
+    public String name()                 { 
+        if (empireName == null)
+            empireName = replaceTokens("[this_empire]", "this");
+        return empireName;
+    }
     
     public void chooseNewCapital() {
         // make list of every colony that is not the current capital
@@ -480,15 +485,13 @@ public final class Empire implements Base, NamedObject, Serializable {
             return false;
         if (sys.colony().quarantined())
             return false;
-        if (allColonizedSystems().size() > 1)
-            return true;
         
         for (StarSystem abSys: galaxy().abandonedSystems()) {
             if (sv.inShipRange(abSys.id) && canColonize(abSys))
                 return true;
         }
             
-        return false;
+        return true;
     }
     public boolean canAbandonTo(StarSystem sys) {
         if (sys == null)
@@ -1939,7 +1942,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         return rebellingPop > loyalPop;
     }
     public void overthrowLeader() {
-        if (isPlayerControlled()) {
+        if (isPlayer()) {
             //session().status().loseOverthrown();
             return;
         }
@@ -1956,7 +1959,8 @@ public final class Empire implements Base, NamedObject, Serializable {
 
         if (viewForEmpire(player()).embassy().contact()) {
             String leaderDesc = text("LEADER_PERSONALITY_FORMAT", leader.personality(),leader.objective());
-            String message = text("GNN_OVERTHROW", name(), leaderDesc);
+            String message = text("GNN_OVERTHROW", leaderDesc);
+            message = replaceTokens(message, "alien");
             GNNNotification.notifyRebellion(message);
         }
     }
