@@ -257,6 +257,7 @@ public enum RaceFactory implements Base {
         if (key.equalsIgnoreCase("desc1"))         { r.description1 = value; return wc; }
         if (key.equalsIgnoreCase("desc2"))         { r.description2 = value; return wc; }
         if (key.equalsIgnoreCase("desc3"))         { r.description3 = value; return wc; }
+        if (key.equalsIgnoreCase("desc4"))         { r.description4 = value; return wc; } // modnar: add desc4
         if (key.equalsIgnoreCase("home"))          { r.homeSystemNames.clear(); r.homeSystemNames.addAll(substrings(value, ',')); return wc; }
         if (key.equalsIgnoreCase("title"))         { r.title(value.trim()); return wc; }
         if (key.equalsIgnoreCase("fulltitle"))     { r.fullTitle(value.trim()); return wc; }

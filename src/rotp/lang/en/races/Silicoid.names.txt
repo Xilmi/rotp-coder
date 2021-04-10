@@ -4,6 +4,7 @@ name: Silicoid, Igneoid, Sedimoid, Granitoid, Magmoid
 desc1: Xenophobic Expansionists
 desc2: Immune to Hostile Environments
 desc3: The enigmatic and lithovoric [race]s search the galaxy for their eternal enemy.
+desc4: POP Growth -50%, No Waste, Colonize All Environments
 
 // possible home system names
 home: Cryslon, Geode, Karst, Igneous, Silican

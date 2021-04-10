@@ -4,6 +4,7 @@ name: Psilon, Mentalon, Psychon, Cerebron, Neuralon
 desc1: Pacifist Technologists
 desc2: Superior Research Techniques
 desc3: The [race] Republic seeks peaceful and enlightened coexistence with other races.
+desc4: Research +50%, Tech Tree +50%
 
 // possible home system names
 home: Mentar, Cogitar, Psilar, Metrica, Neura

@@ -221,8 +221,8 @@ public class GameUI  extends BasePanel implements MouseListener, MouseMotionList
         if (raceRightBackground == null) {
             raceRightBackground = new LinearGradientPaint[2];
             Point2D start = new Point2D.Float(RotPUI.scaledSize(815), 0);
-            Point2D end = new Point2D.Float(RotPUI.scaledSize(1015), 0);
-            float[] dist = {0.0f, 0.3f, 0.7f, 1.0f};
+            Point2D end = new Point2D.Float(RotPUI.scaledSize(1040), 0); // modnar: extend right side gradient
+            float[] dist = {0.0f, 0.2f, 0.8f, 1.0f}; // modnar: adjust right side gradient
             Color edge0 = new Color(113,74,49);
             Color mid0 = new Color(188,123,81);
             Color[] colors0 = {edge0, mid0,  mid0, edge0 };

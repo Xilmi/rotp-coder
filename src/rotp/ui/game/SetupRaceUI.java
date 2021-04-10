@@ -141,7 +141,7 @@ public final class SetupRaceUI extends BasePanel implements MouseListener, Mouse
         Race race = Race.keyed(newGameOptions().selectedPlayerRace());
         int iconH = scaled(115);
         BufferedImage icon = newBufferedImage(race.flagNorm());
-        int imgX = scaled(855);
+        int imgX = scaled(868); // modnar: right side extended, shift race icon
         int imgY = scaled(120);
         //g.drawImage(icon, imgX, imgY, iconH, iconH, null);
         g.drawImage(icon, imgX, imgY, imgX+iconH, imgY+iconH, 0, 0, icon.getWidth(), icon.getHeight(), null);
@@ -152,7 +152,7 @@ public final class SetupRaceUI extends BasePanel implements MouseListener, Mouse
         this.drawBorderedString(g0, race.setupName(), 1, x0, y0, Color.black, Color.white);
 
         // draw race desc #1
-        int maxLineW = scaled(155);
+        int maxLineW = scaled(185); // modnar: right side extended, increase maxLineW
         y0 += s25;
         g.setFont(narrowFont(16));
         g.setColor(Color.black);
@@ -172,6 +172,17 @@ public final class SetupRaceUI extends BasePanel implements MouseListener, Mouse
             y0 += s18;
         }
 
+        // modnar: draw race desc #4, with 'if' check
+        if (race.description4 != null) {
+            y0 += s3;
+            List<String> desc4Lines = wrappedLines(g, race.description4, maxLineW);
+            g.fillOval(x0, y0-s8, s5, s5);
+            for (String line: desc4Lines) {
+                drawString(g,line, x0+s8, y0);
+                y0 += s18;
+            }
+        }
+        
         // draw race desc #3
         y0 += s7;
         String desc3 = race.description3.replace("[race]", race.setupName());
@@ -380,9 +391,9 @@ public final class SetupRaceUI extends BasePanel implements MouseListener, Mouse
         int y0 = s80;
         drawBorderedString(g, title, 2, x0, y0, Color.darkGray, Color.white);
 
-        // draw shading
+        // draw shading, modnar: extend right side
         g.setColor(GameUI.setupShade());
-        g.fillRect(scaled(205), s95, scaled(825), scaled(515));
+        g.fillRect(scaled(205), s95, scaled(850), scaled(515));
 
         // draw race frame
         g.setColor(GameUI.setupFrame());
@@ -392,9 +403,9 @@ public final class SetupRaceUI extends BasePanel implements MouseListener, Mouse
         g.setPaint(GameUI.raceLeftBackground());
         g.fillRect(scaled(220), scaled(115), scaled(200), scaled(475));
 
-        // draw race right gradient
+        // draw race right gradient, modnar: extend right side
         g.setPaint(GameUI.raceRightBackground());
-        g.fillRect(scaled(815), scaled(115), scaled(200), scaled(475));
+        g.fillRect(scaled(815), scaled(115), scaled(225), scaled(475));
 
         int cnr = s5;
         int buttonH = s45;
@@ -418,7 +429,7 @@ public final class SetupRaceUI extends BasePanel implements MouseListener, Mouse
         // draw color buttons on right panel
         int xC = scaled(830);
         int yC = scaled(550);
-        int wC = s18; // modnar: add new colors, change color box sizes
+        int wC = s21; // modnar: add new colors, change color box sizes
         int hC = s15;
         for (int i=0;i<MAX_COLORS;i++) {
             int yC1 = i%2 == 0 ? yC : yC+hC+s5;
