@@ -1120,13 +1120,13 @@ SETUP_AUTOPLAY_AI_BASE            | AI: Base
 SETUP_AUTOPLAY_AI_MODNAR          | AI: Modnar
 SETUP_AUTOPLAY_AI_XILMI           | AI: Xilmi
 SETUP_GAME_DIFFICULTY_LABEL       | Difficulty
-SETUP_DIFFICULTY_EASIEST          | Easiest
-SETUP_DIFFICULTY_EASIER           | Easier
-SETUP_DIFFICULTY_EASY             | Easy
-SETUP_DIFFICULTY_NORMAL           | Normal
-SETUP_DIFFICULTY_HARD             | Hard
-SETUP_DIFFICULTY_HARDER           | Harder
-SETUP_DIFFICULTY_HARDEST          | Hardest
+SETUP_DIFFICULTY_EASIEST          | Easiest (70%)
+SETUP_DIFFICULTY_EASIER           | Easier (85%)
+SETUP_DIFFICULTY_EASY             | Easy (100%)
+SETUP_DIFFICULTY_NORMAL           | Normal (120%)
+SETUP_DIFFICULTY_HARD             | Hard (140%)
+SETUP_DIFFICULTY_HARDER           | Harder (170%)
+SETUP_DIFFICULTY_HARDEST          | Hardest (200%)
 SETUP_RESEARCH_RATE_NORMAL        | Normal
 // mondar: add fast research option
 SETUP_RESEARCH_RATE_FAST          | Fast
