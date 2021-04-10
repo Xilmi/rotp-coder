@@ -69,9 +69,9 @@ PLANET_FERTILE                    | Fertile
 PLANET_GAIA                       | Gaia
 
 // Planet Descriptors for Race
-PLANET_HOMEWORLD                  | %1 Homeworld
-PLANET_WORLD                      | %1 World
-PLANET_COLONY                     | %1 Colony
+PLANET_HOMEWORLD                  | [alien_race] Homeworld
+PLANET_WORLD                      | [alien_race] World
+PLANET_COLONY                     | [alien_race] Colony
 PLANET_ORION                      | Orion
 PLANET_ORION_GUARDIAN             | Guardian
 
@@ -79,9 +79,8 @@ PLANET_ORION_GUARDIAN             | Guardian
 NEBULA_NAME                       | %1 Nebula
 NEBULA_ID                         | NCG %1
 
-// In this, %1 is the race's title when using with the name ("_nameTitle" in the races labels.txt file)
-// and %2 is the leader's actual name
-TITLE_LEADERNAME                  | %1 %2
+// %2 is the leader's actual name
+TITLE_LEADERNAME                  | [alien_nameTitle] %2
 
 // Extended Colony Name prefix when we run out of names
 COLONY_NAME_2                     | New %1
@@ -140,7 +139,7 @@ EVENT_PIRACY_2                    | The pirates based in the [system] system con
 EVENT_PIRACY_3                    | The [target_race] fleet has destroyed a major piracy operation based in the [system] system. Overall trade levels have returned to normal.
 EVENT_PLAGUE                      | A deadly plague strikes the [target_race] world in the [system] system. A quarantine has been placed on the system and millions are expected to die each year until scientists can find a cure.
 EVENT_PLAGUE_2                    | The deadly plague in the [system] system persists. Scientists estimate that another [amt] RP are required to find a cure.
-EVENT_PLAGUE_3                    | [target_race] scientists have found a cure deadly plague afflicting the [system] system. The system quarantine has been lifted.
+EVENT_PLAGUE_3                    | [target_race] scientists have found a cure for the deadly plague afflicting the [system] system. The system quarantine has been lifted.
 EVENT_REBELLION                   | The [target_race] world in the [system] system has gone into revolt, ceasing all planetary production. The revolt will continue until the rebellion is defeated militarily.
 EVENT_SUPERNOVA                   | [target_race] scientists predict that the star in the [system] system will go supernova within [years] years. They recommend diverting all research in the system towards finding a solution.
 EVENT_SUPERNOVA_2                 | The threat of supernova in the [system] system within [years] years remains. Scientists estimate that another [amt] RP may be enough to forestall this catastrophe.
@@ -321,7 +320,7 @@ GAME_SETTINGS_DISPLAY_MODE        | Display Mode: %1
 GAME_SETTINGS_WINDOWED            | Windowed
 GAME_SETTINGS_BORDERLESS          | Borderless
 GAME_SETTINGS_FULLSCREEN          | Full Screen
-GAME_SETTINGS_DISPLAY_MODE_DESC   | Requires a restart. Windowed is fixed ratio and resizeable. Borderless is a maximized window. Fullscreen is an exclusive maximized window.
+GAME_SETTINGS_DISPLAY_MODE_DESC   | Requires a restart. Windowed is fixed ratio and resizable. Borderless is a maximized window. Fullscreen is an exclusive maximized window.
 GAME_SETTINGS_GRAPHICS            | Graphics Level: %1
 GAME_SETTINGS_GRAPHICS_LOW        | Low
 GAME_SETTINGS_GRAPHICS_MED        | Medium
@@ -721,7 +720,7 @@ MAIN_ALERT_FACTORIES_DESTROYED2   | Unknown saboteurs have destroyed %1 factorie
 MAIN_ALERT_BASES_DESTROYED2       | Unknown saboteurs have destroyed %1 missile bases defending the %2 system.
 MAIN_ALERT_TRANSPORTS_PERISHED    | The colony in the %1 system has been destroyed. Our transports attempting to land there have perished.
 MAIN_ALERT_TRANSPORTS_CAPTURED    | Our %2 transports arriving in the %1 system have surrendered to [alien_race] forces.
-MAIN_ALERT_TRANSPORTS_KILLED      | Our %3 transports attempting to reach %2 have been destroyed by defending %1 forces.
+MAIN_ALERT_TRANSPORTS_KILLED      | Our %2 transports attempting to reach %1 have been destroyed by defending [alien_race] forces.
 MAIN_ALERT_INVADERS_CAPTURED      | %2 [alien_race] transports arriving in the %1 system have surrendered to our defensive forces.
 MAIN_ALERT_INVADERS_KILLED        | %2 [alien_race] transports attempting to invade %1 have been completely destroyed by our defensive forces.
 MAIN_ALERT_TRESPASSING1           | [alien_race] ships have been spotted trespassing near our colony in the %1 system.
@@ -825,8 +824,8 @@ PLANETS_HELP_4I                   | Flag - user-selected system flag.
 
 // Bombardment prompt
 MAIN_BOMBARDED_TITLE             | %1 has been bombarded by %2 forces.
-MAIN_BOMBARD_TITLE               | Our forces are orbiting an enemy %2 colony.
-MAIN_BOMBARD_TROOPS              | %1 %2 troops are orbiting or in transit to this colony.
+MAIN_BOMBARD_TITLE               | Our forces are orbiting an enemy [alien_race] colony.
+MAIN_BOMBARD_TROOPS              | %1 [alien_race] troops are orbiting or in transit to this colony.
 MAIN_BOMBARD_PROMPT              | Bombard the planet?
 MAIN_BOMBARD_YES                 | Yes
 MAIN_BOMBARD_NO                  | No

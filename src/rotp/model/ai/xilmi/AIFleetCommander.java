@@ -31,6 +31,7 @@ import rotp.model.galaxy.StarSystem;
 import rotp.model.galaxy.StarType;
 import rotp.model.ships.ShipDesign;
 import rotp.model.ships.ShipDesignLab;
+import rotp.model.tech.TechTree;
 import rotp.ui.NoticeMessage;
 import rotp.util.Base;
 
@@ -61,7 +62,20 @@ public class AIFleetCommander implements Base, FleetCommander {
     @Override
     public float maxShipMaintainance() {
         if (maxMaintenance < 0) 
-            maxMaintenance = max(0.025f, empire.tech().avgTechLevel() / 100.0f);
+        {
+            boolean techsLeft = false;
+            for (int j=0; j<TechTree.NUM_CATEGORIES; j++) {
+                if (!empire.tech().category(j).possibleTechs().isEmpty())
+                {
+                    techsLeft = true;
+                    break;
+                }
+            }
+            if(techsLeft)
+                maxMaintenance = min(empire.tech().avgTechLevel() / 100.0f, 0.05f * empire.tech().topSpeed());
+            else
+                maxMaintenance = 0.9f;
+        }
         return maxMaintenance;
     }
     @Override
@@ -74,9 +88,9 @@ public class AIFleetCommander implements Base, FleetCommander {
             sendColonyMissions = !empire.shipLab().colonyDesign().obsolete();
             canBuildShips = true; //since we build only colonizers and scouts here, this should always be possible
             NoticeMessage.setSubstatus(text("TURN_FLEET_PLANS"));
+            handleMilitary();
             buildFleetPlans();
             fillFleetPlans();
-            handleMilitary();
         }
     }
     @Override
@@ -525,13 +539,6 @@ public class AIFleetCommander implements Base, FleetCommander {
             if(fleet.destination() != null)
             {
                 if(fleet.retreatOnArrival() && empire.enemies().contains(fleet.destination().empire()))
-                    fleet.toggleRetreatOnArrival();
-                if(!fleet.retreatOnArrival() 
-                        && fleet.destination().empire() != null 
-                        && !empire.allies().contains(fleet.destination().empire())
-                        && empire != fleet.destination().empire()
-                        && !empire.enemies().contains(fleet.destination().empire())
-                        && empire.sv.isScouted(fleet.destSysId()))
                     fleet.toggleRetreatOnArrival();
             }
             //ail: using hyperspace-communication disabled for now as it produced weird unintended results... have to check for better implementation
