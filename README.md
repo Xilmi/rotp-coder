@@ -48,7 +48,8 @@ This RotP MOD contains many gameplay additions/changes from the official game ve
     - **Fuel Range Options Disabled**
     - [**Change Missile Colors according to Missile Type**](https://i.imgur.com/HSD2Irb.png)
     - [**Larger Race Status plots**](https://i.imgur.com/tn0mL6E.png)
-    
+    - [**Production Modifiers shown with Difficulty label**](https://i.imgur.com/KW9md9d.png)
+    - [**Primary Race Faction Bonus shown Quantitatively when Selecting Race**](https://i.imgur.com/SOvQ1hh.png)
 
 
 # Links
