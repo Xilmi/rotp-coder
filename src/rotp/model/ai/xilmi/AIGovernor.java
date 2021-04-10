@@ -29,6 +29,7 @@ import rotp.model.galaxy.StarSystem;
 import rotp.model.planet.Planet;
 import rotp.model.ships.ShipDesign;
 import rotp.model.ships.ShipDesignLab;
+import rotp.model.tech.TechTree;
 import rotp.util.Base;
 
 public class AIGovernor implements Base, Governor {
@@ -244,6 +245,7 @@ public class AIGovernor implements Base, Governor {
         // pct increase of factories we could make with 100% industry
         float maxNewFactories = min(col.industry().maxUseableFactories()-col.industry().factories(), currentNet/col.industry().newFactoryCost());
         float factoryIncreasePct = maxNewFactories/col.industry().factories();
+        int colonizerNeed = empire.generalAI().additionalColonizersToBuild(false);
 
         suggestMissileBaseCount(col);
         col.clearSpending();
@@ -273,26 +275,6 @@ public class AIGovernor implements Base, Governor {
             shipCost = 0;
             col.pct(SHIP, 0);
         }
-
-        // modnar: set 70% research overhead for inner colonies >85% full production
-        // or 20% research overhead for non-inner colonies >90% full production (not just border colonies)
-        // not applicable to rich/ultra-rich
-        // no need to allocate anything here, should be added in automatically to research at the end
-        
-        int bases = (int) col.defense().bases();
-        int maxBases = col.defense().maxBases();
-        float resOverhead = 0.1f*netProd;
-        StarSystem sys = col.starSystem();
-        float prodPct = col.currentProductionCapacity();
-        if (bases >= maxBases) { // only if missile bases are in place
-                if ((prodPct > 0.85) && empire.sv.isInnerSystem(sys.id) && !col.planet().isResourceRich() && !col.planet().isResourceUltraRich()) { 
-                        netProd -= 7*resOverhead;
-                }
-                if ((prodPct > 0.9) && !empire.sv.isInnerSystem(sys.id) && !col.planet().isResourceRich() && !col.planet().isResourceUltraRich()) { 
-                        netProd -= 2*resOverhead;
-                }
-        }
-		
         // ship spending, if requested
         if (!col.shipyard().buildingObsoleteDesign()
         && (col.shipyard().desiredShips() > 0)
@@ -307,14 +289,28 @@ public class AIGovernor implements Base, Governor {
         if (col.totalAmountAllocated() >= maxAllocation)
             return;
 
-        // prod spending gets up to 100% of planet's remaining net prod
-        if(col.industry().factories() < col.maxUseableFactories())
+        float netFactoryProduction = 1;
+        if(!empire.ignoresPlanetEnvironment())
+            netFactoryProduction -= empire.tech().factoryWasteMod() / empire.tech().wasteElimination();
+        float workerROI = empire.tech().populationCost() / empire.workerProductivity();
+        float factoryROI = empire.tech().baseFactoryCost() / netFactoryProduction;
+        
+        float enemyBombardPower = 0.0f;
+        
+        for(ShipFleet fleet:col.starSystem().orbitingFleets())
         {
-            float workerROI = empire.tech().populationCost() / empire.workerProductivity();
-            float netFactoryProduction = 1;
-            if(!empire.ignoresPlanetEnvironment())
-                netFactoryProduction -= empire.tech().factoryWasteMod() / empire.tech().wasteElimination();
-            float factoryROI = empire.tech().baseFactoryCost() / netFactoryProduction;
+            if(fleet.empire().aggressiveWith(col.empire().id))
+            {
+                enemyBombardPower += fleet.expectedBombardDamage();
+            }
+        }
+        float popLoss = enemyBombardPower / 200;
+        
+        // prod spending gets up to 100% of planet's remaining net prod
+        if(col.industry().factories() < col.maxUseableFactories() 
+                && (colonizerNeed == 0 || factoryROI < 25 || productionScore(col.starSystem()) < 0.5)
+                && enemyBombardPower == 0)
+        {
             if(workerROI > factoryROI || col.population() == col.maxSize())
             {
                 float prodCost = min(netProd, col.industry().maxSpendingNeeded());
@@ -328,7 +324,18 @@ public class AIGovernor implements Base, Governor {
         }
 
         // eco spending gets up to 100% of planet's remaining net prod
+
         float nonCleanEcoCost = col.ecology().maxSpendingNeeded() - cleanCost;
+        if(colonizerNeed > 0 
+                && productionScore(col.starSystem()) >= 0.5
+                && workerROI >= 25 
+                && col.population() >= col.planet().maxSize() / 2)
+        {
+            nonCleanEcoCost = 0;
+        }
+        //if we bomb us, we make ship or research
+        if(popLoss * empire.tech().populationCost() > totalProd)
+            nonCleanEcoCost = 0;
         float ecoCost = max(0, min(netProd, nonCleanEcoCost));
         col.pct(ECOLOGY, (ecoCost + cleanCost)/totalProd);
 
@@ -336,9 +343,6 @@ public class AIGovernor implements Base, Governor {
             err("Eco pct < 0");
             throw new RuntimeException("Minimum cleanup cost < 0");
         }
-
-        ecoCost = col.pct(ECOLOGY) * totalProd;
-        netProd -= (ecoCost - cleanCost);
 
         if (col.totalAmountAllocated() >= maxAllocation)
             return;
@@ -360,9 +364,48 @@ public class AIGovernor implements Base, Governor {
         int totalAlloc = col.allocation(SHIP)+col.allocation(DEFENSE)+col.allocation(INDUSTRY)+col.allocation(ECOLOGY);
         ShipDesignLab lab = empire.shipLab();
         //System.out.print("\n"+empire.name()+" "+col.name()+" colonizer-production-score "+productionScore(col.starSystem(), true));
-        if(empire.generalAI().additionalColonizersToBuild(false) > 0 && col.allocation(SHIP) == 0 && productionScore(col.starSystem(), true) >= 1)
+        boolean inAttackRange = false;
+        boolean enemy = false;
+        for(Empire emp : empire.contactedEmpires())
+        {
+            EmpireView v = empire.viewForEmpire(emp);
+            if(v.embassy().isEnemy() && empire.inShipRange(emp.id))
+            {
+                enemy = true;
+            }
+            else if(empire.inShipRange(emp.id))
+            {
+                inAttackRange = true;
+            }
+        }
+        int[] counts = galaxy().ships.shipDesignCounts(empire.id);
+        float fighterCost = 0.0f;
+        float bomberCost = 0.0f;
+        float colonizerCost = 0.0f;
+        for (int i=0;i<counts.length;i++) 
+        {
+            if(lab.design(i).isFighter())
+            {
+                fighterCost += lab.design(i).cost() * counts[i];
+            }
+            if(lab.design(i).isBomber())
+            {
+                bomberCost += lab.design(i).cost() * counts[i];
+            }
+            if(lab.design(i).isColonyShip())
+            {
+                colonizerCost += lab.design(i).cost() * counts[i];
+            }
+        }
+        if(colonizerNeed > 0 && col.allocation(SHIP) == 0 && productionScore(col.starSystem()) >= 0.5)
         {
             col.shipyard().design(lab.colonyDesign());
+            //Making sure to not just spam colonizers when we at risk of being attacked, also ignoring ship-maintenance-limit in this case
+            if(enemy == true || inAttackRange == true)
+            {
+                if(colonizerCost > fighterCost)
+                    col.shipyard().design(lab.fighterDesign());
+            }
             col.allocation(SHIP, maxAllocation - totalAlloc);
             totalAlloc = col.allocation(SHIP)+col.allocation(DEFENSE)+col.allocation(INDUSTRY)+col.allocation(ECOLOGY);
             //System.out.print("\n"+empire.name()+" Colony-ship: "+col.shipyard().design().name()+ " needed: "+empire.generalAI().additionalColonizersToBuild());
@@ -371,44 +414,48 @@ public class AIGovernor implements Base, Governor {
         float bomberDamage = lab.bomberDesign().firepower(empire.bestEnemyPlanetaryShieldLevel());
         //ail: No use to build any ships if they won't do damage anyways. Better tech up.
         boolean viableForShipProduction = true;
+        float turnsBeforeColonyDestroyed = Float.MAX_VALUE;
+        if(popLoss > 0)
+            turnsBeforeColonyDestroyed = col.population() / popLoss;
+        float fighterBuildTime = lab.fighterDesign().cost() / totalProd;
+        if(fighterBuildTime > turnsBeforeColonyDestroyed)
+            viableForShipProduction = false;
         if(bomberDamage == 0 && fighterDamage == 0)
         {
             viableForShipProduction = false;
         }
         if(col.allocation(SHIP) == 0 && viableForShipProduction)
         {
-            //System.out.print("\n"+empire.name()+" "+col.name()+" production-score "+productionScore(col.starSystem(), false));
+            //System.out.print("\n"+empire.name()+" "+col.name()+" production-score "+productionScore(col.starSystem()));
             float maxShipMaintainance = 0.0f;
             float fighterPercentage = 1.0f;
 
-            boolean inAttackRange = false;
-            boolean enemy = false;
-            for(Empire emp : empire.contactedEmpires())
-            {
-                EmpireView v = empire.viewForEmpire(emp);
-                if(v.embassy().isEnemy() && empire.inShipRange(emp.id))
-                {
-                    enemy = true;
-                }
-                else if(empire.inShipRange(emp.id))
-                {
-                    inAttackRange = true;
-                }
-            }
             if(enemy)
             {
                 maxShipMaintainance = empire.fleetCommanderAI().maxShipMaintainance();
-                fighterPercentage = max(0.25f, empire.generalAI().defenseRatio());
+                fighterPercentage = 0.5f + empire.generalAI().defenseRatio() * 0.5f;
             }
             else if(inAttackRange)
             {
                 maxShipMaintainance = empire.fleetCommanderAI().maxShipMaintainance() / 4;
-                fighterPercentage = 0.5f;
+                fighterPercentage = 0.75f;
             }
-            maxShipMaintainance *= productionScore(col.starSystem(), false);
-            if(empire.tech().avgTechLevel() >= 99)
+            float maxShipMaintainanceBeforeAdj = maxShipMaintainance;
+            maxShipMaintainance *= productionScore(col.starSystem());
+            if(maxShipMaintainance > maxShipMaintainanceBeforeAdj)
+                maxShipMaintainance = (min(maxShipMaintainance, 1) + maxShipMaintainanceBeforeAdj) / 2;
+            boolean techsLeft = false;
+            for (int j=0; j<TechTree.NUM_CATEGORIES; j++) {
+                if (!empire.tech().category(j).possibleTechs().isEmpty())
+                {
+                    techsLeft = true;
+                    break;
+                }
+            }
+            
+            if(!techsLeft)
                 maxShipMaintainance = empire.fleetCommanderAI().maxShipMaintainance();
-            //System.out.print("\n"+empire.name()+" "+col.name()+" adjMaxMaint: "+maxShipMaintainance+" baseMaxMaint: "+empire.fleetCommanderAI().maxShipMaintainance());
+            //System.out.print("\n"+empire.name()+" "+col.name()+" adjMaxMaint: "+maxShipMaintainance+" baseMaxMaint: "+maxShipMaintainanceBeforeAdj+" avg-tech-level: "+empire.tech().avgTechLevel());
             if(fighterDamage == 0)
             {
                 fighterPercentage = 0.25f;
@@ -417,23 +464,10 @@ public class AIGovernor implements Base, Governor {
             {
                 fighterPercentage = 1.0f;
             }
-            int[] counts = galaxy().ships.shipDesignCounts(empire.id);
-            float fighterCost = 0.0f;
-            float bomberCost = 0.0f;
-            for (int i=0;i<counts.length;i++) 
-            {
-                if(lab.design(i).isFighter())
-                {
-                    fighterCost += lab.design(i).cost() * counts[i];
-                }
-                if(lab.design(i).isBomber())
-                {
-                    bomberCost += lab.design(i).cost() * counts[i];
-                }
-            }
             col.shipyard().design(lab.fighterDesign());
             //System.out.print("\n"+empire.name()+" fighterCost: "+fighterCost+" bomberCost: "+bomberCost+" F% reached: "+fighterCost / (bomberCost + fighterCost)+" of "+fighterPercentage);
-            if(fighterCost / (bomberCost + fighterCost) > fighterPercentage)
+            if(fighterCost / (bomberCost + fighterCost) > fighterPercentage 
+                && enemyBombardPower == 0)
             {
                 col.shipyard().design(empire.shipLab().bomberDesign());
             }
@@ -529,6 +563,7 @@ public class AIGovernor implements Base, Governor {
         if (p.isResourceUltraRich()) return .75f;
         if (p.isArtifact()) return .75f;
         if (p.isOrionArtifact()) return .75f;
+        if (p.isEnvironmentHostile()) return .75f;
         if (p.currentSize() <= 20) return .75f;
 
         if (sv.supportSystem()) return .5f;
@@ -565,26 +600,31 @@ public class AIGovernor implements Base, Governor {
         pct /= col.planet().researchAdj();
         return min(pct, 1);
     }
-    public float productionScore(StarSystem sys, boolean forColonizers)
+    public float productionScore(StarSystem sys)
     {
-        float typeScore = 1;
-        if(sys.planet().isOrionArtifact())
-            typeScore = 0.25f;
-        else if(sys.planet().isResourceUltraPoor())
-            typeScore = 1 / 3;
-        else if(sys.planet().isArtifact() || sys.planet().isResourcePoor())
-            typeScore = 0.5f;
-        else if(sys.planet().isResourceNormal())
-            typeScore = 1;
-        else if(sys.planet().isResourceRich())
-            typeScore = (float) Math.sqrt(2);
-        else if(sys.planet().isResourceUltraRich())
-            typeScore = (float) Math.sqrt(3);
-        float bcScore = 1;
-        if(empire.totalPlanetaryIncome() > 0)
-            bcScore = sys.colony().totalIncome() * empire.allColonizedSystems().size() / empire.totalPlanetaryIncome();
-        if(forColonizers)
-            return bcScore;
-        return typeScore * bcScore;
+        float Score = sys.colony().totalIncome();
+        Score *= sys.planet().productionAdj();
+        Score /= sys.planet().researchAdj();
+        float avgScore = 0;
+        float counted = 0;
+        for (int id=0;id<empire.sv.count();id++) 
+        {
+            StarSystem current = galaxy().system(id);
+            if(current.colony() == null)
+                continue;
+            if(current.empId() != empire.id)
+                continue;
+            if(current.colony().currentProductionCapacity() < 0.5)
+                continue;
+            float currentScore = current.colony().totalIncome();
+            currentScore *= current.planet().productionAdj();
+            currentScore /= current.planet().productionAdj();
+            avgScore += currentScore;
+            counted++;
+        }
+        avgScore /= counted;
+        if(avgScore > 0)
+            return Score/avgScore;
+        return 0;
     }
 }

@@ -52,6 +52,8 @@ text in the planetary spending screen. Since version 1.8 Governor is on by defau
 
 Additional features / changelog
 
+* 3.91.1 Merge v0.91. Change versioning scheme to follow upstream numbers more closely.
+
 * 3.09.2 Fix/improve parallel ship range display. Thanks Elkad for the bug report.
 
 * 3.09.1 Merge v0.9. Since we're no longer beta but march towards 1.0, there's a change in version numbers. I have

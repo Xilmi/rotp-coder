@@ -439,7 +439,17 @@ public class CombatStackShip extends CombatStack {
         for (int i=0;i<weapons.size();i++) {
             ShipComponent comp = weapons.get(i);
             if (!comp.isLimitedShotWeapon() || (roundsRemaining[i] > 0)) 
-                kills += comp.estimatedKills(this, target, num * roundsRemaining[i]);
+            {
+                //ail: take attack and defense into account
+                float hitPct = 1.0f;
+                if(comp.isBeamWeapon())
+                    hitPct = (5 + attackLevel - target.beamDefense) / 10;
+                if(comp.isMissileWeapon())
+                    hitPct = (5 + attackLevel - target.missileDefense) / 10;
+                hitPct = max(.05f, hitPct);
+                //ail: we totally have to consider the weapon-count too!
+                kills += hitPct * comp.estimatedKills(this, target, weaponCount[i] * num * roundsRemaining[i]);
+            }
         }
         return kills;
     }
@@ -519,7 +529,7 @@ public class CombatStackShip extends CombatStack {
     }
     @Override
     public boolean shipComponentIsUsed(int index) {
-        return (shotsRemaining[index] < 1)  || (roundsRemaining[index] < 1);
+        return (shotsRemaining[index] < 1)  || (roundsRemaining[index] < 1) || (wpnTurnsToFire[index] > 1);
     }
     @Override
     public boolean shipComponentIsOutOfMissiles(int index) {
@@ -569,7 +579,9 @@ public class CombatStackShip extends CombatStack {
         fleet.removeShips(design.id(), shipsLost, true);
 
         // record losses
-        mgr.results().addShipDestroyed(design, shipsLost);
+        if (!destroyed())  // if destroyed, already recorded lose in super.loseShip()
+            mgr.results().addShipDestroyed(design, shipsLost);
+        
         empire.shipLab().recordDestruction(design, shipsLost);
         mgr.currentStack().recordKills(shipsLost);
     }
@@ -632,7 +644,7 @@ public class CombatStackShip extends CombatStack {
         int x2 = max(x1, x1+((stackW-sw2)/2));
 
         g.setColor(Color.lightGray);
-        g.drawString(name, x2, y2);
+        drawString(g, name, x2, y2);
 
         if (inStasis) {
             g.setColor(TechStasisField.STASIS_COLOR);

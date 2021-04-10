@@ -330,14 +330,14 @@ public class MainUI extends BasePanel implements IMapHandler {
             h = scaled(Rotp.IMG_H);
         }
  
+        map = new GalaxyMapPanel(this);
+        map.setBounds(0,0,w,h);
+
         int displayW = panelWidth;
         int displayH = panelHeight;
         displayPanel = new SpriteDisplayPanel(this);
         displayPanel.setBorder(newLineBorder(shadeBorderC,5));
         displayPanel.setBounds(w-displayW-s5,s5,displayW,displayH);
-
-        map = new GalaxyMapPanel(this);
-        map.setBounds(0,0,w,h);
 
         int buttonH = s60;
         buttonPanel = new MainButtonPanel(this);
@@ -619,13 +619,13 @@ public class MainUI extends BasePanel implements IMapHandler {
 
         g.setColor(Color.black);
         g.setFont(narrowFont(18));
-        g.drawString(title, x1, y1);
+        drawString(g,title, x1, y1);
 
         g.setFont(narrowFont(16));
         List<String> descLines = wrappedLines(g, alert.description(), scaled(230));
         y1 += scaled(17);
         for (String line: descLines) {
-            g.drawString(line, x1, y1);
+            drawString(g,line, x1, y1);
             y1 += scaled(16);
         }
     }
