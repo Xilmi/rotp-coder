@@ -1233,7 +1233,7 @@ public class ShipBattleUI extends FadeInPanel implements Base, MouseListener, Mo
         String titleText = text("SHIP_COMBAT_PIRATES_TARGET");
         g.setFont(narrowFont(14));
         g.setColor(SystemPanel.blackText);
-        g.drawString(titleText, x0, y0);
+        drawString(g,titleText, x0, y0);
 
         int y1 = y0+s20;
         if (!actions.isEmpty()) {
@@ -1296,10 +1296,10 @@ public class ShipBattleUI extends FadeInPanel implements Base, MouseListener, Mo
         int sw1 = g.getFontMetrics().stringWidth(val1);
         int sw2 = g.getFontMetrics().stringWidth(val2);
         g.setColor(textColor);
-        g.drawString(lbl1, x1a,y2+s12);
-        g.drawString(val1, x1b-s10-sw1, y2+s12);
-        g.drawString(lbl2, x1b,y2+s12);
-        g.drawString(val2, x1+w1-sw2-s5, y2+s12);
+        drawString(g,lbl1, x1a,y2+s12);
+        drawString(g,val1, x1b-s10-sw1, y2+s12);
+        drawString(g,lbl2, x1b,y2+s12);
+        drawString(g,val2, x1+w1-sw2-s5, y2+s12);
 
         y2 += s15;
         g.setColor(lineColor);
@@ -1309,17 +1309,17 @@ public class ShipBattleUI extends FadeInPanel implements Base, MouseListener, Mo
         lbl2 = text("SHIP_COMBAT_SCAN_ATTACK_LEVEL");
         g.setFont(narrowFont(12));
         g.setColor(textColor);
-        g.drawString(lbl1, x1a,y2+s12);
-        g.drawString(lbl2, x1b,y2+s12);
+        drawString(g,lbl1, x1a,y2+s12);
+        drawString(g,lbl2, x1b,y2+s12);
         val1 = ""+pirateStack.missileDefense;
         val2 = ""+pirateStack.attackLevel;
         sw1 = g.getFontMetrics().stringWidth(val1);
         sw2 = g.getFontMetrics().stringWidth(val2);
         g.setColor(textColor);
-        g.drawString(lbl1, x1a,y2+s12);
-        g.drawString(val1, x1b-s10-sw1, y2+s12);
-        g.drawString(lbl2, x1b,y2+s12);
-        g.drawString(val2, x1+w1-sw2-s5, y2+s12);
+        drawString(g,lbl1, x1a,y2+s12);
+        drawString(g,val1, x1b-s10-sw1, y2+s12);
+        drawString(g,lbl2, x1b,y2+s12);
+        drawString(g,val2, x1+w1-sw2-s5, y2+s12);
 
         y2 += s15;
         g.setColor(lineColor);
@@ -1329,17 +1329,17 @@ public class ShipBattleUI extends FadeInPanel implements Base, MouseListener, Mo
         lbl2 = text("SHIP_COMBAT_SCAN_SPEED");
         g.setFont(narrowFont(12));
         g.setColor(textColor);
-        g.drawString(lbl1, x1a,y2+s12);
-        g.drawString(lbl2, x1b,y2+s12);
+        drawString(g,lbl1, x1a,y2+s12);
+        drawString(g,lbl2, x1b,y2+s12);
         val1 = ""+pirateStack.beamDefense;
         val2 = ""+pirateStack.maxMove;
         sw1 = g.getFontMetrics().stringWidth(val1);
         sw2 = g.getFontMetrics().stringWidth(val2);
         g.setColor(textColor);
-        g.drawString(lbl1, x1a,y2+s12);
-        g.drawString(val1, x1b-s10-sw1, y2+s12);
-        g.drawString(lbl2, x1b,y2+s12);
-        g.drawString(val2, x1+w1-sw2-s5, y2+s12);
+        drawString(g,lbl1, x1a,y2+s12);
+        drawString(g,val1, x1b-s10-sw1, y2+s12);
+        drawString(g,lbl2, x1b,y2+s12);
+        drawString(g,val2, x1+w1-sw2-s5, y2+s12);
 
         y2 += s15;
         g.setColor(lineColor);
@@ -1353,7 +1353,7 @@ public class ShipBattleUI extends FadeInPanel implements Base, MouseListener, Mo
             lbl1 = text("SHIP_COMBAT_SCAN_WEAPONS");
             g.setFont(narrowFont(12));
             g.setColor(textColor);
-            g.drawString(lbl1, x1a,y2+s12);
+            drawString(g,lbl1, x1a,y2+s12);
             List<ShipComponent> wpns = pirateStack.weapons;
             for (int i=0; i<pirateStack.weapons.size(); i++) {
                 int num = pirateStack.weaponCount[i];
@@ -1361,7 +1361,7 @@ public class ShipBattleUI extends FadeInPanel implements Base, MouseListener, Mo
                     ShipComponent wpn = wpns.get(i);
                     val2 = text("SHIP_COMBAT_SCAN_WEAPON_CNT", str(num), wpn.name());
                     sw2 = g.getFontMetrics().stringWidth(val2);
-                    g.drawString(val2, x1+w1-sw2-s5, y2+s12);
+                    drawString(g,val2, x1+w1-sw2-s5, y2+s12);
                     y2 += s13;
                 }
             }
@@ -1375,13 +1375,13 @@ public class ShipBattleUI extends FadeInPanel implements Base, MouseListener, Mo
             lbl1 = text("SHIP_COMBAT_SCAN_DEVICES");
             g.setFont(narrowFont(12));
             g.setColor(textColor);
-            g.drawString(lbl1, x1a,y2+s12);
+            drawString(g,lbl1, x1a,y2+s12);
             List<ShipSpecial> specials = pirateStack.specials;
             for (int i=0; i<pirateStack.specials.size(); i++) {
                 ShipSpecial spec = specials.get(i);
                 val2 = spec.name();
                 sw2 = g.getFontMetrics().stringWidth(val2);
-                g.drawString(val2, x1+w1-sw2-s5, y2+s12);
+                drawString(g,val2, x1+w1-sw2-s5, y2+s12);
                 y2 += s13;
             }
             y2 += s5;
