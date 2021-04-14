@@ -52,6 +52,8 @@ text in the planetary spending screen. Since version 1.8 Governor is on by defau
 
 Additional features / changelog
 
+* 3.91.2 Updated native-transform-maven-plugin
+
 * 3.91.1 Merge v0.91. Change versioning scheme to follow upstream numbers more closely.
 
 * 3.09.2 Fix/improve parallel ship range display. Thanks Elkad for the bug report.
