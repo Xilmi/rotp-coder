@@ -1454,8 +1454,8 @@ public final class Colony implements Base, IMappedObject, Serializable {
         balanceEcoAndInd(1);
 
         // add maximum defence
-        // don't allocate just for "upgrades" if there are no bases
-        if (!defense().isCompleted() && (defense().maxBases() > 0 || !defense().shieldAtMaxLevel())) {
+        // don't allocate just for "upgrades" if there are no bases or if there are more bases than we want
+        if (!defense().isCompleted() && defense().maxBases() > 0 && defense().maxBases() >= defense().bases()) {
             moveSlider(Colony.DEFENSE, null, text(ColonySpendingCategory.reserveText));
             locked(DEFENSE, true);
         }

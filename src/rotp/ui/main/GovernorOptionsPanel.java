@@ -354,7 +354,7 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
 
         autoAttack.setText("Auto Attack");
 
-        autoColonyShipCount.setModel(new javax.swing.SpinnerNumberModel(1, 1, 99, 1));
+        autoColonyShipCount.setModel(new javax.swing.SpinnerNumberModel(1, 1, 9999, 1));
         autoColonyShipCount.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
                 autoColonyShipCountMouseWheelMoved(evt);
@@ -363,14 +363,14 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
 
         autoColonyShipCountLabel.setText("Number of colony ships to send");
 
-        autoScoutShipCount.setModel(new javax.swing.SpinnerNumberModel(1, 1, 99, 1));
+        autoScoutShipCount.setModel(new javax.swing.SpinnerNumberModel(1, 1, 9999, 1));
         autoScoutShipCount.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
                 autoScoutShipCountMouseWheelMoved(evt);
             }
         });
 
-        autoAttackShipCount.setModel(new javax.swing.SpinnerNumberModel(1, 1, 99, 1));
+        autoAttackShipCount.setModel(new javax.swing.SpinnerNumberModel(1, 1, 9999, 1));
         autoAttackShipCount.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
                 autoAttackShipCountMouseWheelMoved(evt);
@@ -379,7 +379,7 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
 
         autoScoutShipCountLabel.setText("Number of scout ships to send");
 
-        autoAttackShipCountLabel.setText("Number of colony ships to send");
+        autoAttackShipCountLabel.setText("Number of attack ships to send");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -431,9 +431,8 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addComponent(autoAttackShipCount)
-                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                        .addComponent(autoScoutShipCount)
-                                        .addComponent(autoColonyShipCount)))
+                                    .addComponent(autoScoutShipCount)
+                                    .addComponent(autoColonyShipCount))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(autoColonyShipCountLabel)
