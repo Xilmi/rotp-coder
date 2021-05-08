@@ -127,6 +127,8 @@ public class CombatStackShip extends CombatStack {
     @Override
     public void recordKills(int num) { empire.shipLab().recordKills(design, num); }
     @Override
+    public boolean ignoreRepulsors()    { return cloaked || canTeleport(); }
+    @Override
     public void becomeDestroyed()    {
         fleet.removeShips(design.id(), num, true);
         empire.shipLab().recordDestruction(design, num);
@@ -199,7 +201,7 @@ public class CombatStackShip extends CombatStack {
             //ail: if we count specials as weapons, we'll never get close when we have long-range-specials but short range-weapons
             if(wpn.isSpecial())
                 continue;
-            if (tgt.isColony() || wpn.groundAttacksOnly())
+            if (tgt.isColony() && wpn.groundAttacksOnly())
                 return 1;
             else if (wpn.isMissileWeapon()) 
                 // missiles move by distance, not tiles, so adjust minimum range downward by sqrt(2)
@@ -471,7 +473,7 @@ public class CombatStackShip extends CombatStack {
 
         return shipComponentCanAttack(target, wpn);
     }
-    private boolean shipComponentCanAttack(CombatStack target, int index) {
+    public boolean shipComponentCanAttack(CombatStack target, int index) {
         if (target == null)
             return false;
 

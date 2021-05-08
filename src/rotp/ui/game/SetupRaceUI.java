@@ -160,7 +160,7 @@ public final class SetupRaceUI extends BasePanel implements MouseListener, Mouse
         g.fillOval(x0, y0-s8, s5, s5);
         for (String line: desc1Lines) {
             drawString(g,line, x0+s8, y0);
-            y0 += s18;
+            y0 += s16;
         }
 
         // draw race desc #2
@@ -169,7 +169,7 @@ public final class SetupRaceUI extends BasePanel implements MouseListener, Mouse
         g.fillOval(x0, y0-s8, s5, s5);
         for (String line: desc2Lines) {
             drawString(g,line, x0+s8, y0);
-            y0 += s18;
+            y0 += s16;
         }
 
         // modnar: draw race desc #4, with 'if' check
@@ -184,12 +184,12 @@ public final class SetupRaceUI extends BasePanel implements MouseListener, Mouse
         }
         
         // draw race desc #3
-        y0 += s7;
+        y0 += s12;
         String desc3 = race.description3.replace("[race]", race.setupName());
-        List<String> desc3Lines = scaledNarrowWrappedLines(g0, desc3, maxLineW+s8, 4, 16, 13);
+        List<String> desc3Lines = scaledNarrowWrappedLines(g0, desc3, maxLineW+s8, 5, 16, 13);
         for (String line: desc3Lines) {
             drawString(g,line, x0, y0);
-            y0 += s17;
+            y0 += s16;
         }
 
         // draw homeword label

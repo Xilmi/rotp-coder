@@ -776,7 +776,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
     public float production() {
         if (inRebellion())
             return 0.0f;
-        float mod = empire().isPlayerControlled() ? 1.0f : options().aiProductionModifier();
+        float mod = empire().isPlayer() ? 1.0f : options().aiProductionModifier();
         float workerProd = workingPopulation() * empire.workerProductivity();
         return mod*(workerProd + usedFactories());
     }
@@ -837,7 +837,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         float shipyardCost = shipyard().maintenanceCost();
         float transportCost = transportCost();
 
-        return prod - reserveCost - securityCost - defenseCost - shipyardCost - transportCost + tradeIncome - shipCost - stargateCost;
+        return max(0, prod - reserveCost - securityCost - defenseCost - shipyardCost - transportCost + tradeIncome - shipCost - stargateCost);
     }
     public float expectedPopulation() {
         return workingPopulation() + normalPopGrowth() + incomingTransports();
@@ -862,14 +862,14 @@ public final class Colony implements Base, IMappedObject, Serializable {
         return min(p1,p2);
     }
     public float newWaste() {
-        return max(0, usedFactories() * tech().factoryWasteMod());
+        float mod = empire().isPlayer() ? 1.0f : options().aiWasteModifier();
+        return max(0, usedFactories() * tech().factoryWasteMod() * mod);
     }
     public float wasteCleanupCost() {
         if (empire.ignoresPlanetEnvironment())
             return 0;
         
-        float mod = empire().isPlayerControlled() ? 1.0f : options().aiWasteModifier();
-        return mod*(min(planet.maxWaste(), planet.waste()) + newWaste()) / tech().wasteElimination();
+        return (min(planet.maxWaste(), planet.waste()) + newWaste()) / tech().wasteElimination();
     }
     public float minimumCleanupCost() {
         return min(wasteCleanupCost(), totalIncome());
