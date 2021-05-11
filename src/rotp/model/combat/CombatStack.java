@@ -125,7 +125,7 @@ public class CombatStack implements Base {
     public boolean ignoreRepulsors()    { return false; }
     public int weaponNum(ShipComponent w)  { return -1; }
     public boolean canRetreat()      { return false; }
-    public boolean canTeleport()     { return canTeleport; }
+    public boolean canTeleport()     { return canTeleport && !mgr.interdiction(); }
     public boolean hasTeleporting()  { return false; }
     public boolean canScan()         { return false; }
     public boolean retreatAllowed()  { return false; }
@@ -466,15 +466,16 @@ public class CombatStack implements Base {
         assignCollateralDamage(damage);
         return damageTaken;
     }
-    public void takeBlackHoleDamage(float pct) {
+    public float takeBlackHoleDamage(float pct) {
         if (inStasis)
-            return;
+            return 0;
         attacked = true;
         float pctLoss = pct - (shieldLevel() /50) - blackHoleDef();
         pctLoss = max(0,pctLoss);
-        num = (int) (num * (1-pctLoss));
-        if (destroyed() && (mgr != null))
-            mgr.destroyStack(this);
+        int kills = Math.round(num * pctLoss);
+        for(int i = 0; i < kills; ++i)
+            loseShip();
+        return kills * maxHits;
     }
     public void loseShip() {
         int lost = maxHits > 0 ? 1 : num;
