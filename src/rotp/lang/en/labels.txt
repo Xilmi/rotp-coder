@@ -161,6 +161,11 @@ EVENT_SPACE_PIRATES_2             | The dreaded Space Pirates have ravaged the p
 EVENT_SPACE_PIRATES_3             | The Space Pirate fleet was destroyed by [race] defenders in the [system] system. Significant riches found in the wreckage have been seized by the [race] military to bolster their Planetary Reserve.
 // modnar: add Precursor Relic random event
 EVENT_RELIC_PLANETS               | A Precursor relic has mysteriously activated in [target_empire] space. Galaxy-wide scanners report the formation of new planets in multiple previously empty Star Systems after intense asteroid coalescence events. [target_race] scientists have also harvested several Construction technologies from the relic.
+// modnar: add Gauntlet Relic random event
+EVENT_RELIC_GAUNTLET              | Half of all galactic life have been wiped out following the activation of a Precursor gauntlet with seven embedded gems. [target_race] scientists studying the relic have denied responsibility. Third-party investigators question the capacity increase on many [target_empire] planets and new Planetology technologies.
+// modnar: add Boost Planet baseSize random event
+EVENT_SIZEBOOST                   | Archeologists exploring the [target_race] world in the [system] system have revealed massive subterranean caverns. These geologically stable chambers are habitable and have substantially boosted the planet's size.
+
 
 SYSEVENT_HOMEWORLD                | Homeworld for the [alien_race].
 SYSEVENT_SCOUTED                  | First scouted by the [alien_race].
@@ -181,6 +186,8 @@ SYSEVENT_ENRICHED                 | Huge deposits of rich ore were discovered on
 SYSEVENT_DEPLETED                 | Ore deposits on the planet were depleted.
 SYSEVENT_ACCIDENT                 | A massive industrial accident irradiated the planet.
 SYSEVENT_SUPERNOVA                | The planet was irradiated by a supernova.
+// modnar: add Boost Planet baseSize random event
+SYSEVENT_SIZEBOOST                | The planet size has been boosted by underground caverns.
 
 
 // Diplomatic Incident titles & descriptions

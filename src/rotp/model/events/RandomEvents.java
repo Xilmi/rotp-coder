@@ -112,6 +112,10 @@ public class RandomEvents implements Base, Serializable {
         addEvent(new RandomEventSpacePirates());
         // modnar: add Precursor Relic random event
         addEvent(new RandomEventPrecursorRelic());
+        // modnar: add Boost Planet baseSize random event
+        addEvent(new RandomEventBoostPlanetSize());
+        // modnar: add Gauntlet Relic random event
+        addEvent(new RandomEventGauntletRelic());
     }
     private void addEvent(RandomEvent ev) {
         if (options().allowRandomEvent(ev))
