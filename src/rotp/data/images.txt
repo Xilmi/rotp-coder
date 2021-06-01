@@ -8,3 +8,7 @@ LANGUAGE_ICON       | images/language_icon-red.png
 TEXTURE_BROWN       | images/texture_brown.jpg
 TEXTURE_GRAY        | images/texture_gray.jpg
 DERELICT_SHIP       | images/Derelict_Ship.jpg
+// modnar: add clean icons
+ROTP_MOD_ICON1      | images/rotp_custom_ico_4_medium.png
+ROTP_MOD_ICON2      | images/rotp_custom_ico_4_small.png
+ROTP_MOD_ICON3      | images/rotp_custom_ico_4_tiny_text.png

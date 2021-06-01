@@ -80,10 +80,12 @@ public class Rotp {
         frame.setLayout(new BorderLayout());
         frame.add(RotPUI.instance(), BorderLayout.CENTER);
 
-        Image img = ImageManager.current().image("LANDSCAPE_RUINS_ORION");
-        BufferedImage bimg = toBufferedImage(img);
-        BufferedImage square = bimg.getSubimage(bimg.getWidth()-bimg.getHeight(), 0, bimg.getHeight(), bimg.getHeight());
-        frame.setIconImage(square);
+        // modnar: change to cleaner icon set
+        List<Image> iconImages = new ArrayList<Image>();
+        iconImages.add(ImageManager.current().image("ROTP_MOD_ICON3"));
+        iconImages.add(ImageManager.current().image("ROTP_MOD_ICON2"));
+        iconImages.add(ImageManager.current().image("ROTP_MOD_ICON1"));
+        frame.setIconImages(iconImages);
 
         if (UserPreferences.fullScreen()) {
             frame.setUndecorated(true);
