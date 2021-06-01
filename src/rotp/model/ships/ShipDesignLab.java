@@ -23,6 +23,7 @@ import rotp.model.empires.Empire;
 import rotp.model.empires.ShipView;
 import rotp.model.tech.TechEngineWarp;
 import rotp.util.Base;
+import rotp.ui.UserPreferences; // modnar: add battleScout option to give player super Scout design
 
 public class ShipDesignLab implements Base, Serializable {
     private static final long serialVersionUID = 1L;
@@ -106,8 +107,15 @@ public class ShipDesignLab implements Base, Serializable {
         // shield, armor, engine added by starting techs
         addWeapon(new ShipWeapon());
         addSpecial(new ShipSpecial());
-
+        
         loadInitialDesigns();
+        
+        // modnar: add battleScout option to give player super Scout design
+        if ( c.isPlayerControlled() && UserPreferences.battleScout() ) { 
+            ShipDesign design;
+            design = battleScoutDesign();
+            setFighterDesign(design, 5);
+        }
     }
     public boolean isCurrentLabDesign(int id) {
         return (id == scoutDesignId) || (id == fighterDesignId) || (id == destroyerDesignId)
@@ -308,6 +316,20 @@ public class ShipDesignLab implements Base, Serializable {
             nameDesign(design);
         else
             design.name(text("SHIP_DESIGN_1ST_COLONY_NAME"));
+        iconifyDesign(design);
+        return design;
+    }
+    // modnar: add battleScout option to give player super Scout design
+    public ShipDesign battleScoutDesign() {
+        ShipDesign design = newBlankDesign(ShipDesign.MEDIUM);
+        design.mission(ShipDesign.FIGHTER);
+        design.computer(computers().get(1));
+        design.shield(shields().get(1));
+        design.addWeapon(beamWeapon(0, true), 1); // HEAVY LASER
+        ShipSpecial spBattleScanner = specialNamed("Battle Scanner");
+        design.special(0, spBattleScanner);
+        design.special(1, specialReserveFuel());
+        design.name(text("Battle Scout"));
         iconifyDesign(design);
         return design;
     }
