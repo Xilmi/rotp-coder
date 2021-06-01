@@ -1849,12 +1849,13 @@ NOTICE_SPYING_MISSION_SABOTAGE    | Sabotage
 HISTORY_TITLE                     | Known Galactic History
 HISTORY_TITLE_ALL                 | Full Galactic History
 HISTORY_TURN_DESC                 | Turn %1 of %2
-HISTORY_FORWARD                   | Forward
-HISTORY_BACK                      | Back
-HISTORY_PLAY                      | Play
-HISTORY_PAUSE                     | Pause
-HISTORY_RESET                     | Reset
-HISTORY_EXIT                      | Exit
+// modnar: add media control symbols for history buttons
+HISTORY_FORWARD                   | Forward ▷
+HISTORY_BACK                      | ◁ Back
+HISTORY_PLAY                      | Play ▶
+HISTORY_PAUSE                     | Pause ⏸
+HISTORY_RESET                     | Reset ⏮
+HISTORY_EXIT                      | Exit ⮿
 HISTORY_EXTINCT                   | Extinct
 HISTORY_SYSTEMS                   | Systems
 HISTORY_EMPIRE                    | Empire

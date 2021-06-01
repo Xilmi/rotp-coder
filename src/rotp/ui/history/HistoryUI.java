@@ -18,6 +18,7 @@ package rotp.ui.history;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font; // modnar: history viewer button changes
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.LinearGradientPaint;
@@ -398,7 +399,7 @@ public final class HistoryUI extends BasePanel implements MouseListener {
             int buttonW = s90;
             int buttonH = s30; // -s25 is because 4 buttons at -s5 spacing/button
             
-            int totalButtonSpacing = numButtons*(buttonW+s10);
+            int totalButtonSpacing = numButtons*(buttonW+s20); // modnar: adjust button spacing
             int buttonX = (w-totalButtonSpacing)/2;
             int buttonY = h-buttonH-s20;
             if (greenBackground == null) {
@@ -413,15 +414,21 @@ public final class HistoryUI extends BasePanel implements MouseListener {
                 grayBackground = new LinearGradientPaint(ptStart, ptEnd, dist, grayColors);                
             }
             
-            // draw next turn
-            g.setFont(narrowFont(18));
-            nextTurnBox.setBounds(buttonX, buttonY, buttonW, buttonH);
-            String label = text("HISTORY_FORWARD");
+            // modnar: re-order history UI buttons
+            // from: Forward Back Play Exit
+            //   to: Back  Play  Forward    Exit
+            
+            // draw previous turn button
+            //g.setFont(narrowFont(18));
+            Font fontSansSerif = new Font("SansSerif", Font.BOLD, 20); // modnar: change font to display unicode
+            g.setFont(fontSansSerif); // modnar: change font to display unicode
+            prevTurnBox.setBounds(buttonX, buttonY, buttonW, buttonH);
+            String label = text("HISTORY_BACK");
             int sw = g.getFontMetrics().stringWidth(label);
             g.setColor(SystemPanel.blackText);
             g.fillRoundRect(buttonX+s3, buttonY+s3, buttonW, buttonH, s8, s8);           
-            boolean hovering = hoverTarget == nextTurnBox;
-            boolean enabled = canNextTurn();
+            boolean hovering = hoverTarget == prevTurnBox;
+            boolean enabled = canPreviousTurn();
             if (enabled)
                 g.setPaint(greenBackground);
             else
@@ -442,40 +449,11 @@ public final class HistoryUI extends BasePanel implements MouseListener {
             g.setStroke(prevStr);
             int x2a = buttonX + ((buttonW - sw) / 2);
             drawShadowedString(g, label, x2a, buttonY + buttonH - s8, Color.black, c0);
-          
-            // draw previous button
-            buttonX = buttonX+buttonW+s10;
-            g.setFont(narrowFont(18));
-            prevTurnBox.setBounds(buttonX, buttonY, buttonW, buttonH);
-            label = text("HISTORY_BACK");
-            sw = g.getFontMetrics().stringWidth(label);
-            g.setColor(SystemPanel.blackText);
-            g.fillRoundRect(buttonX+s3, buttonY+s3, buttonW, buttonH, s8, s8);           
-            hovering = hoverTarget == prevTurnBox;
-            enabled = canPreviousTurn();
-            if (enabled)
-                g.setPaint(greenBackground);
-            else
-                g.setPaint(grayBackground);
-            g.fillRoundRect(buttonX, buttonY, buttonW, buttonH, s8, s8);
-            prevStr = g.getStroke();
-            if (hovering && enabled) {
-                c0 = SystemPanel.yellowText;
-                g.setStroke(stroke2);
-            }
-            else {
-                c0 = SystemPanel.whiteText;
-                g.setStroke(BasePanel.stroke1);              
-            }
-            g.setColor(c0);
-            g.drawRoundRect(buttonX, buttonY, buttonW, buttonH, s8, s8);
-            g.setStroke(prevStr);
-            x2a = buttonX + ((buttonW - sw) / 2);
-            drawShadowedString(g, label, x2a, buttonY + buttonH - s8, Color.black, c0);
-          
+
             // draw play/pause button
-            buttonX = buttonX+buttonW+s10;
-            g.setFont(narrowFont(18));
+            buttonX = buttonX+buttonW+s20; // modnar: adjust button spacing
+            //g.setFont(narrowFont(18));
+            g.setFont(fontSansSerif); // modnar: change font to display unicode
             playBox.setBounds(buttonX, buttonY, buttonW, buttonH);
             if (canReset())
                 label = text("HISTORY_RESET");
@@ -507,11 +485,42 @@ public final class HistoryUI extends BasePanel implements MouseListener {
             g.setStroke(prevStr);
             x2a = buttonX + ((buttonW - sw) / 2);
             drawShadowedString(g, label, x2a, buttonY + buttonH - s8, Color.black, c0);
-            g.setFont(narrowFont(15));
-          
+
+            // draw next turn button
+            buttonX = buttonX+buttonW+s20; // modnar: adjust button spacing
+            //g.setFont(narrowFont(18));
+            g.setFont(fontSansSerif); // modnar: change font to display unicode
+            nextTurnBox.setBounds(buttonX, buttonY, buttonW, buttonH);
+            label = text("HISTORY_FORWARD");
+            sw = g.getFontMetrics().stringWidth(label);
+            g.setColor(SystemPanel.blackText);
+            g.fillRoundRect(buttonX+s3, buttonY+s3, buttonW, buttonH, s8, s8);           
+            hovering = hoverTarget == nextTurnBox;
+            enabled = canNextTurn();
+            if (enabled)
+                g.setPaint(greenBackground);
+            else
+                g.setPaint(grayBackground);
+            g.fillRoundRect(buttonX, buttonY, buttonW, buttonH, s8, s8);
+            prevStr = g.getStroke();
+            if (hovering && enabled) {
+                c0 = SystemPanel.yellowText;
+                g.setStroke(stroke2);
+            }
+            else {
+                c0 = SystemPanel.whiteText;
+                g.setStroke(BasePanel.stroke1);              
+            }
+            g.setColor(c0);
+            g.drawRoundRect(buttonX, buttonY, buttonW, buttonH, s8, s8);
+            g.setStroke(prevStr);
+            x2a = buttonX + ((buttonW - sw) / 2);
+            drawShadowedString(g, label, x2a, buttonY + buttonH - s8, Color.black, c0);
+
             // draw exit button
-            buttonX = buttonX+buttonW+s10;
-            g.setFont(narrowFont(18));
+            buttonX = buttonX+buttonW+s40; // modnar: adjust button spacing
+            //g.setFont(narrowFont(18));
+            g.setFont(fontSansSerif); // modnar: change font to display unicode
             exitBox.setBounds(buttonX, buttonY, buttonW, buttonH);
             label = text("HISTORY_EXIT");
             sw = g.getFontMetrics().stringWidth(label);
