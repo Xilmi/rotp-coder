@@ -1432,10 +1432,16 @@ public final class Colony implements Base, IMappedObject, Serializable {
         boolean buildingShips = allocation[SHIP] > 0 &&
                 !shipyard().design().equals(empire.shipLab().stargateDesign()) &&
                 !shipyard().stargateCompleted();
+        // remember if the planet was building a stargate (might have been manually started by the player)
+        boolean buildingStargate = allocation[SHIP] > 0 &&
+                shipyard().design().equals(empire.shipLab().stargateDesign()) &&
+                !shipyard().stargateCompleted();
+
         // start from scratch
         clearSpending();
-        // if we were building ships, keep 1 tick in shipbuilding
-        if (buildingShips && session().getGovernorOptions().isShipbuilding()) {
+        // if we were building ships, or a stargate, keep 1 tick in shipbuilding
+        if ((buildingShips && session().getGovernorOptions().isShipbuilding()) ||
+            (buildingStargate && session().getGovernorOptions().getGates() != GovernorOptions.GatesGovernor.None)) {
             increment(SHIP, 1);
         }
         // lock ship slider while we allocate spending elsewhere
@@ -1461,9 +1467,9 @@ public final class Colony implements Base, IMappedObject, Serializable {
         }
 
         // Build gate if tech is available. Also add a system property to turn it off.
-        // Don't build gate if shipbuilding on governor is enabled, and planet is alrady building ships
+        // Don't build gate if shipbuilding on governor is enabled, and planet is already building ships
         if (!buildingShips || !session().getGovernorOptions().isShipbuilding()) {
-            buildStargate();
+            buildStargate(buildingStargate);
         }
 
         // if all sliders are set to 0, increase research.
@@ -1698,16 +1704,20 @@ public final class Colony implements Base, IMappedObject, Serializable {
         return galaxy().friendlyPopApproachingSystemNextTurn(starSystem());
     }
 
-    private void buildStargate() {
+    private void buildStargate(final boolean wasPreviouslyBuildingStargate) {
         if (!this.shipyard().canBuildStargate()) {
             return;
         }
         if (session().getGovernorOptions().getGates() == GovernorOptions.GatesGovernor.None) {
             return;
         }
-        if (session().getGovernorOptions().getGates() == GovernorOptions.GatesGovernor.Rich) {
-            if (!planet().isResourceRich() && !planet.isResourceUltraRich()) {
-                return;
+        // if the stargate build was already started (whether by governor or by the player),
+        // then continue building it
+        if(!wasPreviouslyBuildingStargate) {
+            if (session().getGovernorOptions().getGates() == GovernorOptions.GatesGovernor.Rich) {
+                if (!planet().isResourceRich() && !planet.isResourceUltraRich()) {
+                    return;
+                }
             }
         }
         // don't build gate if planet production is below 300
