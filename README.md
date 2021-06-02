@@ -10,15 +10,17 @@ This RotP MOD contains many gameplay additions/changes from the official game ve
 
 - [**coder111 governor mod**](https://github.com/coder111111/rotp-public)
     - [**Automatically Adjusts Colony Spending**](https://i.imgur.com/AhXNE73.png)
-- **Better AI** (many AI Improvements from this MOD has been Integrated into the Base Game with Beta 2.12)
+- **Better AI** (many AI Improvements from this MOD has been Integrated into the Base-AI with Beta 2.12)
 - [**AI Difficulty Level Production Modifiers Changed**](https://i.imgur.com/5LJYBqH.png)
 - [**Many New Map Shapes**](https://i.imgur.com/115jnZb.png)
     - [**Text allows custom player input map shape**](https://i.imgur.com/J5Wr3yL.png) (text/unicode in the Homeworld name [**A**](https://i.imgur.com/UUpH1TK.png), [**B**](https://i.imgur.com/JsZp69f.png), [**C**](https://i.imgur.com/tjkhdYP.png), [**Multi-Line**](https://i.imgur.com/Uf4X8gj.png))
 - [**6 New Playable Races**](https://i.imgur.com/Iza3WpE.jpg)
 - [**Re-colored Ships**](https://reddit.com/r/rotp/comments/gli5z5/rotp_recolored_ship_design_sets_download/)
-- [**Options in Remnants.cfg for New Game Modes**](https://i.imgur.com/OhyMaKj.png)
+- [**Options in Remnants.cfg for New Game Modes**](https://i.imgur.com/qbzK3QR.png)
 - [**New Space Pirates Random Event**](https://i.imgur.com/jBu21Pt.png)
 - [**New Precursor Relic Random Event**](https://i.imgur.com/Eq5KW4N.png)
+- [**New Boost Planet Size Random Event**](https://i.imgur.com/vNk0d4B.png)
+- [**New Gauntlet Relic Random Event**](https://i.imgur.com/0En3ESM.png)
 - [**Quality of Life Improvements**](https://i.imgur.com/lBAVLpV.png)
     - **Turns between Backup Saves Changed to 0, 1, 5, 10, 20**
     - **Increased Minimum Empire Homeworld Separation** (**10 ly**, up from 6 ly in the official version)
@@ -39,6 +41,8 @@ This RotP MOD contains many gameplay additions/changes from the official game ve
         - A Few Random Events are Non-Repeatable
     - **Horizontal TreasuryResearchBar**
     - **Disable Showing Help Tool-Tips at Start of New Game**
+    - [**Game History Viewer Buttons Re-Ordered**](https://i.imgur.com/PsMXdqG.png)
+    - [**Clean RotP MOD Icons**](https://i.imgur.com/WJNO4us.png)
     - **Texture Defaults to OFF**
     - **FAST Research Rate Option** added to Advanced Options
         - Asymptotically Approach Half Cost Techs
