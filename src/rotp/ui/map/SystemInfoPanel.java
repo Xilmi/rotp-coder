@@ -27,6 +27,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,11 +56,18 @@ public class SystemInfoPanel extends SystemPanel implements MouseMotionListener 
     EmpireInfoGraphicPane graphicPane;
     SystemsUI parent;
     SystemSummaryPane summaryPane;
+    SystemFlagsPane systemFlagsPane;
     public SystemInfoPanel(SystemsUI p) {
         parent = p;
-        init();
+        init0();
     }
-    private void init() {
+    public void init() {
+        systemFlagsPane.init();
+    }
+    public void exit() {
+        systemFlagsPane.exit();
+    }
+    private void init0() {
         palette = Palette.named("Brown");
         setOpaque(true);
         setBackground(selectedC);
@@ -97,7 +106,7 @@ public class SystemInfoPanel extends SystemPanel implements MouseMotionListener 
     protected BasePanel detailPane() {
         summaryPane = new SystemSummaryPane();
 
-        BasePanel systemFlagsPane = new SystemFlagsPane();
+        systemFlagsPane = new SystemFlagsPane();
 
         BasePanel systemEventsPanel = new SystemHistoryPane();
         systemEventsPanel.setPreferredSize(new Dimension(getWidth(), scaled(250)));
@@ -173,7 +182,7 @@ public class SystemInfoPanel extends SystemPanel implements MouseMotionListener 
             }
         }
     }
-    final class SystemSummaryPane extends BasePanel implements MouseMotionListener, MouseListener {
+    final class SystemSummaryPane extends BasePanel implements MouseMotionListener, MouseListener, MouseWheelListener {
         private static final long serialVersionUID = 1L;
         Shape hoverBox;
         Rectangle flagBox = new Rectangle();
@@ -182,6 +191,7 @@ public class SystemInfoPanel extends SystemPanel implements MouseMotionListener 
             setPreferredSize(new Dimension(getWidth(), s40));
             addMouseListener(this);
             addMouseMotionListener(this);
+            addMouseWheelListener(this);
         }
         @Override
         public void paintComponent(Graphics g0) {
@@ -207,7 +217,10 @@ public class SystemInfoPanel extends SystemPanel implements MouseMotionListener 
         }
         public void toggleFlagColor(boolean rightClick) {
             StarSystem sys = systemViewToDisplay();
-            player().sv.view(sys.id).toggleFlagColor(rightClick);
+            if (rightClick)
+                player().sv.resetFlagColor(sys.id);
+            else
+                player().sv.toggleFlagColor(sys.id);
             parent.repaint();
         }
         @Override
@@ -244,6 +257,17 @@ public class SystemInfoPanel extends SystemPanel implements MouseMotionListener 
                 repaint();
             }
         }
+        @Override
+        public void mouseWheelMoved(MouseWheelEvent e) {
+            if (hoverBox == flagBox) {
+                StarSystem sys = systemViewToDisplay();
+                if (e.getWheelRotation() < 0)
+                    player().sv.toggleFlagColor(sys.id, true);
+                else
+                    player().sv.toggleFlagColor(sys.id, false);
+                parent.repaint();
+            }
+        }
     }
     final class SystemFlagsPane extends BasePanel implements MouseListener {
         private static final long serialVersionUID = 1L;
@@ -262,7 +286,12 @@ public class SystemInfoPanel extends SystemPanel implements MouseMotionListener 
             comments.putClientProperty("caretWidth", s3);
             comments.setFocusTraversalKeysEnabled(false);
             comments.addMouseListener(this);
+        }
+        public void init() {
             emptyNotes = text("SYSTEMS_ENTER_NOTES");
+        }
+        public void exit() {
+            sys = null;
         }
         @Override
         public void paintComponent(Graphics g) {

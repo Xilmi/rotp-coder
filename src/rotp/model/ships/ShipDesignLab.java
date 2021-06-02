@@ -218,6 +218,7 @@ public class ShipDesignLab implements Base, Serializable {
         d.active(true);
         d.id(slot);
         d.seq(slot); 
+        d.shipColor(empire().defaultShipTint());
         scoutDesignId = slot;
         log("Empire: "+empire.name()+" creates scout design: "+d.name()+"  slot:"+slot);
     }
@@ -228,6 +229,7 @@ public class ShipDesignLab implements Base, Serializable {
         d.active(true);
         d.id(slot);
         d.seq(slot); 
+        d.shipColor(empire().defaultShipTint());
         colonyDesignId = slot;
         log("Empire: "+empire.name()+" creates colony design: "+d.name()+"  slot:"+slot);
     }
@@ -237,6 +239,7 @@ public class ShipDesignLab implements Base, Serializable {
         d.active(true);
         d.id(slot);
         d.seq(slot); 
+        d.shipColor(empire().defaultShipTint());
         empire().swapShipConstruction(fighterDesign(), d);
         fighterDesignId = slot;
         log("Empire: "+empire.name()+" creates fighter design: "+d.name()+"  slot:"+slot);
@@ -248,6 +251,7 @@ public class ShipDesignLab implements Base, Serializable {
         d.active(true);
         d.id(slot);
         d.seq(slot); 
+        d.shipColor(empire().defaultShipTint());
         bomberDesignId = slot;
         log("Empire: "+empire.name()+" creates bomber design: "+d.name()+"  slot:"+slot);
     }
@@ -258,6 +262,7 @@ public class ShipDesignLab implements Base, Serializable {
         d.active(true);
         d.id(slot);
         d.seq(slot); 
+        d.shipColor(empire().defaultShipTint());
         destroyerDesignId = slot;
         log("Empire: "+empire.name()+" creates destroyer design: "+d.name()+"  slot:"+slot);
     }

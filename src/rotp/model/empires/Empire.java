@@ -74,6 +74,8 @@ import rotp.model.tech.Tech;
 import rotp.model.tech.TechRoboticControls;
 import rotp.model.tech.TechTree;
 import rotp.ui.NoticeMessage;
+import rotp.ui.diplomacy.DialogueManager;
+import rotp.ui.diplomacy.DiplomaticReply;
 import rotp.ui.main.GalaxyMapPanel;
 import rotp.util.Base;
 
@@ -257,7 +259,10 @@ public final class Empire implements Base, NamedObject, Serializable {
         
         colorId(newColor);
     }
-    
+    public int defaultShipTint() {
+        int maxRaces = 10;
+        return id < maxRaces ? 0 : id % (ShipDesign.shipColors.length-1)+1;
+    }
     private void resetColors() {
         nameColor = null;
         ownershipColor = null;
@@ -424,7 +429,17 @@ public final class Empire implements Base, NamedObject, Serializable {
             empireName = replaceTokens("[this_empire]", "this");
         return empireName;
     }
-    
+    public DiplomaticReply respond(String reason, Empire listener) {
+        return respond(reason,listener,null);
+    }
+    public DiplomaticReply respond(String reason, Empire listener, Empire other) {
+        String message = DialogueManager.current().randomMessage(reason, this);
+        message = replaceTokens(message, "my");
+        message = listener.replaceTokens(message, "your");
+        if (other != null)
+            message = other.replaceTokens(message, "other");
+        return DiplomaticReply.answer(true, message);
+    }
     public void chooseNewCapital() {
         // make list of every colony that is not the current capital
         StarSystem currentCapital = galaxy().system(capitalSysId);
@@ -1960,7 +1975,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         
         // end all rebellions
         for (StarSystem sys: allColonizedSystems()) 
-            sys.colony().rebels(0);    
+            sys.colony().clearAllRebellion();   
 
         if (viewForEmpire(player()).embassy().contact()) {
             String leaderDesc = text("LEADER_PERSONALITY_FORMAT", leader.personality(),leader.objective());
@@ -2070,29 +2085,6 @@ public final class Empire implements Base, NamedObject, Serializable {
         Galaxy gal = galaxy();
         visibleShips.clear();
         
-        float scanRange = planetScanningRange();
-        // get ships orbiting visible systems
-
-        for (int sysId=0;sysId<sv.count();sysId++) {
-            // is the system in scanning range?
-            boolean canScan = sv.withinRange(sysId, scanRange);
-            List<ShipFleet> systemFleets = gal.ships.allFleetsAtSystem(sysId);
-            // if not, see if we own or are unity with any ships
-            // currently in the system. If so, we can see all ships here
-            if (!canScan)  {
-                for (ShipFleet fl: systemFleets) {
-                    if (canSeeShips(fl.empId))
-                        canScan = true;
-                }
-            }
-            if (canScan) {
-                for (ShipFleet fl: systemFleets) {
-                    if (fl.visibleTo(this))
-                        visibleShips.add(fl);
-                }
-            }
-        }
-
         List<ShipFleet> myShips = galaxy().ships.allFleets(id);
         List<StarSystem> mySystems = this.allColonizedSystems();
 
@@ -2104,7 +2096,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         }
 
         // get fleets in transit
-        for (ShipFleet sh : gal.ships.inTransitFleets()) {
+        for (ShipFleet sh : gal.ships.allFleets()) {
             if (canSeeShips(sh.empId())
             || (sh.visibleTo(id) && canScanTo(sh, mySystems, myShips) ))
                 addVisibleShip(sh);
@@ -2132,19 +2124,15 @@ public final class Empire implements Base, NamedObject, Serializable {
     }
     public boolean canScanTo(IMappedObject loc, List<StarSystem> systems, List<ShipFleet> ships) {
         float planetRange = planetScanningRange();
-        if (planetRange > 0) {
-            for (StarSystem sys: systems) {
-                if (sys.distanceTo(loc) <= planetRange)
-                    return true;
-            }
+        for (StarSystem sys: systems) {
+            if (sys.distanceTo(loc) <= planetRange)
+                return true;
         }
 
         float shipRange = shipScanningRange();
-        if (shipRange > 0) {
-            for (Ship sh: ships) {
-                if (sh.distanceTo(loc) <= shipRange)
-                    return true;
-            }
+        for (Ship sh: ships) {
+            if (sh.distanceTo(loc) <= shipRange)
+                return true;
         }
         return false;
     }
@@ -3171,6 +3159,17 @@ public final class Empire implements Base, NamedObject, Serializable {
             pts += fl.bcValue();
         return pts;
     }
+    public Float totalEmpirePopulation() {
+        float totalPop = 0;
+        List<StarSystem> systems = new ArrayList<>(allColonizedSystems());
+        for (StarSystem sys: systems)
+            totalPop += sys.colony().population();
+        List<Transport> allTransports = transports();
+        for(Transport tr: allTransports) 
+            totalPop += tr.size();
+                
+        return totalPop;
+    }
     public Float totalPlanetaryPopulation() {
         float totalPop = 0;
         List<StarSystem> systems = new ArrayList<>(allColonizedSystems());
@@ -3232,7 +3231,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         if (totalEmpireProduction <= 0) {
             float totalProductionBC = 0;
             List<StarSystem> systems = new ArrayList<>(allColonizedSystems());
-            for (StarSystem sys: systems)
+            for (StarSystem sys: systems) 
                 totalProductionBC += sys.colony().production();
             totalEmpireProduction = totalProductionBC;
         }
@@ -3359,6 +3358,8 @@ public final class Empire implements Base, NamedObject, Serializable {
             log("disband#1 fleet: ", fl.toString());
             fl.disband();
         }
+        
+        galaxy().removeAllTransports(id);
 
         for (EmpireView v : empireViews()) {
             if (v != null)

@@ -55,7 +55,7 @@ public class CombatStackColony extends CombatStack {
         beamDefense = mBase.beamDefense();
         startingPop = colony.population();
         startingFactories = colony.industry().factories();
-        planetaryShieldLevel = colony.empire().tech().maxPlanetaryShieldLevel();
+        planetaryShieldLevel = colony.defense().shieldLevel();
         hits = maxHits;
         shield = maxShield;
     }
@@ -108,6 +108,7 @@ public class CombatStackColony extends CombatStack {
     public boolean destroyed()        { return colony.destroyed(); }
     @Override
     public float beamDamageMod()      { return BEAM_DAMAGE_MOD; }
+    @Override
     public float missileInterceptPct(ShipWeaponMissileType missile)   {
         return (missileBase() == null)? 0 : missileBase().missileInterceptPct(missile);
     }

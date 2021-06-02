@@ -52,8 +52,6 @@ DECLAREWAR_OPPORTUNITY_01  | As you can see, we of the [my_empire] have managed 
 DECLAREWAR_ASSASSIN_01     | What crassness is this? You would commit so monstrous an act as slaying an ambassador in cold blood? The Sovereignty will not suffer so loathsome a race as yours to exist any longer!
 
 
-
-
 OFFER_PEACE_01             | The story of the Crimson Millennium cannot be allowed to repeat, ambassador! We request that you bring honor to [your_race] and [my_race] alike by signing this peace treaty to prevent any further bloodshed!
 OFFER_TRADE_01             | Surely civilized races such as ours are capable of aiding one another in honorable cooperation. The [my_empire] wishes a trade agreement with the [your_empire] set at [amt] BC, each year. What is your response, ambassador?
 OFFER_PACT_01              | The Sovereignty is pleased with how your people present themselves in diplomatic affairs. To show how much we value our relationship, we wish to sign a non-aggression pact, ensuring that neither of us falls prey to... misinterpreting each other's intentions.
@@ -71,7 +69,7 @@ WARN_BIOWEAPON_01          | Dishonor! Dishonor! You have used the most unspeaka
 WARN_GENOCIDE_01           | While I do agree that the [victim_race] were a miserable horde of churlish vermin, the Sovereignty strongly opposes committing genocide. We wonder, ambassador, if your people are capable of repeating these actions with more... civilized races?
 WARN_FINAL_WAR_01          | There is no virtue in this course you have chosen, ambassador. Make no mistake: now that you have decided to stand against the duly elected leader of the galaxy, we are honor bound to do everything we can to stop you! 
 WARN_COUNCIL_VOTE_01       | So much for the illustrious ambassador of the [your_empire]! Did you truly believe we would not learn of your deception in council? You should fear for your people, ambassador: the Spire King will be most displeased. 
-WARN_OATHBREAKER_01        | How scandalous! You know the esteem we place upon honor, yet you so openly break your word merely to satisfy your own desires?! The Sovereignty will remember this insult forever, ambassador, and will surely repay it in kind! 
+WARN_OATHBREAKER_01        | How scandalous! You know the esteem we place upon honor, yet you so openly break your word merely to satisfy your own desires?! The Sovereignty will remember this insult forever, ambassador, and will surely repay it in kind! [spiesCaught]
 WARN_ATTACKED_ALLY_01      | It is troublesome, ambassador, that your people and the [defender_empire] have chosen to bicker so. You cannot hope to match our combined might, ambassador: the Sovereignty urges you to reconsider your actions.
 WARN_REBELLING_AGAINST_01  | Did you think we had forgotten how dishonorable you have proven to be? It matters not whether we must fight you or the entire galaxy: you will never sit on the throne of the council so long as the Spire King lives! 
  

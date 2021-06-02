@@ -24,6 +24,7 @@ import rotp.model.incidents.EspionageTechIncident;
 import rotp.model.incidents.SpyConfessionIncident;
 import rotp.model.ships.ShipDesign;
 import rotp.model.tech.Tech;
+import rotp.model.tech.TechCategory;
 import rotp.model.tech.TechTree;
 import rotp.ui.RotPUI;
 import rotp.ui.notifications.SabotageNotification;
@@ -37,11 +38,12 @@ public final class SpyNetwork implements Base, Serializable {
     private static final int MAX_SPENDING_TICKS = 20;
     private static final float MAX_SPENDING_PCT = 0.10f;
     private static final int MIN_SPIES_FOR_FLEET_VIEW = 1;
+    private static final float NO_TRADE_SECURITY_BONUS = 0.1f;
     
     private static final int THREAT_NONE = 0;
     private static final int THREAT_HIDE = 1;
     private static final int THREAT_EVICT = 2;
-
+    
     public enum Sabotage {
         FACTORIES, MISSILES, REBELS;
     }
@@ -246,6 +248,13 @@ public final class SpyNetwork implements Base, Serializable {
             return;
         }
         
+        // data automatically updates for allies
+        if (view.embassy().alliance()) {
+            lastSpyDate = galaxy().currentYear();
+            view.refreshSystemSpyViews();
+            updateTechList();
+        }
+        
         if (maxSpies() == 0) {
             activeSpies.clear();
             return;
@@ -328,6 +337,10 @@ public final class SpyNetwork implements Base, Serializable {
                 report().recordTechsLearned(newPossible);
             }
         }  
+    }
+    public void noteTradedTech(Tech t) {
+        TechCategory cat = tech.category(t.cat.index());
+        cat.addKnownTech(t.id());
     }
     private boolean sendSpiesToInfiltrate() {
         boolean confession = false;
@@ -446,12 +459,12 @@ public final class SpyNetwork implements Base, Serializable {
             return;
         
         if (!isHide() && owner().alliedWith(victim.id)) {
-            view.embassy().breakAlliance();
+            view.embassy().breakAlliance(true);
             view.breakAllTreaties();
             return;
         }
         if (isSabotage() && owner().pactWith(victim.id)) {
-            view.embassy().breakPact();
+            view.embassy().breakPact(true);
             view.breakAllTreaties();
             return;
         }
@@ -486,6 +499,12 @@ public final class SpyNetwork implements Base, Serializable {
         // security pct based on their spending
         float adj = empire().totalInternalSecurityPct();
 
+        // we get a security bonus if there is no trade set up with any race...
+        // xenophobes rejoice! now there is a slight downside to trade routes
+        // whereas before they were automatic
+        if (empire().totalTradeTreaties() == 0)
+            adj += NO_TRADE_SECURITY_BONUS;
+        
         // adjust for their race
         adj += empire().internalSecurityAdj();
 

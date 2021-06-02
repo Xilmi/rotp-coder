@@ -29,6 +29,8 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.URISyntaxException;
+import java.util.List; // modnar: change to cleaner icon set
+import java.util.ArrayList; // modnar: change to cleaner icon set
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import rotp.model.game.GameSession;
@@ -43,11 +45,12 @@ public class Rotp {
     private static final int MB = 1048576;
     public static int IMG_W = 1229;
     public static int IMG_H = 768;
-    public static String jarFileName = "RotP-0.92_modnar_MOD31"+RotpGovernor.miniSuffix()+".jar";
+    public static String jarFileName = "RotP-0.93_modnar_MOD32"+RotpGovernor.miniSuffix()+".jar";
+    public static String exeFileName = "RotP-0.93_modnar_MOD32"+RotpGovernor.miniSuffix()+".exe";
     public static boolean countWords = false;
-    private static String jarPath;
+    private static String startupDir;
     private static JFrame frame;
-    public static String releaseId = "0.92 modnar_MOD31";
+    public static String releaseId = "0.93 modnar_MOD32";
     public static long startMs = System.currentTimeMillis();
     public static long maxHeapMemory = Runtime.getRuntime().maxMemory() / 1048576;
     public static long maxUsedMemory;
@@ -59,12 +62,18 @@ public class Rotp {
     static GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
     public static void main(String[] args) {
         frame = new JFrame("Remnants of the Precursors");
+        String loadSaveFile = "";
         if (args.length == 0) {
             if (restartWithMoreMemory(frame, false))
                 return;
             logging = false;
         }
-        reloadRecentSave = containsArg(args, "reload");
+        else {
+            if (args[0].toLowerCase().endsWith(".rotp")) 
+                loadSaveFile = args[0];
+        }
+        
+        reloadRecentSave = containsArg(args, "reload");  
         logging = containsArg(args, "log");
         stopIfInsufficientMemory(frame, (int)maxHeapMemory);
         Thread.setDefaultUncaughtExceptionHandler(new SwingExceptionHandler());
@@ -103,34 +112,18 @@ public class Rotp {
             setFrameSize();
         }
 
-        if (reloadRecentSave)
-            GameSession.instance().loadRecentSession(false);
-        
         // this will not catch 32-bit JREs on all platforms, but better than nothing
         String bits = System.getProperty("sun.arch.data.model").trim();
         if (bits.equals("32"))
             RotPUI.instance().mainUI().showJava32BitPrompt();
+        else if (reloadRecentSave)
+            GameSession.instance().loadRecentSession(false);
+        else if (!loadSaveFile.isEmpty()) 
+            GameSession.instance().loadSession("", loadSaveFile, false);        
 
-        frame.setVisible(true);
+        becomeVisible();
     }
-    public static BufferedImage toBufferedImage(Image img)
-    {
-        if (img instanceof BufferedImage)
-        {
-            return (BufferedImage) img;
-        }
-
-        // Create a buffered image with transparency
-        BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-
-        // Draw the image on to the buffered image
-        Graphics2D bGr = bimage.createGraphics();
-        bGr.drawImage(img, 0, 0, null);
-        bGr.dispose();
-
-        // Return the buffered image
-        return bimage;
-    }
+    public static void becomeVisible() {   frame.setVisible(true); }
     public static boolean containsArg(String[] argList, String key) {
         for (String s: argList) {
             if (s.equalsIgnoreCase(key))
@@ -171,16 +164,16 @@ public class Rotp {
         return resizeAmt;
     }
     public static String jarPath()  {
-        if (jarPath == null) {
+        if (startupDir == null) {
             try {
                 File jarFile = new File(Rotp.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-                jarPath = jarFile.getParentFile().getPath();
+                startupDir = jarFile.getParentFile().getPath();
             } catch (URISyntaxException ex) {
                 System.out.println("Unable to resolve jar path: "+ex.toString());
-                jarPath = ".";
+                startupDir = ".";
             }
         }
-        return jarPath;
+        return startupDir;
     }
     private static void stopIfInsufficientMemory(JFrame frame, int allocMb) {
         if (allocMb < 260) {
@@ -196,7 +189,9 @@ public class Rotp {
         return (max == total) && (free < 300);
     }
     public static void restart() {
-        String execStr = actualAlloc < 0 ? "java -jar "+jarFileName : "java -Xmx"+actualAlloc+"m -jar "+jarFileName+" arg1";
+        File exeFile = new File(startupDir+"/"+exeFileName);
+        String execStr = exeFile.exists() ? exeFileName : actualAlloc < 0 ? "java -jar "+jarFileName : "java -Xmx"+actualAlloc+"m -jar "+jarFileName+" arg1";
+
         try {
             Runtime.getRuntime().exec(execStr);
             System.exit(0);
