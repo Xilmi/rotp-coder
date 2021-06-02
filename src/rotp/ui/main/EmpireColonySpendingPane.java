@@ -23,6 +23,8 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
+import java.util.List; // modnar: change to cleaner icon set
+import java.util.ArrayList; // modnar: change to cleaner icon set
 
 import rotp.Rotp;
 import rotp.model.colony.Colony;
