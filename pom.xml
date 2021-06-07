@@ -150,7 +150,7 @@
                         <configuration>
                             <!-- quality 90 is visually indistinguishable from original jpeg -->
                             <!-- but given that people using minified version want a small jar, let's use quality 80 -->
-                            <command>cwebp -mt -q 80 ${input} -o ${output}</command>
+                            <command>cwebp -mt -q 75 ${input} -o ${output}</command>
                             <outputExtension>webp</outputExtension>
                             <errorToOutput>true</errorToOutput>
                             <inputFiles>

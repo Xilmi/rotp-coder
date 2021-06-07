@@ -21,6 +21,8 @@ import javax.swing.SwingUtilities;
 public class SwingExceptionHandler implements Thread.UncaughtExceptionHandler {
     @Override
     public void uncaughtException(final Thread t, final Throwable e) {
+        System.err.println("Error "+e.getMessage()+" in thread "+t.getName());
+        e.printStackTrace();
         if (SwingUtilities.isEventDispatchThread()) {
             showError(e);
         } else {

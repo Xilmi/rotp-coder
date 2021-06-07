@@ -29,6 +29,7 @@ import java.util.Properties;
  */
 public class RotpGovernor {
     static String expectedROTPVersion = "0.92";
+    public static boolean GRAALVM_NATIVE = System.getProperty("org.graalvm.nativeimage.imagecode") != null;
 
     private static String governorVersion = null;
 

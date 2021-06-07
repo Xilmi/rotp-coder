@@ -207,6 +207,11 @@ public class Rotp {
         restartWithMoreMemory(frame, true);
     }
     private static boolean restartWithMoreMemory(JFrame frame, boolean reload) {
+        // MXBeans are not supported by GraalVM Native, so skip this part
+        if (RotpGovernor.GRAALVM_NATIVE) {
+            System.out.println("Running as GraalVM Native image");
+            return false;
+        }
         long memorySize = ((com.sun.management.OperatingSystemMXBean) ManagementFactory
                         .getOperatingSystemMXBean()).getTotalPhysicalMemorySize();
         long freeMemory = ((com.sun.management.OperatingSystemMXBean) ManagementFactory

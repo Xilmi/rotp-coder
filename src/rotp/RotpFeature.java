@@ -8,15 +8,12 @@ import org.graalvm.nativeimage.hosted.Feature;
 @AutomaticFeature
 public class RotpFeature implements Feature {
 
-    public static void hello() {
-        System.out.println("TTTT INIT");
-    }
-
     @Override
     public void beforeAnalysis(BeforeAnalysisAccess access) {
-        // needed on Linux for Robot classes
-        NativeLibraries nativeLibraries = ((FeatureImpl.BeforeAnalysisAccessImpl) access).getNativeLibraries();
-        nativeLibraries.addDynamicNonJniLibrary("Xtst");
-        System.out.println("TTTT HELLO");
+        if ("".equals(System.getProperty("os.name"))) {
+            // needed on Linux for Robot classes
+            NativeLibraries nativeLibraries = ((FeatureImpl.BeforeAnalysisAccessImpl) access).getNativeLibraries();
+            nativeLibraries.addDynamicNonJniLibrary("Xtst");
+        }
     }
 }

@@ -57,6 +57,7 @@ public enum SoundManager implements Base {
             loadMusicFiles(soundListDir);
         }
         catch(Exception | NoClassDefFoundError e) {
+            e.printStackTrace();
             log("SoundManager.init error: "+e.getMessage());
             disableOnError("on init: "+e.getMessage());
         }
@@ -137,6 +138,7 @@ public enum SoundManager implements Base {
             currentAmbience = playContinuously(key);
         }
         catch (IllegalArgumentException e) {
+            e.printStackTrace();
             err("error: "+e.toString());
             disableOnError("on ambience:"+e.getMessage());
         }
