@@ -141,7 +141,7 @@ public final class TechCategory implements Base, Serializable {
             }
         }
     }
-    private void addKnownTech(String id) {
+    public void addKnownTech(String id) {
         if (!knownTechs().contains(id)) {
             knownTechs().add(id);
             Collections.sort(knownTechs, Tech.LEVEL);

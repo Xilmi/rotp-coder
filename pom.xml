@@ -7,7 +7,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.rayfowler</groupId>
 
-    <version>3.92.1</version>
+    <version>3.93.1</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>8</java.version>
@@ -262,6 +262,59 @@
                                     <Built-By>coder111@protonmail.com</Built-By>
                                 </manifestEntries>
                             </archive>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.akathist.maven.plugins.launch4j</groupId>
+                <artifactId>launch4j-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+<!-- disabled for now. For this to work, we need to download and package a JRE, and I don't want to go through the hassle yet.
+                        <phase>package</phase>
+                        <goals>
+                            <goal>launch4j</goal>
+                        </goals>
+-->
+                        <configuration>
+                            <icon>launch4j/rotp.ico</icon>
+                            <splash>
+                                <file>launch4j/rotp_splash.bmp</file>
+                                <waitForWindow>false</waitForWindow>
+                                <timeout>15</timeout>
+                                <timeoutErr>false</timeoutErr>
+                            </splash>
+                            <headerType>gui</headerType>
+                            <outfile>target/rotp-${project.version}.exe</outfile>
+                            <jar>target/rotp-${project.version}-mini.jar</jar>
+                            <errTitle>ROTP</errTitle>
+                            <classPath>
+                                <mainClass>rotp.RotpGovernor</mainClass>
+                                <addDependencies>false</addDependencies>
+                                <preCp>anything</preCp>
+                            </classPath>
+                            <jre>
+                                <path>jre</path>
+                                <minVersion>11</minVersion>
+                                <bundledJre64Bit>true</bundledJre64Bit>
+                                <bundledJreAsFallback>false</bundledJreAsFallback>
+                                <runtimeBits>64</runtimeBits>
+                                <jdkPreference>preferJre</jdkPreference>
+                                <initialHeapSize>2000</initialHeapSize>
+                                <maxHeapSize>3500</maxHeapSize>
+                            </jre>
+                            <versionInfo>
+                                <fileVersion>${project.version}.1</fileVersion>
+                                <txtFileVersion>${project.version}</txtFileVersion>
+                                <fileDescription>Remnants of the Precursors</fileDescription>
+                                <copyright>Copyright Ray Fowler</copyright>
+                                <productVersion>${project.version}.1</productVersion>
+                                <txtProductVersion>${project.version}</txtProductVersion>
+                                <productName>Remnants of the Precursors</productName>
+                                <internalName>rotp</internalName>
+                                <originalFilename>rotp-${project.version}.exe</originalFilename>
+                            </versionInfo>
                         </configuration>
                     </execution>
                 </executions>

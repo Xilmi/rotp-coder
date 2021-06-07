@@ -260,8 +260,6 @@ public class DiplomaticEmbassy implements Base, Serializable {
     public void giveExpansionWarning()      { warningLevel = 1; }
     public boolean gaveExpansionWarning()   { return warningLevel > 0; }
     public void noteRequest() {
-        if (requestCount == currentMaxRequests)
-            currentMaxRequests--;
         requestCount++;
     }
     public void heedThreat()          { threatened = true; }
@@ -407,6 +405,9 @@ public class DiplomaticEmbassy implements Base, Serializable {
         // owner() is the requestee, who will be learning the counter-offered tech
         owner().tech().acquireTechThroughTrade(offeredTech.id, empire().id);
         empire().tech().acquireTechThroughTrade(requestedTech.id, owner().id);
+
+        view.spies().noteTradedTech(requestedTech);
+        view.otherView().spies().noteTradedTech(offeredTech);
         DiplomaticIncident inc = ExchangeTechnologyIncident.create(owner(), empire(), offeredTech, requestedTech);
         addIncident(inc);
         otherEmbassy().addIncident(ExchangeTechnologyIncident.create(empire(), owner(), requestedTech, offeredTech));
@@ -500,8 +501,8 @@ public class DiplomaticEmbassy implements Base, Serializable {
             case 1:
                 if (!finalWar)
                     GNNAllianceBrokenNotice.create(owner(), empire());
-                OathBreakerIncident.alertBrokenAlliance(owner(),empire(),requestor); break;
-            case 2: OathBreakerIncident.alertBrokenPact(owner(),empire(),requestor); break;
+                OathBreakerIncident.alertBrokenAlliance(owner(),empire(),requestor,false); break;
+            case 2: OathBreakerIncident.alertBrokenPact(owner(),empire(),requestor,false); break;
         }
         
         // if the player is one of our allies, let him know
@@ -534,6 +535,7 @@ public class DiplomaticEmbassy implements Base, Serializable {
         beginTreaty();
         int duration = roll(8,15);
         endWarPreparations();
+        otherEmbassy().endWarPreparations();
         beginPeace(duration);
         otherEmbassy().beginPeace(duration);
         DiplomaticIncident inc = SignPeaceIncident.create(owner(), empire(), duration);
@@ -556,12 +558,13 @@ public class DiplomaticEmbassy implements Base, Serializable {
     public void closeEmbassy() {
         withdrawAmbassador(Integer.MAX_VALUE);
     }
-    public DiplomaticIncident breakPact() {
+    public DiplomaticIncident breakPact() { return breakPact(false); }
+    public DiplomaticIncident breakPact(boolean caughtSpying) {
         endTreaty();
         setTreaty(new TreatyNone(view.owner(), view.empire()));
-        DiplomaticIncident inc = BreakPactIncident.create(owner(), empire());
+        DiplomaticIncident inc = BreakPactIncident.create(owner(), empire(), caughtSpying);
         otherEmbassy().addIncident(inc);
-        OathBreakerIncident.alertBrokenPact(owner(),empire());
+        OathBreakerIncident.alertBrokenPact(owner(),empire(), caughtSpying);
         return inc;
     }
     public DiplomaticIncident signAlliance() {
@@ -582,13 +585,14 @@ public class DiplomaticEmbassy implements Base, Serializable {
         }
         return inc;
     }
-    public DiplomaticIncident breakAlliance() {
+    public DiplomaticIncident breakAlliance() { return breakAlliance(false); }
+    public DiplomaticIncident breakAlliance(boolean caughtSpying) {
         endTreaty();
         setTreaty(new TreatyNone(view.owner(), view.empire()));
-        DiplomaticIncident inc = BreakAllianceIncident.create(owner(), empire());
+        DiplomaticIncident inc = BreakAllianceIncident.create(owner(), empire(), caughtSpying);
         otherEmbassy().addIncident(inc);
         GNNAllianceBrokenNotice.create(owner(), empire());
-        OathBreakerIncident.alertBrokenAlliance(owner(),empire());
+        OathBreakerIncident.alertBrokenAlliance(owner(),empire(),caughtSpying);
         return inc;
     }
     public DiplomaticIncident signJointWar(Empire target) {
