@@ -26,6 +26,7 @@ import rotp.model.galaxy.StarSystem;
 import rotp.model.planet.Planet;
 import rotp.model.tech.TechEngineWarp;
 import rotp.ui.game.SetupGalaxyUI;
+import rotp.ui.UserPreferences; // modnar: add custom difficulty level option
 
 public interface IGameOptions {
     public static final int MAX_OPPONENTS = SetupGalaxyUI.MAX_DISPLAY_OPPS;
@@ -70,6 +71,8 @@ public interface IGameOptions {
     public static final String DIFFICULTY_HARD    = "SETUP_DIFFICULTY_HARD";
     public static final String DIFFICULTY_HARDER  = "SETUP_DIFFICULTY_HARDER";
     public static final String DIFFICULTY_HARDEST = "SETUP_DIFFICULTY_HARDEST";
+    // mondar: add custom difficulty level option, set in Remnants.cfg
+    public static final String DIFFICULTY_CUSTOM  = "SETUP_DIFFICULTY_CUSTOM";
     
     public static final String RESEARCH_NORMAL  = "SETUP_RESEARCH_RATE_NORMAL";
     // mondar: add fast research option
@@ -537,6 +540,8 @@ public interface IGameOptions {
     // modnar: change difficulty production modifiers
     // from 0.5, 0.75, 0.9, 1.0, 1.1, 1.4, 2.0
     // to   0.7, 0.85, 1.0, 1.2, 1.4, 1.7, 2.0 (smoother step-to-step increases between 1.0 to 2.0)
+    // modnar: add custom difficulty level option, set in Remnants.cfg
+    // UserPreferences.customDifficulty(), custom difficulty range: 20% to 500%
     default float aiProductionModifier() {
         switch(selectedGameDifficulty()) {
             case DIFFICULTY_EASIEST: return 0.7f;
@@ -546,15 +551,18 @@ public interface IGameOptions {
             case DIFFICULTY_HARD:    return 1.4f;
             case DIFFICULTY_HARDER:  return 1.7f;
             case DIFFICULTY_HARDEST: return 2.0f;
+            case DIFFICULTY_CUSTOM:  return (float)(0.01f*UserPreferences.customDifficulty());
             default: return 1.0f;
         }
     }
     // modnar: change difficulty waste modifiers, with production changes above
+    // modnar: if custom difficulty level option is set to less than 100%, also change waste modifiers
     default float aiWasteModifier() {
         switch(selectedGameDifficulty()) {
             case DIFFICULTY_EASIEST: return 0.7f;
             case DIFFICULTY_EASIER:  return 0.85f;
             case DIFFICULTY_EASY:    return 1.0f;
+            case DIFFICULTY_CUSTOM:  return (float)(Math.min(1.0f, 0.01f*UserPreferences.customDifficulty()));
             default: return 1.0f;
         }
     }

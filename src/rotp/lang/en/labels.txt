@@ -1129,6 +1129,8 @@ SETUP_AUTOPLAY_AI_BASE            | AI: Base
 SETUP_AUTOPLAY_AI_MODNAR          | AI: Modnar
 SETUP_AUTOPLAY_AI_XILMI           | AI: Xilmi
 SETUP_GAME_DIFFICULTY_LABEL       | Difficulty
+// mondar: add custom difficulty level option, set in Remnants.cfg
+SETUP_DIFFICULTY_CUSTOM           | Custom
 SETUP_DIFFICULTY_EASIEST          | Easiest (70%)
 SETUP_DIFFICULTY_EASIER           | Easier (85%)
 SETUP_DIFFICULTY_EASY             | Easy (100%)

@@ -286,6 +286,12 @@ public final class SetupGalaxyUI  extends BasePanel implements MouseListener, Mo
         drawString(g,sizeLbl, x5b, y5);
 
         String diffLbl = text(newGameOptions().selectedGameDifficulty());
+        // modnar: add custom difficulty level option, set in Remnants.cfg
+        // append this custom difficulty percentage to diffLbl if selected
+        if (diffLbl.equals("Custom")) {
+            diffLbl = diffLbl + " (" + Integer.toString(UserPreferences.customDifficulty()) + "%)";
+        }
+        
         int diffSW = g.getFontMetrics().stringWidth(diffLbl);
         int x5c =diffBox.x+((diffBox.width-diffSW)/2);
         drawString(g,diffLbl, x5c, y5);
@@ -518,6 +524,11 @@ public final class SetupGalaxyUI  extends BasePanel implements MouseListener, Mo
         starting = true;
         Race r = Race.keyed(newGameOptions().selectedPlayerRace());
         GameUI.gameName = r.setupName()+ " - "+text(newGameOptions().selectedGalaxySize())+ " - "+text(newGameOptions().selectedGameDifficulty());
+        // modnar: add custom difficulty level option, set in Remnants.cfg
+        // append this custom difficulty percentage to gameName if selected
+        if (text(newGameOptions().selectedGameDifficulty()).equals("Custom")) {
+            GameUI.gameName = GameUI.gameName + " (" + Integer.toString(UserPreferences.customDifficulty()) + "%)";
+        }
         repaint();
         buttonClick();
         UserPreferences.setForNewGame();

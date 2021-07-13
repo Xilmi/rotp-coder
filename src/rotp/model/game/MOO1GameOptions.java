@@ -743,6 +743,8 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         list.add(DIFFICULTY_HARD);
         list.add(DIFFICULTY_HARDER);
         list.add(DIFFICULTY_HARDEST);
+        // modnar: add custom difficulty level option, set in Remnants.cfg
+        list.add(DIFFICULTY_CUSTOM);
         return list;
     }
     @Override

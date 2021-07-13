@@ -837,6 +837,11 @@ public final class GameSession implements Base, Serializable {
         String gShape = text(options().selectedGalaxyShape()).replaceAll("\\s", "");
         String gSize = text(options().selectedGalaxySize());
         String diff = text(options().selectedGameDifficulty());
+        // modnar: add custom difficulty level option, set in Remnants.cfg
+        // append this custom difficulty percentage to backup save file name if selected
+        if (diff.equals("Custom")) {
+            diff = diff + " (" + Integer.toString(UserPreferences.customDifficulty()) + "%)";
+        }
         String turn = "T"+pad4.format(num);
         String opp = "vs"+options().selectedNumberOpponents();
         String dash = "-";               
