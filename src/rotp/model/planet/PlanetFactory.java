@@ -67,6 +67,13 @@ public class PlanetFactory implements Base {
             p.terrainSeed(r.homeworldKey());
         return p;
     }
+    // modnar: add option to start game with additional colonies
+    // modnar: use orionPlanet (always Terran), always size-60
+    public static Planet createCompanionWorld(StarSystem sys, float bonus) {
+        Planet p = instance.options().orionPlanet(sys);
+        p.baseSize(60*bonus);
+        return p;
+    }
     private void loadDataFiles() {
         log("Loading Planet Types...");
         BufferedReader in = reader(planetListFile);

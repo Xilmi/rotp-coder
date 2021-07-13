@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import rotp.model.game.IGameOptions;
 import rotp.util.Base;
+import rotp.ui.UserPreferences; // modnar: add option to start game with additional colonies
 
 public abstract class GalaxyShape implements Base, Serializable {
     private static final long serialVersionUID = 1L;
@@ -77,7 +78,9 @@ public abstract class GalaxyShape implements Base, Serializable {
         }
     }
     public int numberStarSystems()            { return num; }
-    public int totalStarSystems()             { return num+homeStars;}
+    // modnar: add option to start game with additional colonies
+    // modnar: these colonies are in addition to number of stars chosen in galaxy
+    public int totalStarSystems()             { return num+homeStars+UserPreferences.companionWorlds()*(opts.selectedNumberOpponents()+1);}
     public List<EmpireSystem> empireSystems() { return empSystems; }
     public int empireSystemStars()            { return homeStars; }
     public float adjustedSizeFactor()        { return sizeFactor(opts.selectedGalaxySize()) + (genAttempt/3); }

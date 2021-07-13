@@ -410,6 +410,27 @@ public final class Colony implements Base, IMappedObject, Serializable {
         lab.recordConstruction(colony, 2);
 		}
     }
+    
+    // modnar: add option to start game with additional colonies
+    public void setCompanionWorldValues() {
+        Empire emp = empire();
+		
+		// modnar: normal resources for player or non-challengeMode
+		if (emp.isPlayer() || !challengeMode) {
+        setPopulation(30);
+        previousPopulation = population();
+        industry().factories(20);
+        industry().previousFactories(20);
+		}
+		// modnar: add extra starting resources, if challengeMode and AI
+		// increase pop/factories to approximately double initial production
+		if (emp.isAI() && challengeMode) {
+        setPopulation(50);
+        previousPopulation = population();
+        industry().factories(50);
+        industry().previousFactories(50);
+		}
+    }
 
     public void spreadRebellion() {
         inciteRebels(0.50f, "GNN_PLAYER_REBELLION_SPREAD");

@@ -73,6 +73,7 @@ public class UserPreferences {
     private static boolean challengeMode = false; // modnar: add option to give AI more initial resources
     private static boolean randomTechStart = false; // modnar: add option to start all Empires with 2 techs, no Artifacts
     private static boolean battleScout = false; // modnar: add battleScout option to give player super Scout design
+    private static int companionWorlds = 0; // modnar: add option to start game with additional colonies
     private static boolean autoColonize = false;
     private static String autoBombardMode = AUTOBOMBARD_NO;
     private static String displayMode = WINDOW_MODE;
@@ -100,6 +101,7 @@ public class UserPreferences {
         challengeMode = false; // modnar: add option to give AI more initial resources
         randomTechStart = false; // modnar: add option to start all Empires with 2 techs, no Artifacts
         battleScout = false; // modnar: add battleScout option to give player super Scout design
+        companionWorlds = 0; // modnar: add option to start game with additional colonies
         saveDir = "";
         uiTexturePct = 0.20f;
         showMemory = false;
@@ -206,6 +208,7 @@ public class UserPreferences {
     public static boolean challengeMode()    { return challengeMode; } // modnar: add option to give AI more initial resources
     public static boolean randomTechStart()  { return randomTechStart; } // modnar: add option to start all Empires with 2 techs, no Artifacts
     public static boolean battleScout()      { return battleScout; } // modnar: add battleScout option to give player super Scout design
+    public static int companionWorlds()      { return companionWorlds; } // modnar: add option to start game with additional colonies
     public static int screenSizePct()       { return screenSizePct; }
     public static void screenSizePct(int i) { setScreenSizePct(i); }
     public static String saveDirectoryPath() {
@@ -296,6 +299,7 @@ public class UserPreferences {
             out.println(keyFormat("CHALLENGE_MODE")+ yesOrNo(challengeMode)); // modnar: add option to give AI more initial resources
             out.println(keyFormat("RANDOM_TECH_START")+ yesOrNo(randomTechStart)); // modnar: add option to start all Empires with 2 techs, no Artifacts
             out.println(keyFormat("BATTLE_SCOUT")+ yesOrNo(battleScout)); // modnar: add battleScout option to give player super Scout design
+            out.println(keyFormat("COMPANION_WORLDS")+ companionWorlds); // modnar: add option to start game with additional colonies
             out.println(keyFormat("LANGUAGE")+ languageDir());
             for (String raceKey: raceKeys) 
               out.println(keyFormat(raceKey)+raceNames.get(raceKey));
@@ -348,6 +352,7 @@ public class UserPreferences {
             case "CHALLENGE_MODE": challengeMode = yesOrNo(val); return; // modnar: add option to give AI more initial resources
             case "RANDOM_TECH_START": randomTechStart = yesOrNo(val); return; // modnar: add option to start all Empires with 2 techs, no Artifacts
             case "BATTLE_SCOUT": battleScout = yesOrNo(val); return; // modnar: add battleScout option to give player super Scout design
+            case "COMPANION_WORLDS": setNumCompanionWorlds(val); return; // modnar: add option to start game with additional colonies
             case "LANGUAGE":     selectLanguage(val); return;
             default:
                 raceNames.put(key, val); break;
@@ -361,6 +366,11 @@ public class UserPreferences {
     }
     private static void selectLanguage(String s) {
         LanguageManager.selectLanguage(s);
+    }
+    // modnar: add option to start game with additional colonies
+    private static void setNumCompanionWorlds(String s) {
+        int val = Integer.valueOf(s);
+        companionWorlds = Math.max(0, Math.min(4, val)); // max number of companion worlds is 4
     }
     // modnar: add custom difficulty level option, in units of percent
     private static void setCustomDifficulty(String s) {

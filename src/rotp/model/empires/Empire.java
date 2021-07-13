@@ -105,6 +105,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     private TechTree tech = new TechTree();
     private final ShipDesignLab shipLab;
     private final int homeSysId;
+    private final int[] compSysId; // modnar: add option to start game with additional colonies
     private int capitalSysId;
     public final SystemInfo sv;
     private final EmpireView[] empireViews;
@@ -182,6 +183,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     public EmpireStatus status()                  { return status; }
     public int homeSysId()                        { return homeSysId; }
     public int capitalSysId()                     { return capitalSysId; }
+    public int compSysId(int i)                   { return compSysId[i]; } // modnar: add option to start game with additional colonies
     public String unparsedRaceName()              { return race().nameVariant(raceNameIndex); }
     public String raceName()                      { return raceName(0); }
     public String raceName(int i) {
@@ -379,11 +381,14 @@ public final class Empire implements Base, NamedObject, Serializable {
         }
         return reachColor;
     }
-    public Empire(Galaxy g, int empId, String rk, StarSystem s, Integer cId, String name) {
+    // modnar: add option to start game with additional colonies
+    // modnar: compId is the System ID array for these additional colonies
+    public Empire(Galaxy g, int empId, String rk, StarSystem s, int[] compId, Integer cId, String name) {
         log("creating empire for ",  rk);
         id = empId;
         raceKey = rk;
-        homeSysId = capitalSysId = s.id;     
+        homeSysId = capitalSysId = s.id;
+        compSysId = compId; // modnar: add option to start game with additional colonies
         empireViews = new EmpireView[options().selectedNumberOpponents()+1];
         status = new EmpireStatus(this);
         sv = new SystemInfo(this);
@@ -681,6 +686,18 @@ public final class Empire implements Base, NamedObject, Serializable {
         governorAI().setInitialAllocations(c);
         sv.refreshFullScan(homeSysId);
         return c;
+    }
+    // modnar: add option to start game with additional colonies
+    public Colony colonizeCompanionWorld(int sysId) {
+        StarSystem sys1 = galaxy().system(sysId);
+        sys1.addEvent(new SystemColonizedEvent(id));
+        newSystems.add(sys1);
+        colonizedSystems.add(sys1);
+        Colony c1 = sys1.becomeColonized(sys1.name(), this);
+        c1.setCompanionWorldValues();
+        governorAI().setInitialAllocations(c1);
+        sv.refreshFullScan(sys1.id);
+        return c1;
     }
     public boolean isHomeworld(StarSystem sys) {
         return sys.id == homeSysId;

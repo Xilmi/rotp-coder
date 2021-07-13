@@ -131,6 +131,11 @@ public class GalaxyFactory implements Base {
 
         for (Empire e: g.empires()) {
             e.colonizeHomeworld();
+            // modnar: add option to start game with additional colonies
+            // modnar: colonize these 0 to 4 additional colonies
+            for (int i=0; i<UserPreferences.companionWorlds(); i++) {
+                e.colonizeCompanionWorld(e.compSysId(i));
+            }
         }
         long tm3c = System.currentTimeMillis();
         log("colonize homeworld: "+(tm3c-tm3b)+"ms");
@@ -216,8 +221,28 @@ public class GalaxyFactory implements Base {
         sys.name(systemName);
         g.addStarSystem(sys);
 
+        // modnar: add option to start game with additional colonies
+        // between 0 to 4 additional colonies, set in UserPreferences
+        int numCompWorlds = UserPreferences.companionWorlds();
+        List<StarSystem> compSystems;
+        int[] pmQuadA = new int[]{ 2,2,1,1 }; // companion world location, plus/minus quadrants
+        int[] pmQuadB = new int[]{ 2,1,2,1 }; // companion world location, plus/minus quadrants
+        String[] compSysName = new String[]{"α", "β", "γ", "δ"}; // companion world greek letter prefix
+        int[] compSysId = new int[numCompWorlds];
+        if (numCompWorlds > 0) { 
+            for (int i=0; i<numCompWorlds; i++) {
+                StarSystem sysComp = StarSystemFactory.current().newCompanionSystemForRace(g);
+                sysComp.setXY(empSystem.colonyX() + (float)Math.pow(-1, pmQuadA[i])*0.7f, empSystem.colonyY() + (float)Math.pow(-1, pmQuadB[i])*0.7f); // companion world within one ly distance to homeworld
+                sysComp.name(compSysName[i]+" "+systemName); // companion world greek letter prefix
+                g.addStarSystem(sysComp);
+                compSysId[i] = sysComp.id;
+            }
+        }
+        
         // add Empire to galaxy
-        Empire emp = new Empire(g, id, raceKey, sys, color, leaderName);
+        // modnar: add option to start game with additional colonies
+        // modnar: compSysId is the System ID array for these additional colonies
+        Empire emp = new Empire(g, id, raceKey, sys, compSysId, color, leaderName);
         g.addEmpire(emp);
 
         //log("Adding star system: ", sys.name(), " - ", playerRace.id, " : ", fmt(sys.x(),2), "@", fmt(sys.y(),2));
@@ -269,7 +294,28 @@ public class GalaxyFactory implements Base {
             sys.setXY(empSystem.colonyX(), empSystem.colonyY());
             sys.name(r.nextAvailableHomeworld());
             g.addStarSystem(sys);
-            Empire emp = new Empire(g, empId, r.id, sys, colorId, null);
+            
+            // modnar: add option to start game with additional colonies
+            // between 0 to 4 additional colonies, set in UserPreferences
+            int numCompWorlds = UserPreferences.companionWorlds();
+            List<StarSystem> compSystems;
+            int[] pmQuadA = new int[]{ 2,2,1,1 }; // companion world location, plus/minus quadrants
+            int[] pmQuadB = new int[]{ 2,1,2,1 }; // companion world location, plus/minus quadrants
+            String[] compSysName = new String[]{"α", "β", "γ", "δ"}; // companion world greek letter prefix
+            int[] compSysId = new int[numCompWorlds];
+            if (numCompWorlds > 0) { 
+                for (int i=0; i<numCompWorlds; i++) {
+                    StarSystem sysComp = StarSystemFactory.current().newCompanionSystemForRace(g);
+                    sysComp.setXY(empSystem.colonyX() + (float)Math.pow(-1, pmQuadA[i])*0.7f, empSystem.colonyY() + (float)Math.pow(-1, pmQuadB[i])*0.7f); // companion world within one ly distance to homeworld
+                    sysComp.name(compSysName[i]+" "+sys.name()); // companion world greek letter prefix
+                    g.addStarSystem(sysComp);
+                    compSysId[i] = sysComp.id;
+                }
+            }
+            
+            // modnar: add option to start game with additional colonies
+            // modnar: compSysId is the System ID array for these additional colonies
+            Empire emp = new Empire(g, empId, r.id, sys, compSysId, colorId, null);
             g.addEmpire(emp);
             empId++;
             // create two nearby system within 3 light-years (required to be at least 1 habitable)

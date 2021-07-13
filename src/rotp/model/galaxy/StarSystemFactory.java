@@ -55,4 +55,13 @@ public class StarSystemFactory implements Base {
         sys.planet(PlanetFactory.createHomeworld(r, sys, session().populationBonus()));
         return sys;
     }
+    // modnar: add option to start game with additional colonies
+    // modnar: use orion star type (red, orange, yellow)
+    public StarSystem newCompanionSystemForRace(Galaxy gal) {
+        IGameOptions opts = GameSession.instance().options();
+        String type = opts.randomOrionStarType();
+        StarSystem sys = StarSystem.create(type, gal);
+        sys.planet(PlanetFactory.createCompanionWorld(sys, session().populationBonus()));
+        return sys;
+    }
 }
