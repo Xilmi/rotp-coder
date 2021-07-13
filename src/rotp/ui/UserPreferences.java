@@ -68,6 +68,7 @@ public class UserPreferences {
     private static int soundVolume = 10;
     private static boolean displayYear = true;
     private static int customDifficulty = 100; // mondar: add custom difficulty level option, in units of percent
+    private static boolean dynamicDifficulty = false; // modnar: add dynamic difficulty option, change AI colony production
     private static boolean alwaysStarGates = false; // modnar: add option to always have Star Gates tech
     private static boolean alwaysThorium = false; // modnar: add option to always have Thorium Cells tech
     private static boolean challengeMode = false; // modnar: add option to give AI more initial resources
@@ -96,6 +97,7 @@ public class UserPreferences {
         screenSizePct = 93;
         backupTurns = 5; // modnar: change default turns between backups to 5
         customDifficulty = 100; // mondar: add custom difficulty level option, in units of percent
+        dynamicDifficulty = false; // modnar: add dynamic difficulty option, change AI colony production
         alwaysStarGates = false; // modnar: add option to always have Star Gates tech
         alwaysThorium = false; // modnar: add option to always have Thorium Cells tech
         challengeMode = false; // modnar: add option to give AI more initial resources
@@ -203,6 +205,7 @@ public class UserPreferences {
     public static boolean playMusic()       { return playMusic; }
     public static void toggleMusic()        { playMusic = !playMusic; save();  }
     public static int customDifficulty()     { return customDifficulty; } // mondar: add custom difficulty level option, in units of percent
+    public static boolean dynamicDifficulty() { return dynamicDifficulty; } // modnar: add dynamic difficulty option, change AI colony production
     public static boolean alwaysStarGates()  { return alwaysStarGates; } // modnar: add option to always have Star Gates tech
     public static boolean alwaysThorium()    { return alwaysThorium; } // modnar: add option to always have Thorium Cells tech
     public static boolean challengeMode()    { return challengeMode; } // modnar: add option to give AI more initial resources
@@ -294,6 +297,7 @@ public class UserPreferences {
             out.println(keyFormat("SCREEN_SIZE_PCT")+ screenSizePct());
             out.println(keyFormat("UI_TEXTURE_LEVEL")+(int) (uiTexturePct()*100));
             out.println(keyFormat("CUSTOM_DIFFICULTY")+ customDifficulty); // mondar: add custom difficulty level option, in units of percent
+            out.println(keyFormat("DYNAMIC_DIFFICULTY")+ yesOrNo(dynamicDifficulty)); // modnar: add dynamic difficulty option, change AI colony production
             out.println(keyFormat("ALWAYS_STAR_GATES")+ yesOrNo(alwaysStarGates)); // modnar: add option to always have Star Gates tech
             out.println(keyFormat("ALWAYS_THORIUM")+ yesOrNo(alwaysThorium)); // modnar: add option to always have Thorium Cells tech
             out.println(keyFormat("CHALLENGE_MODE")+ yesOrNo(challengeMode)); // modnar: add option to give AI more initial resources
@@ -347,6 +351,7 @@ public class UserPreferences {
             case "SCREEN_SIZE_PCT": screenSizePct(Integer.valueOf(val)); return;
             case "UI_TEXTURE_LEVEL": uiTexturePct(Integer.valueOf(val)); return;
             case "CUSTOM_DIFFICULTY": setCustomDifficulty(val); return; // mondar: add custom difficulty level option, in units of percent
+            case "DYNAMIC_DIFFICULTY": dynamicDifficulty = yesOrNo(val); return; // modnar: add dynamic difficulty option, change AI colony production
             case "ALWAYS_STAR_GATES": alwaysStarGates = yesOrNo(val); return; // modnar: add option to always have Star Gates tech
             case "ALWAYS_THORIUM": alwaysThorium = yesOrNo(val); return; // modnar: add option to always have Thorium Cells tech
             case "CHALLENGE_MODE": challengeMode = yesOrNo(val); return; // modnar: add option to give AI more initial resources

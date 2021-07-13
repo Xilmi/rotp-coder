@@ -797,6 +797,60 @@ public final class Colony implements Base, IMappedObject, Serializable {
     public float production() {
         if (inRebellion())
             return 0.0f;
+        
+        // modnar: add dynamic difficulty option, change AI colony production
+        float dynaMod = 1.0f;
+        if (UserPreferences.dynamicDifficulty() && !(galaxy().currentTurn() < 5)) {
+            // scale with relative empire industrialPowerLevel (production*tech) compared with player
+            // use custom created nonDynaIndPowerLevel, to avoid infinite recursion
+            float empIndPowerLevel = empire.nonDynaIndPowerLevel(empire());
+            float playerIndPowerLevel = empire.nonDynaIndPowerLevel(player());
+            // r_empInd > 1 means more powerful than player, r_empInd < 1 means less powerful than player
+            float r_empInd = empIndPowerLevel / playerIndPowerLevel;
+            
+            /*
+            // relative empire industrialPowerLevel compared with galactic average
+            float galIndPowerLevel = 0.0f;
+            for (Empire emp: galaxy().empires()) {
+                galIndPowerLevel += emp.nonDynaIndPowerLevel(emp);                 
+            }
+            // multiply numActiveEmpires to assess against balanced power distribution relative to galaxy
+            // r_empInd > 1 means more powerful than average, r_empInd < 1 means less powerful than average
+            float r_empInd = galaxy().numActiveEmpires() * empIndPowerLevel / galIndPowerLevel;
+            */
+            
+            // scale with turns, between 0 to 1, ramp up at around turn 150
+            // (little to no dynamic production change in early turns)
+            // turnMod(0)=2.12%, turnMod(50)=3.17%, turnMod(100)=6.28%, turnMod(150)=50.0%, turnMod(200)=93.7%, 
+            float turnMod = (float) (0.5f + Math.atan(galaxy().currentTurn()/10 - 15)/Math.PI);
+            
+            // scaling with base function: f(x) = x^3/(x^2+1), asymptotically approach f(x)=x, with flattening near x=0
+            // adjust scaling with base function: g(x) = 1-1/(x+1), to get g(0)=0
+            float scaleMod;
+            if (r_empInd > 1.0f) {
+                scaleMod = (float) ((1 + Math.pow(r_empInd-1, 3) / (Math.pow(r_empInd-1, 2) + 0.25f)) / r_empInd);
+            }
+            else {
+                scaleMod = (float) ((1.01f - 1.01f/(100*r_empInd+1)) * (1 + Math.pow(r_empInd-1, 3) / (Math.pow(r_empInd-1, 2) + 0.25f)) / r_empInd);
+            }
+            
+            // put it all together with: h(x,t) = 1+(scaleMod-1)*turnMod, h(x,t) will then multiply onto mod
+            // at turns << 150, turnMod ~ 0, h(x,t) ~ 1
+            // at turns >> 150, turnMod ~ 1, h(x,t) ~ scaleMod
+            dynaMod = 1.0f + (scaleMod - 1.0f) * turnMod;
+        }
+        
+        float mod = empire().isPlayer() ? 1.0f : (options().aiProductionModifier()*dynaMod);
+        
+        float workerProd = workingPopulation() * empire.workerProductivity();
+        float factoryOutput = mod*(workerProd + usedFactories());
+        return factoryOutput - transportCost();
+    }
+    // modnar: add dynamic difficulty option, change AI colony production
+    // create unscaled production, nonDynaProd, to avoid infinite recursion
+    public float nonDynaProd() {
+        if (inRebellion())
+            return 0.0f;
         float mod = empire().isPlayer() ? 1.0f : options().aiProductionModifier();
         float workerProd = workingPopulation() * empire.workerProductivity();
         float factoryOutput = mod*(workerProd + usedFactories());

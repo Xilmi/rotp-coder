@@ -2327,6 +2327,14 @@ public final class Empire implements Base, NamedObject, Serializable {
         float techLvl = t0.avgTechLevel();
         return prod*techLvl;
     }
+    // modnar: add dynamic difficulty option, change AI colony production
+    // create unscaled production power level, to avoid infinite recursion
+    public float nonDynaIndPowerLevel(Empire e) {
+        TechTree t0 = e == this ? tech() : viewForEmpire(e).spies().tech();
+        float prod = nonDynaTotalProd(e);
+        float techLvl = t0.avgTechLevel();
+        return prod*techLvl;
+    }
     public void clearDataForExtinctEmpire(int empId) {
         EmpireView view = viewForEmpire(empId);
         view.spies().shutdownSpyNetworks();
@@ -3262,6 +3270,29 @@ public final class Empire implements Base, NamedObject, Serializable {
         for (int i=0; i<sv.count(); i++) {
             if ((sv.empire(i) == emp) && (sv.colony(i) != null))
                 totalProductionBC += sv.colony(i).production();
+        }
+        return totalProductionBC;
+    }
+    // modnar: add dynamic difficulty option, change AI colony production
+    // create unscaled production, nonDynaTotalProd, to avoid infinite recursion
+    public Float nonDynaTotalProd() {
+        if (totalEmpireProduction <= 0) {
+            float totalProductionBC = 0;
+            List<StarSystem> systems = new ArrayList<>(allColonizedSystems());
+            for (StarSystem sys: systems) 
+                totalProductionBC += sys.colony().nonDynaProd();
+            totalEmpireProduction = totalProductionBC;
+        }
+        return totalEmpireProduction;
+    }
+    public float nonDynaTotalProd(Empire emp) {
+        if (emp == this)
+            return nonDynaTotalProd();
+
+        float totalProductionBC = 0;
+        for (int i=0; i<sv.count(); i++) {
+            if ((sv.empire(i) == emp) && (sv.colony(i) != null))
+                totalProductionBC += sv.colony(i).nonDynaProd();
         }
         return totalProductionBC;
     }
