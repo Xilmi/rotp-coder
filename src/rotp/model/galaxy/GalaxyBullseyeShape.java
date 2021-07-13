@@ -42,6 +42,7 @@ public class GalaxyBullseyeShape extends GalaxyShape {
     
     Shape circle, square, arc;
 	Area totalArea, circleArea, squareArea, arcArea;
+    float adjust_density = 1.0f;
 	
     public GalaxyBullseyeShape(IGameOptions options) {
         opts = options;
@@ -61,13 +62,17 @@ public class GalaxyBullseyeShape extends GalaxyShape {
         int option1 = max(0, options1.indexOf(opts.selectedGalaxyShapeOption1()));
         //int option2 = max(0, options2.indexOf(opts.selectedGalaxyShapeOption2()));
 		
-		float gE = (float) galaxyEdgeBuffer();
-		float gW = (float) galaxyWidthLY();
-		float gH = (float) galaxyHeightLY();
-		
 		// modnar: different bullseye/target configurations with options1
         switch(option1) {
             case 0: { // standard dart board, exclusiveOr
+                adjust_density = 1.4f;
+                // reset w/h vars since aspect ratio may have changed
+                initWidthHeight();
+                
+                float gE = (float) galaxyEdgeBuffer();
+                float gW = (float) galaxyWidthLY();
+                float gH = (float) galaxyHeightLY();
+                
                 // number of arc sections in the dart board
                 int nArcs = (int) Math.min(20, Math.ceil(Math.sqrt(opts.numberStarSystems())/4.0f));
                 
@@ -106,6 +111,14 @@ public class GalaxyBullseyeShape extends GalaxyShape {
                 break;
             }
             case 1: { // concentric ring target
+                adjust_density = 1.0f;
+                // reset w/h vars since aspect ratio may have changed
+                initWidthHeight();
+                
+                float gE = (float) galaxyEdgeBuffer();
+                float gW = (float) galaxyWidthLY();
+                float gH = (float) galaxyHeightLY();
+                
                 // number of rings/halos
                 int nRings = (int) Math.min(200, Math.floor(Math.sqrt(opts.numberStarSystems())/2.5f));
                 
@@ -139,6 +152,14 @@ public class GalaxyBullseyeShape extends GalaxyShape {
                 break;
             }
             case 2: { // concentric square target
+                adjust_density = 1.0f;
+                // reset w/h vars since aspect ratio may have changed
+                initWidthHeight();
+                
+                float gE = (float) galaxyEdgeBuffer();
+                float gW = (float) galaxyWidthLY();
+                float gH = (float) galaxyHeightLY();
+                
                 // number of rings/halos
                 int nRings = (int) Math.min(200, Math.floor(Math.sqrt(opts.numberStarSystems())/3));
                 
@@ -172,19 +193,16 @@ public class GalaxyBullseyeShape extends GalaxyShape {
                 break;
             }
         }
-        
-        // reset w/h vars since aspect ratio may have changed
-        initWidthHeight();
     }
     @Override
     public float maxScaleAdj()               { return 1.0f; }
     @Override
     protected int galaxyWidthLY() { 
-        return (int) (Math.sqrt(opts.numberStarSystems()*adjustedSizeFactor()));
+        return (int) (Math.sqrt(adjust_density*opts.numberStarSystems()*adjustedSizeFactor()));
     }
     @Override
     protected int galaxyHeightLY() { 
-        return (int) (Math.sqrt(opts.numberStarSystems()*adjustedSizeFactor()));
+        return (int) (Math.sqrt(adjust_density*opts.numberStarSystems()*adjustedSizeFactor()));
     }
     @Override
     public void setRandom(Point.Float pt) {
