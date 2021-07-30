@@ -800,11 +800,12 @@ public final class Colony implements Base, IMappedObject, Serializable {
         
         // modnar: add dynamic difficulty option, change AI colony production
         float dynaMod = 1.0f;
+        float scaleMod = 1.0f;
         if (UserPreferences.dynamicDifficulty() && !(galaxy().currentTurn() < 5)) {
             // scale with relative empire industrialPowerLevel (production*tech) compared with player
             // use custom created nonDynaIndPowerLevel, to avoid infinite recursion
-            float empIndPowerLevel = empire.nonDynaIndPowerLevel(empire());
-            float playerIndPowerLevel = empire.nonDynaIndPowerLevel(player());
+            float empIndPowerLevel = empire().nonDynaIndPowerLevel();
+            float playerIndPowerLevel = player().nonDynaIndPowerLevel();
             // r_empInd > 1 means more powerful than player, r_empInd < 1 means less powerful than player
             float r_empInd = empIndPowerLevel / playerIndPowerLevel;
             
@@ -826,7 +827,6 @@ public final class Colony implements Base, IMappedObject, Serializable {
             
             // scaling with base function: f(x) = x^3/(x^2+1), asymptotically approach f(x)=x, with flattening near x=0
             // adjust scaling with base function: g(x) = 1-1/(x+1), to get g(0)=0
-            float scaleMod;
             if (r_empInd > 1.0f) {
                 scaleMod = (float) ((1 + Math.pow(r_empInd-1, 3) / (Math.pow(r_empInd-1, 2) + 0.25f)) / r_empInd);
             }

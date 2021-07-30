@@ -157,6 +157,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     private transient Color scoutBorderColor;
     private transient Color empireRangeColor;
     private transient float totalEmpireProduction;
+    private transient float totalEmpireNonDynaProduction; // modnar: create unscaled production, to avoid infinite recursion
     private transient float totalEmpireShipMaintenanceCost;
     private transient float totalEmpireStargateCost;
     private transient float totalEmpireMissileBaseCost;
@@ -2329,10 +2330,9 @@ public final class Empire implements Base, NamedObject, Serializable {
     }
     // modnar: add dynamic difficulty option, change AI colony production
     // create unscaled production power level, to avoid infinite recursion
-    public float nonDynaIndPowerLevel(Empire e) {
-        TechTree t0 = e == this ? tech() : viewForEmpire(e).spies().tech();
-        float prod = nonDynaTotalProd(e);
-        float techLvl = t0.avgTechLevel();
+    public float nonDynaIndPowerLevel() {
+        float prod = nonDynaTotalProd();
+        float techLvl = tech().avgTechLevel();
         return prod*techLvl;
     }
     public void clearDataForExtinctEmpire(int empId) {
@@ -3247,6 +3247,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     }
     public void recalcPlanetaryProduction() {
         totalEmpireProduction = -999;
+        totalEmpireNonDynaProduction = -999;
         totalEmpireShipMaintenanceCost = -999;
         totalEmpireStargateCost = -999;
         totalEmpireMissileBaseCost = -999;
@@ -3276,14 +3277,14 @@ public final class Empire implements Base, NamedObject, Serializable {
     // modnar: add dynamic difficulty option, change AI colony production
     // create unscaled production, nonDynaTotalProd, to avoid infinite recursion
     public Float nonDynaTotalProd() {
-        if (totalEmpireProduction <= 0) {
+        if (totalEmpireNonDynaProduction <= 0) {
             float totalProductionBC = 0;
             List<StarSystem> systems = new ArrayList<>(allColonizedSystems());
             for (StarSystem sys: systems) 
                 totalProductionBC += sys.colony().nonDynaProd();
-            totalEmpireProduction = totalProductionBC;
+            totalEmpireNonDynaProduction = totalProductionBC;
         }
-        return totalEmpireProduction;
+        return totalEmpireNonDynaProduction;
     }
     public float nonDynaTotalProd(Empire emp) {
         if (emp == this)
