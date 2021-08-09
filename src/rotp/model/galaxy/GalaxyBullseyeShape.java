@@ -24,6 +24,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import rotp.model.game.IGameOptions;
 
 // modnar: custom map shape, Bullseye
@@ -42,7 +43,7 @@ public class GalaxyBullseyeShape extends GalaxyShape {
     
     Shape circle, square, arc;
 	Area totalArea, circleArea, squareArea, arcArea;
-    float adjust_density = 1.0f;
+    float adjust_density = 2.0f;
 	
     public GalaxyBullseyeShape(IGameOptions options) {
         opts = options;
@@ -65,7 +66,7 @@ public class GalaxyBullseyeShape extends GalaxyShape {
 		// modnar: different bullseye/target configurations with options1
         switch(option1) {
             case 0: { // standard dart board, exclusiveOr
-                adjust_density = 1.4f;
+                adjust_density = 2.0f;
                 // reset w/h vars since aspect ratio may have changed
                 initWidthHeight();
                 
@@ -111,7 +112,7 @@ public class GalaxyBullseyeShape extends GalaxyShape {
                 break;
             }
             case 1: { // concentric ring target
-                adjust_density = 1.0f;
+                adjust_density = 1.4f;
                 // reset w/h vars since aspect ratio may have changed
                 initWidthHeight();
                 
@@ -152,7 +153,7 @@ public class GalaxyBullseyeShape extends GalaxyShape {
                 break;
             }
             case 2: { // concentric square target
-                adjust_density = 1.0f;
+                adjust_density = 1.2f;
                 // reset w/h vars since aspect ratio may have changed
                 initWidthHeight();
                 
@@ -206,8 +207,19 @@ public class GalaxyBullseyeShape extends GalaxyShape {
     }
     @Override
     public void setRandom(Point.Float pt) {
-        pt.x = randomLocation(width, galaxyEdgeBuffer());
-        pt.y = randomLocation(height, galaxyEdgeBuffer());
+        // modnar: use quasi-random low-discrepancy additive recurrence sequence instead of random()
+        // based on generalised golden ratio values, in 2D this is the plastic number
+        // http://extremelearning.com.au/unreasonable-effectiveness-of-quasirandom-sequences/
+        // currently not better than random(), but could in principle allow better separated star systems
+        
+        double c1 = 0.7548776662466927600495; // inverse of plastic number
+        double c2 = 0.5698402909980532659114; // square inverse of plastic number
+        
+        Random rand = new Random();
+        int rand_int = rand.nextInt(20*opts.numberStarSystems());
+        
+        pt.x = galaxyEdgeBuffer() + (width - 2*galaxyEdgeBuffer()) * (float)( (0.5 + c1*rand_int)%1 );
+        pt.y = galaxyEdgeBuffer() + (height - 2*galaxyEdgeBuffer()) * (float)( (0.5 + c2*rand_int)%1 );
     }
     @Override
     public boolean valid(float x, float y) {

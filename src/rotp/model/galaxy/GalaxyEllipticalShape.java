@@ -20,6 +20,7 @@ import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import rotp.model.game.IGameOptions;
 
 public class GalaxyEllipticalShape extends GalaxyShape {
@@ -42,6 +43,7 @@ public class GalaxyEllipticalShape extends GalaxyShape {
     }
 
     Shape ellipse, hole;
+    float adjust_density = 1.0f; // modnar: adjust stellar density
     float ellipseRatio = 2.0f;
     float voidSize = 0.0f;
 	
@@ -82,6 +84,10 @@ public class GalaxyEllipticalShape extends GalaxyShape {
             case 4: voidSize = 0.8f; break;
             default: voidSize = 0.0f; break;
         }
+        
+        // modnar: account for void size
+        adjust_density = 1.0f / (1.0f - voidSize*voidSize);
+        
         // reset w/h vars since aspect ratio may have changed
         initWidthHeight();
         
@@ -102,16 +108,27 @@ public class GalaxyEllipticalShape extends GalaxyShape {
     }
     @Override
     protected int galaxyWidthLY() { 
-        return (int) (Math.sqrt(ellipseRatio*maxStars*adjustedSizeFactor()));
+        return (int) (Math.sqrt(adjust_density*ellipseRatio*maxStars*adjustedSizeFactor()));
     }
     @Override
     protected int galaxyHeightLY() { 
-        return (int) (Math.sqrt((1/ellipseRatio)*maxStars*adjustedSizeFactor()));
+        return (int) (Math.sqrt(adjust_density*(1/ellipseRatio)*maxStars*adjustedSizeFactor()));
     }
     @Override
     public void setRandom(Point.Float pt) {
-        pt.x = randomLocation(width, galaxyEdgeBuffer());
-        pt.y = randomLocation(height, galaxyEdgeBuffer());
+        // modnar: use quasi-random low-discrepancy additive recurrence sequence instead of random()
+        // based on generalised golden ratio values, in 2D this is the plastic number
+        // http://extremelearning.com.au/unreasonable-effectiveness-of-quasirandom-sequences/
+        // currently not better than random(), but could in principle allow better separated star systems
+        
+        double c1 = 0.7548776662466927600495; // inverse of plastic number
+        double c2 = 0.5698402909980532659114; // square inverse of plastic number
+        
+        Random rand = new Random();
+        int rand_int = rand.nextInt(20*opts.numberStarSystems());
+        
+        pt.x = galaxyEdgeBuffer() + (width - 2*galaxyEdgeBuffer()) * (float)( (0.5 + c1*rand_int)%1 );
+        pt.y = galaxyEdgeBuffer() + (height - 2*galaxyEdgeBuffer()) * (float)( (0.5 + c2*rand_int)%1 );
     }
     @Override
     public boolean valid(float x, float y) {

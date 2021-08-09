@@ -22,6 +22,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import rotp.model.game.IGameOptions;
 
 public class GalaxyRectangularShape extends GalaxyShape {
@@ -42,7 +43,7 @@ public class GalaxyRectangularShape extends GalaxyShape {
 	
     Shape block, circle;
 	Area totalArea, blockArea, circleArea;
-	float adjust_density = 0.9f; // modnar: adjust stellar density
+	float adjust_density = 0.75f; // modnar: adjust stellar density
     float rectangleRatio = 4.0f/3.0f;
     int voids = 0;
 	
@@ -85,7 +86,7 @@ public class GalaxyRectangularShape extends GalaxyShape {
         switch(option2) {
             case 0: {
                 // no voids
-                adjust_density = 0.9f;
+                adjust_density = 0.75f;
                 // reset w/h vars since aspect ratio may have changed
                 initWidthHeight();
                 
@@ -100,7 +101,7 @@ public class GalaxyRectangularShape extends GalaxyShape {
             }
             case 1: {
                 // single large central void
-                adjust_density = 1.9f;
+                adjust_density = 1.75f;
                 // reset w/h vars since aspect ratio may have changed
                 initWidthHeight();
                 
@@ -119,7 +120,7 @@ public class GalaxyRectangularShape extends GalaxyShape {
             }
             case 2: {
                 // two diagonal voids
-                adjust_density = 1.9f;
+                adjust_density = 1.2f;
                 // reset w/h vars since aspect ratio may have changed
                 initWidthHeight();
                 
@@ -142,7 +143,7 @@ public class GalaxyRectangularShape extends GalaxyShape {
             }
             case 3: {
                 // five separated voids
-                adjust_density = 1.9f;
+                adjust_density = 1.5f;
                 // reset w/h vars since aspect ratio may have changed
                 initWidthHeight();
                 
@@ -188,8 +189,19 @@ public class GalaxyRectangularShape extends GalaxyShape {
     }
     @Override
     public void setRandom(Point.Float pt) {
-        pt.x = randomLocation(width, galaxyEdgeBuffer());
-        pt.y = randomLocation(height, galaxyEdgeBuffer());
+        // modnar: use quasi-random low-discrepancy additive recurrence sequence instead of random()
+        // based on generalised golden ratio values, in 2D this is the plastic number
+        // http://extremelearning.com.au/unreasonable-effectiveness-of-quasirandom-sequences/
+        // currently not better than random(), but could in principle allow better separated star systems
+        
+        double c1 = 0.7548776662466927600495; // inverse of plastic number
+        double c2 = 0.5698402909980532659114; // square inverse of plastic number
+        
+        Random rand = new Random();
+        int rand_int = rand.nextInt(20*opts.numberStarSystems());
+        
+        pt.x = galaxyEdgeBuffer() + (width - 2*galaxyEdgeBuffer()) * (float)( (0.5 + c1*rand_int)%1 );
+        pt.y = galaxyEdgeBuffer() + (height - 2*galaxyEdgeBuffer()) * (float)( (0.5 + c2*rand_int)%1 );
     }
     @Override
     public boolean valid(float x, float y) {
