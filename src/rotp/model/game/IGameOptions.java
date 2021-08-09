@@ -115,6 +115,9 @@ public interface IGameOptions {
     public static final String STAR_DENSITY_HIGHER   = "SETUP_STAR_DENSITY_HIGHER";
     public static final String STAR_DENSITY_HIGHEST  = "SETUP_STAR_DENSITY_HIGHEST";
     
+    // modnar: change PLANET_QUALITY settings, add larger and richer
+    public static final String PLANET_QUALITY_LARGER = "SETUP_PLANET_QUALITY_LARGER";
+    public static final String PLANET_QUALITY_RICHER = "SETUP_PLANET_QUALITY_RICHER";
     public static final String PLANET_QUALITY_POOR   = "SETUP_PLANET_QUALITY_POOR";
     public static final String PLANET_QUALITY_MEDIOCRE  = "SETUP_PLANET_QUALITY_MEDIOCRE";
     public static final String PLANET_QUALITY_NORMAL = "SETUP_PLANET_QUALITY_NORMAL";
@@ -563,6 +566,15 @@ public interface IGameOptions {
             case DIFFICULTY_EASIER:  return 0.85f;
             case DIFFICULTY_EASY:    return 1.0f;
             case DIFFICULTY_CUSTOM:  return (float)(Math.min(1.0f, 0.01f*UserPreferences.customDifficulty()));
+            default: return 1.0f;
+        }
+    }
+    // modnar: change PLANET_QUALITY settings, set planet size bonus, 150% for LARGER, 80% for RICHER
+    default float planetSizeBonus() {
+        switch(selectedPlanetQualityOption()) {
+            case PLANET_QUALITY_LARGER:   return 1.5f;
+            case PLANET_QUALITY_RICHER:   return 0.8f;
+            case PLANET_QUALITY_NORMAL:   return 1.0f;
             default: return 1.0f;
         }
     }

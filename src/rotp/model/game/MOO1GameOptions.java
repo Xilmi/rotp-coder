@@ -606,6 +606,9 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         }
 
         float r = random();
+        
+        // modnar: change PLANET_QUALITY settings, comment out poor to great settings
+        /*
         switch(selectedPlanetQualityOption()) {
             case PLANET_QUALITY_POOR:     r = random() * 0.8f; break;
             case PLANET_QUALITY_MEDIOCRE: r = random() * 0.9f; break;
@@ -613,6 +616,7 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
             case PLANET_QUALITY_GOOD:     r = 0.1f + (random() * 0.9f); break;
             case PLANET_QUALITY_GREAT:    r = 0.2f + (random() * 0.8f); break;
         }
+        */
         
         for (int i=0;i<pcts.length;i++) {
             if (r <= pcts[i]) {
@@ -827,11 +831,17 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
     @Override
     public List<String> planetQualityOptions() {
         List<String> list = new ArrayList<>();
+        // modnar: change PLANET_QUALITY settings, add larger and richer, comment out poor to great settings
+        list.add(PLANET_QUALITY_NORMAL);
+        list.add(PLANET_QUALITY_LARGER);
+        list.add(PLANET_QUALITY_RICHER);
+        /*
         list.add(PLANET_QUALITY_POOR);
         list.add(PLANET_QUALITY_MEDIOCRE);
         list.add(PLANET_QUALITY_NORMAL);
         list.add(PLANET_QUALITY_GOOD);
         list.add(PLANET_QUALITY_GREAT);
+        */
         return list;
     }
     @Override
@@ -1088,6 +1098,15 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
             default:
                 throw new RuntimeException(concat("Invalid star type for options: ", s.starType().key()));
         }
+        
+        // modnar: change PLANET_QUALITY settings, 20% more Poor with LARGER, 20% less Poor with RICHER
+        switch(selectedPlanetQualityOption()) {
+            case PLANET_QUALITY_LARGER:   r1 *= 1.2f; r2 *= 1.2f; break;
+            case PLANET_QUALITY_RICHER:   r1 *= 0.8f; r2 *= 0.8f; break;
+            case PLANET_QUALITY_NORMAL:   break;
+            default:    break;
+        }
+        
         float r = random();
         if (r <= r1)
             p.setResourceUltraPoor();
@@ -1141,6 +1160,14 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
                 throw new RuntimeException(concat("Invalid star type for options: ", s.starType().key()));
         }
 
+        // modnar: change PLANET_QUALITY settings, 20% less Rich with LARGER, 50% more Rich with RICHER
+        switch(selectedPlanetQualityOption()) {
+            case PLANET_QUALITY_LARGER:   r1 *= 0.8f; r2 *= 0.8f; break;
+            case PLANET_QUALITY_RICHER:   r1 *= 1.5f; r2 *= 1.5f; break;
+            case PLANET_QUALITY_NORMAL:   break;
+            default:    break;
+        }
+        
         float r = random();
         if (r <= r1)
             p.setResourceRich();
@@ -1150,8 +1177,15 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
     private void checkForArtifacts(Planet p, StarSystem s) {
         // modnar: no Artifact planets if randomTechStart selected
         float rArtifact = 1.0f;
+        // modnar: change PLANET_QUALITY settings, 50% more Artifact with RICHER
+        switch(selectedPlanetQualityOption()) {
+            case PLANET_QUALITY_LARGER:   break;
+            case PLANET_QUALITY_RICHER:   rArtifact *= 1.5f; break;
+            case PLANET_QUALITY_NORMAL:   break;
+            default:    break;
+        }
         if (randomTechStart) {
-            rArtifact *= 0.0f;
+            rArtifact *= 0.0f; // modnar: no Artifact planets if randomTechStart selected
         }
         switch(p.type().key()) {
             case PlanetType.STEPPE:

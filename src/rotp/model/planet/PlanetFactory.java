@@ -48,8 +48,14 @@ public class PlanetFactory implements Base {
         }
         
         // IMPORTANT: bound the size between 10 and 120
-        size = Math.max(10, Math.min(size, 120));
-       
+        // modnar: change planet size with selectedPlanetQualityOption, which changes the bonus value
+        // also change bound range (size_min, size_max) with bonus value
+        // give all sizes in multiples of 5
+        float size_min = (float) (Math.round((10.0f*bonus)/5) * 5);
+        float size_max = (float) (Math.round((120.0f*bonus)/5) * 5);
+        size = (float) (Math.round((size*bonus)/5) * 5);
+        size = Math.max(size_min, Math.min(size, size_max));
+        
         p.baseSize(size);
         return p;
     }
