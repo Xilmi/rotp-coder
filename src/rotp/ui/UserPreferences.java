@@ -116,11 +116,48 @@ public class UserPreferences {
         SoundManager.current().resetSoundVolumes(); 
         save();
     }
+    // modnar: set MOD option to defaults, specifically for UI
+    public static void setModToDefault() {
+        customDifficulty = 100; // mondar: add custom difficulty level option, in units of percent
+        dynamicDifficulty = false; // modnar: add dynamic difficulty option, change AI colony production
+        alwaysStarGates = false; // modnar: add option to always have Star Gates tech
+        alwaysThorium = false; // modnar: add option to always have Thorium Cells tech
+        challengeMode = false; // modnar: add option to give AI more initial resources
+        randomTechStart = false; // modnar: add option to start all Empires with 2 techs, no Artifacts
+        battleScout = false; // modnar: add battleScout option to give player super Scout design
+        companionWorlds = 0; // modnar: add option to start game with additional colonies
+        save();
+    }
     public static void setForNewGame() {
         autoColonize = false;
         autoBombardMode = AUTOBOMBARD_NO;
         save();
     }
+    
+    // modnar: MOD option toggles, specifically for UI
+    public static void toggleAlwaysStarGates()       { alwaysStarGates = !alwaysStarGates; save(); }
+    public static void toggleAlwaysThorium()         { alwaysThorium = !alwaysThorium; save(); }
+    public static void toggleChallengeMode()         { challengeMode = !challengeMode; save(); }
+    public static void toggleBattleScout()           { battleScout = !battleScout; save(); }
+    public static void toggleCompanionWorlds()       {
+        if ((companionWorlds >= 4) || (companionWorlds < 0))
+            companionWorlds = 0;
+        else
+            companionWorlds++;
+        save();
+    }
+    public static void toggleRandomTechStart()       { randomTechStart = !randomTechStart; save(); }
+    public static void toggleCustomDifficulty(int i) {
+        if (customDifficulty+i >= 500)
+            customDifficulty = 500;
+        else if (customDifficulty+i < 20)
+            customDifficulty = 20;
+        else
+            customDifficulty += i;
+        save();
+    }
+    public static void toggleDynamicDifficulty()     { dynamicDifficulty = !dynamicDifficulty; save(); }
+    
     public static int musicVolume()         { return musicVolume; }
     public static int soundVolume()         { return soundVolume; }
     public static boolean showMemory()      { return showMemory; }
