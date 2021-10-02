@@ -55,7 +55,7 @@ public class CombatStackColony extends CombatStack {
         beamDefense = mBase.beamDefense();
         startingPop = colony.population();
         startingFactories = colony.industry().factories();
-        planetaryShieldLevel = colony.empire().tech().maxPlanetaryShieldLevel();
+        planetaryShieldLevel = colony.defense().shieldLevel();
         hits = maxHits;
         shield = maxShield;
     }
@@ -108,6 +108,7 @@ public class CombatStackColony extends CombatStack {
     public boolean destroyed()        { return colony.destroyed(); }
     @Override
     public float beamDamageMod()      { return BEAM_DAMAGE_MOD; }
+    @Override
     public float missileInterceptPct(ShipWeaponMissileType missile)   {
         return (missileBase() == null)? 0 : missileBase().missileInterceptPct(missile);
     }
@@ -218,6 +219,10 @@ public class CombatStackColony extends CombatStack {
         colony.rebels(newRebels);
     }
     @Override
+    public int optimalFiringRange(CombatStack target) {
+        return 9;
+    }
+    @Override
     public boolean shipComponentIsUsed(int index) {
         return missileFired;
     }
@@ -256,5 +261,12 @@ public class CombatStackColony extends CombatStack {
             return missile.name();
         else
             return scatterPack.name();
+    }
+    @Override
+    public int maxFiringRange(CombatStack tgt) {
+        int maxRange = 0;
+        if(num > 0)
+            maxRange = 9;
+        return maxRange;
     }
 }

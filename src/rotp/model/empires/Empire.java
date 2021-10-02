@@ -65,6 +65,7 @@ import rotp.model.tech.Tech;
 import rotp.model.tech.TechRoboticControls;
 import rotp.model.tech.TechTree;
 import rotp.ui.NoticeMessage;
+import rotp.ui.UserPreferences;
 import rotp.ui.diplomacy.DialogueManager;
 import rotp.ui.diplomacy.DiplomaticReply;
 import rotp.ui.main.GalaxyMapPanel;
@@ -121,11 +122,11 @@ public final class Empire implements Base, NamedObject, Serializable {
     private int securityAllocation = 0;
     private int empireTaxLevel = 0;
     private boolean empireTaxOnlyDeveloped = true;
-    private boolean divertColonyExcessToResearch = false;
+    private boolean divertColonyExcessToResearch = UserPreferences.divertColonyExcessToResearch();
     private float totalReserve = 0;
     private float tradePiracyRate = 0;
     private NamedObject lastAttacker;
-    private int defaultMaxBases = 1;
+    private int defaultMaxBases = UserPreferences.defaultMaxBases();
     private final String dataRaceKey;
     
     private transient float avgX, avgY, nameX1, nameX2;
@@ -250,7 +251,10 @@ public final class Empire implements Base, NamedObject, Serializable {
         
         colorId(newColor);
     }
-    
+    public int defaultShipTint() {
+        int maxRaces = 10;
+        return id < maxRaces ? 0 : id % (ShipDesign.shipColors.length-1)+1;
+    }
     private void resetColors() {
         nameColor = null;
         ownershipColor = null;
@@ -421,11 +425,14 @@ public final class Empire implements Base, NamedObject, Serializable {
         return respond(reason,listener,null);
     }
     public DiplomaticReply respond(String reason, Empire listener, Empire other) {
+        return respond(reason,listener,other,"other");
+    }
+    public DiplomaticReply respond(String reason, Empire listener, Empire other, String otherName) {
         String message = DialogueManager.current().randomMessage(reason, this);
         message = replaceTokens(message, "my");
         message = listener.replaceTokens(message, "your");
         if (other != null)
-            message = other.replaceTokens(message, "other");
+            message = other.replaceTokens(message, otherName);
         return DiplomaticReply.answer(true, message);
     }
     public void chooseNewCapital() {
@@ -624,15 +631,23 @@ public final class Empire implements Base, NamedObject, Serializable {
         if (!colonizedSystems.contains(s)) {
             colonizedSystems.add(s);
             setRecalcDistances();
+            refreshViews();
             for (Empire ally: allies())
+            {
                 ally.setRecalcDistances();       
+                ally.refreshViews();
+            }
         }
     }
     public void removeColonizedSystem(StarSystem s) {
         colonizedSystems.remove(s);
         setRecalcDistances();
+        refreshViews();
         for (Empire ally: allies())
+        {
             ally.setRecalcDistances();
+            ally.refreshViews();
+        }
         
         if (colonizedSystems.isEmpty())
             goExtinct();
@@ -933,9 +948,10 @@ public final class Empire implements Base, NamedObject, Serializable {
             scientistAI().setTechTreeAllocations();
             securityAllocation = spyMasterAI().suggestedInternalSecurityLevel();
             empireTaxLevel = governorAI().suggestedEmpireTaxLevel();
-            fleetCommanderAI().nextTurn();
+            //ail: calling this before fleetCommanderAI avoids a possible case where a fleet is slower than it could be due to scrapping ships after the fleet was launched
             NoticeMessage.setSubstatus(text("TURN_DESIGN_SHIPS"));
             shipDesignerAI().nextTurn();
+            fleetCommanderAI().nextTurn();
             ai().sendTransports();
         }
 
@@ -992,6 +1008,18 @@ public final class Empire implements Base, NamedObject, Serializable {
         for (Ship sh: visibleShips) {
             if (sh.isTransport()) {
                 if (enemyMap[sh.empId()] && (sh.destSysId() == s.id))
+                if (aggressiveWith(sh.empId()) && sh.destSysId() == s.id)
+                    transports += ((Transport)sh).size();
+            }
+        }
+        return transports;
+    }
+    public int unfriendlyTransportsInTransit(StarSystem s) {
+        int transports = s.orbitingTransports(id);
+        
+        for (Ship sh: visibleShips) {
+            if (sh.isTransport()) {
+                if (aggressiveWith(sh.empId()) && sh.destSysId() == s.id)
                     transports += ((Transport)sh).size();
             }
         }
@@ -1066,7 +1094,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         
         // end all rebellions
         for (StarSystem sys: allColonizedSystems()) 
-            sys.colony().rebels(0);    
+            sys.colony().clearAllRebellion();   
 
         if (viewForEmpire(player()).embassy().contact()) {
             String leaderDesc = text("LEADER_PERSONALITY_FORMAT", leader.personality(),leader.objective());
@@ -1215,19 +1243,15 @@ public final class Empire implements Base, NamedObject, Serializable {
     }
     public boolean canScanTo(IMappedObject loc, List<StarSystem> systems, List<ShipFleet> ships) {
         float planetRange = planetScanningRange();
-        if (planetRange > 0) {
-            for (StarSystem sys: systems) {
-                if (sys.distanceTo(loc) <= planetRange)
-                    return true;
-            }
+        for (StarSystem sys: systems) {
+            if (sys.distanceTo(loc) <= planetRange)
+                return true;
         }
         
         float shipRange = shipScanningRange();
-        if (shipRange > 0) {
-            for (Ship sh: ships) {
-                if (sh.distanceTo(loc) <= shipRange)
-                    return true;
-            }
+        for (Ship sh: ships) {
+            if (sh.distanceTo(loc) <= shipRange)
+                return true;
         }
         return false;
     }
@@ -1497,7 +1521,10 @@ public final class Empire implements Base, NamedObject, Serializable {
         return sum;
     }
     public int internalSecurity()            { return securityAllocation; }
-    public void internalSecurity(int i)      { securityAllocation = bounds(0,i,MAX_SECURITY_TICKS); }
+    public void internalSecurity(int i)      { 
+        securityAllocation = bounds(0,i,MAX_SECURITY_TICKS); 
+        flagColoniesToRecalcSpending();
+    }
     public float internalSecurityPct()       { return (float) securityAllocation/MAX_SECURITY_TICKS; }
     public void increaseInternalSecurity()   { internalSecurity(securityAllocation+1); }
     public void decreaseInternalSecurity()   { internalSecurity(securityAllocation-1); }
@@ -2172,7 +2199,8 @@ public final class Empire implements Base, NamedObject, Serializable {
             flagColoniesToRecalcSpending();
         return empireTaxLevel != prevLevel;
     }
-    private void flagColoniesToRecalcSpending() {
+    //ail: needs to be public for when spending in spy-network is adjusted
+    public void flagColoniesToRecalcSpending() {
         // tax rate has changed in some way... flag colonies so they
         // recalc properly
         List<StarSystem> allSystems = allColonizedSystems();
@@ -2451,6 +2479,8 @@ public final class Empire implements Base, NamedObject, Serializable {
             log("disband#1 fleet: ", fl.toString());
             fl.disband();
         }
+        
+        galaxy().removeAllTransports(id);
 
         for (EmpireView v : empireViews()) {
             if (v != null)

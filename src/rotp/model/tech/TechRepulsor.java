@@ -61,6 +61,8 @@ public final class TechRepulsor extends Tech {
     @Override
     public boolean providesShipComponent()  { return true; }
     @Override
+    public float baseValue(Empire c) { return c.ai().scientist().baseValue(this); }
+    @Override
     public void provideBenefits(Empire c) {
         super.provideBenefits(c);
         ShipSpecialRepulsor sh = new ShipSpecialRepulsor(this);
@@ -131,6 +133,8 @@ public final class TechRepulsor extends Tech {
         
         // draw attack
         for (int h=0; h<repeat; h++) {
+            if (!source.mgr.showAnimations()) 
+                break;
             ui.paintCellsImmediately(source.x, target.x, source.y, target.y);
             for (int i=0; i<n; i++) {
                 long t0 = System.currentTimeMillis();

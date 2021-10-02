@@ -43,7 +43,7 @@ import rotp.util.AnimationManager;
 
 public class RacesUI extends BasePanel {
     private static final long serialVersionUID = 1L;
-    private static RacesUI instance;
+    public static RacesUI instance;
     
     private static final String DIPLOMACY_PANEL = "Diplomacy";
     private static final String INTELLIGENCE_PANEL = "Intelligence";
@@ -422,7 +422,6 @@ public class RacesUI extends BasePanel {
             intelPanel.changedEmpire();
             militaryPanel.changedEmpire();
             statusPanel.changedEmpire();
-            raceListingPanel.changedEmpire();
         }
     }
     public void selectedIconEmpire(Empire e)  {
@@ -1175,8 +1174,8 @@ public class RacesUI extends BasePanel {
             }
             else if (hoverEmp != null) {
                 if (contactsListBox.contains(x,y)) { 
-                    int h = (int) contactsListBox.getHeight();
-                    int dListY = (int)(-(float)dY*(h+contactsYMax)/h);
+                    //ail: dragging inside of the list should not be accelerated
+                    int dListY = -dY;
                     if (dListY < 0)
                         contactsY = max(0,contactsY+dListY);
                     else 

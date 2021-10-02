@@ -1,7 +1,27 @@
-en,     , English    ,
+##
+## 5 fields for each language line:
+##   1 - the folder name under the lang folder
+##   2 - the language name as displayed on the language selection menu
+##   3 - "Y" if this is a right-to-left language
+##   4 - global font size multiplier (100=normal size)
+##   5 - "Y" if this is a logographic language (affects word wrapping)
+##
+
+
+en,  English          ,  ,   , 
+bg,  българин         ,  ,   , 
+de,  Deutsch          ,  ,   , 
+el,  Ελληνικά         ,  ,   , 
+id,  Bahasa Indonesia ,  ,   , 
+pl,  Polski           ,  ,   , 
+pt,  Português        ,  ,   , 
+sr,  Srpski           ,  ,   , 
+sr2, Српски           ,  ,   , 
+uk,  Українська       ,  ,   , 
+//zh,  中国人            ,  ,   , Y
+
+
 //bn,     , বাংলা     , 
-//de,     , Deutsch    ,
-el,     , Ελληνικά   ,
 //es,     , Español    ,
 //fi,     , Suomen kieli,
 //fr,     , Français   ,
@@ -11,13 +31,9 @@ el,     , Ελληνικά   ,
 //it,     , Italiana   ,
 //jp,     , 日本語      ,
 //ko,     , 한국어      ,
-//pl,     , Polski     ,
-//pt,     , Português  ,
-//ro,     , Română ,
+//ro,     , Română     ,
 //ru,     , Русский    ,
-//sr,     , Српски     ,
+//sk,     , Slovák     , 
 //sv,     , Svenska    ,
 //tr,     , Türk       ,
-//ua,     , Українська , 
 //vi,     , Tiếng Việt ,
-//zh,     , 中国人      ,

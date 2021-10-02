@@ -560,6 +560,26 @@ public class ShipFleet implements Base, Sprite, Ship, Serializable {
         
         return true;
     }
+    public boolean canSendDesignTo(ShipDesign d, int id) {
+        if (id == StarSystem.NULL_ID)
+            return false;
+
+        // retreating fleets can only go to different systems, colonized by friendly empire
+        if (retreating)  {
+            StarSystem sys = galaxy().system(id);
+            return isRetreatingThisTurn() && (id != sysId) && sys.isColonized() && sys.empire().alliedWith(empId());
+        }
+        if (!canSend())
+            return false;
+
+        //cannot send if already orbiting the sv.system
+        if (!inTransit() && (sysId == id))
+            return false;
+        if (!empire().sv.withinRange(id, d.range()))
+            return false;
+        
+        return true;
+    }
     public boolean canSend(Empire c) {
         return canSend() && (empire() == c);
     }
@@ -641,7 +661,7 @@ public class ShipFleet implements Base, Sprite, Ship, Serializable {
     }
     public float travelTime(StarSystem dest, float speed) {
         if (inOrbit() || deployed()
-        || (isInTransit() && (travelPct() == 0))) {
+        || (isInTransit() && (travelPct() == 0 && system() != null))) {
             if (system().hasStargate(empire()) && dest.hasStargate(empire()))
                 return 1;
         }
@@ -677,7 +697,9 @@ public class ShipFleet implements Base, Sprite, Ship, Serializable {
         int nextTurns = (int) Math.ceil(travelTime(currDest,finalDest,design.warpSpeed()));
         return currTurns+nextTurns;
     }
-    public int travelTurnsRemaining()     { return hasDestination() ?  travelTurns(destination()) : 0;  }
+    public int travelTurnsRemaining()     { 
+        return (int)Math.ceil(arrivalTime - galaxy().currentTime());
+    }
     public int numScouts()   { return numShipType(ShipDesign.SCOUT); }
     public int numFighters() { return numShipType(ShipDesign.FIGHTER); }
     public int numBombers()  { return numShipType(ShipDesign.BOMBER); }

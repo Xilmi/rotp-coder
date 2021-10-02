@@ -251,7 +251,6 @@ public class Galaxy implements Base, Serializable {
         Galaxy gal = galaxy();
         for (int i=0; i<gal.numStarSystems(); i++) {
             gal.system(i).resolveAnyShipConflict();
-            gal.ships.disembarkRalliedFleets();
         }
     }
     public void refreshEmpireViews(Empire e) {
@@ -383,6 +382,7 @@ public class Galaxy implements Base, Serializable {
         NoticeMessage.resetSubstatus(text("TURN_ASSESS"));
         for (Empire e: empires)
             e.assessTurn();
+        ships.disembarkRalliedFleets();
         NoticeMessage.resetSubstatus(text("TURN_DIPLOMACY"));
         for (Empire e: empires)
             e.makeDiplomaticOffers();
@@ -395,7 +395,8 @@ public class Galaxy implements Base, Serializable {
         for (int i=0;i<num;i++) {
             NoticeMessage.setSubstatus(text("TURN_MAKE_DECISIONS"), (i+1), num);
             Empire emp = empires[i];
-            emp.makeNextTurnDecisions();
+            if(!emp.extinct())
+                emp.makeNextTurnDecisions();
         }
     }
     
@@ -456,8 +457,15 @@ public class Galaxy implements Base, Serializable {
         }
     }
     public List<Transport> transports()       { return transports; }
-    public void removeShipInTransit(Transport sh) { transports.remove(sh); }
-    public void addShipInTransit(Transport sh)    { transports.add(sh); }
+    public void removeTransport(Transport sh) { transports.remove(sh); }
+    public void addTransport(Transport sh)    { transports.add(sh); }
+    public void removeAllTransports(int empId) {
+        List<Transport> allTransports = new ArrayList<>(transports);
+        for (Transport tr: allTransports) {
+            if (tr.empId() == empId)
+                transports.remove(tr);
+        }
+    }
     public void nextEmpireTurns() {
         for (Empire e: empires) {
             if (!e.extinct())
