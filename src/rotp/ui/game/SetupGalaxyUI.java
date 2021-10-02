@@ -405,6 +405,7 @@ public final class SetupGalaxyUI  extends BasePanel implements MouseListener, Mo
             return;
         if (click) softClick();
         newGameOptions().selectedGalaxySize(newGameOptions().nextGalaxySize(bounded));
+        newGameOptions().galaxyShape().quickGenerate(); // modnar: do a quickgen to get correct map preview
         repaint();
     }
     public void prevGalaxySize(boolean bounded, boolean click) {
@@ -420,6 +421,7 @@ public final class SetupGalaxyUI  extends BasePanel implements MouseListener, Mo
                 newGameOptions().selectedOpponentRace(i,null);
             newGameOptions().selectedNumberOpponents(maxOpps);
         }
+        newGameOptions().galaxyShape().quickGenerate(); // modnar: do a quickgen to get correct map preview
         repaint();
     }
     public void nextGalaxyShape(boolean click) {
@@ -492,6 +494,7 @@ public final class SetupGalaxyUI  extends BasePanel implements MouseListener, Mo
             return;
         if (click) softClick();
         newGameOptions().selectedNumberOpponents(numOpps+1);
+        newGameOptions().galaxyShape().quickGenerate(); // modnar: do a quickgen to get correct map preview
         repaint();
     }
     public void decreaseOpponents(boolean click) {
@@ -501,6 +504,7 @@ public final class SetupGalaxyUI  extends BasePanel implements MouseListener, Mo
         if (click) softClick();
         newGameOptions().selectedOpponentRace(numOpps-1,null);
         newGameOptions().selectedNumberOpponents(numOpps-1);
+        newGameOptions().galaxyShape().quickGenerate(); // modnar: do a quickgen to get correct map preview
         repaint();
     }
     public void nextSpecificOpponentAI(int i, boolean click) {

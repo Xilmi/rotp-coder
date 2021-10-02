@@ -170,6 +170,10 @@ public class GalaxyTextShape extends GalaxyShape {
         pt.y = randomLocation(height, galaxyEdgeBuffer());
     }
     @Override
+    public void setSpecific(Point.Float pt) { // modnar: add possibility for specific placement of homeworld/orion locations
+        setRandom(pt);
+    }
+    @Override
     public boolean valid(float x, float y) {
         // modnar: check validity of point with multiple lines
         int option2 = max(0, options2.indexOf(opts.selectedGalaxyShapeOption2()));

@@ -141,6 +141,10 @@ public class GalaxyShurikenShape extends GalaxyShape {
         pt.y = randomLocation(height, galaxyEdgeBuffer());
     }
     @Override
+    public void setSpecific(Point.Float pt) { // modnar: add possibility for specific placement of homeworld/orion locations
+        setRandom(pt);
+    }
+    @Override
     public boolean valid(float x, float y) {
         return totalArea.contains(x, y);
     }

@@ -222,6 +222,10 @@ public class GalaxyBullseyeShape extends GalaxyShape {
         pt.y = galaxyEdgeBuffer() + (height - 2*galaxyEdgeBuffer()) * (float)( (0.5 + c2*rand_int)%1 );
     }
     @Override
+    public void setSpecific(Point.Float pt) { // modnar: add possibility for specific placement of homeworld/orion locations
+        setRandom(pt);
+    }
+    @Override
     public boolean valid(float x, float y) {
         return totalArea.contains(x, y);
     }

@@ -148,6 +148,10 @@ public class GalaxyClusterShape extends GalaxyShape {
         pt.y = randomLocation(height, galaxyEdgeBuffer());
     }
     @Override
+    public void setSpecific(Point.Float pt) { // modnar: add possibility for specific placement of homeworld/orion locations
+        setRandom(pt);
+    }
+    @Override
     public boolean valid(float x, float y) {
 		// calculate the distances from the random point to ClusterCenters
 		float dcc1 = distance(x,y,cc1.x,cc1.y);

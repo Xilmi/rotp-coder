@@ -17,6 +17,7 @@ package rotp.model.galaxy;
 
 import java.awt.Point;
 import java.awt.Shape;
+import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +43,8 @@ public class GalaxyEllipticalShape extends GalaxyShape {
         options2.add("SETUP_VOID_4");
     }
 
-    Shape ellipse, hole;
+    Shape ellipse, hole, orionSpot;
+    Area totalArea, circleArea, holeArea, orionArea;
     float adjust_density = 1.0f; // modnar: adjust stellar density
     float ellipseRatio = 2.0f;
     float voidSize = 0.0f;
@@ -96,6 +98,8 @@ public class GalaxyEllipticalShape extends GalaxyShape {
         float gH = (float) galaxyHeightLY();
         
         ellipse = new Ellipse2D.Float(gE,gE,gW,gH);
+        circleArea = new Area(ellipse);
+        totalArea = circleArea; // modnar: use totalArea for valid(x,y)
         
         hole = null;
         if (voidSize > 0) {
@@ -104,7 +108,18 @@ public class GalaxyEllipticalShape extends GalaxyShape {
             float vX = gE+((gW-vW)/2);
             float vY = gE+((gH-vH)/2);
             hole = new Ellipse2D.Float(vX, vY,vW,vH);
+            holeArea = new Area(hole);
+            totalArea.subtract(holeArea);
         }
+        
+        // modnar: add central orion location for circular, void-4, non-small maps
+        float rOrion = 1.0f;
+        orionSpot = new Ellipse2D.Float(gE+0.5f*gW-rOrion,gE+0.5f*gH-rOrion,2.0f*rOrion,2.0f*rOrion);
+        orionArea = new Area(orionSpot);
+        if ((option1 == 0)&&(opts.numberStarSystems()>90)&&(voidSize > 0.7f)) {
+            totalArea.add(orionArea);
+        }
+        
     }
     @Override
     protected int galaxyWidthLY() { 
@@ -131,11 +146,38 @@ public class GalaxyEllipticalShape extends GalaxyShape {
         pt.y = galaxyEdgeBuffer() + (height - 2*galaxyEdgeBuffer()) * (float)( (0.5 + c2*rand_int)%1 );
     }
     @Override
+    public void setSpecific(Point.Float pt) { // modnar: add possibility for specific placement of homeworld/orion locations
+        
+        int opt1 = max(0, options1.indexOf(opts.selectedGalaxyShapeOption1()));
+        
+        // modnar: setSpecific only for circular, void-4, non-small maps
+        if ((opt1 == 0)&&(opts.numberStarSystems()>90)&&(voidSize > 0.7f)) {
+            if (indexWorld == 0) { // orion
+                pt.x = galaxyEdgeBuffer()+0.5f*galaxyWidthLY();
+                pt.y = galaxyEdgeBuffer()+0.5f*galaxyHeightLY();
+            }
+            else { // empire homeworlds
+                int numStarts = opts.selectedNumberOpponents()+1;
+                float rStart = 0.45f*galaxyHeightLY();
+                float xStart = rStart * (float)Math.cos(indexWorld*2*Math.PI/numStarts);
+                float yStart = rStart * (float)Math.sin(indexWorld*2*Math.PI/numStarts);
+                pt.x = galaxyEdgeBuffer()+0.5f*galaxyWidthLY()+xStart;
+                pt.y = galaxyEdgeBuffer()+0.5f*galaxyHeightLY()+yStart;
+            }
+        }
+        else {
+            setRandom(pt);
+        }
+    }
+    @Override
     public boolean valid(float x, float y) {
+        /*
         if (hole == null)
             return ellipse.contains(x, y);
         else
             return ellipse.contains(x, y) && !hole.contains(x, y);
+        */
+        return totalArea.contains(x, y); // modnar: use totalArea for valid(x,y)
     }
     float randomLocation(float max, float buff) {
         return buff + (random() * (max-buff-buff));
