@@ -258,8 +258,12 @@ public class ShipCombatManager implements Base {
         }
     }
     private void setupCurrentTurnList() {
-        currentTurnList = new ArrayList<>(activeStacks());
-        Collections.sort(currentTurnList, CombatStack.INITIATIVE);
+        // use temp to avoid rare comod error when auto-resolving in
+        // the middle of combat, which can potentially update both activeStacks()
+        // and currentTurnList
+        List<CombatStack> temp = new ArrayList<>(activeStacks());
+        Collections.sort(temp, CombatStack.INITIATIVE);
+        currentTurnList = new ArrayList<>(temp);
     }
     public void resolveAllCombat() {
         clearAsteroids();
@@ -406,7 +410,7 @@ public class ShipCombatManager implements Base {
         // if they have nowhere to retreat, destroy them (don't show retreat animation in this case)
         List<CombatStack> activeStacks = new ArrayList<>(results.activeStacks());
         for (CombatStack st: activeStacks) {
-            if (st.inStasis && st.isShip() && (st.empire == results.attacker())) {
+            if (st.inStasis && st.isShip()) {
                 CombatStackShip sh = (CombatStackShip) st;
                 StarSystem dest = sh.empire.retreatSystem(system());
                 boolean prevShow = showAnimations;
@@ -417,6 +421,21 @@ public class ShipCombatManager implements Base {
                     retreatStack(sh, dest);
                 showAnimations = prevShow;
             }          
+        }
+        
+        // cancel the retreat of any ships that belong to the combat victor
+        Empire victor = results.victor();
+        if (victor != null) {
+            List<ShipDesign> retreatedShips = new ArrayList<>(results.shipsRetreated().keySet());
+            boolean retreatsCancelled = false;
+            for (ShipDesign des: retreatedShips) {
+                if (victor.shipLab().design(des.id()) == des) {
+                    results.shipsRetreated().remove(des);
+                    retreatsCancelled = true;
+                }        
+            }
+            if (retreatsCancelled)
+                galaxy().ships.cancelRetreatingFleets(victor.id, system().id);
         }
         
         // ensure rebels are killed in proportionn to overall population
@@ -747,12 +766,18 @@ public class ShipCombatManager implements Base {
             else if (st.isMonster())
                 combatableStacks.add(st);
             // attacking ships not in stasis count
-            else if (st.empire == results.attacker()) { 
-                if (!st.inStasis)
-                    combatableStacks.add(st);
-            }
-            else // add defending ships count
+            else if (!st.inStasis)
                 combatableStacks.add(st);
+            //ail: when there's still missiles flying around don't end the combat (the stack that fired it doesn't count as armed anymore)
+            if(!st.missiles().isEmpty())
+            {
+                for(CombatStackMissile missile : st.missiles())
+                {
+                    //ail: the missile alsoe needs to have a target that still is there as otherwise this can lead to combat going on after target with incoming missile was destroyed
+                    if(missile.target.num > 0)
+                        return true;
+                }
+            }
         }
         for (CombatStack stack1 : combatableStacks) {
             for (CombatStack stack2 : combatableStacks) {
@@ -762,6 +787,7 @@ public class ShipCombatManager implements Base {
                 }
             }
         }
+        // don't retreat if we still have missiles in flight
         return false;
     }
     public void addStackToCombat(CombatStack st) {
@@ -791,6 +817,13 @@ public class ShipCombatManager implements Base {
 
         if (st.canTeleport() && !interdiction)
             return true;
+        
+        for (CombatStack s: results.activeStacks()) {            
+            if(st.ignoreRepulsors() || (s.empire == st.empire) || s.inStasis)
+                continue;
+            if(s.movePointsTo(x, y) <= s.repulsorRange())
+                return false;
+        }
 
         return st.canMoveTo(x, y);
     }

@@ -163,7 +163,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         // returns a pct (0 to 1) representing the colony's current
         // production vs its maximum possible formula
         float maxFactories = industry().maxFactories();
-        float factories = min(maxFactories, industry().factories());
+        float factories = min(maxFactories, industry().factories(), industry().maxUseableFactories());
         float pop = population();
         float maxPop = planet().maxSize();
         
@@ -509,6 +509,8 @@ public final class Colony implements Base, IMappedObject, Serializable {
         previousPopulation = population;
         reallocationRequired = false;          
         ensureProperSpendingRates();
+        validateOnLoad();
+        
         // if rebelling, nothing happens (only enough prod assumed to clean new
         // waste and maintain existing structures)
         if (inRebellion())
@@ -1007,6 +1009,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
     }
     public void clearTransport() {
         StarSystem oldDest = transport().destination();
+        starSystem().clearTransportSprite();
         transport().reset(empire);
         // recalculate destination and this colony if applicable
         if (oldDest != null) {
@@ -1116,12 +1119,12 @@ public final class Colony implements Base, IMappedObject, Serializable {
             if (ev.embassy().unity())
                 return;
             // don't cause war if treaty signed since launch
-            if (!ev.embassy().war() && (ev.embassy().treatyDate() >= tr.launchTime()))
+            if (!ev.embassy().anyWar() && (ev.embassy().treatyDate() >= tr.launchTime()))
                 return;
             // don't cause war if planet now occupied by another race
-            if (!ev.embassy().war() && (empire != tr.targetCiv()))
+            if (!ev.embassy().anyWar() && (empire != tr.targetCiv()))
                 return;
-            if (!ev.embassy().war())
+            if (!ev.embassy().anyWar())
                 ev.embassy().declareWar();
         }
 
@@ -1283,6 +1286,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         tr.empire().addColonizedSystem(sys);
 
         empire = tr.empire();
+        defense().maxBases(empire.defaultMaxBases());
         buildFortress();
         shipyard().goToNextDesign();
 
