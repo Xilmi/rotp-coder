@@ -245,7 +245,9 @@ public class ColonyEcology extends ColonySpendingCategory {
             }
         }
         if (colony().population() < 0)
+        {
             err("ERROR: bad pop for ", colony().name(), " pop:"+colony().population(), " newGrown:", str(newGrownPopulation), " newPurchased:", str(newPurchasedPopulation));
+        }
 
         if (!empire().divertColonyExcessToResearch())
             empire().addReserve(unallocatedBC);
@@ -278,7 +280,8 @@ public class ColonyEcology extends ColonySpendingCategory {
         // new population
         float currentPop = c.population();
         float workingPop = c.workingPopulation(); // currentpop - transports away
-        expectedPopGrowth = (int) workingPop - (int) currentPop;
+        float expGrowth = c.normalPopGrowth();
+        expectedPopGrowth = (int) (workingPop+expGrowth) - (int) currentPop;
 
         // check for waste cleanup
         cost = c.wasteCleanupCost();
@@ -290,8 +293,6 @@ public class ColonyEcology extends ColonySpendingCategory {
         if (allocation() == cleanupAllocationNeeded())
             return text(cleanupText);
 
-        float expGrowth = c.normalPopGrowth();
-        expectedPopGrowth = (int) (workingPop+expGrowth) - (int) currentPop;
         newBC -= cost;
         // check for atmospheric terraforming
         Empire emp = c.empire();

@@ -107,7 +107,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
             new ColonyIndustry(), new ColonyEcology(), new ColonyResearch() };
 
     private boolean underSiege = false;
-    private boolean keepEcoLockedToClean; 
+    public boolean keepEcoLockedToClean;
     private transient boolean hasNewOrders = false;
     private transient int cleanupAllocation = 0;
     private transient boolean recalcSpendingForNewTaxRate;
@@ -158,7 +158,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         // returns a pct (0 to 1) representing the colony's current
         // production vs its maximum possible formula
         float maxFactories = industry().maxFactories();
-        float factories = min(maxFactories, industry().factories());
+        float factories = min(maxFactories, industry().factories(), industry().maxUseableFactories());
         float pop = population();
         float maxPop = planet().maxSize();
         
@@ -308,6 +308,9 @@ public final class Colony implements Base, IMappedObject, Serializable {
         if ((newValue < 0)
         || (newValue > MAX_TICKS))
             return false;
+
+        if (catNum == ECOLOGY)
+            keepEcoLockedToClean = false;
 
         allocation(catNum, newValue);
         realignSpending(spending[catNum]);
@@ -462,6 +465,8 @@ public final class Colony implements Base, IMappedObject, Serializable {
         previousPopulation = population;
         reallocationRequired = false;          
         ensureProperSpendingRates();
+        validateOnLoad();
+
         // if rebelling, nothing happens (only enough prod assumed to clean new
         // waste and maintain existing structures)
         if (inRebellion())
@@ -677,23 +682,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         }
     }
     private void redistributeReducedEcoSpending() {
-        int maxAllocation = ColonySpendingCategory.MAX_TICKS;
-        // determine how much categories are over/under spent
-        int spendingTotal = 0;
-        for (int i = 0; i < NUM_CATS; i++)
-            spendingTotal += spending[i].allocation();
-
-        int adj = maxAllocation - spendingTotal;
-        if (adj == 0)
-            return;
-        
-        // funnel excess to industry if it's not completed
-        if (!industry().isCompleted())
-            adj -= spending[INDUSTRY].adjustValue(adj);
-        
-        // put whatever is left in research
-        if (adj > 0)
-            spending[RESEARCH].adjustValue(adj);
+        realignSpending(ecology());
     }
     public void realignSpending(ColonySpendingCategory cat) {
         int maxAllocation = ColonySpendingCategory.MAX_TICKS;
@@ -905,6 +894,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         return inTransport();
     }
     public void clearTransport() {
+        starSystem().clearTransportSprite();
         StarSystem oldDest = transport().destination();
         transport().reset(empire);
         // recalculate destination and this colony if applicable
@@ -1015,12 +1005,12 @@ public final class Colony implements Base, IMappedObject, Serializable {
             if (ev.embassy().unity())
                 return;
             // don't cause war if treaty signed since launch
-            if (!ev.embassy().war() && (ev.embassy().treatyDate() >= tr.launchTime()))
+            if (!ev.embassy().anyWar() && (ev.embassy().treatyDate() >= tr.launchTime()))
                 return;
             // don't cause war if planet now occupied by another race
-            if (!ev.embassy().war() && (empire != tr.targetCiv()))
+            if (!ev.embassy().anyWar() && (empire != tr.targetCiv()))
                 return;
-            if (!ev.embassy().war())
+            if (!ev.embassy().anyWar())
                 ev.embassy().declareWar();
         }
 
@@ -1151,7 +1141,9 @@ public final class Colony implements Base, IMappedObject, Serializable {
             allocation(INDUSTRY,0);
             allocation(ECOLOGY,0);
             allocation(RESEARCH,0);
-            session().addSystemToAllocate(starSystem(), text("MAIN_ALLOCATE_COLONY_CAPTURED", pl.sv.name(starSystem().id), pl.raceName()));
+            String str1 = text("MAIN_ALLOCATE_COLONY_CAPTURED", pl.sv.name(starSystem().id), pl.raceName());
+            str1 = pl.replaceTokens(str1, "spy");
+            session().addSystemToAllocate(starSystem(), str1);
         }
         // list of possible techs that could be recovered from factories
         List<Tech> possibleTechs = empire().tech().techsUnknownTo(tr.empire());
@@ -1182,6 +1174,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         tr.empire().addColonizedSystem(sys);
 
         empire = tr.empire();
+        defense().maxBases(empire.defaultMaxBases());
         buildFortress();
         shipyard().goToNextDesign();
 

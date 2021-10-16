@@ -144,7 +144,7 @@ public class AI implements Base {
     }
     public void sendTransports() {
         long tm0 = System.currentTimeMillis();
-        int minTransportSize = 5;
+        int minTransportSize = empire.generalAI().minTransportSize();
         List<ColonyTransporter> needy = new ArrayList<>();
         List<ColonyTransporter> givey = new ArrayList<>();
         for (StarSystem sys: empire.allColonizedSystems()) {
@@ -163,30 +163,27 @@ public class AI implements Base {
         }
 
         Collections.sort(needy,TRANSPORT_PRIORITY);
-        boolean transporting = true;
 
-        while(transporting) {
-            transporting = false;
-            if (!needy.isEmpty()) {
-                if (!givey.isEmpty()) {
-                    ColonyTransporter needer = needy.get(0);
-                    TARGET_COLONY = needer;
-                    Collections.sort(givey,DISTANCE_TO_TARGET);
-                    int j = 0;
-                    while(!transporting && (j < givey.size())) {
-                        ColonyTransporter giver = givey.get(j);
-                        j++;
-                        if ((giver.maxPopToGive >= minTransportSize) && (giver.transportPriority < needer.transportPriority)) {
-                            float needed = needer.popNeeded - ((int) (Math.ceil(giver.transportTimeTo(needer))) * needer.growth);
-                            int trPop = (int) min(needed, giver.maxPopToGive);
-                            if (trPop >= minTransportSize) {
-                                giver.sendTransportsTo(needer, trPop);
-                                transporting = true;
-                            }
-                        }
+        for(ColonyTransporter needer : needy)
+        {
+            TARGET_COLONY = needer;
+            Collections.sort(givey,DISTANCE_TO_TARGET);
+            boolean allGiversBusy = true;
+            for(ColonyTransporter giver : givey)
+            {
+                if(giver.colony.transport().size() > 0)
+                    continue;
+                allGiversBusy = false;
+                if ((giver.maxPopToGive >= minTransportSize) && (giver.transportPriority < needer.transportPriority)) {
+                    float needed = needer.popNeeded - ((int) (Math.ceil(giver.transportTimeTo(needer))) * needer.growth);
+                    int trPop = (int) min(needed, giver.maxPopToGive);
+                    if (trPop >= minTransportSize) {
+                        giver.sendTransportsTo(needer, trPop);
                     }
                 }
             }
+            if(allGiversBusy)
+                break;
         }
         long tm1 = System.currentTimeMillis();
         log("sendTransports: "+empire.raceName()+"   "+(tm1-tm0)+"ms");
@@ -236,7 +233,7 @@ public class AI implements Base {
         }
         
         // ail: asking our general for permission
-        if(!empire.generalAI().allowedToBomb(sys.empire()))
+        if(!empire.generalAI().allowedToBomb(sys))
             return false;
         
         // estimate bombardment damage and resulting population loss

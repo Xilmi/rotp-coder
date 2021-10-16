@@ -219,6 +219,10 @@ public class CombatStackColony extends CombatStack {
         colony.rebels(newRebels);
     }
     @Override
+    public int optimalFiringRange(CombatStack target) {
+        return 9;
+    }
+    @Override
     public boolean shipComponentIsUsed(int index) {
         return missileFired;
     }
@@ -257,5 +261,12 @@ public class CombatStackColony extends CombatStack {
             return missile.name();
         else
             return scatterPack.name();
+    }
+    @Override
+    public int maxFiringRange(CombatStack tgt) {
+        int maxRange = 0;
+        if(num > 0)
+            maxRange = 9;
+        return maxRange;
     }
 }

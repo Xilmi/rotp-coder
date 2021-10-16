@@ -65,6 +65,7 @@ import rotp.model.galaxy.ShipFleet;
 import rotp.model.galaxy.Ships;
 import rotp.model.galaxy.StarSystem;
 import rotp.model.galaxy.Transport;
+import rotp.model.incidents.DiplomaticIncident;
 import rotp.model.incidents.GenocideIncident;
 import rotp.model.planet.PlanetType;
 import rotp.model.ships.ShipDesign;
@@ -74,6 +75,7 @@ import rotp.model.tech.Tech;
 import rotp.model.tech.TechRoboticControls;
 import rotp.model.tech.TechTree;
 import rotp.ui.NoticeMessage;
+import rotp.ui.UserPreferences;
 import rotp.ui.diplomacy.DialogueManager;
 import rotp.ui.diplomacy.DiplomaticReply;
 import rotp.ui.main.GalaxyMapPanel;
@@ -134,7 +136,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     private float totalReserve = 0;
     private float tradePiracyRate = 0;
     private NamedObject lastAttacker;
-    private int defaultMaxBases = 1;
+    private int defaultMaxBases = UserPreferences.defaultMaxBases();
     private final String dataRaceKey;
     
     private transient float avgX, avgY, nameX1, nameX2;
@@ -388,8 +390,10 @@ public final class Empire implements Base, NamedObject, Serializable {
         status = new EmpireStatus(this);
         sv = new SystemInfo(this);
         // many things need to know if this is the player civ, so set it early
-        if (empId == Empire.PLAYER_ID) 
+        if (empId == Empire.PLAYER_ID) {
+            divertColonyExcessToResearch = UserPreferences.divertColonyExcessToResearch();
             g.player(this);
+        }
 
         // if not the player, we may randomize the race ability
         if ((empId != Empire.PLAYER_ID) && options().randomizeAIAbility())
@@ -433,11 +437,21 @@ public final class Empire implements Base, NamedObject, Serializable {
         return respond(reason,listener,null);
     }
     public DiplomaticReply respond(String reason, Empire listener, Empire other) {
+        return respond(reason,listener,other,"other");
+    }
+    public DiplomaticReply respond(String reason, Empire listener, Empire other, String otherName) {
         String message = DialogueManager.current().randomMessage(reason, this);
         message = replaceTokens(message, "my");
         message = listener.replaceTokens(message, "your");
         if (other != null)
-            message = other.replaceTokens(message, "other");
+            message = other.replaceTokens(message, otherName);
+        return DiplomaticReply.answer(true, message);
+    }
+    public DiplomaticReply respond(String reason, DiplomaticIncident inc, Empire listener) {
+        String message = DialogueManager.current().randomMessage(reason, this);
+        message = replaceTokens(message, "my");
+        message = listener.replaceTokens(message, "your");
+        message = inc.decode(message);
         return DiplomaticReply.answer(true, message);
     }
     public void chooseNewCapital() {
@@ -636,15 +650,23 @@ public final class Empire implements Base, NamedObject, Serializable {
         if (!colonizedSystems.contains(s)) {
             colonizedSystems.add(s);
             setRecalcDistances();
+            refreshViews();
             for (Empire ally: allies())
+            {
                 ally.setRecalcDistances();       
+                ally.refreshViews();
+            }
         }
     }
     public void removeColonizedSystem(StarSystem s) {
         colonizedSystems.remove(s);
         setRecalcDistances();
+        refreshViews();
         for (Empire ally: allies())
+        {
             ally.setRecalcDistances();
+            ally.refreshViews();
+        }
         
         if (colonizedSystems.isEmpty())
             goExtinct();
@@ -1902,6 +1924,18 @@ public final class Empire implements Base, NamedObject, Serializable {
         for (Ship sh: visibleShips) {
             if (sh.isTransport()) {
                 if (enemyMap[sh.empId()] && (sh.destSysId() == s.id))
+                if (aggressiveWith(sh.empId()) && sh.destSysId() == s.id)
+                    transports += ((Transport)sh).size();
+            }
+        }
+        return transports;
+    }
+    public int unfriendlyTransportsInTransit(StarSystem s) {
+        int transports = s.orbitingTransports(id);
+        
+        for (Ship sh: visibleShips) {
+            if (sh.isTransport()) {
+                if (aggressiveWith(sh.empId()) && sh.destSysId() == s.id)
                     transports += ((Transport)sh).size();
             }
         }
@@ -3089,7 +3123,11 @@ public final class Empire implements Base, NamedObject, Serializable {
         // recalc properly
         List<StarSystem> allSystems = allColonizedSystems();
         for (StarSystem sys: allSystems)
+        {
+            if(sys.colony() == null)
+                continue;
             sys.colony().toggleRecalcSpending();
+        }
     }
     public boolean hasTrade() {
         for (EmpireView v : empireViews()) {

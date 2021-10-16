@@ -61,8 +61,11 @@ public class SabotageBasesIncident extends DiplomaticIncident {
         && (destroyed > 0)) {
             StarSystem sys = m.starSystem();
             BasesDestroyedAlert.create(ev.empire(), destroyed, sys);
-            if (sys.isColonized() && sys.colony().defense().allocation() == 0)
-                session().addSystemToAllocate(sys, text("MAIN_ALLOCATE_SABOTAGE_BASES", systemName(), str(destroyed), ev.empire().raceName()));
+            if (sys.isColonized() && sys.colony().defense().allocation() == 0) {
+                String str1 = text("MAIN_ALLOCATE_SABOTAGE_BASES", systemName(), str(destroyed), ev.empire().raceName());
+                str1 = ev.empire().replaceTokens(str1, "spy");
+                session().addSystemToAllocate(sys, str1);
+            }
         }
     }
     private String systemName() { return player().sv.name(sysId); }
@@ -89,6 +92,7 @@ public class SabotageBasesIncident extends DiplomaticIncident {
         s1 = galaxy().empire(empVictim).replaceTokens(s1, "victim");
         s1 = s1.replace("[system]", systemName());
         s1 = s1.replace("[amt]", str(destroyed));
+        s1 = s1.replace("[target]", text("SABOTAGE_BASES"));
         return s1;
     }
 }
