@@ -69,11 +69,13 @@ public class WavClip  implements SoundClip, Base {
         loaded = false;
         
         AudioInputStream ais = null;
+        DataLine.Info info = null;
         try {
             if (!loaded) {
                 BufferedInputStream is = new BufferedInputStream(wavFileStream(fn));
                 ais = AudioSystem.getAudioInputStream(is);
-                DataLine.Info info = new DataLine.Info(Clip.class, ais.getFormat());
+                info = new DataLine.Info(Clip.class, ais.getFormat());
+
                 clip = (Clip)AudioSystem.getLine(info);
                 clip.open(ais);
                 if (vol < 1 && clip.isControlSupported(MASTER_GAIN)) {
@@ -85,6 +87,16 @@ public class WavClip  implements SoundClip, Base {
             }
         }
         catch (IOException | LineUnavailableException | UnsupportedAudioFileException e) {
+            System.err.println("Error looking for DataLine.Info "+info);
+            if (info != null && info.getFormats() != null && info.getFormats().length > 0) {
+                for (AudioFormat f : info.getFormats()) {
+                    System.err.println("Format channels="+f.getChannels()+" samplerate="+f.getSampleRate()
+                            +" framerate="+f.getFrameRate()+" framesize="+f.getFrameSize()
+                            +" encoding="+f.getEncoding()+" "+f);
+                }
+            } else {
+                System.err.println("Error happened before determining input stream DataLine.Info details");
+            }
             System.err.println(e.toString());
             System.err.println(e.getStackTrace());
         }
