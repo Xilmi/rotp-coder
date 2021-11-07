@@ -74,6 +74,11 @@ public class MainUI extends BasePanel implements IMapHandler {
     public static final Color greenAlertC  = new Color(0,255,0,192);
     public static final Color redAlertC    = new Color(255,0,0,192);
     public static final Color yellowAlertC = new Color(255,255,0,192);
+    // modnar: add additional alert colors
+    public static final Color blueAlertC   = new Color(0,120,255,192);
+    public static final Color limeAlertC   = new Color(160,255,0,192);
+    public static final Color orangeAlertC = new Color(255,160,0,192);
+    public static final Color purpleAlertC = new Color(180,0,255,192);
     
     public static int panelWidth, panelHeight;
     static LinearGradientPaint alertBack;
