@@ -1410,7 +1410,7 @@ public class AIDiplomat implements Base, Diplomat {
         }
         if(!empire.generalAI().isRusher() && facCapRank() > 1)
             warAllowed = false;
-            
+
         //Ail: If there's only two empires left, there's no time for preparation. We cannot allow them the first-strike-advantage!
         if(galaxy().numActiveEmpires() < 3)
             warAllowed = true;
