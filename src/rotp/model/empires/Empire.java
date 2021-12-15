@@ -2677,6 +2677,22 @@ public final class Empire implements Base, NamedObject, Serializable {
         Collections.sort(list, IMappedObject.MAP_ORDER);
         return list;
     }
+    public List<ShipFleet> orderedIdleFleets() {
+        List<ShipFleet> list = new ArrayList<>();
+        List<ShipFleet> fleets = galaxy().ships.allFleets(id);
+        for (ShipFleet fl: fleets) {
+            if (!fl.isEmpty())
+            {
+                if(fl.isDeployed() || fl.isInTransit())
+                    continue;
+                if(fl.system() != null && hostiles().contains(viewForEmpire(fl.system().empire())))
+                    continue;
+                list.add(fl);                
+            }
+        }
+        Collections.sort(list, IMappedObject.MAP_ORDER);
+        return list;
+    }
     public List<ShipFleet> orderedEnemyFleets() {
         List<ShipFleet> list = new ArrayList<>(enemyFleets());
         Collections.sort(list, IMappedObject.MAP_ORDER);
