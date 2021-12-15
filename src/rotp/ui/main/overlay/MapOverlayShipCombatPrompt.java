@@ -32,6 +32,9 @@ import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
+import java.util.Map.Entry;
+import rotp.model.combat.CombatStack;
 import rotp.ui.combat.ShipBattleUI;
 
 public class MapOverlayShipCombatPrompt extends MapOverlay {
@@ -234,15 +237,54 @@ public class MapOverlayShipCombatPrompt extends MapOverlay {
         retreatButton.mapY(battleButton.mapY());
         retreatButton.draw(parent.map(), g);
 
+        // xilmi: draw info on the competing fleets
+        // draw planet info, from bottom up
+        int x1 = boxX+s15;
+        int x2 = boxX+boxW/2+s15;
+        int y1 = boxY+boxH1+s15;
+        int y2 = y1;
+        int lineH = s20;
+        int desiredFont = 18;
+        
+        HashMap<String, Integer> mySizes = new HashMap();
+        HashMap<String, Integer> aiSizes = new HashMap();
+        for(CombatStack st : mgr.activeStacks())
+        {
+            if(st.isShip())
+            {
+                if(st.empire == pl)
+                {
+                    int putVal = st.num;
+                    if(mySizes.containsKey(st.design().sizeDesc()))
+                        putVal += mySizes.get(st.design().sizeDesc());
+                    mySizes.put(st.design().sizeDesc(), putVal);
+                }
+                else
+                {
+                    int putVal = st.num;
+                    if(aiSizes.containsKey(st.design().sizeDesc()))
+                        putVal += aiSizes.get(st.design().sizeDesc());
+                    aiSizes.put(st.design().sizeDesc(), putVal);
+                }
+            }
+        }
+        for(Entry<String, Integer> entry : mySizes.entrySet())
+        {
+            drawBorderedString(g, entry.getValue() + " " + entry.getKey(), 1, x1, y1, Color.black, pl.color());
+            y1 += lineH;
+        }
+        for(Entry<String, Integer> entry : aiSizes.entrySet())
+        {
+            drawBorderedString(g, entry.getValue() + " " + entry.getKey(), 1, x2, y2, Color.black, aiEmpire.color());
+            y2 += lineH;
+        }
+       
         // if unscouted, no planet info
         if (!scouted)
             return;
         
-        // draw planet info, from bottom up
-        int x1 = boxX+s15;
-        int y1 = boxY+boxH1+boxH2-s10;
-        int lineH = s20;
-        int desiredFont = 18;
+        x1 = boxX+s15;
+        y1 = boxY+boxH1+boxH2-s10;
 
         if (pl.sv.isUltraPoor(sys.id)) {
             g.setColor(SystemPanel.redText);
