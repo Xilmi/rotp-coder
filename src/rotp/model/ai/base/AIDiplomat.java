@@ -24,6 +24,7 @@ import rotp.model.combat.CombatStack;
 import rotp.model.combat.ShipCombatResults;
 import rotp.model.empires.DiplomaticEmbassy;
 import rotp.model.empires.Empire;
+import static rotp.model.empires.EmpireStatus.FLEET;
 import rotp.model.empires.EmpireView;
 import rotp.model.empires.GalacticCouncil;
 import rotp.model.empires.Leader;
@@ -1308,7 +1309,7 @@ public class AIDiplomat implements Base, Diplomat {
             return false;
         if (view.embassy().unity() || view.embassy().anyWar())
             return false;
-        if (!view.inEconomicRange())
+        if(!empire.inShipRange(view.empId()))
             return false;
         
         // look at new incidents. If any trigger war, pick
@@ -1383,7 +1384,6 @@ public class AIDiplomat implements Base, Diplomat {
         // if relative power is 3, then contempt mod is 30 or -30
         float contemptMod = 10 * v.scaleOfContempt();
         warThreshold += contemptMod;
-        
         return (v.embassy().relations() <= warThreshold);
     }
     @Override
@@ -1415,8 +1415,11 @@ public class AIDiplomat implements Base, Diplomat {
         // modnar: reduce basePower due to other changes (techMod, enemyMod)
         int basePower = 200;
         
-        float otherPower = basePower+v.owner().militaryPowerLevel(v.empire());
+        float otherPower = basePower+v.empire().status().lastViewValue(empire, FLEET);
         float myPower = basePower+v.owner().militaryPowerLevel();
+        // xilmi: When we have never had any espionage-information on that empire we assume it's as strong as we are
+        if(v.empire().status().lastViewTurn(empire) < 0)
+            otherPower = myPower;
         
         // modnar: due to other changes (techMod, enemyMod), reduce baseThreshold
         float baseThreshold = v.owner().atWar() ? 8.0f : 4.0f;
@@ -1432,10 +1435,9 @@ public class AIDiplomat implements Base, Diplomat {
         
         // modnar: scale war threshold by number of our wars vs. number of their wars
         // try not to get into too many wars, and pile on if target is in many wars
-        float enemyMod = (float) ((empire.numEnemies() + 1) / (v.empire().numEnemies() + 1));
+        float enemyMod = (float)(empire.numEnemies() + 1) / (v.empire().numEnemies() + 1);
         
         float warThreshold = baseThreshold * techMod * enemyMod * treatyMod * v.owner().diplomatAI().leaderExploitWeakerEmpiresRatio();
-        
         return (myPower/otherPower) > warThreshold;
     }
     private DiplomaticIncident worstWarnableIncident(Collection<DiplomaticIncident> incidents) {
@@ -1450,20 +1452,24 @@ public class AIDiplomat implements Base, Diplomat {
     }
     private void beginIncidentWar(EmpireView view, DiplomaticIncident inc) {
         log(view.toString(), " - Declaring war based on incident: ", inc.toString(), " id:", inc.declareWarId());
+        System.out.println(galaxy().currentTurn()+" "+empire.name()+" starts incident-war on "+view.empire().name());
         view.embassy().beginWarPreparations(inc.declareWarId(), inc);
         if (inc.triggersImmediateWar())
             view.embassy().declareWar();
     }
     private void beginOpportunityWar(EmpireView view) {
         log(view+" - Declaring war based on opportunity");
+        System.out.println(galaxy().currentTurn()+" "+empire.name()+" starts opportunity-war on "+view.empire().name());
         view.embassy().beginWarPreparations(DialogueManager.DECLARE_OPPORTUNITY_WAR, null);
     }
     private void beginHateWar(EmpireView view) {
         log(view+" - Declaring war based on hate");
+        System.out.println(galaxy().currentTurn()+" "+empire.name()+" starts hate-war on "+view.empire().name());
         view.embassy().beginWarPreparations(DialogueManager.DECLARE_HATE_WAR, null);
     }
     private void beginErraticWar(EmpireView view) {
         log(view+" - Declaring war based on erratic");
+        System.out.println(galaxy().currentTurn()+" "+empire.name()+" starts erratic-war on "+view.empire().name());
         view.embassy().beginWarPreparations(DialogueManager.DECLARE_ERRATIC_WAR, null);
     }
     @Override
@@ -1778,7 +1784,8 @@ public class AIDiplomat implements Base, Diplomat {
    private boolean warWeary(EmpireView v) {
         if (v.embassy().finalWar())
             return false;
-        
+        if(!empire.inShipRange(v.empId()))
+            return true;
         // modnar: scale warWeary by number of our wars vs. number of their wars
         // more weary (willing to take less losses) if we are in more wars than they are
         // willing to take at least 15% losses
