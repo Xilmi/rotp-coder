@@ -239,10 +239,6 @@ public class MapOverlayShipCombatPrompt extends MapOverlay {
             retreatButton.draw(parent.map(), g);
         }
 
-        // if unscouted, no planet info
-        if (!scouted)
-            return;
-        
         // draw planet info, from bottom up
         int x1 = boxX+s15;
         int x2 = boxX+boxW/2+s15;
