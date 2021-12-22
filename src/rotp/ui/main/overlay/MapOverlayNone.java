@@ -444,6 +444,7 @@ public class MapOverlayNone extends MapOverlay {
                 }
                 break;
             case KeyEvent.VK_PAGE_DOWN:
+            case KeyEvent.VK_SPACE:
                 fleets = player().orderedIdleFleets();
                 currFleet = null;
                 if (fleets.isEmpty())

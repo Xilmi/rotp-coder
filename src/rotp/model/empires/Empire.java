@@ -2685,7 +2685,7 @@ public final class Empire implements Base, NamedObject, Serializable {
             {
                 if(fl.isDeployed() || fl.isInTransit())
                     continue;
-                if(fl.system() != null && hostiles().contains(viewForEmpire(fl.system().empire())))
+                if(fl.system() != null && warEnemies().contains(fl.system().empire()))
                     continue;
                 list.add(fl);                
             }
