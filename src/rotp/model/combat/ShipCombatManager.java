@@ -994,7 +994,10 @@ public class ShipCombatManager implements Base {
     }
     public boolean moveStack(CombatStack st, int x1, int y1) {
         //log(currentStack.fullName(), " moving to: ", str(x1), ",", str(y1));
-        return st.moveTo(x1,y1);
+        boolean moved = st.moveTo(x1,y1);
+        if(moved)
+            CheckForReturnFire(st);
+        return moved;
     }
     public void teleportStack(CombatStack st, int x1, int y1) {
         //log(currentStack.fullName() + " teleporting to: " + x1 + "," + y1);
@@ -1055,6 +1058,23 @@ public class ShipCombatManager implements Base {
             }
         }
         return valid;
+    }
+    public void CheckForReturnFire(CombatStack stack)
+    {
+        if(stack.cloaked)
+            return;
+        List<CombatStack> stacks = new ArrayList<>(results.activeStacks());
+        for (CombatStack s: stacks) {
+            if(s.empire == stack.empire)
+                continue;
+            if(s.initiative() <= stack.initiative())
+                continue;
+            if(s.canAttack(stack) && !s.cloaked)
+            {
+                s.target = stack;
+                performAttackTarget(s);
+            }
+        }
     }
     class EmpireMatchup {
         Empire emp1;
