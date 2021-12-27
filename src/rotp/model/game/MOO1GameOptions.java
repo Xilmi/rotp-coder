@@ -824,6 +824,7 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         list.add(OPPONENT_AI_MODNAR);
         list.add(OPPONENT_AI_HYBRID);
         list.add(OPPONENT_AI_XILMI);
+        list.add(OPPONENT_AI_UNFAIR);
         return list;
     }
     @Override
