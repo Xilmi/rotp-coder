@@ -251,22 +251,28 @@ public class MapOverlayShipCombatPrompt extends MapOverlay {
         HashMap<String, Integer> aiSizes = new HashMap();
         for(CombatStack st : mgr.activeStacks())
         {
+            int putVal = st.num;
             if(st.isShip())
             {
                 if(st.empire == pl)
                 {
-                    int putVal = st.num;
                     if(mySizes.containsKey(st.design().sizeDesc()))
                         putVal += mySizes.get(st.design().sizeDesc());
                     mySizes.put(st.design().sizeDesc(), putVal);
                 }
                 else
                 {
-                    int putVal = st.num;
                     if(aiSizes.containsKey(st.design().sizeDesc()))
                         putVal += aiSizes.get(st.design().sizeDesc());
                     aiSizes.put(st.design().sizeDesc(), putVal);
                 }
+            }
+            else if(st.isColony() && st.isArmed())
+            {
+                if(st.empire == pl)
+                    mySizes.put(text("MAIN_COLONY_BASES"), putVal);
+                else
+                    aiSizes.put(text("MAIN_COLONY_BASES"), putVal);
             }
         }
         for(Entry<String, Integer> entry : mySizes.entrySet())
