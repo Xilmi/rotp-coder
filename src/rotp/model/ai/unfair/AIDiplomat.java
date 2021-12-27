@@ -1498,7 +1498,7 @@ public class AIDiplomat implements Base, Diplomat {
     }
     private boolean giveLoyaltyTo(Empire c) {
         // ail: Very simple decision
-        return empire.generalAI().timeToKill(empire, c) > empire.generalAI().timeToKill(c, empire);
+        return empire.generalAI().timeToKill(empire, c) > empire.generalAI().timeToKill(c, empire) || empire.allies().contains(c);
     }
     // ----------------------------------------------------------
 // PRIVATE METHODS
