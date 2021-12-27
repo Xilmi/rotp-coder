@@ -45,8 +45,9 @@ import rotp.util.Base;
 public class AI implements Base {
     public static final int BASE = 0;
     public static final int MODNAR = 1;
-    public static final int XILMI = 2;
-    public static final int HYBRID = 3;
+    public static final int HYBRID = 2;
+    public static final int XILMI = 3;
+    public static final int UNFAIR = 4;
     
     private final Empire empire;
 
@@ -95,6 +96,17 @@ public class AI implements Base {
                 shipDesigner =   new rotp.model.ai.xilmi.AIShipDesigner(empire);
                 fleetCommander = new rotp.model.ai.xilmi.AIFleetCommander(empire);
                 spyMaster =      new rotp.model.ai.base.AISpyMaster(empire);
+                treasurer =      new rotp.model.ai.xilmi.AITreasurer(empire);
+                break;
+            case UNFAIR:
+                general =        new rotp.model.ai.xilmi.AIGeneral(empire);
+                captain =        new rotp.model.ai.xilmi.AIShipCaptain(empire);
+                governor =       new rotp.model.ai.xilmi.AIGovernor(empire);
+                scientist =      new rotp.model.ai.xilmi.AIScientist(empire);
+                diplomat =       new rotp.model.ai.unfair.AIDiplomat(empire);
+                shipDesigner =   new rotp.model.ai.xilmi.AIShipDesigner(empire);
+                fleetCommander = new rotp.model.ai.xilmi.AIFleetCommander(empire);
+                spyMaster =      new rotp.model.ai.xilmi.AISpyMaster(empire);
                 treasurer =      new rotp.model.ai.xilmi.AITreasurer(empire);
                 break;
             case BASE:
