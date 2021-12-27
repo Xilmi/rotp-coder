@@ -66,13 +66,13 @@ public class UserPreferences {
     private static boolean playSounds = true;
     private static int musicVolume = 10;
     private static int soundVolume = 10;
-    private static int defaultMaxBases = 1;
-    private static boolean displayYear = true;
+    private static int defaultMaxBases = 0;
+    private static boolean displayYear = false;
     private static boolean autoColonize = false;
-    private static boolean divertColonyExcessToResearch = false;
+    private static boolean divertColonyExcessToResearch = true;
     private static boolean xilmiRoleplayMode = false;
     private static String autoBombardMode = AUTOBOMBARD_NO;
-    private static String displayMode = WINDOW_MODE;
+    private static String displayMode = FULLSCREEN_MODE;
     private static String graphicsMode = GRAPHICS_HIGH;
     private static String texturesMode = TEXTURES_BOTH;
     private static String sensitivityMode = SENSITIVITY_MEDIUM;
