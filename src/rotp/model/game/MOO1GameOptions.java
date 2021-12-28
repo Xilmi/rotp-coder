@@ -141,7 +141,7 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
     @Override
     public void selectedTechTradeOption(String s)   { selectedTechTradeOption = s; }
     @Override
-    public String selectedRandomEventOption()       { return selectedRandomEventOption == null ? RANDOM_EVENTS_ON : selectedRandomEventOption; }
+    public String selectedRandomEventOption()       { return selectedRandomEventOption == null ? RANDOM_EVENTS_NO_MONSTERS : selectedRandomEventOption; }
     @Override
     public void selectedRandomEventOption(String s) { selectedRandomEventOption = s; }
     @Override
@@ -867,7 +867,7 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         selectedColonizingOption = COLONIZING_NORMAL;
         selectedResearchRate = RESEARCH_NORMAL;
         selectedTechTradeOption = TECH_TRADING_YES;
-        selectedRandomEventOption = RANDOM_EVENTS_ON;
+        selectedRandomEventOption = RANDOM_EVENTS_NO_MONSTERS;
         selectedWarpSpeedOption = WARP_SPEED_NORMAL;
         selectedFuelRangeOption = FUEL_RANGE_NORMAL;
         selectedNebulaeOption = NEBULAE_NORMAL;
