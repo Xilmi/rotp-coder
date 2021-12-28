@@ -103,6 +103,7 @@ public final class SystemsUI extends BasePanel implements IMapHandler, ActionLis
     // public for all
     public StarSystem hoverSystem;
     public StarSystem targetSystem;
+    private float colonyShipRange;
 
     JLayeredPane layers = new JLayeredPane();
     public boolean animate = true;
@@ -127,6 +128,8 @@ public final class SystemsUI extends BasePanel implements IMapHandler, ActionLis
         targetSystem = null;
         map.init();
         displayPanel.init();
+        
+        colonyShipRange = player().colonyShipRange();
         
         // on opening, build list of systems that we have colony ships 
         // in transport to. This is too expensive to do real-time
@@ -561,7 +564,7 @@ public final class SystemsUI extends BasePanel implements IMapHandler, ActionLis
             
             float sysDistance = sv.distance();
             Empire pl = player();
-            if ((sysDistance <= pl.shipRange()) && pl.canColonize(sv.sysId)) {
+            if ((sysDistance <= colonyShipRange) && pl.canColonize(sv.sysId)) {
                 if (this.expandGuardedSystems.containsKey(sv.sysId))
                     return MainUI.redAlertC;
                 else if (expandEnRouteSystems.containsKey(sv.sysId))
@@ -574,7 +577,7 @@ public final class SystemsUI extends BasePanel implements IMapHandler, ActionLis
             String envTech = pl.environmentTechNeededToColonize(sv.sysId);   
             if ((rangeTech != null) && (envTech != null))
                 return MainUI.yellowAlertC;
-            if ((envTech != null) && (sysDistance <= pl.shipRange()))
+            if ((envTech != null) && (sysDistance <= colonyShipRange))
                 return MainUI.yellowAlertC;
             if ((rangeTech != null) && pl.canColonize(sv.sysId)) 
                 return MainUI.yellowAlertC;
@@ -764,7 +767,7 @@ public final class SystemsUI extends BasePanel implements IMapHandler, ActionLis
         
         float sysDistance = sv.distance();
         Empire pl = player();
-        if ((sysDistance <= pl.shipRange()) && pl.canColonize(sv.sysId)) { 
+        if ((sysDistance <= colonyShipRange) && pl.canColonize(sv.sysId)) { 
             if (expandGuardedSystems.containsKey(sv.sysId)) {
                 Empire enemyEmp = galaxy().empire(expandGuardedSystems.get(sv.sysId));
                 String s = text("SYSTEMS_CAN_COLONIZE_ENEMY");
@@ -786,7 +789,7 @@ public final class SystemsUI extends BasePanel implements IMapHandler, ActionLis
             Tech t2 = tech(rangeTech);
             return text("SYSTEMS_UNCOLONIZED_NEED_TECHS", t1.name(), t2.name());
         }
-        if ((envTech != null) && (sysDistance <= pl.shipRange())){
+        if ((envTech != null) && (sysDistance <= colonyShipRange)){
             Tech t1 = tech(envTech);
             return text("SYSTEMS_UNCOLONIZED_NEED_TECH", t1.name());            
         }

@@ -3,7 +3,7 @@ name: Human, Terran, Tellan, Priman, Midgardian
 
 desc1: Honorable Diplomats
 desc2: Expert Traders and Magnificent Diplomats
-desc3: The silver-tongued Humans are masters at convincing others to serve Human interests.
+desc3: The silver-tongued Humans are masters at convincing others to serve their interests.
 desc4: Trade +25%, Diplomacy +100%
 
 // possible home system names

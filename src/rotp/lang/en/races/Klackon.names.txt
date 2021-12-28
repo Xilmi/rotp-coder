@@ -1,5 +1,5 @@
 // all possible names
-name: Klackon, Klackant, Klockan, Arthropon, Coleopteron
+name: Kholdan, Klackant, Klockan, Arthropon, Coleopteron
 
 desc1: Xenophobic Industrialists
 desc2: Hive Mind and Increased Worker Production
@@ -7,7 +7,7 @@ desc3: A species with a single controlling mind, the industrious [race] is inscr
 desc4: POP Productivity +100%
 
 // possible home system names
-home: Kholdan, Kholdant, Khaldon, Klokdon, Khakdon
+home: Kholdan, Klackant, Klockan, Arthropon, Coleopteron
 
 title:     The
 fulltitle: The

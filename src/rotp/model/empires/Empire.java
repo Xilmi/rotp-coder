@@ -196,6 +196,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         else
             return names.get(i);
     }
+    public boolean masksDiplomacy()               { return race().masksDiplomacy || ai().diplomat().masksDiplomacy(); }
     public List<StarSystem> shipBuildingSystems() { return shipBuildingSystems; }
     public boolean inGalacticAlliance()           { return galacticAlliance; }
     public void joinGalacticAlliance()            { galacticAlliance = true; }
@@ -689,8 +690,8 @@ public final class Empire implements Base, NamedObject, Serializable {
         StarSystem home = galaxy().system(capitalSysId);
         sys.addEvent(new SystemColonizedEvent(id));
         newSystems.add(sys);
-        addColonizedSystem(sys);
         Colony c = sys.becomeColonized(sysName, this);
+        addColonizedSystem(sys);
         governorAI().setInitialAllocations(c);
         if (isPlayerControlled()) {
             int maxTransportPop =(int)(sys.planet().maxSize()-sys.colony().population());
@@ -761,6 +762,17 @@ public final class Empire implements Base, NamedObject, Serializable {
     }
     public float shipRange()              { return tech().shipRange(); }
     public float scoutRange()             { return tech().scoutRange(); }
+    
+    public float colonyShipRange() {
+        // return max range of design with colony special
+        float range = shipRange();
+        for (int slot=0;slot<ShipDesignLab.MAX_DESIGNS;slot++) {
+            ShipDesign d = shipLab().design(slot);
+            if(d.active() && d.hasColonySpecial() && (d.range() > range))
+                range = d.range();
+        }
+        return range;
+    }
     public float researchingShipRange()   { return tech().researchingShipRange(); }
     public float researchingScoutRange()  { return tech().researchingScoutRange(); }
     public float learnableShipRange()     { return tech().learnableShipRange(); }
@@ -992,13 +1004,6 @@ public final class Empire implements Base, NamedObject, Serializable {
             ai().sendTransports();
         }
 
-        // colony development (sometimes done for player if auto-pilot)
-        NoticeMessage.setSubstatus(text("TURN_COLONY_SPENDING"));
-        for (int n=0; n<sv.count(); n++) {
-            if (sv.empId(n) == id)
-                governorAI().setColonyAllocations(sv.colony(n));
-        }
-
         if (isAIControlled()) {
             ai().treasurer().allocateReserve();
             // diplomatic activities
@@ -1019,6 +1024,13 @@ public final class Empire implements Base, NamedObject, Serializable {
                     this.sv.colony(i).governIfNeeded();
                 }
             }
+        }
+        
+        // colony development (sometimes done for player if auto-pilot)
+        NoticeMessage.setSubstatus(text("TURN_COLONY_SPENDING"));
+        for (int n=0; n<sv.count(); n++) {
+            if (sv.empId(n) == id)
+                governorAI().setColonyAllocations(sv.colony(n));
         }
     }
     /**
@@ -2190,12 +2202,9 @@ public final class Empire implements Base, NamedObject, Serializable {
         return false;
     }
     public boolean shipsCanScanTo(IMappedObject loc) {
-        if (shipScanningRange == 0)
-            return false;
-
         List<ShipFleet> fleets = galaxy().ships.allFleets(id);
         for (ShipFleet fl : fleets) {
-            if (fl.distanceTo(loc) < shipScanningRange)
+            if (fl.distanceTo(loc) <= shipScanningRange)
                 return true;
         }
         return false;
@@ -2338,7 +2347,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     }
     public boolean atWar() {
         for (EmpireView v: empireViews()) {
-            if ((v != null) && v.embassy().anyWar())
+            if ((v != null) && !v.empire().extinct() && v.embassy().anyWar())
                 return true;
         }
         return false;

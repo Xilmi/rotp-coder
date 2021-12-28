@@ -201,6 +201,7 @@ public class ColonizePlanetUI extends FadeInPanel implements MouseListener, Mous
         claimingFrame = 0;
         showFlag = false;
         nameField.setLimit(24);
+        nameField.setFont(narrowFont(26));
         nameField.setText(player().sv.name(sysId));
         nameField.setCaretPosition(nameField.getText().length());
         nameField.setVisible(false);

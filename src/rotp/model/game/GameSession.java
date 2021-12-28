@@ -394,8 +394,8 @@ public final class GameSession implements Base, Serializable {
                 gal.council().nextTurn();
                 GNNRankingNoticeCheck.nextTurn();
                 GNNExpansionEvent.nextTurn();
-                gal.refreshAllEmpireViews();
                 gal.nextEmpireTurns();
+                player().setVisibleShips();
                 
                 // test game over conditions
                 //randomlyEndGame();
@@ -415,6 +415,7 @@ public final class GameSession implements Base, Serializable {
                     log("Notifications processed 2 - back to MainPanel");
                     RotPUI.instance().selectMainPanel();
                 }
+                gal.refreshAllEmpireViews();
                 gal.postNextTurn2();
 
                 if (!inProgress())
@@ -430,8 +431,6 @@ public final class GameSession implements Base, Serializable {
                     log("Notifications processed 4 - back to MainPanel");
                     RotPUI.instance().selectMainPanel();
                 }
-                gal.refreshAllEmpireViews();
-
                 gal.makeNextTurnDecisions();
 
                 if (processNotifications()){
@@ -447,9 +446,8 @@ public final class GameSession implements Base, Serializable {
                 log("Refreshing Player Views");
                 NoticeMessage.resetSubstatus(text("TURN_REFRESHING"));
                 validate();
-                gal.refreshEmpireViews(player());
                 player().setEmpireMapAvgCoordinates();
-
+                gal.refreshAllEmpireViews();
                 log("Autosaving post-turn");
                 log("NEXT TURN PROCESSING TIME: ", str(timeMs()-startMs));
                 NoticeMessage.resetSubstatus(text("TURN_SAVING"));
@@ -914,7 +912,9 @@ public final class GameSession implements Base, Serializable {
             newSession.validate();
             newSession.validateOnLoadOnly();
             loadPreviousSession(newSession, startUp);
-            saveRecentSession(false);
+            // do not autosave the current session if that is the file we are trying to reload
+            if (!filename.equals(RECENT_SAVEFILE))
+                saveRecentSession(false); 
         }
         catch(IOException e) {
             throw new RuntimeException(text("LOAD_GAME_BAD_VERSION", filename));

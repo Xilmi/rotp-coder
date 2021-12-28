@@ -78,6 +78,7 @@ public class UserPreferences {
     private static int companionWorlds = 0; // modnar: add option to start game with additional colonies
     private static boolean autoColonize = false;
     private static boolean divertColonyExcessToResearch = false;
+    private static boolean xilmiRoleplayMode = false;
     private static String autoBombardMode = AUTOBOMBARD_NO;
     private static String displayMode = WINDOW_MODE;
     private static String graphicsMode = GRAPHICS_HIGH;
@@ -86,7 +87,6 @@ public class UserPreferences {
     private static String saveDir = "";
     private static float uiTexturePct = 0.20f;
     private static int screenSizePct = 93;
-    private static final HashMap<String, String> raceNames = new HashMap<>();
     private static int backupTurns = 5; // modnar: change default turns between backups to 5
 
     public static void setToDefault() {
@@ -288,6 +288,7 @@ public class UserPreferences {
     public static boolean displayYear()       { return displayYear; }
     public static int defaultMaxBases()    { return defaultMaxBases; }
     public static boolean divertColonyExcessToResearch()  { return divertColonyExcessToResearch; }
+    public static boolean xilmiRoleplayMode() { return xilmiRoleplayMode; }
     public static void uiTexturePct(int i)    { uiTexturePct = i / 100.0f; }
     public static float uiTexturePct()        { return uiTexturePct; }
 
@@ -316,8 +317,6 @@ public class UserPreferences {
     }
     public static void save() {
         String path = Rotp.jarPath();
-        List<String> raceKeys = new ArrayList<>(raceNames.keySet());
-        Collections.sort(raceKeys);
         try (FileOutputStream fout = new FileOutputStream(new File(path, PREFERENCES_FILE));
             // modnar: change to OutputStreamWriter, force UTF-8
             PrintWriter out = new PrintWriter(new OutputStreamWriter(fout, "UTF-8")); ) {
@@ -337,6 +336,7 @@ public class UserPreferences {
             out.println(keyFormat("DISPLAY_YEAR")+ yesOrNo(displayYear));
             out.println(keyFormat("DEFAULT_MAX_BASES") + defaultMaxBases);
             out.println(keyFormat("DIVERT_COLONY_EXCESS_TO_RESEARCH")+ yesOrNo(divertColonyExcessToResearch));
+            out.println(keyFormat("XILMI_ROLEPLAY_MODE") + yesOrNo(xilmiRoleplayMode));
             out.println(keyFormat("SCREEN_SIZE_PCT")+ screenSizePct());
             out.println(keyFormat("UI_TEXTURE_LEVEL")+(int) (uiTexturePct()*100));
             out.println(keyFormat("CUSTOM_DIFFICULTY")+ customDifficulty); // mondar: add custom difficulty level option, in units of percent
@@ -348,8 +348,6 @@ public class UserPreferences {
             out.println(keyFormat("BATTLE_SCOUT")+ yesOrNo(battleScout)); // modnar: add battleScout option to give player super Scout design
             out.println(keyFormat("COMPANION_WORLDS")+ companionWorlds); // modnar: add option to start game with additional colonies
             out.println(keyFormat("LANGUAGE")+ languageDir());
-            for (String raceKey: raceKeys) 
-              out.println(keyFormat(raceKey)+raceNames.get(raceKey));
         }
         catch (IOException e) {
             System.err.println("UserPreferences.save -- IOException: "+ e.toString());
@@ -393,6 +391,7 @@ public class UserPreferences {
             case "DISPLAY_YEAR": displayYear = yesOrNo(val); return;
             case "DEFAULT_MAX_BASES": defaultMaxBases = Integer.valueOf(val); return;
             case "DIVERT_COLONY_EXCESS_TO_RESEARCH": divertColonyExcessToResearch = yesOrNo(val); return;
+            case "XILMI_ROLEPLAY_MODE": xilmiRoleplayMode = yesOrNo(val); return;
             case "SCREEN_SIZE_PCT": screenSizePct(Integer.valueOf(val)); return;
             case "UI_TEXTURE_LEVEL": uiTexturePct(Integer.valueOf(val)); return;
             case "CUSTOM_DIFFICULTY": setCustomDifficulty(val); return; // mondar: add custom difficulty level option, in units of percent
@@ -405,7 +404,7 @@ public class UserPreferences {
             case "COMPANION_WORLDS": setNumCompanionWorlds(val); return; // modnar: add option to start game with additional colonies
             case "LANGUAGE":     selectLanguage(val); return;
             default:
-                raceNames.put(key, val); break;
+                break;
         }
     }
     private static String yesOrNo(boolean b) {
@@ -450,14 +449,6 @@ public class UserPreferences {
         int oldSize = screenSizePct;
         setScreenSizePct(screenSizePct+5);
         return oldSize != screenSizePct;
-    }
-    public static String raceNames(String id, String defaultNames) {
-        String idUpper = id.toUpperCase();
-        if (raceNames.containsKey(idUpper))
-            return raceNames.get(idUpper);
-        
-        raceNames.put(idUpper, defaultNames);
-        return defaultNames;
     }
     public static String displayModeToSettingName(String s) {
         switch(s) {

@@ -45,12 +45,12 @@ public class Rotp {
     private static final int MB = 1048576;
     public static int IMG_W = 1229;
     public static int IMG_H = 768;
-    public static String jarFileName = "RotP-0.95_modnar_MOD36"+RotpGovernor.miniSuffix()+".jar";
-    public static String exeFileName = "RotP-0.95_modnar_MOD36"+RotpGovernor.miniSuffix()+".exe";
+    public static String jarFileName = "RotP-1.0_modnar_MOD37"+RotpGovernor.miniSuffix()+".jar";
+    public static String exeFileName = "RotP-1.0_modnar_MOD37"+RotpGovernor.miniSuffix()+".exe";
     public static boolean countWords = false;
     private static String startupDir;
     private static JFrame frame;
-    public static String releaseId = "0.95 modnar_MOD36";
+    public static String releaseId = "1.0 modnar_MOD37";
     public static long startMs = System.currentTimeMillis();
     public static long maxHeapMemory = Runtime.getRuntime().maxMemory() / 1048576;
     public static long maxUsedMemory;
@@ -133,12 +133,12 @@ public class Rotp {
     }
     public static void setFrameSize() {
         resizeAmt = -1;
-        FontManager.current().resetFonts();
         double adj = resizeAmt();
         int vFrame = 0;
         int hFrame = 0;
         int maxX = (int)((hFrame+IMG_W)*adj);
         int maxY = (int)((vFrame+IMG_H)*adj);
+        FontManager.current().resetFonts();
         if (logging)
             System.out.println("setting size to: "+maxX+" x "+maxY);
         frame.getContentPane().setPreferredSize(new Dimension(maxX,maxY));

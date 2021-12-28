@@ -196,8 +196,8 @@ public class ShipCombatManager implements Base {
             RotPUI.instance().promptForShipCombat(this);
         else {
             resolveAllCombat();
-            endOfCombat(true);
         }
+        endOfCombat(true);
     }
     private void battle(StarSystem sys, Empire emp, SpaceMonster monster) {
         finished = false;
@@ -216,8 +216,8 @@ public class ShipCombatManager implements Base {
             RotPUI.instance().promptForShipCombat(this);
         else {
             resolveAllCombat();
-            endOfCombat(true);
         }
+        endOfCombat(true);
     }
     private void beginInSystem(StarSystem s, Empire emp1, Empire emp2) {
         system = s;
@@ -441,8 +441,6 @@ public class ShipCombatManager implements Base {
         // ensure rebels are killed in proportionn to overall population
         results.killRebels();
 
-        results.refreshSystemScans();
-        
         // update treaty with results
         Empire defender = results.defender();
         Empire attacker = results.attacker();
@@ -901,8 +899,10 @@ public class ShipCombatManager implements Base {
             CombatStack stack = currentTurnList.get(i);
             if (stack.destroyed())
                 continue;
-            if (stack.isColony() && !stack.isArmed()) 
+            if (stack.isColony() && !stack.isArmed()) {
+                stack.endTurn();
                 continue;
+            }
             nextIndex = i;
             break;
         }

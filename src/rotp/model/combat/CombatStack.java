@@ -35,6 +35,17 @@ import rotp.util.Base;
 public class CombatStack implements Base {
     static final Color shipCountTextC = new Color(255,240,78);
     static final Float MOVE_STEP = 0.1f;
+    public static final Color healthBarC = new Color(0,96,0);
+    public static final Color shipCountBackC = new Color(0,0,0);
+    public static final Color healthBarBackC = new Color(0,48,0);
+    public static final Color healthBorderC = new Color(64,192,64);
+    public static final Color shipShieldC = new Color(128,128,0);
+    public static final Color shipAttackC = new Color(128,0,0);
+    public static final Color shipMissDefenseC = new Color(0,0,128);
+    public static final Color shipBeamDefenseC = new Color(64,64,160);
+    public static final Color sysShieldC = new Color(128,128,0);
+    public static final Color sysPopC = new Color(128,0,0);
+    public static final Color sysFactoryC = new Color(0,0,128);
     public Empire empire;
     public ShipCombatManager mgr;
     public ShipCaptain captain;
@@ -360,8 +371,10 @@ public class CombatStack implements Base {
         boolean missilesFinished = true;
 
         List<CombatStackMissile> targetCopy = new ArrayList<>(targetingMissiles);
-        for (CombatStackMissile miss : targetCopy) 
+        for (CombatStackMissile miss : targetCopy) {
+            miss.move = miss.moveRate;
             missilesFinished = miss.pursue(MOVE_STEP) && missilesFinished;
+        }
         
         if (mgr.showAnimations()) 
             mgr.ui.paintAllImmediately(20);
@@ -584,13 +597,18 @@ public class CombatStack implements Base {
 
         // set a clip to minimize delays cause by potential side-effect
         // repainting of the ui
-        g.setClip(rTopLeft.x, rTopLeft.y, 2*rTopLeft.width, 2*rTopLeft.height);
+        int clipX = rTopLeft.x+(int)((offsetX-0.2)*rTopLeft.width);
+        int clipY = rTopLeft.y+(int)((offsetY-0.2)*rTopLeft.height);
+        int clipW = 5*rTopLeft.width/2;
+        int clipH = 5*rTopLeft.height/2;
+        g.setClip(clipX, clipY, clipW, clipH);
 
         for (int i=0;i<FRAMES;i++) {
             long t0 = System.currentTimeMillis();
             if (!mgr.showAnimations()) 
                 break;
-            mgr.ui.paintCellImmediately(x,y);
+            mgr.ui.paintImmediately(clipX,clipY,clipW,clipH);
+            //mgr.ui.paintCellImmediately(x,y);
             g.setFont(font[i]);
             if (dmg != 0)
                 g.setColor(cRed[i]);
@@ -696,6 +714,42 @@ public class CombatStack implements Base {
             int x3 = x1+(stackW-sw)/2;
             int y3 = y1+(stackH/2);
             drawBorderedString(g, s,x3,y3, Color.black, Color.white);
+        }
+        int mgn = BasePanel.s2;
+        int x4 = x+mgn;
+        int y4 = y+mgn;
+        int w4 = stackW-mgn-mgn;
+        int barH = BasePanel.s10;
+        if (ui.showTacticalInfo()) {
+            // draw health bar & hp
+            g.setColor(healthBarBackC);
+            g.fillRect(x4, y4, w4, barH);
+            int w4a = (int)(w4*hits/maxHits);
+            g.setColor(healthBarC);
+            g.fillRect(x4, y4, w4a, barH);
+            int numW = 0;
+            // draw ship count
+            if (num > 1) {
+                g.setColor(healthBarC);
+                String numStr = str(num);
+                g.setFont(narrowFont(20));
+                numW = g.getFontMetrics().stringWidth(numStr);
+                int x6 = reversed ? x4: x4+w4-numW-BasePanel.s10;
+                g.fillRect(x6, y4, numW+BasePanel.s10, BasePanel.s22);
+                g.setColor(Color.white);
+                Stroke prevStroke = g.getStroke();
+                g.setStroke(BasePanel.stroke1);
+                g.drawRect(x6, y4, numW+BasePanel.s10, BasePanel.s22);
+                g.setStroke(prevStroke);
+                g.drawString(numStr, x6+BasePanel.s5,y4+BasePanel.s18);
+            }
+            // draw hit points
+            g.setColor(Color.white);
+            String hpStr = ""+(int)Math.ceil(hits)+"/"+(int)Math.ceil(maxHits);
+            g.setFont(narrowFont(12));
+            int hpW = g.getFontMetrics().stringWidth(hpStr);
+            int x5 = reversed ? x4+((w4-hpW+numW)/2) : x4+((w4-hpW-numW)/2);
+            g.drawString(hpStr, x5, y4+BasePanel.s9);
         }
     }
 }

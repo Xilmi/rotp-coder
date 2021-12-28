@@ -19,6 +19,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import rotp.model.empires.ShipView;
 import rotp.model.galaxy.ShipFleet;
 import rotp.model.galaxy.StarSystem;
 import rotp.model.ships.*;
@@ -28,8 +29,6 @@ import rotp.ui.BasePanel;
 import rotp.ui.combat.ShipBattleUI;
 
 public class CombatStackShip extends CombatStack {
-    static Color healthBarC = new Color(0,96,0);
-    static Color healthBorderC = new Color(64,192,64);
     public ShipDesign design;
     public ShipFleet fleet;
     public int selectedWeaponIndex;
@@ -68,7 +67,7 @@ public class CombatStackShip extends CombatStack {
         origNum = num = fl.num(index);
         startingMaxHits = maxHits = design.hits();
         maxMove = design.moveRange();
-        maxShield = design.shieldLevel();
+        maxShield = m.system().inNebula() ? 0 : design.shieldLevel();
         attackLevel = design.attackLevel() + empire.shipAttackBonus();
         maneuverability = design.maneuverability();
         repulsorRange = design.repulsorRange();
@@ -187,14 +186,6 @@ public class CombatStackShip extends CombatStack {
         int missileRange = -1;
         int weaponRange = -1;
         
-        int maxX = ShipCombatManager.maxX;
-        int maxY = ShipCombatManager.maxY;
-        float maxRetreatMove = 2*tgt.maxMove; // allow 2 turns to retreat before missiles hit
-        if (maxRetreatMove > 0) {
-            // won't retreat more than the distance to the nearest corner of the map
-            float moveToCorner = min(distance(tgt.x,tgt.y,0,0), distance(tgt.x,tgt.y,0,maxY), distance(tgt.x,tgt.y,maxX,0), distance(tgt.x,tgt.y,maxX,maxY));
-            maxRetreatMove = min(maxRetreatMove, moveToCorner);
-        }
         for (int i=0;i<weapons.size();i++) {
             ShipComponent wpn = weapons.get(i);
             // if we are bombing a planet, ignore other weapons
@@ -203,14 +194,30 @@ public class CombatStackShip extends CombatStack {
                 continue;
             if (tgt.isColony() && wpn.groundAttacksOnly())
                 return 1;
-            else if (wpn.isMissileWeapon()) 
-                // missiles move by distance, not tiles, so adjust minimum range downward by sqrt(2)
-                // to account for diagonal movement
-                missileRange = (int) max(tgt.repulsorRange() + 1, repulsorRange() + 1, missileRange, ((weaponRange(wpn)/1.414f)-maxRetreatMove));
+            else if (wpn.isMissileWeapon())
+            {
+                if(roundsRemaining[i] > 0)
+                {
+                    float mslRange = 1;
+                    float requiredRange = 2 * tgt.maxMove * sqrt(2) - 0.7f;
+                    mslRange = max(weaponRange(wpn) - requiredRange, mslRange);
+                    missileRange = (int) max(tgt.repulsorRange() + 1, repulsorRange() + 1, missileRange, mslRange);
+                }
+            }
             else
-                weaponRange = max(weaponRange,weaponRange(wpn));
+            {
+                if(empire.ai().shipCaptain().useSmartRangeForBeams())
+                {
+                    if(tgt.maxFiringRange(this) > repulsorRange()) //If our enemy has a bigger range than our repulsors we close in no matter what
+                        weaponRange = 1;
+                    else
+                        weaponRange = min(repulsorRange() + 1, weaponRange(wpn)); //ail: optimal firing-range for beam-weapons should be as close as possible but still take advantage of repulsor
+                }
+                else
+                    weaponRange = weaponRange(wpn); //Use longest range for base-AI as it otherwise can't deal with repulsor-beam-ships because it doesn't have a loop around it's path-finding trying bigger ranges when range 1 is blocked
+            }
         }
-        return weaponRange < 0 ? missileRange: weaponRange;
+        return max(missileRange, weaponRange);
     }
     @Override
     public float missileInterceptPct(ShipWeaponMissileType wpn)   {
@@ -656,16 +663,19 @@ public class CombatStackShip extends CombatStack {
             }
         }
 
+        int iconW = BasePanel.s18;
         int y2 = y+stackH-BasePanel.s5;
         g.setFont(narrowFont(16));
-        String name = text("SHIP_COMBAT_COUNT_NAME", str(num), design.name());
-        scaledFont(g, name, stackW-BasePanel.s5,16,8);
+        int nameMgn = ui.showTacticalInfo() ? iconW + BasePanel.s5 : BasePanel.s5;
+        String name = ui.showTacticalInfo() ? design.name() : text("SHIP_COMBAT_COUNT_NAME", str(num), design.name());
+        scaledFont(g, name, stackW-nameMgn,16,8);
         int sw2 = g.getFontMetrics().stringWidth(name);
-        int x2 = max(x1, x1+((stackW-sw2)/2));
+        int x1mgn = reversed || !ui.showTacticalInfo() ? x1 : x1+iconW;
+        int x2 = max(x1mgn, x1mgn+((stackW-nameMgn-sw2)/2));
 
         g.setColor(Color.lightGray);
         drawString(g, name, x2, y2);
-
+        
         if (inStasis) {
             g.setColor(TechStasisField.STASIS_COLOR);
             g.fillRect(x1,y1,stackW, stackH);
@@ -676,6 +686,90 @@ public class CombatStackShip extends CombatStack {
             int x3 = x1+(stackW-sw)/2;
             int y3 = y1+(stackH/2);
             drawBorderedString(g, s,x3,y3, Color.black, Color.white);
+        }
+        
+        int mgn = BasePanel.s2;
+        int x4 = x+mgn;
+        int y4 = y+mgn;
+        int w4 = stackW-mgn-mgn;
+        int barH = BasePanel.s10;
+        if (ui.showTacticalInfo()) {
+            // draw health bar & hp
+            g.setColor(healthBarBackC);
+            g.fillRect(x4, y4, w4, barH);
+            int w4a = (int)(w4*hits/maxHits);
+            g.setColor(healthBarC);
+            g.fillRect(x4, y4, w4a, barH);
+            // draw ship count
+            g.setColor(healthBarC);
+            String numStr = str(num);
+            g.setFont(narrowFont(20));
+            int numW = g.getFontMetrics().stringWidth(numStr);
+            int x6 = reversed ? x4: x4+w4-numW-BasePanel.s10;
+            g.fillRect(x6, y4, numW+BasePanel.s10, BasePanel.s22);
+            g.setColor(Color.white);
+            Stroke prevStroke = g.getStroke();
+            g.setStroke(BasePanel.stroke1);
+            g.drawRect(x6, y4, numW+BasePanel.s10, BasePanel.s22);
+            g.setStroke(prevStroke);
+            g.drawString(numStr, x6+BasePanel.s5,y4+BasePanel.s18);
+            // draw hit points
+            g.setColor(Color.white);
+            String hpStr = ""+(int)Math.ceil(hits)+"/"+(int)Math.ceil(maxHits);
+            g.setFont(narrowFont(12));
+            int hpW = g.getFontMetrics().stringWidth(hpStr);
+            int x5 = reversed ? x4+((w4-hpW+numW)/2) : x4+((w4-hpW-numW)/2);
+            g.drawString(hpStr, x5, y4+BasePanel.s9);
+                
+            
+            ShipView view = player().shipViewFor(design());
+            if (view != null) {
+                // draw shield level
+                g.setColor(shipShieldC);
+                int x4a = reversed ? x4+w4-iconW : x4;
+                int y4a =y4+barH+BasePanel.s1;
+                g.fillOval(x4a, y4a, iconW, iconW);
+                if (view.shieldKnown()) {
+                    g.setColor(Color.white);
+                    String valStr = str((int)Math.ceil(shieldLevel()));
+                    g.setFont(narrowFont(16));
+                    int shldW = g.getFontMetrics().stringWidth(valStr);
+                    g.drawString(valStr, x4a+((iconW-shldW)/2), y4a+BasePanel.s14);
+                }
+                //draw attack level
+                g.setColor(shipAttackC);
+                int y4b =y4a+iconW+BasePanel.s2;
+                g.fillOval(x4a, y4b, iconW, iconW);
+                if (view.attackLevelKnown()) {
+                    g.setColor(Color.white);
+                    String valStr = str((int)Math.ceil(attackLevel()));
+                    g.setFont(narrowFont(16));
+                    int shldW = g.getFontMetrics().stringWidth(valStr);
+                    g.drawString(valStr, x4a+((iconW-shldW)/2), y4b+BasePanel.s14);
+                }
+                //draw beam defense level
+                g.setColor(shipBeamDefenseC);
+                int y4c =y4b+iconW+BasePanel.s1;
+                g.fillOval(x4a, y4c, iconW, iconW);
+                if (view.beamDefenseKnown()) {
+                    g.setColor(Color.white);
+                    String valStr = str((int)Math.ceil(beamDefense()));
+                    g.setFont(narrowFont(16));
+                    int shldW = g.getFontMetrics().stringWidth(valStr);
+                    g.drawString(valStr, x4a+((iconW-shldW)/2), y4c+BasePanel.s14);
+                }
+                //draw missie defense level
+                g.setColor(shipMissDefenseC);
+                int y4d =y4c+iconW+BasePanel.s1;
+                g.fillOval(x4a, y4d, iconW, iconW);
+                if (view.missileDefenseKnown()) {
+                    g.setColor(Color.white);
+                    String valStr = str((int)Math.ceil(missileDefense()));
+                    g.setFont(narrowFont(16));
+                    int shldW = g.getFontMetrics().stringWidth(valStr);
+                    g.drawString(valStr, x4a+((iconW-shldW)/2), y4d+BasePanel.s14);
+                }
+            }
         }
     }
     public void drawRetreat() {
