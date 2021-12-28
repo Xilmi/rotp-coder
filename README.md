@@ -28,10 +28,13 @@ This RotP MOD contains many gameplay additions/changes from the official game ve
     - [**Gauntlet Relic Random Event**](https://i.imgur.com/0En3ESM.png)
 - [**Quality of Life Improvements**](https://i.imgur.com/lBAVLpV.png)
     - **Turns between Backup Saves Changed to 0, 1, 5, 10, 20**
-    - **Increased Minimum Empire Homeworld Separation** (**10 ly**, up from 6 ly in the official version)
+    - **Increased Minimum Empire Homeworld Separation** (**8 ly**, up from 6 ly in the official version)
         - Reduce Max Number of Empires for Map Sizes
     - **Colony Map Info Shorthand**
         - P, F, and B in place of Pop, Fac, and Base
+    - **Additional "Expand" and "Exploit" Map Displays with Turn/Year Selection**
+        - [**"Expand"**](https://i.imgur.com/KJKc8tq.png)
+        - [**"Exploit"**](https://i.imgur.com/Qfem6WP.png)
     - [**Weapon Count Modifier**](https://i.imgur.com/YHfMdMG.png)
     - **Weapon Count Mouse Scrolling Changed to: scroll up to increase, scroll down to decrease.**
     - [**Additional Empire Colors**](https://i.imgur.com/3XH7OsF.png)
