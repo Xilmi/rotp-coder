@@ -82,7 +82,7 @@ public final class TransferReserveUI extends BasePanel implements MouseListener,
         addMouseMotionListener(this);
         addMouseWheelListener(this);
     }
-    public void targetSystem(StarSystem sys) {
+    public void targetSystem(StarSystem sys)  {
         targetSystem = sys;
         initted = false;
         setDefaultAmt(sys);
@@ -107,6 +107,7 @@ public final class TransferReserveUI extends BasePanel implements MouseListener,
         // get length of title and determine box width
         g.setFont(narrowFont(24));
         String title = text("PLANETS_TRANSFER_DESC", player().sv.name(targetSystem.id));
+
         int titleSW = g.getFontMetrics().stringWidth(title);
 
         int boxWidth = titleSW+s70;

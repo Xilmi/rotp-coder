@@ -52,6 +52,8 @@ text in the planetary spending screen. Since version 1.8 Governor is on by defau
 
 Additional features / changelog
 
+* 4.00.1 Merge 1.00. No other changes so far.
+
 * 3.95.1 Merge 0.95. Added native packaging with launch4j. Removed code-only "governor" packaging.
 
 * 3.91.2 Updated native-transform-maven-plugin

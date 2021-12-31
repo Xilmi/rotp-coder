@@ -822,14 +822,14 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         List<String> list = new ArrayList<>();
         list.add("RACE_HUMAN");
         list.add("RACE_ALKARI");
-        list.add("RACE_BULRATHI");
-        list.add("RACE_DARLOK");
+        list.add("RACE_SILICOID");
+        list.add("RACE_MRRSHAN");
         list.add("RACE_KLACKON");
         list.add("RACE_MEKLAR");
-        list.add("RACE_MRRSHAN");
         list.add("RACE_PSILON");
+        list.add("RACE_DARLOK");
         list.add("RACE_SAKKRA");
-        list.add("RACE_SILICOID");
+        list.add("RACE_BULRATHI");
         return list;
     }
     @Override
@@ -842,7 +842,7 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         selectedGalaxyAge = galaxyAgeOptions().get(1);
         selectedNumberOpponents = defaultOpponentsOptions();
         selectedPlayerRace(random(startingRaceOptions()));
-        selectedGameDifficulty = DIFFICULTY_NORMAL;
+        selectedGameDifficulty = DIFFICULTY_EASY;
         selectedOpponentAIOption = OPPONENT_AI_BASE;
         for (int i=0;i<specificOpponentAIOption.length;i++)
             specificOpponentAIOption[i] = OPPONENT_AI_BASE;

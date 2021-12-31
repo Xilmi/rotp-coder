@@ -157,10 +157,10 @@ public final class Colony implements Base, IMappedObject, Serializable {
     public float currentProductionCapacity() {
         // returns a pct (0 to 1) representing the colony's current
         // production vs its maximum possible formula
-        float maxFactories = industry().maxFactories();
-        float factories = min(maxFactories, industry().factories(), industry().maxUseableFactories());
         float pop = population();
-        float maxPop = planet().maxSize();
+        float maxPop = planet().maxSizeAfterSoilAtmoTform();
+        float maxFactories = maxPop * industry().maxRobotControls();
+        float factories = min(maxFactories, industry().factories(), industry().maxUseableFactories());
         
         float workerProd = empire.workerProductivity();
         float maxProd = maxFactories + (maxPop * workerProd);
@@ -221,6 +221,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
 
     public boolean hasStargate()         { return shipyard().hasStargate(); }
     public boolean hasStargate(Empire e) { return (empire == e) && hasStargate(); }
+    public void removeStargate()         { shipyard().removeStargate(); }
 
     public int totalAmountAllocated() {
         int amt = 0;
@@ -682,7 +683,26 @@ public final class Colony implements Base, IMappedObject, Serializable {
         }
     }
     private void redistributeReducedEcoSpending() {
-        realignSpending(ecology());
+        int maxAllocation = ColonySpendingCategory.MAX_TICKS;
+        // determine how much categories are over/under spent
+        int spendingTotal = 0;
+        for (int i = 0; i < NUM_CATS; i++)
+            spendingTotal += spending[i].allocation();
+
+        int adj = maxAllocation - spendingTotal;
+        if (adj == 0)
+            return;
+        
+        // funnel excess to industry if it's not completed
+        if (!industry().isCompleted() && adj > 0)
+            adj -= spending[INDUSTRY].adjustValue(adj);
+        
+        // put whatever is left or take whatever is missing acording to the spending-sequence
+        for (int i = 0; i < NUM_CATS; i++) {
+            ColonySpendingCategory currCat = spending[spendingSeq[i]];
+            if ((spendingSeq[i] != ECOLOGY) && !locked(spendingSeq[i]))
+                adj -= currCat.adjustValue(adj);
+        }
     }
     public void realignSpending(ColonySpendingCategory cat) {
         int maxAllocation = ColonySpendingCategory.MAX_TICKS;
@@ -1079,11 +1099,6 @@ public final class Colony implements Base, IMappedObject, Serializable {
                 completeDefenseAgainstTransports(tr);
         }
 
-        if (empire == galaxy().orionEmpire()) {
-            capturedOrion(tr);
-            return;
-        }
-
         float pctLost = min(1, ((startingPop - population()) / startingPop));
         int popLost = (int) startingPop -  (int) population();
         int rebelsLost = (int) Math.ceil(pctLost*rebels);
@@ -1130,10 +1145,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         loser.lastAttacker(tr.empire());
         starSystem().addEvent(new SystemCapturedEvent(tr.empId()));
         tr.empire().lastAttacker(loser);
-        if (loser == galaxy().orionEmpire()) {
-            capturedOrion(tr);
-            return;
-        }
+
         Empire pl = player();
         if (tr.empire().isPlayerControlled()) {
             allocation(SHIP, 0);
@@ -1160,7 +1172,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
             }
         }
 
-        setPopulation(tr.size());
+        setPopulation(min(planet.currentSize(),tr.size()));
         tr.size(0);
         shipyard().capturedBy(tr.empire());
         industry().capturedBy(tr.empire());
@@ -1196,22 +1208,6 @@ public final class Colony implements Base, IMappedObject, Serializable {
 
         if (loser.numColonies() == 0)
             loser.goExtinct();
-    }
-    public void capturedOrion(Transport tr) {
-        setPopulation(tr.size());
-        tr.size(0);
-        industry().capturedBy(tr.empire());
-        defense().capturedBy(tr.empire());
-        ecology().capturedBy(tr.empire());
-
-        empire = tr.empire();
-        empire.setRecalcDistances();
-        buildFortress();
-        shipyard().goToNextDesign();
-
-        rebels = 0;
-        rebellion = false;
-        clearReserveIncome();
     }
     public void takeCollateralDamage(float damage) {
         if (destroyed())

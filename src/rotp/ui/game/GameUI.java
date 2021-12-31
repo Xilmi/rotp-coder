@@ -32,9 +32,14 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import javax.swing.border.Border;
 import rotp.Rotp;
@@ -55,6 +60,7 @@ public class GameUI  extends BasePanel implements MouseListener, MouseMotionList
     protected static RoundGradientPaint rgp;
 
     public static final int BG_DURATION = 80;
+    public static final float SLIDESHOW_MAX = 15f;
     
     public static String gameName = "";
     
@@ -109,7 +115,7 @@ public class GameUI  extends BasePanel implements MouseListener, MouseMotionList
     int diff = s60;
     int languageX;
     BaseText discussText, continueText, newGameText, loadGameText, saveGameText, settingsText, exitText, restartText;
-    BaseText versionText;
+    BaseText versionText, manualText;
     BaseText developerText, artistText, graphicDsnrText, writerText, soundText, translatorText, slideshowText;
     BaseText shrinkText, enlargeText;
     BaseText hoverBox;
@@ -124,10 +130,9 @@ public class GameUI  extends BasePanel implements MouseListener, MouseMotionList
     BufferedImage backImg;
     String imageKey1, imageKey2;
     int animationTimer = BG_DURATION;
-    private final GameLanguagePane languagePanel = new GameLanguagePane();
-    float slideshowFade = 1.0f;
-    long slideshowTime = 0;
-
+    private final GameLanguagePane languagePanel;
+    float slideshowFade = SLIDESHOW_MAX;
+    
     public static Color langShade()               { return langShade[opt()]; }
     public static Color titleColor()              { return titleColor[opt()]; }
     public static Color titleShade()              { return titleShade[opt()]; }
@@ -331,6 +336,7 @@ public class GameUI  extends BasePanel implements MouseListener, MouseMotionList
     public GameUI() {
         startingScale = UserPreferences.screenSizePct();
         startingDisplayMode = UserPreferences.displayMode();
+        languagePanel = new GameLanguagePane(this);
         imageKey1 = backImgKeys[0];
         imageKey2 = random(backImgKeys);
         while (imageKey1.equals(imageKey2))
@@ -350,7 +356,8 @@ public class GameUI  extends BasePanel implements MouseListener, MouseMotionList
         loadGameText    = new BaseText(this, true, 45,   0, 430,  enabledC, disabledC, hoverC, depressedC, shadedC, 1, 1, 8);
         saveGameText    = new BaseText(this, true, 45,   0, 475,  enabledC, disabledC, hoverC, depressedC, shadedC, 1, 1, 8);
         settingsText    = new BaseText(this, true, 45,   0, 520,  enabledC, disabledC, hoverC, depressedC, shadedC, 1, 1, 8);
-        exitText        = new BaseText(this, true, 45,   0, 565,  enabledC, disabledC, hoverC, depressedC, shadedC, 1, 1, 8);
+        manualText      = new BaseText(this, true, 45,   0, 565,  enabledC, disabledC, hoverC, depressedC, shadedC, 1, 1, 8);
+        exitText        = new BaseText(this, true, 45,   0, 610,  enabledC, disabledC, hoverC, depressedC, shadedC, 1, 1, 8);
         restartText     = new BaseText(this, true, 45,   0, 430,  enabledC, disabledC, hoverC, depressedC, shadedC, 1, 1, 8);
         versionText     = new BaseText(this, false,16,   5, -35,  enabledC,  enabledC, hoverC, depressedC, Color.black, 1, 0, 1);
         discussText     = new BaseText(this, false,22,   5, -10,  enabledC, disabledC, hoverC, depressedC, Color.black, 1, 1, 1);
@@ -398,6 +405,7 @@ public class GameUI  extends BasePanel implements MouseListener, MouseMotionList
         loadGameText.displayText(text("GAME_MENU_LOAD_GAME"));
         saveGameText.displayText(text("GAME_MENU_SAVE_GAME"));
         settingsText.displayText(text("GAME_MENU_SETTINGS"));
+        manualText.displayText(text("GAME_MENU_OPEN_MANUAL"));
         exitText.displayText(text("GAME_MENU_EXIT"));
         restartText.displayText(text("GAME_MENU_RESTART"));
 
@@ -412,16 +420,18 @@ public class GameUI  extends BasePanel implements MouseListener, MouseMotionList
         slideshowText.displayText(text("CREDITS_ILLUSTRATOR"));
         versionText.displayText(text("GAME_VERSION", str(Rotp.releaseId)));
     }
+    public void init() {
+        slideshowFade = SLIDESHOW_MAX;
+        resetSlideshowTimer();
+    }
     @Override
     public void animate() {
         if (glassPane() != null)
             return;
         
-        if (slideshowTime == 0) 
-            slideshowTime = System.currentTimeMillis();
-        
         animationTimer--;
-        if (animationTimer == 0) {
+        slideshowFade -=.1f;
+        if (animationTimer <= 0) {
             imageKey1 = imageKey2;
             imageKey2 = random(backImgKeys);
             backImg1 = backImg2;
@@ -438,21 +448,12 @@ public class GameUI  extends BasePanel implements MouseListener, MouseMotionList
             AlphaComposite composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, pct);
             imgG.setComposite(composite);
             imgG.drawImage(backImg2, 0,0,null);
-            //int alpha =(int) (255* ((10-(int)Math.abs(10-animationTimer))/10.0f));
-            //Color c0 = new Color (0,0,0,alpha);
-            //imgG.setColor(c0);
-            //imgG.fillRect(0,0,img.getWidth(),img.getHeight());
             imgG.dispose();
             backImg = img;
-            if ((animationTimer >= 10) && (slideshowFade > 0) && !languagePanel.isVisible()) {
-                long curTime = System.currentTimeMillis();
-                if ((curTime - slideshowTime) >= (BG_DURATION * RotPUI.ANIMATION_TIMER))
-                    slideshowFade = (animationTimer - 10)/10f;
-                else if (animationTimer == 10)
-                    slideshowTime = curTime;
-            }
             repaint();
         }
+        else if ((slideshowFade <= 1) && (slideshowFade >= -0.3f))
+            repaint();
     }
     @Override
     public boolean drawMemory()       { return true; }
@@ -463,6 +464,8 @@ public class GameUI  extends BasePanel implements MouseListener, MouseMotionList
         super.paintComponent(g0);
         Graphics2D g = (Graphics2D) g0;
         int w = getWidth();
+        
+        languagePanel.initFonts();
 
         if (backImg == null) {
             backImg1 =  ImageManager.current().image(imageKey1);
@@ -475,21 +478,26 @@ public class GameUI  extends BasePanel implements MouseListener, MouseMotionList
         int imgH = back.getHeight(null);
         g.drawImage(back, 0, 0, getWidth(), getHeight(), 0, 0, imgW, imgH, this);
 
+  
+        
         Composite prevComp = g.getComposite();
-        if (slideshowFade < 1) {
-            AlphaComposite ac = java.awt.AlphaComposite.getInstance(AlphaComposite.SRC_OVER,max(0,1-slideshowFade));
-            g.setComposite(ac);
+        float textAlpha = min(1,max(0,slideshowFade));
+        if ((textAlpha < 1) || hideText) {
+            if (!hideText) {
+                AlphaComposite ac = java.awt.AlphaComposite.getInstance(AlphaComposite.SRC_OVER,1-textAlpha);
+                g.setComposite(ac);
+            }
             slideshowText.draw(g);
         }
  
-        if (slideshowFade == 0) {
+        if (textAlpha == 0) {
             languagePanel.setVisible(false);
             g.setComposite(prevComp);
             return;
         }
         
-        if (slideshowFade < 1) {
-            AlphaComposite ac = java.awt.AlphaComposite.getInstance(AlphaComposite.SRC_OVER,max(0,slideshowFade));
+        if (textAlpha < 1) {
+            AlphaComposite ac = java.awt.AlphaComposite.getInstance(AlphaComposite.SRC_OVER,textAlpha);
             g.setComposite(ac);
         }
         
@@ -526,34 +534,43 @@ public class GameUI  extends BasePanel implements MouseListener, MouseMotionList
             imgG.dispose();
         }
         
-        g.drawImage(titleImg, 0, s100, null);
+        if (!hideText)
+           g.drawImage(titleImg, 0, s100, null);
         if (hideText) {
             g.setComposite(prevComp);
             return;
         }
 
-        int lw = languagePanel.w;
-        int lh = languagePanel.h;
-        languagePanel.setBounds(w-lw-s15,s5,lw,lh);
+        if (languagePanel.fontsReady) {
+            int lw = languagePanel.w;
+            int lh = languagePanel.h;
+            languagePanel.setBounds(w-lw-s15,s5,lw,lh);
 
-        if (languagePanel.isVisible()) {
-            g.setColor(langShade());
-            g.fillRoundRect(w-s55, s5, s40, s40,s10,s10);
+            if (languagePanel.isVisible()) {
+                g.setColor(langShade());
+                g.fillRoundRect(w-s55, s5, s40, s40,s10,s10);
+            }
+            Image img = image("LANGUAGE_ICON");
+            g.drawImage(img, w-s55, s5, s40, s40, this);
+            languageBox.setBounds(w-s55, s5, s40, s40);
+
+            String langText = LanguageManager.current().selectedLanguageName();
+            g.setFont(narrowFont(24));
+            int langSW = g.getFontMetrics().stringWidth(langText);
+            int langX = w-s55-langSW-s10;
+            g.setColor(logoFore[0]);
+            drawShadowedString(g, langText, 2, langX, s30, Color.black, logoFore[0]);
         }
-        Image img = image("LANGUAGE_ICON");
-        g.drawImage(img, w-s55, s5, s40, s40, this);
-        languageBox.setBounds(w-s55, s5, s40, s40);
-
-        String langText = LanguageManager.current().selectedLanguageName();
-        g.setFont(narrowFont(24));
-        int langSW = g.getFontMetrics().stringWidth(langText);
-        int langX = w-s55-langSW-s10;
-        g.setColor(logoFore[0]);
-        drawShadowedString(g, langText, 2, langX, s30, Color.black, logoFore[0]);
 
         discussText.disabled(false);
         if (!discussText.isEmpty())
             discussText.draw(g);
+        
+        if (canOpenManual()) {
+            exitText.setY(610);
+        }
+        else
+            exitText.setY(565);
 
         if (canRestart()) {
             continueText.reset();
@@ -562,6 +579,7 @@ public class GameUI  extends BasePanel implements MouseListener, MouseMotionList
             saveGameText.reset();
             settingsText.disabled(false);
             settingsText.drawCentered(g);
+            manualText.reset();
             exitText.reset();
             restartText.disabled(false);
             restartText.drawCentered(g);
@@ -578,6 +596,8 @@ public class GameUI  extends BasePanel implements MouseListener, MouseMotionList
             saveGameText.drawCentered(g);
             settingsText.disabled(false);
             settingsText.drawCentered(g);
+            manualText.visible(canOpenManual());
+            manualText.drawCentered(g);
             exitText.disabled(!canExit());
             exitText.drawCentered(g);
         }
@@ -598,10 +618,18 @@ public class GameUI  extends BasePanel implements MouseListener, MouseMotionList
         
         g.setComposite(prevComp);
     }
+    private String manualFilePath() {
+        return LanguageManager.current().selectedLanguageFullPath()+"/manual.pdf";
+    }
+    private boolean manualExists() { 
+        String filename = manualFilePath();
+        return readerExists(filename);
+    }
     private boolean canContinue()    { return session().status().inProgress() || session().hasRecentSession(); }
     private boolean canNewGame()     { return true; }
     private boolean canLoadGame()    { return true; }
     private boolean canSaveGame()    { return session().status().inProgress(); }
+    private boolean canOpenManual()  { return manualExists(); }
     private boolean canExit()        { return true; }
     private boolean canRestart()     { return !UserPreferences.displayMode().equals(startingDisplayMode) 
             || (UserPreferences.screenSizePct() != startingScale); }
@@ -613,14 +641,14 @@ public class GameUI  extends BasePanel implements MouseListener, MouseMotionList
         loadGameText.rescale();
         saveGameText.rescale();
         settingsText.rescale();
+        manualText.rescale();
         exitText.rescale();
     }
     private void resetSlideshowTimer() {
         if (slideshowFade < 1) {
-            slideshowFade = 1;
-            slideshowTime = System.currentTimeMillis();
+            slideshowFade = SLIDESHOW_MAX;
             repaint();
-        }        
+        }
     }
     @Override
     public void keyReleased(KeyEvent e) {
@@ -646,6 +674,7 @@ public class GameUI  extends BasePanel implements MouseListener, MouseMotionList
             case KeyEvent.VK_C:  continueGame(); return;
             case KeyEvent.VK_N:  newGame();      return;
             case KeyEvent.VK_L:  loadGame();     return;
+            case KeyEvent.VK_O:  openManual();     return;
             case KeyEvent.VK_S:  saveGame();     return;
             case KeyEvent.VK_T:  goToSettings();     return;
             case KeyEvent.VK_E:
@@ -662,6 +691,8 @@ public class GameUI  extends BasePanel implements MouseListener, MouseMotionList
         if (UserPreferences.shrinkFrame()) {
             Rotp.setFrameSize();
             rescaleMenuOptions();
+            titleImg = null;
+            languagePanel.initBounds();
             UserPreferences.save();
             repaint();
        }
@@ -672,6 +703,8 @@ public class GameUI  extends BasePanel implements MouseListener, MouseMotionList
        if (UserPreferences.expandFrame()) {
             Rotp.setFrameSize();
             rescaleMenuOptions();
+            titleImg = null;
+            languagePanel.initBounds();
             UserPreferences.save();
             repaint();
        }    
@@ -681,6 +714,19 @@ public class GameUI  extends BasePanel implements MouseListener, MouseMotionList
             buttonClick();
             Desktop.getDesktop().browse(new URL("http://www.reddit.com/r/rotp").toURI());
         } catch (IOException | URISyntaxException e) {}
+    }
+    private void openManual() {
+        try {
+            buttonClick();
+            String filename = manualFilePath();
+            InputStream manualAsStream = fileInputStream(filename);
+            Path tempOutput = Files.createTempFile("ROTP_Manual", ".pdf");
+            tempOutput.toFile().deleteOnExit();
+            Files.copy(manualAsStream, tempOutput, StandardCopyOption.REPLACE_EXISTING);
+            File userManual = new File (tempOutput.toFile().getPath());
+            if (userManual.exists()) 
+                Desktop.getDesktop().open(userManual);
+        } catch (IOException e) {}
     }
     public void continueGame() {
         if (canContinue()) {
@@ -761,7 +807,9 @@ public class GameUI  extends BasePanel implements MouseListener, MouseMotionList
             hoverBox.mouseReleased();
         mouseDepressed = false;
 
-        if (discussText.contains(x,y))
+        if (manualText.contains(x,y))
+            openManual();
+        else if (discussText.contains(x,y))
             openRedditPage();
         else if (continueText.contains(x,y))
             continueGame();
@@ -809,6 +857,8 @@ public class GameUI  extends BasePanel implements MouseListener, MouseMotionList
             newHover = loadGameText;
         else if (canSaveGame() && saveGameText.contains(x,y))
             newHover = saveGameText;
+        else if (manualText.contains(x,y))
+            newHover = manualText;
         else if (settingsText.contains(x,y))
             newHover = settingsText;
         else if (canExit() && exitText.contains(x,y))
@@ -841,22 +891,58 @@ public class GameUI  extends BasePanel implements MouseListener, MouseMotionList
         List<String> codes;
         public int w;
         public int h;
+        boolean fontsInitialized = false;
+        boolean fontsReady = false;
         private Rectangle[] lang;
         private Rectangle hoverBox;
-        public GameLanguagePane() {
+        GameUI parent;
+        public GameLanguagePane(GameUI ui) {
+            parent = ui;
             init();
         }
         private void init() {
             codes = LanguageManager.current().languageCodes();
             names = LanguageManager.current().languageNames();
-            w = scaled(100);
-            h = s45+(s17*names.size());
+            initBounds();
             lang = new Rectangle[names.size()];
             for (int i=0;i<lang.length;i++)
                 lang[i] = new Rectangle();
             addMouseListener(this);
             addMouseMotionListener(this);
             setOpaque(false);
+        }
+        void initBounds() {
+            w = scaled(100);
+            h = s45+(s17*names.size());
+        }
+        public void initFonts() {
+            if (fontsInitialized)
+                return;
+            
+            fontsInitialized = true;
+            Thread r1 = new Thread(){
+                @Override
+                public void run(){
+                    renderFonts();
+                }
+            };
+            r1.start();
+        }
+        private void renderFonts() {
+            Graphics g = getGraphics();
+            int y0 = 0;
+            for (int i=0; i<names.size(); i++) {
+                String code = codes.get(i);
+                String name = names.get(i);
+                Font f = FontManager.current().languageFont(code);
+                g.setFont(f);
+                g.setColor(Color.white);
+                int sw = g.getFontMetrics().stringWidth(name);
+                drawString(g,name, w-sw-s5, y0);
+            }    
+            fontsReady = true;
+            g.dispose();
+            parent.repaint();
         }
         @Override
         public void paintComponent(Graphics g0) {
@@ -872,7 +958,7 @@ public class GameUI  extends BasePanel implements MouseListener, MouseMotionList
             for (int i=0; i<names.size(); i++) {
                 String code = codes.get(i);
                 String name = names.get(i);
-                Font f = FontManager.current().languageFont(code, 15);
+                Font f = FontManager.current().languageFont(code);
                 g.setFont(f);
                 Color c0 = hoverBox == lang[i] ? Color.yellow : Color.white;
                 g.setColor(c0);

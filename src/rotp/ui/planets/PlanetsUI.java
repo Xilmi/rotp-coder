@@ -141,6 +141,8 @@ public class PlanetsUI extends BasePanel implements SystemViewer {
     }
     public void init() {
         displayedSystems = null;
+        nameField.setFont(narrowFont(20));
+        notesField.setFont(narrowFont(20));
         listingUI.open();
     }
     private void initModel() {
@@ -573,6 +575,21 @@ public class PlanetsUI extends BasePanel implements SystemViewer {
                 if (control) {
                     selectAllSystems();
                 }
+                return;
+            case KeyEvent.VK_S:
+                multiSpendingPane.selectCat(0);
+                return;
+            case KeyEvent.VK_D:
+                multiSpendingPane.selectCat(1);
+                return;
+            case KeyEvent.VK_I:
+                multiSpendingPane.selectCat(2);
+                return;
+            case KeyEvent.VK_E:
+                multiSpendingPane.selectCat(3);
+                return;
+            case KeyEvent.VK_T:
+                multiSpendingPane.selectCat(4);
                 return;
         }
         if (repaint)
@@ -1225,6 +1242,7 @@ public class PlanetsUI extends BasePanel implements SystemViewer {
             g.setFont(narrowFont(20));
             g.setColor(Color.black);
             String str = text("MAIN_COLONY_SHIPYARD_CONSTRUCTION");
+            scaledFont(g, str, getWidth()-s10, 20, 16);
             drawShadowedString(g, str, 2, s5, s22, MainUI.shadeBorderC(), textColor);
         }
         private List<Colony> colonies() {
@@ -2251,7 +2269,7 @@ public class PlanetsUI extends BasePanel implements SystemViewer {
                     player().empireTaxLevel(newLevel);
                     repaint();
                     planetDisplayPane.repaint();
-                }
+                }                   
             }
         }
         @Override
