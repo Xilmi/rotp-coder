@@ -63,26 +63,14 @@
             <artifactId>webp-imageio</artifactId>
             <version>0.1.2</version>
         </dependency>
-        <!-- Let's try video decode -->
-        <!-- FFMPEG -->
-        <!-- https://mvnrepository.com/artifact/org.bytedeco.javacpp-presets/ffmpeg-platform -->
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>ffmpeg-platform</artifactId>
-            <version>4.4-1.5.6</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.bytedeco/ffmpeg -->
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>ffmpeg</artifactId>
-            <version>4.4-1.5.6</version>
-        </dependency>
-
+        <!-- Remove ffmpeg dependency, too big -->
+        <!-- My attempt to convert save game files to JSON, incomplete -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.11.3</version>
         </dependency>
+        <!-- My attempt to produce GraalVM native executables, unfinished -->
         <dependency>
             <groupId>org.graalvm.nativeimage</groupId>
             <artifactId>svm</artifactId>
