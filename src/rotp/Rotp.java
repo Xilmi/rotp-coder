@@ -87,6 +87,9 @@ public class Rotp {
         frame.setLayout(new BorderLayout());
         frame.add(RotPUI.instance(), BorderLayout.CENTER);
 
+        // check after ROTPUI is created
+        stopIfNoFilePermissions(frame);
+
         Image img = ImageManager.current().image("LANDSCAPE_RUINS_ORION");
         BufferedImage bimg = toBufferedImage(img);
         BufferedImage square = bimg.getSubimage(bimg.getWidth()-bimg.getHeight(), 0, bimg.getHeight(), bimg.getHeight());
@@ -192,6 +195,12 @@ public class Rotp {
     private static void stopIfInsufficientMemory(JFrame frame, int allocMb) {
         if (allocMb < 260) {
             JOptionPane.showMessageDialog(frame, "Error starting game: Not enough free memory to play");
+            System.exit(0);
+        }
+    }
+    private static void stopIfNoFilePermissions(JFrame frame) {
+        if (UserPreferences.save() < 0) {
+            JOptionPane.showMessageDialog(frame, "Error starting game: Installed in directory with insufficient file permissions.");
             System.exit(0);
         }
     }
