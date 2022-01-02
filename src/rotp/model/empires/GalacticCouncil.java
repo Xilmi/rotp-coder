@@ -331,9 +331,6 @@ public class GalacticCouncil implements Base, Serializable {
                 c.diplomatAI().acceptCouncilRuling(this);
             return;
         }
-        else 
-            ensureFullContact();
-
 
         // create incidents between voters and the candidates
         for (Empire voter: empires) {
