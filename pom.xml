@@ -10,7 +10,7 @@
     <version>4.00.1</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>8</java.version>
+        <java.version>11</java.version>
         <GITHUB_TOKEN></GITHUB_TOKEN>
     </properties>
 
@@ -56,18 +56,18 @@
         <dependency>
             <groupId>com.googlecode.soundlibs</groupId>
             <artifactId>vorbisspi</artifactId>
-            <version>1.0.3-1</version>
+            <version>1.0.3.3</version>
         </dependency>
         <dependency>
             <groupId>org.sejda.imageio</groupId>
             <artifactId>webp-imageio</artifactId>
-            <version>0.1.2</version>
+            <version>0.1.6</version>
         </dependency>
         <!-- Needed to play video -->
         <!-- Remove ffmpeg dependency, too big jar size -->
-	    <!-- JavaFX doesn't do WebM, don't use JavaFX -->
+        <!-- JavaFX doesn't do WebM, don't use JavaFX -->
         <!-- Try LibGDX next -->
-	
+
         <!-- My attempt to convert save game files to JSON, incomplete -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -116,6 +116,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
@@ -259,11 +260,11 @@
                 </executions>
                 <configuration>
                     <url>
-                        https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jre_x64_windows_hotspot_11.0.12_7.zip
+                        https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.13%2B8/OpenJDK11U-jre_x64_windows_hotspot_11.0.13_8.zip
                     </url>
                     <unpack>true</unpack>
                     <outputDirectory>${project.build.directory}/jre-win</outputDirectory>
-                    <sha256>5e00dd1fa87749c819ca94d8f3f352e198de44a9e2c09b0e75cc120a63edea87</sha256>
+                    <sha256>7b0c07a068506b8539408cfe60e3120f54610af463a2dbd3b2ca42b572dd567e</sha256>
                 </configuration>
             </plugin>
             <plugin>
