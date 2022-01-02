@@ -329,7 +329,7 @@ public final class SpyNetwork implements Base, Serializable {
         List<String> prevPossible = owner.isPlayer() ? new ArrayList<>(possibleTechs()) : null;
 
         tech.spyOnTechs(emp.tech());
-        float maxTech = owner.tech().maxTechLevel();
+        float maxTech = owner.tech().maxTechLevelSpy();
         possibleTechs = emp.tech().worseTechsUnknownToCiv(owner.tech(), maxTech);
         
         if (owner.isPlayer()) {
@@ -379,7 +379,7 @@ public final class SpyNetwork implements Base, Serializable {
 
         // from active spies with successful, find the one with the
         // highest "steal number"... he will acquire the best tech
-        float maxTechLevel = owner().tech().maxTechLevel();
+        float maxTechLevel = owner().tech().maxTechLevelSpy();
         float bestStealNumber = 0;
         Spy bestSpy = null;
         for (Spy spy: activeSpies()) {
@@ -494,6 +494,13 @@ public final class SpyNetwork implements Base, Serializable {
 
     private float costForNextSpy() {
         float spyCost = owner().baseSpyCost();
+        float SpySpread = 0;
+        for(EmpireView ev : owner().contacts())
+        {
+            if(ev.spies() != null && ev.spies().hasSpies())
+                SpySpread++;
+        }
+        spyCost *= max(SpySpread, 5) / 5;
         for (int i=1;i<activeSpies.size();i++)
             spyCost *= 2;
         return spyCost;
@@ -538,7 +545,7 @@ public final class SpyNetwork implements Base, Serializable {
     private void startSabotageMission() {
         // from active spies with successful, find the one with the
         // highest "steal number"... he will acquire the best tech
-        float maxTechLevel = owner().tech().maxTechLevel();
+        float maxTechLevel = owner().tech().maxTechLevelSpy();
         float bestStealNumber = 0;
         Spy bestSpy = null;
         for (Spy spy: activeSpies()) {

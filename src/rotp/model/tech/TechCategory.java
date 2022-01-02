@@ -301,6 +301,19 @@ public final class TechCategory implements Base, Serializable {
         }
         return "";
     }
+    public float techLevelSpy() {
+        int max = 0;
+        int free = 0;
+        List<String> ids = new ArrayList<>(knownTechs());
+        for (String id: ids) {
+            Tech t = tech(id);
+            if (t.free)
+                free++;
+            if (t.level > max)
+                max = t.level;
+        }
+        return max(1, min(max, ((.80f * max) + ids.size() - free)));
+    }
     private float currentTechLevel() {
         int max = 0;
         int free = 0;
