@@ -131,6 +131,9 @@ public class AIGovernor implements Base, Governor {
         int orderedInd = col.industry().orderedAllocation();
         int orderedEco = col.ecology().orderedAllocation();
         int orderedDef = col.defense().orderedAllocation();
+        
+        if(col.shipyard().canLowerMaintenance())
+            col.shipyard().lowerMaintenance();
 
         // reset all unlocked allocations to zero
         col.clearUnlockedSpending();
