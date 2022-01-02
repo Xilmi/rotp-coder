@@ -1,3 +1,5 @@
+// rename to RotpFeature.java
+// Not sure what to do with modules, cannot do "provided" org.graalvm.sdk?
 package rotp;
 
 import com.oracle.svm.core.annotate.AutomaticFeature;

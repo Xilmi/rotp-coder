@@ -63,7 +63,11 @@
             <artifactId>webp-imageio</artifactId>
             <version>0.1.2</version>
         </dependency>
-        <!-- Remove ffmpeg dependency, too big -->
+        <!-- Needed to play video -->
+        <!-- Remove ffmpeg dependency, too big jar size -->
+	    <!-- JavaFX doesn't do WebM, don't use JavaFX -->
+        <!-- Try LibGDX next -->
+	
         <!-- My attempt to convert save game files to JSON, incomplete -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
