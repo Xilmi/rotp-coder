@@ -1103,15 +1103,15 @@ SETUP_OPPONENT_RANDOM             | ???
 SETUP_OPPONENT_AI                 | Play against:
 SETUP_OPPONENT_AI_BASE            | AI: Rookie
 SETUP_OPPONENT_AI_MODNAR          | AI: Advanced
-SETUP_OPPONENT_AI_HYBRID          | AI: Expert
-SETUP_OPPONENT_AI_XILMI           | AI: Cruel
+SETUP_OPPONENT_AI_XILMI           | AI: Expert
+SETUP_OPPONENT_AI_CRUEL           | AI: Cruel
 SETUP_OPPONENT_AI_UNFAIR          | AI: Unfair
 SETUP_OPPONENT_AI_SELECT          | AI: Selectable
 SETUP_AUTOPLAY_OFF                | Off
 SETUP_AUTOPLAY_AI_BASE            | AI: Rookie
 SETUP_AUTOPLAY_AI_MODNAR          | AI: Advanced
-SETUP_AUTOPLAY_AI_HYBRID          | AI: Expert
-SETUP_AUTOPLAY_AI_XILMI           | AI: Cruel
+SETUP_AUTOPLAY_AI_XILMI           | AI: Expert
+SETUP_AUTOPLAY_AI_CRUEL           | AI: Cruel
 SETUP_GAME_DIFFICULTY_LABEL       | AI-Production
 SETUP_DIFFICULTY_EASIEST          | 50%
 SETUP_DIFFICULTY_EASIER           | 75%
