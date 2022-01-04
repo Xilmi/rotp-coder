@@ -152,7 +152,7 @@ public final class TechShipNullifier extends Tech {
             h0 += dH;
         }
         
-        int repeat = 4;
+        int repeat = 1;
         
         // create shade boxes for target as it gets increasingly in stasis
 
