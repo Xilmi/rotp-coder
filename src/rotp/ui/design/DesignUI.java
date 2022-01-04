@@ -3082,9 +3082,12 @@ public class DesignUI extends BasePanel {
                 hoverTarget = colonizeButtonArea;
             else if (attackButtonArea.contains(x,y))
                 hoverTarget = attackButtonArea;
-
-            if (shipDesign().active())
+            
+            if (shipDesign().active()) {
+                if (prevHover != hoverTarget)
+                    repaint();
                 return;
+            }
             
             if (shipImageDecr.contains(x,y))
                 hoverTarget = shipImageDecr;

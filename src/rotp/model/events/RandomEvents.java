@@ -116,6 +116,7 @@ public class RandomEvents implements Base, Serializable {
         addEvent(new RandomEventBoostPlanetSize());
         // modnar: add Gauntlet Relic random event
         addEvent(new RandomEventGauntletRelic());
+        // addEvent(new RandomEventGenric("EventKey1"));
     }
     private void addEvent(RandomEvent ev) {
         if (options().allowRandomEvent(ev))

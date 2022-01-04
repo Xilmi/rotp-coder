@@ -196,9 +196,12 @@ public class TransportDeploymentPanel extends SystemPanel {
     }
     @Override
     public void cancel() {
-        transportSprite().cancel();
-        parentSpritePanel.parent.clickedSprite(transportSprite().homeSystem());
-        parentSpritePanel.parent.repaint();
+        if(transportSprite() != null)
+        {
+            transportSprite().cancel();
+            parentSpritePanel.parent.clickedSprite(transportSprite().homeSystem());
+            parentSpritePanel.parent.repaint();
+        }
     }
     public void clearTransport() {
         transportSprite().clear();
@@ -415,6 +418,8 @@ public class TransportDeploymentPanel extends SystemPanel {
             if (enableAbandon) 
                 transportSprite().amt(maxSendingSize);
             else {
+                if (transportSprite().amt() > maxSendingSize)
+                    transportSprite().amt(maxSendingSize);
                 float pct = (float) transportSprite().amt() / maxSendingSize;
                 int button1X = s15+sw2;
                 int button2X = w - s45;

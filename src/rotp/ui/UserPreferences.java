@@ -24,10 +24,6 @@ import java.io.PrintWriter;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 import rotp.Rotp;
 import rotp.model.game.GameSession;
 import rotp.util.LanguageManager;
@@ -315,7 +311,7 @@ public class UserPreferences {
             System.err.println("UserPreferences.load -- IOException: "+ e.toString());
         }
     }
-    public static void save() {
+    public static int save() {
         String path = Rotp.jarPath();
         try (FileOutputStream fout = new FileOutputStream(new File(path, PREFERENCES_FILE));
             // modnar: change to OutputStreamWriter, force UTF-8
@@ -348,9 +344,11 @@ public class UserPreferences {
             out.println(keyFormat("BATTLE_SCOUT")+ yesOrNo(battleScout)); // modnar: add battleScout option to give player super Scout design
             out.println(keyFormat("COMPANION_WORLDS")+ companionWorlds); // modnar: add option to start game with additional colonies
             out.println(keyFormat("LANGUAGE")+ languageDir());
+            return 0;
         }
         catch (IOException e) {
             System.err.println("UserPreferences.save -- IOException: "+ e.toString());
+            return -1;
         }
     }
     private static String keyFormat(String s)  { return String.format(keyFormat, s); }

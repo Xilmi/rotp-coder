@@ -296,7 +296,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
         }
         //2nd run: fire non-special-weapons
         for (int i=0;i<stack.numWeapons(); i++) {
-            if(stack.selectedWeapon().isSpecial()
+            if(stack.weapon(i).isSpecial()
                     || !((CombatStackShip)stack).shipComponentCanAttack(target, i)
                     || (stack.weapon(i).isMissileWeapon() && stack.movePointsTo(target) > stack.optimalFiringRange(target)))
             {
@@ -746,6 +746,10 @@ public class AIShipCaptain implements Base, ShipCaptain {
         // if stack is pacted with colony and doesn't want war, then retreat
         // ail: Whether I want a war or not depends on whether the other faction is an enemy, not on relation!
         if ((colView != null) && !empire.enemies().contains(col.empire))  
+            return true;
+        
+        // threatened to be completely disabled by warp-dissipater
+        if(currStack.maxMove() <= 1 && currStack.design().combatSpeed() > currStack.maxMove())
             return true;
 
         // don't retreat if all enemies can only target planets

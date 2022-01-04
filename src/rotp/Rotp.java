@@ -45,12 +45,12 @@ public class Rotp {
     private static final int MB = 1048576;
     public static int IMG_W = 1229;
     public static int IMG_H = 768;
-    public static String jarFileName = "RotP-1.0_modnar_MOD37"+RotpGovernor.miniSuffix()+".jar";
-    public static String exeFileName = "RotP-1.0_modnar_MOD37"+RotpGovernor.miniSuffix()+".exe";
+    public static String jarFileName = "RotP-1.01_modnar_MOD38"+RotpGovernor.miniSuffix()+".jar";
+    public static String exeFileName = "RotP-1.01_modnar_MOD38"+RotpGovernor.miniSuffix()+".exe";
     public static boolean countWords = false;
     private static String startupDir;
     private static JFrame frame;
-    public static String releaseId = "1.0 modnar_MOD37";
+    public static String releaseId = "1.01 modnar_MOD38";
     public static long startMs = System.currentTimeMillis();
     public static long maxHeapMemory = Runtime.getRuntime().maxMemory() / 1048576;
     public static long maxUsedMemory;
@@ -96,6 +96,9 @@ public class Rotp {
         iconImages.add(ImageManager.current().image("ROTP_MOD_ICON1"));
         frame.setIconImages(iconImages);
 
+        // check after ROTPUI is created
+        stopIfNoFilePermissions(frame);
+        
         if (UserPreferences.fullScreen()) {
             frame.setUndecorated(true);
             device.setFullScreenWindow(frame);
@@ -178,6 +181,12 @@ public class Rotp {
     private static void stopIfInsufficientMemory(JFrame frame, int allocMb) {
         if (allocMb < 260) {
             JOptionPane.showMessageDialog(frame, "Error starting game: Not enough free memory to play");
+            System.exit(0);
+        }
+    }
+    private static void stopIfNoFilePermissions(JFrame frame) {
+        if (UserPreferences.save() < 0) {
+            JOptionPane.showMessageDialog(frame, "Error starting game: Installed in directory with insufficient file permissions.");
             System.exit(0);
         }
     }
