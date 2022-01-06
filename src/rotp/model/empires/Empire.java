@@ -2674,8 +2674,6 @@ public final class Empire implements Base, NamedObject, Serializable {
         EmpireView v = viewForEmpire(c);
         if (v == null)
             return true;
-        if (v.embassy().peaceTreatyInEffect())
-            return false;
         return v.embassy().canAttackWithoutPenalty(s);
     }
     public boolean atWarWith(int empId) {
