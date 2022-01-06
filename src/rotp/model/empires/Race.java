@@ -59,7 +59,7 @@ public class Race implements Base, Serializable {
     public String id;
     public String setupName;
     public String langKey;
-    public String description1, description2, description3;
+    public String description1, description2, description3, description4; // modnar: add desc4
     public String directoryName;
     public String laboratoryKey, embassyKey, councilKey;
     public String holographKey;

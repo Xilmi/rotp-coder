@@ -34,6 +34,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
+import java.awt.RenderingHints; // modnar: needed for adding RenderingHints
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import rotp.model.colony.Colony;
@@ -272,6 +273,7 @@ public class EmpireSystemPanel extends SystemPanel {
             drawShadowedString(g, str, 2, s5, s22, MainUI.shadeBorderC(), textColor);
         }
         private void drawShipIcon(Graphics2D g,  Colony c, int x, int y, int w, int h) {
+			// modnar: draw ship design icons in System information panel on main map screen
             g.setColor(Color.black);
             g.fillRect(x, y, w, h);
 
@@ -295,6 +297,22 @@ public class EmpireSystemPanel extends SystemPanel {
             int h1 = (int)(scale*h0);
             int x1 = x+(w - w1) / 2;
             int y1 = y+(h - h1) / 2;
+			// modnar: one-step progressive image downscaling, slightly better
+			// there should be better methods
+			if (scale < 0.5) {
+				BufferedImage tmp = new BufferedImage(w0/2, h0/2, BufferedImage.TYPE_INT_ARGB);
+				Graphics2D g2D = tmp.createGraphics();
+				g2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+				g2D.drawImage(img, 0, 0, w0/2, h0/2, 0, 0, w0, h0, this);
+				g2D.dispose();
+				img = tmp;
+				w0 = img.getWidth(null);
+				h0 = img.getHeight(null);
+				scale = scale*2;
+			}
+			// modnar: use (slightly) better downsampling
+			g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+			g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
             g.drawImage(img, x1, y1, x1+w1, y1+h1, 0, 0, w0, h0, this);
 
             if (hoverBox == shipDesignBox) {

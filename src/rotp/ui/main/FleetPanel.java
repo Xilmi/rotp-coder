@@ -36,6 +36,7 @@ import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.awt.RenderingHints; // modnar: needed for adding RenderingHints
 import java.util.List;
 import rotp.model.Sprite;
 import rotp.model.empires.Empire;
@@ -470,6 +471,7 @@ public class FleetPanel extends BasePanel implements MapSpriteViewer {
         }
         @Override
         public void paintComponent(Graphics g0) {
+			// modnar: paint top of "Fleet Deployment" panel on main map screen
             Graphics2D g = (Graphics2D) g0;
             super.paintComponent(g);
             int w = getWidth();
@@ -493,8 +495,9 @@ public class FleetPanel extends BasePanel implements MapSpriteViewer {
             }
             else {
                 g.drawImage(pl.sv.starBackground(this), 0, 0, null);
-                drawStar(g, sys.starType(), s80, w/3, s70);
-                sys.planet().draw(g, w, h, s20, s70, s80, 45);
+				//modnar: increase planet size, move star
+                drawStar(g, sys.starType(), s80, w*3/4, s60);
+                sys.planet().draw(g, w, h, s5, s70, s80*2, 45);
             }
             boolean contact = fl.empire().isPlayer() || pl.hasContacted(fl.empId());
             // draw ship image
@@ -506,6 +509,22 @@ public class FleetPanel extends BasePanel implements MapSpriteViewer {
             int shipH = (int) (scale*imgH);
             int shipX = s70;
             int shipY = h-shipH-s10;
+			// modnar: one-step progressive image downscaling, slightly better
+			// there should be better methods
+			if (scale < 0.5) {
+				BufferedImage tmp = new BufferedImage(imgW/2, imgH/2, BufferedImage.TYPE_INT_ARGB);
+				Graphics2D g2D = tmp.createGraphics();
+				g2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+				g2D.drawImage(shipImg, 0, 0, imgW/2, imgH/2, 0, 0, imgW, imgH, this);
+				g2D.dispose();
+				shipImg = tmp;
+				imgW = shipImg.getWidth(null);
+				imgH = shipImg.getHeight(null);
+				scale = scale*2;
+			}
+			// modnar: use (slightly) better downsampling
+			g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+			g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
             g.drawImage(shipImg, shipX,shipY,shipX+shipW,shipY+shipH, 0,0,imgW,imgH, null);
 
             // draw title
@@ -944,6 +963,7 @@ public class FleetPanel extends BasePanel implements MapSpriteViewer {
             }
         }
         private void drawShip(Graphics2D g, ShipFleet origFl, ShipFleet displayFl, boolean canAdjust, boolean contact, int i, int x0, int y0, int w, int h) {
+			// modnar: draw ship design icons in "Fleet Deployment" panel on main map screen
             int x = x0-w/2;
             int y = y0-h/2;
             g.setColor(fleetBackC);
@@ -968,6 +988,22 @@ public class FleetPanel extends BasePanel implements MapSpriteViewer {
 
             int x1 = x+((w-w1)/2);
             int y1 = y+((h-h1)/2);
+			// modnar: one-step progressive image downscaling, slightly better
+			// there should be better methods
+			if (scale < 0.5) {
+				BufferedImage tmp = new BufferedImage(imgW/2, imgH/2, BufferedImage.TYPE_INT_ARGB);
+				Graphics2D g2D = tmp.createGraphics();
+				g2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+				g2D.drawImage(img, 0, 0, imgW/2, imgH/2, 0, 0, imgW, imgH, this);
+				g2D.dispose();
+				img = tmp;
+				imgW = img.getWidth(null);
+				imgH = img.getHeight(null);
+				scale = scale*2;
+			}
+			// modnar: use (slightly) better downsampling
+			g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+			g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
             g.drawImage(img, x1, y1, x1+w1, y1+h1, 0, 0, imgW, imgH, parent);
 
             // draw ship name

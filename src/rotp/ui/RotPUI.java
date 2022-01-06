@@ -63,6 +63,7 @@ import rotp.ui.game.SaveGameUI;
 import rotp.ui.game.SetupGalaxyUI;
 import rotp.ui.game.SetupRaceUI;
 import rotp.ui.game.StartOptionsUI;
+import rotp.ui.game.StartModOptionsUI; // modnar: add UI panel for modnar MOD game options
 import rotp.ui.history.HistoryUI;
 import rotp.ui.main.MainUI;
 import rotp.ui.notifications.DiplomaticNotification;
@@ -222,6 +223,8 @@ public class RotPUI extends BasePanel implements ActionListener, KeyListener {
     private final ErrorUI errorUI = new ErrorUI();
     private final HelpUI helpUI = new HelpUI();
     private final StartOptionsUI startOptionsUI = new StartOptionsUI();
+    // modnar: add UI panel for modnar MOD game options
+    private final StartModOptionsUI startModOptionsUI = new StartModOptionsUI();
     private final GameSettingsUI gameSettingsUI = new GameSettingsUI();
     private final LargeDialogPane dialogPane = new LargeDialogPane();
 
@@ -300,6 +303,8 @@ public class RotPUI extends BasePanel implements ActionListener, KeyListener {
     public static RotPUI instance()                  { return instance; }
     public static HelpUI helpUI()                    { return instance.helpUI; } 
     public static StartOptionsUI startOptionsUI()    { return instance.startOptionsUI; } 
+    // modnar: add UI panel for modnar MOD game options
+    public static StartModOptionsUI startModOptionsUI()    { return instance.startModOptionsUI; }
     public static GameSettingsUI gameSettingsUI()    { return instance.gameSettingsUI; } 
 
     @Override
@@ -357,8 +362,9 @@ public class RotPUI extends BasePanel implements ActionListener, KeyListener {
         disableGlassPane();
         mainUI.clearOverlay();
         mainUI.init(true);
-        if (!options().isAutoPlay())
-            mainUI.showHelp();
+        // modnar: don't show help on new game
+        //if (!options().isAutoPlay())
+        //    mainUI.showHelp();
         mainUI.showDisplayPanel();
         selectPanel(MAIN_PANEL, mainUI());
         repaint();

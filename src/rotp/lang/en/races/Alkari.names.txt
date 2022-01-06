@@ -4,6 +4,7 @@ name: Altairi, Aviari, Cluckari, Feathari, Fowlari
 desc1: Honorable Militarists
 desc2: Superior Pilots
 desc3: The [race] Sovereignty is an organized warrior society that prizes honor in battle.
+desc4: Ship DEF/INIT +3
 
 // possible home system names
 home: Altair, Aegir, Aviar, Volary, Aerie

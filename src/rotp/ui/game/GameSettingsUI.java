@@ -502,10 +502,10 @@ public class GameSettingsUI extends BasePanel implements MouseListener, MouseMot
     }
     private void scrollBackupTurns(boolean up) {
         int turns = UserPreferences.backupTurns();
-        if (up)
-            UserPreferences.backupTurns(turns+1);
-        else
-            UserPreferences.backupTurns(turns-1);
+        if (up) // modnar: change backupTurns to be: 0, 1, 5 ,10, 20
+            UserPreferences.backupTurns((int) Math.round(1.0f + 4.87f*turns - 0.93f*Math.pow(turns, 2) + 0.063f*Math.pow(turns, 3) ));
+        else  // modnar: change backupTurns to be: 0, 1, 5 ,10, 20
+            UserPreferences.backupTurns((int) Math.round(0.27f - 0.39f*turns + 0.13f*Math.pow(turns, 2) - 0.0043f*Math.pow(turns, 3) ));
         backupTurnsText.repaint(backupTurnsStr());
     }
     private void toggleBackupTurns() {

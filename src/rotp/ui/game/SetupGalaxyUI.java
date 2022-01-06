@@ -35,6 +35,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.awt.RenderingHints; // modnar: needed for adding RenderingHints
 import java.util.List;
 import javax.swing.SwingUtilities;
 import rotp.model.empires.Race;
@@ -54,6 +55,7 @@ public final class SetupGalaxyUI  extends BasePanel implements MouseListener, Mo
     Rectangle backBox = new Rectangle();
     Rectangle startBox = new Rectangle();
     Rectangle settingsBox = new Rectangle();
+    Rectangle ModSettingsBox = new Rectangle(); // modnar: add UI panel for modnar MOD game options
     Rectangle shapeBox = new Rectangle();
     Polygon shapeBoxL = new Polygon();
     Polygon shapeBoxR = new Polygon();
@@ -106,6 +108,9 @@ public final class SetupGalaxyUI  extends BasePanel implements MouseListener, Mo
     public void paintComponent(Graphics g0) {
         super.paintComponent(g0);
         Graphics2D g = (Graphics2D) g0;
+		// modnar: use (slightly) better upsampling
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         int w = getWidth();
         int h = getHeight();
 
@@ -282,6 +287,12 @@ public final class SetupGalaxyUI  extends BasePanel implements MouseListener, Mo
         drawString(g,sizeLbl, x5b, y5);
 
         String diffLbl = text(newGameOptions().selectedGameDifficulty());
+        // modnar: add custom difficulty level option, set in Remnants.cfg
+        // append this custom difficulty percentage to diffLbl if selected
+        if (diffLbl.equals("Custom")) {
+            diffLbl = diffLbl + " (" + Integer.toString(UserPreferences.customDifficulty()) + "%)";
+        }
+        
         int diffSW = g.getFontMetrics().stringWidth(diffLbl);
         int x5c =diffBox.x+((diffBox.width-diffSW)/2);
         drawString(g,diffLbl, x5c, y5);
@@ -311,6 +322,19 @@ public final class SetupGalaxyUI  extends BasePanel implements MouseListener, Mo
         Stroke prev = g.getStroke();
         g.setStroke(stroke1);
         g.drawRoundRect(settingsBox.x, settingsBox.y, settingsBox.width, settingsBox.height, cnr, cnr);
+        g.setStroke(prev);
+        
+        // modnar: add UI panel for modnar MOD game options
+        // MOD settings button
+        String textMOD = text("SETUP_BUTTON_MOD_SETTINGS");
+        int swMOD = g.getFontMetrics().stringWidth(textMOD);
+        int xMOD = ModSettingsBox.x+((ModSettingsBox.width-swMOD)/2);
+        int yMOD = ModSettingsBox.y+ModSettingsBox.height-s8;
+        Color cMOD = hoverBox == ModSettingsBox ? Color.yellow : GameUI.borderBrightColor();
+        drawShadowedString(g, textMOD, 2, xMOD, yMOD, GameUI.borderDarkColor(), cMOD);
+        prev = g.getStroke();
+        g.setStroke(stroke1);
+        g.drawRoundRect(ModSettingsBox.x, ModSettingsBox.y, ModSettingsBox.width, ModSettingsBox.height, cnr, cnr);
         g.setStroke(prev);
 
         // left button
@@ -381,6 +405,7 @@ public final class SetupGalaxyUI  extends BasePanel implements MouseListener, Mo
             return;
         if (click) softClick();
         newGameOptions().selectedGalaxySize(newGameOptions().nextGalaxySize(bounded));
+        newGameOptions().galaxyShape().quickGenerate(); // modnar: do a quickgen to get correct map preview
         repaint();
     }
     public void prevGalaxySize(boolean bounded, boolean click) {
@@ -396,6 +421,7 @@ public final class SetupGalaxyUI  extends BasePanel implements MouseListener, Mo
                 newGameOptions().selectedOpponentRace(i,null);
             newGameOptions().selectedNumberOpponents(maxOpps);
         }
+        newGameOptions().galaxyShape().quickGenerate(); // modnar: do a quickgen to get correct map preview
         repaint();
     }
     public void nextGalaxyShape(boolean click) {
@@ -468,6 +494,7 @@ public final class SetupGalaxyUI  extends BasePanel implements MouseListener, Mo
             return;
         if (click) softClick();
         newGameOptions().selectedNumberOpponents(numOpps+1);
+        newGameOptions().galaxyShape().quickGenerate(); // modnar: do a quickgen to get correct map preview
         repaint();
     }
     public void decreaseOpponents(boolean click) {
@@ -477,6 +504,7 @@ public final class SetupGalaxyUI  extends BasePanel implements MouseListener, Mo
         if (click) softClick();
         newGameOptions().selectedOpponentRace(numOpps-1,null);
         newGameOptions().selectedNumberOpponents(numOpps-1);
+        newGameOptions().galaxyShape().quickGenerate(); // modnar: do a quickgen to get correct map preview
         repaint();
     }
     public void nextSpecificOpponentAI(int i, boolean click) {
@@ -505,6 +533,13 @@ public final class SetupGalaxyUI  extends BasePanel implements MouseListener, Mo
         optionsUI.open(this);
         release();
     }
+    // modnar: add UI panel for modnar MOD game options
+    public void goToModOptions() {
+        buttonClick();
+        StartModOptionsUI ModOptionsUI = RotPUI.startModOptionsUI();
+        ModOptionsUI.open(this);
+        release();
+    }
     public void goToRaceSetup() {
         buttonClick();
         RotPUI.instance().selectSetupRacePanel();
@@ -514,6 +549,11 @@ public final class SetupGalaxyUI  extends BasePanel implements MouseListener, Mo
         starting = true;
         Race r = Race.keyed(newGameOptions().selectedPlayerRace());
         GameUI.gameName = r.setupName()+ " - "+text(newGameOptions().selectedGalaxySize())+ " - "+text(newGameOptions().selectedGameDifficulty());
+        // modnar: add custom difficulty level option, set in Remnants.cfg
+        // append this custom difficulty percentage to gameName if selected
+        if (text(newGameOptions().selectedGameDifficulty()).equals("Custom")) {
+            GameUI.gameName = GameUI.gameName + " (" + Integer.toString(UserPreferences.customDifficulty()) + "%)";
+        }
         repaint();
         buttonClick();
         UserPreferences.setForNewGame();
@@ -540,6 +580,9 @@ public final class SetupGalaxyUI  extends BasePanel implements MouseListener, Mo
         backImg = newOpaqueImage(w, h);
         Graphics2D g = (Graphics2D) backImg.getGraphics();
         setFontHints(g);
+		// modnar: use (slightly) better upsampling
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         Race race = Race.keyed(newGameOptions().selectedPlayerRace());
 
         // background image
@@ -763,6 +806,12 @@ public final class SetupGalaxyUI  extends BasePanel implements MouseListener, Mo
         settingsBox.setBounds(scaled(960), scaled(610), smallButtonW, smallButtonH);
         g.setPaint(GameUI.buttonLeftBackground());
         g.fillRoundRect(settingsBox.x, settingsBox.y, smallButtonW, smallButtonH, cnr, cnr);
+        
+        // modnar: add UI panel for modnar MOD game options
+        // draw MOD settings button
+        ModSettingsBox.setBounds(scaled(760), scaled(610), smallButtonW, smallButtonH);
+        g.setPaint(GameUI.buttonLeftBackground());
+        g.fillRoundRect(ModSettingsBox.x, ModSettingsBox.y, smallButtonW, smallButtonH, cnr, cnr);
 
         int buttonH = s45;
         int buttonW = scaled(220);
@@ -828,6 +877,9 @@ public final class SetupGalaxyUI  extends BasePanel implements MouseListener, Mo
             hoverBox = backBox;
         else if (settingsBox.contains(x,y))
             hoverBox = settingsBox;
+        // modnar: add UI panel for modnar MOD game options
+        else if (ModSettingsBox.contains(x,y))
+            hoverBox = ModSettingsBox;
         else if (shapeBoxL.contains(x,y))
             hoverBox = shapeBoxL;
         else if (shapeBoxR.contains(x,y))
@@ -903,6 +955,9 @@ public final class SetupGalaxyUI  extends BasePanel implements MouseListener, Mo
             goToRaceSetup();
         else if (hoverBox == settingsBox)
             goToOptions();
+        // modnar: add UI panel for modnar MOD game options
+        else if (hoverBox == ModSettingsBox)
+            goToModOptions();
         else if (hoverBox == startBox)
             startGame();
         else if (hoverBox == shapeBoxL)

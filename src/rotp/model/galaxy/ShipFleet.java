@@ -712,6 +712,7 @@ public class ShipFleet implements Base, Sprite, Ship, Serializable {
     public int numScouts()   { return numShipType(ShipDesign.SCOUT); }
     public int numFighters() { return numShipType(ShipDesign.FIGHTER); }
     public int numBombers()  { return numShipType(ShipDesign.BOMBER); }
+    public int numDestroyers()  { return numShipType(ShipDesign.DESTROYER); } // modnar: add in destroyer number, not used anywhere (?)
     public int numColonies() { return numShipType(ShipDesign.COLONY); }
     public boolean isEmpty()  { return numShips() == 0; }
     public int numShips ()   {

@@ -55,7 +55,7 @@ public class UserPreferences {
     
     
     private static final String PREFERENCES_FILE = "Remnants.cfg";
-    private static final int MAX_BACKUP_TURNS = 10;
+    private static final int MAX_BACKUP_TURNS = 20; // modnar: change max turns between backups to 20
     private static final String keyFormat = "%-20s: ";
     private static boolean showMemory = false;
     private static boolean playMusic = true;
@@ -64,18 +64,26 @@ public class UserPreferences {
     private static int soundVolume = 10;
     private static int defaultMaxBases = 0;
     private static boolean displayYear = false;
+    private static int customDifficulty = 100; // mondar: add custom difficulty level option, in units of percent
+    private static boolean dynamicDifficulty = false; // modnar: add dynamic difficulty option, change AI colony production
+    private static boolean alwaysStarGates = false; // modnar: add option to always have Star Gates tech
+    private static boolean alwaysThorium = false; // modnar: add option to always have Thorium Cells tech
+    private static boolean challengeMode = false; // modnar: add option to give AI more initial resources
+    private static boolean randomTechStart = false; // modnar: add option to start all Empires with 2 techs, no Artifacts
+    private static boolean battleScout = false; // modnar: add battleScout option to give player super Scout design
+    private static int companionWorlds = 0; // modnar: add option to start game with additional colonies
     private static boolean autoColonize = false;
     private static boolean divertColonyExcessToResearch = true;
     private static boolean xilmiRoleplayMode = false;
     private static String autoBombardMode = AUTOBOMBARD_NO;
     private static String displayMode = FULLSCREEN_MODE;
     private static String graphicsMode = GRAPHICS_HIGH;
-    private static String texturesMode = TEXTURES_BOTH;
+    private static String texturesMode = TEXTURES_MAP; // modnar: set default texture to only map, no interface
     private static String sensitivityMode = SENSITIVITY_MEDIUM;
     private static String saveDir = "";
     private static float uiTexturePct = 0.20f;
     private static int screenSizePct = 93;
-    private static int backupTurns = 0;
+    private static int backupTurns = 5; // modnar: change default turns between backups to 5
 
     public static void setToDefault() {
         autoColonize = false;
@@ -85,7 +93,15 @@ public class UserPreferences {
         texturesMode = TEXTURES_BOTH;
         sensitivityMode = SENSITIVITY_MEDIUM;
         screenSizePct = 93;
-        backupTurns = 0;
+        backupTurns = 5; // modnar: change default turns between backups to 5
+        customDifficulty = 100; // mondar: add custom difficulty level option, in units of percent
+        dynamicDifficulty = false; // modnar: add dynamic difficulty option, change AI colony production
+        alwaysStarGates = false; // modnar: add option to always have Star Gates tech
+        alwaysThorium = false; // modnar: add option to always have Thorium Cells tech
+        challengeMode = false; // modnar: add option to give AI more initial resources
+        randomTechStart = false; // modnar: add option to start all Empires with 2 techs, no Artifacts
+        battleScout = false; // modnar: add battleScout option to give player super Scout design
+        companionWorlds = 0; // modnar: add option to start game with additional colonies
         saveDir = "";
         uiTexturePct = 0.20f;
         showMemory = false;
@@ -98,11 +114,48 @@ public class UserPreferences {
         SoundManager.current().resetSoundVolumes(); 
         save();
     }
+    // modnar: set MOD option to defaults, specifically for UI
+    public static void setModToDefault() {
+        customDifficulty = 100; // mondar: add custom difficulty level option, in units of percent
+        dynamicDifficulty = false; // modnar: add dynamic difficulty option, change AI colony production
+        alwaysStarGates = false; // modnar: add option to always have Star Gates tech
+        alwaysThorium = false; // modnar: add option to always have Thorium Cells tech
+        challengeMode = false; // modnar: add option to give AI more initial resources
+        randomTechStart = false; // modnar: add option to start all Empires with 2 techs, no Artifacts
+        battleScout = false; // modnar: add battleScout option to give player super Scout design
+        companionWorlds = 0; // modnar: add option to start game with additional colonies
+        save();
+    }
     public static void setForNewGame() {
         autoColonize = false;
         autoBombardMode = AUTOBOMBARD_NO;
         save();
     }
+    
+    // modnar: MOD option toggles, specifically for UI
+    public static void toggleAlwaysStarGates()       { alwaysStarGates = !alwaysStarGates; save(); }
+    public static void toggleAlwaysThorium()         { alwaysThorium = !alwaysThorium; save(); }
+    public static void toggleChallengeMode()         { challengeMode = !challengeMode; save(); }
+    public static void toggleBattleScout()           { battleScout = !battleScout; save(); }
+    public static void toggleCompanionWorlds()       {
+        if ((companionWorlds >= 4) || (companionWorlds < 0))
+            companionWorlds = 0;
+        else
+            companionWorlds++;
+        save();
+    }
+    public static void toggleRandomTechStart()       { randomTechStart = !randomTechStart; save(); }
+    public static void toggleCustomDifficulty(int i) {
+        if (customDifficulty+i >= 500)
+            customDifficulty = 500;
+        else if (customDifficulty+i < 20)
+            customDifficulty = 20;
+        else
+            customDifficulty += i;
+        save();
+    }
+    public static void toggleDynamicDifficulty()     { dynamicDifficulty = !dynamicDifficulty; save(); }
+    
     public static int musicVolume()         { return musicVolume; }
     public static int soundVolume()         { return soundVolume; }
     public static boolean showMemory()      { return showMemory; }
@@ -186,6 +239,14 @@ public class UserPreferences {
     public static void toggleSounds()       { playSounds = !playSounds;	save(); }
     public static boolean playMusic()       { return playMusic; }
     public static void toggleMusic()        { playMusic = !playMusic; save();  }
+    public static int customDifficulty()     { return customDifficulty; } // mondar: add custom difficulty level option, in units of percent
+    public static boolean dynamicDifficulty() { return dynamicDifficulty; } // modnar: add dynamic difficulty option, change AI colony production
+    public static boolean alwaysStarGates()  { return alwaysStarGates; } // modnar: add option to always have Star Gates tech
+    public static boolean alwaysThorium()    { return alwaysThorium; } // modnar: add option to always have Thorium Cells tech
+    public static boolean challengeMode()    { return challengeMode; } // modnar: add option to give AI more initial resources
+    public static boolean randomTechStart()  { return randomTechStart; } // modnar: add option to start all Empires with 2 techs, no Artifacts
+    public static boolean battleScout()      { return battleScout; } // modnar: add battleScout option to give player super Scout design
+    public static int companionWorlds()      { return companionWorlds; } // modnar: add option to start game with additional colonies
     public static int screenSizePct()       { return screenSizePct; }
     public static void screenSizePct(int i) { setScreenSizePct(i); }
     public static String saveDirectoryPath() {
@@ -213,10 +274,10 @@ public class UserPreferences {
         return prev != backupTurns;
     }
     public static void toggleBackupTurns() {
-        if (backupTurns >= MAX_BACKUP_TURNS)
+        if ((backupTurns >= MAX_BACKUP_TURNS) || (backupTurns < 0)) // modnar: add negative check
             backupTurns = 0;
-        else
-            backupTurns++;
+        else // modnar: change backupTurns to be: 0, 1, 5 ,10, 20
+            backupTurns = (int) Math.round(1.0f + 4.87f*backupTurns - 0.93f*Math.pow(backupTurns, 2) + 0.063f*Math.pow(backupTurns, 3) );
         save();
     }
     public static void toggleYearDisplay()    { displayYear = !displayYear; save(); }
@@ -274,6 +335,14 @@ public class UserPreferences {
             out.println(keyFormat("XILMI_ROLEPLAY_MODE") + yesOrNo(xilmiRoleplayMode));
             out.println(keyFormat("SCREEN_SIZE_PCT")+ screenSizePct());
             out.println(keyFormat("UI_TEXTURE_LEVEL")+(int) (uiTexturePct()*100));
+            out.println(keyFormat("CUSTOM_DIFFICULTY")+ customDifficulty); // mondar: add custom difficulty level option, in units of percent
+            out.println(keyFormat("DYNAMIC_DIFFICULTY")+ yesOrNo(dynamicDifficulty)); // modnar: add dynamic difficulty option, change AI colony production
+            out.println(keyFormat("ALWAYS_STAR_GATES")+ yesOrNo(alwaysStarGates)); // modnar: add option to always have Star Gates tech
+            out.println(keyFormat("ALWAYS_THORIUM")+ yesOrNo(alwaysThorium)); // modnar: add option to always have Thorium Cells tech
+            out.println(keyFormat("CHALLENGE_MODE")+ yesOrNo(challengeMode)); // modnar: add option to give AI more initial resources
+            out.println(keyFormat("RANDOM_TECH_START")+ yesOrNo(randomTechStart)); // modnar: add option to start all Empires with 2 techs, no Artifacts
+            out.println(keyFormat("BATTLE_SCOUT")+ yesOrNo(battleScout)); // modnar: add battleScout option to give player super Scout design
+            out.println(keyFormat("COMPANION_WORLDS")+ companionWorlds); // modnar: add option to start game with additional colonies
             out.println(keyFormat("LANGUAGE")+ languageDir());
             return 0;
         }
@@ -323,6 +392,14 @@ public class UserPreferences {
             case "XILMI_ROLEPLAY_MODE": xilmiRoleplayMode = yesOrNo(val); return;
             case "SCREEN_SIZE_PCT": screenSizePct(Integer.valueOf(val)); return;
             case "UI_TEXTURE_LEVEL": uiTexturePct(Integer.valueOf(val)); return;
+            case "CUSTOM_DIFFICULTY": setCustomDifficulty(val); return; // mondar: add custom difficulty level option, in units of percent
+            case "DYNAMIC_DIFFICULTY": dynamicDifficulty = yesOrNo(val); return; // modnar: add dynamic difficulty option, change AI colony production
+            case "ALWAYS_STAR_GATES": alwaysStarGates = yesOrNo(val); return; // modnar: add option to always have Star Gates tech
+            case "ALWAYS_THORIUM": alwaysThorium = yesOrNo(val); return; // modnar: add option to always have Thorium Cells tech
+            case "CHALLENGE_MODE": challengeMode = yesOrNo(val); return; // modnar: add option to give AI more initial resources
+            case "RANDOM_TECH_START": randomTechStart = yesOrNo(val); return; // modnar: add option to start all Empires with 2 techs, no Artifacts
+            case "BATTLE_SCOUT": battleScout = yesOrNo(val); return; // modnar: add battleScout option to give player super Scout design
+            case "COMPANION_WORLDS": setNumCompanionWorlds(val); return; // modnar: add option to start game with additional colonies
             case "LANGUAGE":     selectLanguage(val); return;
             default:
                 break;
@@ -336,6 +413,16 @@ public class UserPreferences {
     }
     private static void selectLanguage(String s) {
         LanguageManager.selectLanguage(s);
+    }
+    // modnar: add option to start game with additional colonies
+    private static void setNumCompanionWorlds(String s) {
+        int val = Integer.valueOf(s);
+        companionWorlds = Math.max(0, Math.min(4, val)); // max number of companion worlds is 4
+    }
+    // modnar: add custom difficulty level option, in units of percent
+    private static void setCustomDifficulty(String s) {
+        int val = Integer.valueOf(s);
+        customDifficulty = Math.max(20, Math.min(500, val)); // custom difficulty range: 20% to 500%
     }
     private static void setMusicVolume(String s) {
         int val = Integer.valueOf(s);

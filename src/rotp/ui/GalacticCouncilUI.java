@@ -34,6 +34,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.awt.RenderingHints; // modnar: needed for adding RenderingHints
 import java.util.List;
 import rotp.model.empires.Empire;
 import rotp.model.empires.GalacticCouncil;
@@ -307,6 +308,9 @@ public final class GalacticCouncilUI extends FadeInPanel implements MouseListene
         BufferedImage img1 = c.candidate1().race().diploMugshotQuiet();
         BufferedImage img2 = c.candidate2().race().diploMugshotQuiet();
 
+        // modnar: use (slightly) better sampling
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g.drawImage(img1, x3a, y3, w3, h3, null);
         g.drawImage(img2, x3b, y3, w3, h3, null);
         
@@ -323,6 +327,9 @@ public final class GalacticCouncilUI extends FadeInPanel implements MouseListene
         GalacticCouncil c = galaxy().council();
         int w = getWidth();
         int h = getHeight();
+		// modnar: use (slightly) better sampling
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g.drawImage(background, 0, 0, w, h, null);
         
         paintVoteTotals(g);
@@ -485,6 +492,9 @@ public final class GalacticCouncilUI extends FadeInPanel implements MouseListene
 
         int w = getWidth();
         int h = getHeight();
+		// modnar: use (slightly) better sampling
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g.drawImage(background, 0, 0, w, h, null);
         paintVoteTotals(g);
         g.setColor(maskC);
@@ -580,6 +590,9 @@ public final class GalacticCouncilUI extends FadeInPanel implements MouseListene
         GalacticCouncil c = galaxy().council();
         int w = getWidth();
         int h = getHeight();
+		// modnar: use (slightly) better sampling
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g.drawImage(background, 0, 0, w, h, null);
         
         paintVoteTotals(g);
@@ -691,6 +704,9 @@ public final class GalacticCouncilUI extends FadeInPanel implements MouseListene
         Empire pl = player();
         int w = getWidth();
         int h = getHeight();
+		// modnar: use (slightly) better sampling
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g.drawImage(background, 0, 0, w, h, null);
         
         paintVoteTotals(g);
@@ -865,6 +881,9 @@ public final class GalacticCouncilUI extends FadeInPanel implements MouseListene
         g.setColor(MainUI.paneBackground);
         g.fillRect(x, y, w, h);
         
+		// modnar: use (slightly) better sampling
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         BufferedImage img = iconBackImg();
         g.drawImage(img, x, y, this);
         int imgW = img.getWidth();
@@ -955,6 +974,9 @@ public final class GalacticCouncilUI extends FadeInPanel implements MouseListene
             int w = h;
             diplomatImg = newBufferedImage(w, h);
             Graphics2D imgG =  (Graphics2D) diplomatImg.getGraphics();
+			// modnar: use (slightly) better sampling
+			imgG.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+			imgG.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
             // draw race diplo image
             BufferedImage dipImg = emp.race().diplomatQuiet();
@@ -982,6 +1004,9 @@ public final class GalacticCouncilUI extends FadeInPanel implements MouseListene
         int w1 = diplomatImg.getWidth()*h1/diplomatImg.getHeight();
         int xOff = scaled(player().race().diploXOffset);
         int yOff = scaled(player().race().diploYOffset);
+		// modnar: use (slightly) better sampling
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g.drawImage(diplomatImg, ((w-w1)/2)+xOff, ((h-h1)/2)+yOff, w1, h1, null);
     }
     public BufferedImage wideBackImg() {

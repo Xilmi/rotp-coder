@@ -25,6 +25,11 @@ import java.io.InputStream;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
+import java.io.PrintWriter;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -318,6 +323,49 @@ public final class GameSession implements Base, Serializable {
                 log("Next Turn - BEGIN: ", str(galaxy.currentYear()));
                 log("Autosaving pre-turn");
                 instance.saveRecentSession(false);
+                
+				/*
+				// modnar: private logging
+				String LogPath = Rotp.jarPath();
+				File TestLogFile = new File(LogPath, "TestLogFile.txt");
+				if (galaxy.currentTurn() % 5 == 0) { // log every 5 turns
+					PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(TestLogFile, true)));
+					out.println("Turn: "+ str(galaxy.currentTurn()));
+					for (Empire e: galaxy().empires()) {
+						StarSystem sys1 = e.mostPopulousSystemForCiv(e);
+						float relationToPlayer = 0.0f;
+						if (!(e==player())) {
+							EmpireView pl = e.viewForEmpire(player());
+							relationToPlayer = pl.embassy().relations();
+						}
+						
+						out.println(String.format("%10s", e.raceName()) 
+						+ String.format("%6d", e.numColonizedSystems()) 
+						+ String.format("%12.2f", e.totalPlanetaryPopulation()) 
+						+ String.format("%12.2f", e.totalPlanetaryProduction()) 
+						+ String.format("%12.0f", e.totalFleetSize()) 
+						+ String.format("%10.2f", 100*e.shipMaintCostPerBC()) + "%" 
+						+ String.format("%10.2f", 100*e.missileBaseCostPerBC()) + "%" 
+                        + String.format("%10.2f", 100*e.totalSecurityCostPct()) + "%" 
+						+ String.format("%12.2f", e.totalPlanetaryResearch()) 
+						+ String.format("%8.2f", e.tech().avgTechLevel()) 
+						+ String.format("%6d", e.numEnemies())
+						/*
+						+ String.format("reserve %12.2f", e.totalReserve())
+						+ String.format("trade %12.2f", e.netTradeIncome())
+						+ String.format("%10s", sys1.name())
+						+ String.format("%8.2f", sys1.colony().industry().factories())
+						+ String.format("%8.2f", sys1.colony().reserveIncome())
+						+ String.format("%8.2f", sys1.colony().totalIncome())
+						+ String.format("%8.2f", sys1.colony().production())
+						+ String.format("%8.2f", sys1.colony().defense().bases())
+						////
+						);
+					}
+					out.close();
+				}
+				// modnar: private logging
+				*/
                 
                 long startMs = timeMs();
                 systemsToAllocate().clear();
@@ -787,6 +835,11 @@ public final class GameSession implements Base, Serializable {
         String gShape = text(options().selectedGalaxyShape()).replaceAll("\\s", "");
         String gSize = text(options().selectedGalaxySize());
         String diff = text(options().selectedGameDifficulty());
+        // modnar: add custom difficulty level option, set in Remnants.cfg
+        // append this custom difficulty percentage to backup save file name if selected
+        if (diff.equals("Custom")) {
+            diff = diff + " (" + Integer.toString(UserPreferences.customDifficulty()) + "%)";
+        }
         String turn = "T"+pad4.format(num);
         String opp = "vs"+options().selectedNumberOpponents();
         String dash = "-";               

@@ -35,8 +35,8 @@ public class StarSystemFactory implements Base {
         IGameOptions opts = GameSession.instance().options();
         String type = opts.randomOrionStarType();
         StarSystem sys = StarSystem.create(type, gal);
-		// modnar: change Orion to MoO1 size-120, by using 1.2f population bonus multiplier
-        sys.planet(PlanetFactory.createOrion(sys, 1.2f));
+        // modnar: revert session().populationBonus(), Ray has modified PlanetFactory instead
+        sys.planet(PlanetFactory.createOrion(sys, session().populationBonus()));
         sys.monster(new OrionGuardianShip());
         sys.name(text("PLANET_ORION"));
         return sys;
@@ -53,6 +53,15 @@ public class StarSystemFactory implements Base {
         String type = opts.randomPlayerStarType(r);
         StarSystem sys = StarSystem.create(type, gal);
         sys.planet(PlanetFactory.createHomeworld(r, sys, session().populationBonus()));
+        return sys;
+    }
+    // modnar: add option to start game with additional colonies
+    // modnar: use orion star type (red, orange, yellow)
+    public StarSystem newCompanionSystemForRace(Galaxy gal) {
+        IGameOptions opts = GameSession.instance().options();
+        String type = opts.randomOrionStarType();
+        StarSystem sys = StarSystem.create(type, gal);
+        sys.planet(PlanetFactory.createCompanionWorld(sys, session().populationBonus()));
         return sys;
     }
 }

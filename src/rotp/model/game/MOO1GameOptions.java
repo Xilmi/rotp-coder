@@ -28,12 +28,24 @@ import rotp.model.galaxy.GalaxyEllipticalShape;
 import rotp.model.galaxy.GalaxyRectangularShape;
 import rotp.model.galaxy.GalaxyShape;
 import rotp.model.galaxy.GalaxySpiralShape;
+// mondar: add new map shapes
+import rotp.model.galaxy.GalaxyTextShape; // modnar, custom shape
+import rotp.model.galaxy.GalaxyClusterShape; // modnar, custom shape
+import rotp.model.galaxy.GalaxySwirlClustersShape; // modnar, custom shape
+import rotp.model.galaxy.GalaxyGridShape; // modnar, custom shape
+import rotp.model.galaxy.GalaxySpiralArmsShape; // modnar, custom shape
+import rotp.model.galaxy.GalaxyMazeShape; // modnar, custom shape
+import rotp.model.galaxy.GalaxyShurikenShape; // modnar, custom shape, long generation times
+import rotp.model.galaxy.GalaxyBullseyeShape; // modnar, custom shape, long generation times
+import rotp.model.galaxy.GalaxyLorenzShape; // modnar, custom shape, long generation times
+import rotp.model.galaxy.GalaxyFractalShape; // modnar, custom shape, long generation times
 import rotp.model.galaxy.StarSystem;
 import rotp.model.galaxy.StarType;
 import rotp.model.planet.Planet;
 import rotp.model.planet.PlanetType;
 import rotp.model.tech.TechEngineWarp;
 import rotp.ui.game.SetupGalaxyUI;
+import rotp.ui.UserPreferences;
 import rotp.util.Base;
 
 public class MOO1GameOptions implements Base, IGameOptions, Serializable {
@@ -50,6 +62,8 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
     private String selectedGalaxyShapeOption2;
     
     private String selectedGalaxyAge;
+	// modnar: random tech start
+    private boolean randomTechStart = UserPreferences.randomTechStart();
     private String selectedGameDifficulty;
     private String selectedResearchRate;
     private String selectedTechTradeOption;
@@ -89,7 +103,7 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
     @Override
     public int numPlayers()                      { return 1; }
     @Override
-    public int numColors()                       { return 10; }
+    public int numColors()                       { return 10; } // modnar: added new colors, but this value should stay == numRaces
     @Override
     public NewPlayer selectedPlayer()            { return player; }
 /*
@@ -185,7 +199,7 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
     @Override
     public void selectedAutoplayOption(String s)    { selectedAutoplayOption = s; }
     @Override
-    public String selectedOpponentAIOption()       { return selectedOpponentAIOption == null ? OPPONENT_AI_BASE : selectedOpponentAIOption; }
+    public String selectedOpponentAIOption()       { return selectedOpponentAIOption == null ? OPPONENT_AI_MODNAR : selectedOpponentAIOption; } // modnar: default to modnar AI
     @Override
     public void selectedOpponentAIOption(String s) { selectedOpponentAIOption = s; }
     @Override
@@ -235,7 +249,8 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
     }
     @Override
     public int maximumOpponentsOptions() {
-        int maxEmpires = min(numberStarSystems()/8, colors.size(), MAX_OPPONENT_TYPE*startingRaceOptions().size());
+        // modnar: change maxEmpires to be ~12 stars/empire, original ~8 stars/empire
+        int maxEmpires = min(numberStarSystems()/12, colors.size(), MAX_OPPONENT_TYPE*startingRaceOptions().size());
         int maxOpponents = min(SetupGalaxyUI.MAX_DISPLAY_OPPS);
         return min(maxOpponents, maxEmpires-1);
     }
@@ -306,6 +321,27 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
                 galaxyShape = new GalaxyEllipticalShape(this); break;
             case SHAPE_SPIRAL:
                 galaxyShape = new GalaxySpiralShape(this); break;
+            // mondar: add new map shapes
+            case SHAPE_TEXT:
+                galaxyShape = new GalaxyTextShape(this); break;
+            case SHAPE_CLUSTER:
+                galaxyShape = new GalaxyClusterShape(this); break;
+			case SHAPE_SWIRLCLUSTERS:
+                galaxyShape = new GalaxySwirlClustersShape(this); break;
+			case SHAPE_GRID:
+                galaxyShape = new GalaxyGridShape(this); break;
+			case SHAPE_SPIRALARMS:
+                galaxyShape = new GalaxySpiralArmsShape(this); break;
+			case SHAPE_MAZE:
+                galaxyShape = new GalaxyMazeShape(this); break;
+			case SHAPE_SHURIKEN:
+                galaxyShape = new GalaxyShurikenShape(this); break;
+			case SHAPE_BULLSEYE:
+                galaxyShape = new GalaxyBullseyeShape(this); break;
+			case SHAPE_LORENZ:
+                galaxyShape = new GalaxyLorenzShape(this); break;
+			case SHAPE_FRACTAL:
+                galaxyShape = new GalaxyFractalShape(this); break;
             case SHAPE_RECTANGLE:
             default:
                 galaxyShape = new GalaxyRectangularShape(this);
@@ -418,7 +454,7 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
                     }
             }
         }
-        return AI.BASE;
+        return AI.MODNAR; // modnar: default to modnar AI
     }
     @Override
     public float hostileTerraformingPct() { 
@@ -436,14 +472,32 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         
         // the various "slowing" options increase the research cost for higher tech levels
         
+        // modnar: adjust research costs to asymptotically reach their original scaling
+        // mainly to keep low tech level costs similar to RESEARCH_NORMAL (1.00)
+        // also corrects for old_SLOW's cheaper techLevel==2 and same cost techLevel==3
+        //
+        // techLevel:     2     3     4     5     6     7     8     9     10     20     30     40     50    100
+        // old_SLOW:     0.82  1.00  1.15  1.29  1.41  1.53  1.63  1.73  1.83   2.58   3.16   3.65   4.08   5.77
+        // new_SLOW:     1.15  1.17  1.25  1.34  1.44  1.53  1.62  1.71  1.80   2.53   3.12   3.62   4.06   5.81
+        // old_SLOWER:   1.41  1.73  2.00  2.24  2.45  2.65  2.83  3.00  3.16   4.47   5.48   6.32   7.07  10.00
+        // new_SLOWER:   1.20  1.25  1.40  1.58  1.77  1.96  2.14  2.32  2.49   3.97   5.14   6.14   7.03  10.52
+        // old_SLOWEST:  3.16  3.87  4.47  5.00  5.48  5.92  6.32  6.71  7.07  10.00  12.25  14.14  15.81  22.36
+        // new_SLOWEST:  1.24  1.36  1.75  2.21  2.68  3.15  3.61  4.06  4.49   8.17  11.10  13.60  15.81  24.55
+        
         float amt = BASE_RESEARCH_MOD;                  // default adjustment
         switch(selectedResearchRate()) {
+            // mondar: add fast research option
+            case RESEARCH_FAST:
+                return amt*(1.0f/(techLevel+2.0f) + 0.5f);    // mondar: asymptotically approach 2x faster
             case RESEARCH_SLOW:
-                return amt*sqrt(techLevel/3.0f); // approx. 4x slower for level 50
+                return amt*((0.6f*techLevel*sqrt(techLevel)+1.0f)/techLevel - 0.2f); // mondar: asymptotically similar
+                //return amt*sqrt(techLevel/3.0f); // approx. 4x slower for level 50
             case RESEARCH_SLOWER:
-                return amt*sqrt(techLevel);   // approx. 7x slower for level 50
+                return amt*((1.2f*techLevel*sqrt(techLevel)+2.0f)/techLevel - 1.5f); // mondar: asymptotically similar
+                //return amt*sqrt(techLevel);   // approx. 7x slower for level 50
             case RESEARCH_SLOWEST:
-                return amt*sqrt(techLevel*5); // approx. 16x slower for level 50
+                return amt*((3.0f*techLevel*sqrt(techLevel)+5.0f)/techLevel - 5.5f); // mondar: asymptotically similar
+                //return amt*sqrt(techLevel*5); // approx. 16x slower for level 50
             default:  
                 return amt;                   // no additional slowing. 
         }
@@ -483,7 +537,14 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
     public int warpSpeed(TechEngineWarp tech) {
         switch(selectedWarpSpeedOption()) {
             case WARP_SPEED_NORMAL:  return tech.baseWarp();
-            case WARP_SPEED_FAST: return fibonacci(tech.baseWarp());
+            //case WARP_SPEED_FAST: return fibonacci(tech.baseWarp());
+            // modnar: adjust Fast Warp down at advanced Engines
+            //         use [A033638] https://oeis.org/A033638
+            //         a(n) = floor(n^2/4)+1
+            // Normal:     1, 2, 3, 4, 5,  6,  7,  8,  9
+            // FastMOD:    1, 2, 3, 5, 7, 10, 13, 17, 21
+            // Fibonacci:  1, 2, 3, 5, 8, 13, 21, 34, 55
+            case WARP_SPEED_FAST: return quarterSquaresPlusOne(tech.baseWarp());
         }
         return tech.baseWarp();
     }
@@ -550,6 +611,9 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         }
 
         float r = random();
+        
+        // modnar: change PLANET_QUALITY settings, comment out poor to great settings
+        /*
         switch(selectedPlanetQualityOption()) {
             case PLANET_QUALITY_POOR:     r = random() * 0.8f; break;
             case PLANET_QUALITY_MEDIOCRE: r = random() * 0.9f; break;
@@ -557,6 +621,7 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
             case PLANET_QUALITY_GOOD:     r = 0.1f + (random() * 0.9f); break;
             case PLANET_QUALITY_GREAT:    r = 0.2f + (random() * 0.8f); break;
         }
+        */
         
         for (int i=0;i<pcts.length;i++) {
             if (r <= pcts[i]) {
@@ -651,6 +716,17 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         list.add(SHAPE_RECTANGLE);
         list.add(SHAPE_ELLIPTICAL);
         list.add(SHAPE_SPIRAL);
+        // mondar: add new map shapes
+        list.add(SHAPE_TEXT);
+        list.add(SHAPE_CLUSTER);
+		list.add(SHAPE_SWIRLCLUSTERS);
+		list.add(SHAPE_GRID);
+		list.add(SHAPE_SPIRALARMS);
+		list.add(SHAPE_MAZE);
+		list.add(SHAPE_SHURIKEN);
+		list.add(SHAPE_BULLSEYE);
+		list.add(SHAPE_LORENZ);
+		list.add(SHAPE_FRACTAL);
         return list;
     }
 	
@@ -676,6 +752,8 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         list.add(DIFFICULTY_HARD);
         list.add(DIFFICULTY_HARDER);
         list.add(DIFFICULTY_HARDEST);
+        // modnar: add custom difficulty level option, set in Remnants.cfg
+        list.add(DIFFICULTY_CUSTOM);
         return list;
     }
     @Override
@@ -685,6 +763,8 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         list.add(RESEARCH_SLOW);
         list.add(RESEARCH_SLOWER);
         list.add(RESEARCH_SLOWEST);
+        // mondar: add fast research option
+        list.add(RESEARCH_FAST);
         return list;
     }
     @Override
@@ -756,11 +836,17 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
     @Override
     public List<String> planetQualityOptions() {
         List<String> list = new ArrayList<>();
+        // modnar: change PLANET_QUALITY settings, add larger and richer, comment out poor to great settings
+        list.add(PLANET_QUALITY_NORMAL);
+        list.add(PLANET_QUALITY_LARGER);
+        list.add(PLANET_QUALITY_RICHER);
+        /*
         list.add(PLANET_QUALITY_POOR);
         list.add(PLANET_QUALITY_MEDIOCRE);
         list.add(PLANET_QUALITY_NORMAL);
         list.add(PLANET_QUALITY_GOOD);
         list.add(PLANET_QUALITY_GREAT);
+        */
         return list;
     }
     @Override
@@ -782,9 +868,10 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
     public List<String> fuelRangeOptions() {
         List<String> list = new ArrayList<>();
         list.add(FUEL_RANGE_NORMAL);
-        list.add(FUEL_RANGE_HIGH);
-        list.add(FUEL_RANGE_HIGHER);
-        list.add(FUEL_RANGE_HIGHEST);
+        // modnar: comment out fuelRangeOptions from being selected
+        //list.add(FUEL_RANGE_HIGH);
+        //list.add(FUEL_RANGE_HIGHER);
+        //list.add(FUEL_RANGE_HIGHEST);
         return list;
     }
     @Override
@@ -884,17 +971,37 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
     public Color color(int i)  { return empireColors.get(i); }
     @Override
     public void randomizeColors() {
+		// modnar: add new colors
         empireColors.clear();
-        empireColors.add(new Color(9,131,214));   // blue
-        empireColors.add(new Color(132,57,20));   // brown
-        empireColors.add(new Color(0,166,81));    // green
-        empireColors.add(new Color(255,127,0));   // orange
-        empireColors.add(new Color(247,127,230)); // pink
-        empireColors.add(new Color(145,51,188));  // purple
-        empireColors.add(new Color(237,28,36));   // red
-        empireColors.add(new Color(56,232,186));  // teal
-        empireColors.add(new Color(247,229,60));  // yellow
-        empireColors.add(new Color(255,255,255)); // white
+		empireColors.add(new Color(237,28,36));   // red
+		empireColors.add(new Color(0,166,81));    // green
+		empireColors.add(new Color(247,229,60));  // yellow
+		empireColors.add(new Color(9,131,214));   // blue
+		empireColors.add(new Color(255,127,0));   // orange
+		empireColors.add(new Color(145,51,188));  // purple
+		empireColors.add(new Color(0,255,255));   // modnar: aqua
+		empireColors.add(new Color(255,0,255));   // modnar: fuchsia
+		empireColors.add(new Color(132,57,20));   // brown
+		empireColors.add(new Color(255,255,255)); // white
+		empireColors.add(new Color(0,255,0));     // modnar: lime
+		empireColors.add(new Color(128,128,128)); // modnar: grey
+		empireColors.add(new Color(220,160,220)); // modnar: plum*
+		empireColors.add(new Color(160,220,250)); // modnar: light blue*
+		empireColors.add(new Color(170,255,195)); // modnar: mint*
+		empireColors.add(new Color(128,128,0));   // modnar: olive**
+		//empireColors.add(new Color(255,215,180)); // modnar: apricot*
+		
+        //empireColors.add(new Color(9,131,214));   // blue
+        //empireColors.add(new Color(132,57,20));   // brown
+        //empireColors.add(new Color(0,166,81));    // green
+        //empireColors.add(new Color(255,127,0));   // orange
+        //empireColors.add(new Color(247,127,230)); // pink
+        //empireColors.add(new Color(145,51,188));  // purple
+        //empireColors.add(new Color(237,28,36));   // red
+        //empireColors.add(new Color(56,232,186));  // teal
+        //empireColors.add(new Color(247,229,60));  // yellow
+        //empireColors.add(new Color(255,255,255)); // white
+
         colors.clear();
         //primary color list
         List<Integer> list1 = new ArrayList<>();
@@ -904,13 +1011,19 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         list1.add(3);
         list1.add(4);
         list1.add(5);
-
+        list1.add(6);
+        list1.add(7);
+        list1.add(8);
+        list1.add(9);
+		
         //secondary color list
         List<Integer> list1a = new ArrayList<>();
-        list1a.add(6);
-        list1a.add(7);
-        list1a.add(8);
-        list1a.add(9);
+        list1a.add(10);
+        list1a.add(11);
+        list1a.add(12);
+        list1a.add(13);
+		list1a.add(14);
+        list1a.add(15);
 
         // start repeating the 10-color list for copies of races (up to 5 per race)
         List<Integer> list2 = new ArrayList<>(list1);
@@ -920,17 +1033,18 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         List<Integer> list5 = new ArrayList<>(list2);
             
         Collections.shuffle(list1);
-        Collections.shuffle(list1a);
+        //Collections.shuffle(list1a); // modnar: no need to shuffle list1a
         Collections.shuffle(list2);
         Collections.shuffle(list3);
         Collections.shuffle(list4);
         Collections.shuffle(list5);
+		// modnar: due to new colors, only add first 10 colors of shuffled lists, subList(0,10)
         colors.addAll(list1);
-        colors.addAll(list1a);
-        colors.addAll(list2);
-        colors.addAll(list3);
-        colors.addAll(list4);
-        colors.addAll(list5);
+        //colors.addAll(list1a); // modnar: no need to add list1a
+        colors.addAll(list2.subList(0,10));
+        colors.addAll(list3.subList(0,10));
+        colors.addAll(list4.subList(0,10));
+        colors.addAll(list5.subList(0,10));
     }
     private void initOpponentRaces() {
     }
@@ -994,6 +1108,15 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
             default:
                 throw new RuntimeException(concat("Invalid star type for options: ", s.starType().key()));
         }
+        
+        // modnar: change PLANET_QUALITY settings, 20% more Poor with LARGER, 20% less Poor with RICHER
+        switch(selectedPlanetQualityOption()) {
+            case PLANET_QUALITY_LARGER:   r1 *= 1.2f; r2 *= 1.2f; break;
+            case PLANET_QUALITY_RICHER:   r1 *= 0.8f; r2 *= 0.8f; break;
+            case PLANET_QUALITY_NORMAL:   break;
+            default:    break;
+        }
+        
         float r = random();
         if (r <= r1)
             p.setResourceUltraPoor();
@@ -1047,6 +1170,14 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
                 throw new RuntimeException(concat("Invalid star type for options: ", s.starType().key()));
         }
 
+        // modnar: change PLANET_QUALITY settings, 20% less Rich with LARGER, 50% more Rich with RICHER
+        switch(selectedPlanetQualityOption()) {
+            case PLANET_QUALITY_LARGER:   r1 *= 0.8f; r2 *= 0.8f; break;
+            case PLANET_QUALITY_RICHER:   r1 *= 1.5f; r2 *= 1.5f; break;
+            case PLANET_QUALITY_NORMAL:   break;
+            default:    break;
+        }
+        
         float r = random();
         if (r <= r1)
             p.setResourceRich();
@@ -1054,13 +1185,25 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
             p.setResourceUltraRich();
     }
     private void checkForArtifacts(Planet p, StarSystem s) {
+        // modnar: no Artifact planets if randomTechStart selected
+        float rArtifact = 1.0f;
+        // modnar: change PLANET_QUALITY settings, 50% more Artifact with RICHER
+        switch(selectedPlanetQualityOption()) {
+            case PLANET_QUALITY_LARGER:   break;
+            case PLANET_QUALITY_RICHER:   rArtifact *= 1.5f; break;
+            case PLANET_QUALITY_NORMAL:   break;
+            default:    break;
+        }
+        if (randomTechStart) {
+            rArtifact *= 0.0f; // modnar: no Artifact planets if randomTechStart selected
+        }
         switch(p.type().key()) {
             case PlanetType.STEPPE:
             case PlanetType.ARID:
             case PlanetType.OCEAN:
             case PlanetType.JUNGLE:
             case PlanetType.TERRAN:
-                if (random() <= 0.10)
+                if (random() <= 0.10 * rArtifact) // modnar: change artifact ratio for testing, original 0.10
                     p.setArtifact();
         }
     }

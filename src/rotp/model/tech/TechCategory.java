@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import rotp.model.empires.Empire;
 import rotp.util.Base;
+import rotp.ui.UserPreferences;
 
 public final class TechCategory implements Base, Serializable {
     private static final long serialVersionUID = 1L;
@@ -221,6 +222,26 @@ public final class TechCategory implements Base, Serializable {
                     found = true;
                 }
             }
+			
+			// modnar: always add in Star Gates Tech
+			// if the ALWAYS_STAR_GATES option in UserPreferences (Remnants.cfg) is set to YES
+			// for tech category Propulsion, index = 4
+			// tech level 27, quintile i = 5
+			if ((index == 4) && (i == 5) && UserPreferences.alwaysStarGates()) {
+				String StarGateId = "Stargate:0";
+				addPossibleTech(StarGateId);
+                found = true;
+			}
+            // modnar: always add in Thorium Cells Tech
+			// if the ALWAYS_THORIUM option in UserPreferences (Remnants.cfg) is set to YES
+			// for tech category Propulsion, index = 4
+			// tech level 41, quintile i = 8
+			if ((index == 4) && (i == 8) && UserPreferences.alwaysThorium()) {
+				String ThoriumCellId = "FuelRange:8";
+				addPossibleTech(ThoriumCellId);
+                found = true;
+			}
+			
             if (!found)
                 addPossibleTech(random(techs));
         }

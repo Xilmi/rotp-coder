@@ -30,7 +30,6 @@ import java.util.Properties;
 public class RotpGovernor {
     static String expectedROTPVersion = "Xilmi-Mod 1.01.0";
     public static boolean GRAALVM_NATIVE = System.getProperty("org.graalvm.nativeimage.imagecode") != null;
-
     private static String governorVersion = null;
 
     public static String governorVersion() {
@@ -66,7 +65,6 @@ public class RotpGovernor {
 
 
     public static void main(String[] args) throws IOException {
-
         String jarFilename = "rotp-" + governorVersion() + "-governor.jar";
         try {
             Class.forName("rotp.Rotp");

@@ -178,6 +178,21 @@ public class AlienSystemPanel extends SystemPanel {
             // draw planet terrain background
             BufferedImage img = pl.sv.planetTerrain(id);
             g.drawImage(img, 0, topH, w, h, 0, 0, img.getWidth(), img.getHeight(), null);
+            // modnar: draw fortress and shield if hostile, on top of terrain
+            if (spied) {
+                BufferedImage fortImg = sys.colony().empire().race().fortress(0);
+                int fortW = (int)(0.6f*w);
+                int fortH = (int)(45*fortW/42);
+                int fortX = w-fortW;
+                int fortY = topH + s90;
+                g.drawImage(fortImg, fortX, fortY, fortX+fortW, fortY+fortH, 0, 0, fortImg.getWidth(), fortImg.getHeight(), null);
+
+                // for hostile planets, draw shield
+                if (sys.colony().empire().race().isHostile(sys.colony().planet().type())) {
+                    BufferedImage shieldImg = sys.colony().empire().race().shield();
+                    g.drawImage(shieldImg, fortX, fortY, fortX+fortW, fortY+fortH, 0, 0, shieldImg.getWidth(), shieldImg.getHeight(), null);
+                }
+            }
             g.setFont(narrowFont(16));
             g.setColor(grayText);
 

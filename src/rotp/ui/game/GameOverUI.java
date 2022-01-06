@@ -32,6 +32,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.awt.RenderingHints; // modnar: needed for adding RenderingHints
 import java.util.ArrayList;
 import java.util.List;
 import rotp.model.empires.Empire;
@@ -100,6 +101,9 @@ public final class GameOverUI extends FadeInPanel implements MouseListener, Mous
         Graphics2D g = (Graphics2D) img.getGraphics();
         setFontHints(g);
 
+        // modnar: use (slightly) better sampling
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g.drawImage(backImg, 0, 0, w, h, null);
 
         g.setFont(narrowFont(30));

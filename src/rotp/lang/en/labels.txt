@@ -92,6 +92,8 @@ COLONY_NAME_5                     | Distant %1
 // Space Monster Names
 SPACE_AMOEBA                      | Space Amoeba
 SPACE_CRYSTAL                     | Space Crystal
+// modnar: add space pirate random event
+SPACE_PIRATES                     | Space Pirates
 ORION_GUARDIAN                    | Orion Guardian
 
 // Personality types (adjective)
@@ -153,6 +155,18 @@ EVENT_SPACE_CRYSTAL               | A gigantic crystalline entity called the "Sp
 EVENT_SPACE_CRYSTAL_1             | A gigantic crystalline entity called the "Space Crystal" has been spotted approaching the uncolonized [system] system.
 EVENT_SPACE_CRYSTAL_2             | The Space Crystal has completely destroyed all life on the [victim_race] colony in the [system] system.
 EVENT_SPACE_CRYSTAL_3             | The Space Crystal was destroyed by [victim_race] defenders in the [system] system.
+// modnar: add space pirate random event
+EVENT_SPACE_PIRATES               | A fleet of marauding Space Pirates have been spotted approaching the [system] system. Defending [race] colonists and fleets are preparing for the worst.
+EVENT_SPACE_PIRATES_1             | A fleet of marauding Space Pirates have been spotted approaching the uncolonized [system] system.
+EVENT_SPACE_PIRATES_2             | The dreaded Space Pirates have ravaged the population and pillaged all industry on the [race] colony in the [system] system, devastating the local ecology.
+EVENT_SPACE_PIRATES_3             | The Space Pirate fleet was destroyed by [race] defenders in the [system] system. Significant riches found in the wreckage have been seized by the [race] military to bolster their Planetary Reserve.
+// modnar: add Precursor Relic random event
+EVENT_RELIC_PLANETS               | A Precursor relic has mysteriously activated in [target_empire] space. Galaxy-wide scanners report the formation of new planets in multiple previously empty Star Systems after intense asteroid coalescence events. [target_race] scientists have also harvested several Construction technologies from the relic.
+// modnar: add Gauntlet Relic random event
+EVENT_RELIC_GAUNTLET              | Half of all galactic life have been wiped out following the activation of a Precursor gauntlet with seven embedded gems. [target_race] scientists studying the relic have denied responsibility. Third-party investigators question the capacity increase on many [target_empire] planets and new Planetology technologies.
+// modnar: add Boost Planet baseSize random event
+EVENT_SIZEBOOST                   | Archeologists exploring the [target_race] world in the [system] system have revealed massive subterranean caverns. These geologically stable chambers are habitable and have substantially boosted the planet's size.
+
 
 SYSEVENT_HOMEWORLD                | Homeworld for the [alien_race].
 SYSEVENT_SCOUTED                  | First scouted by the [alien_race].
@@ -173,6 +187,8 @@ SYSEVENT_ENRICHED                 | Huge deposits of rich ore were discovered on
 SYSEVENT_DEPLETED                 | Ore deposits on the planet were depleted.
 SYSEVENT_ACCIDENT                 | A massive industrial accident irradiated the planet.
 SYSEVENT_SUPERNOVA                | The planet was irradiated by a supernova.
+// modnar: add Boost Planet baseSize random event
+SYSEVENT_SIZEBOOST                | The planet size has been boosted by underground caverns.
 
 
 // Diplomatic Incident titles & descriptions
@@ -445,8 +461,9 @@ MAIN_HELP_3H                      | Next Year - advances the game to the next ye
 MAIN_HELP_3I                      | Current Turn - displays the game's current turn or your empire's current year. Click to toggle.
 MAIN_HELP_3J                      | Map controls - click to cycle through various display settings for the galaxy map.
 
-MAIN_SYSTEM_DETAIL_PFB            | Pop %1  Fac %2  Base %3
-MAIN_SYSTEM_DETAIL_PF             | Pop %1  Fac %2
+// modnar: shorten SystemData display
+MAIN_SYSTEM_DETAIL_PFB            | P:%1  F:%2  B:%3
+MAIN_SYSTEM_DETAIL_PF             | P:%1  F:%2
 MAIN_SYSTEM_DETAIL_NO_DATA        | No Data
 MAIN_UNEXPLORED_SYSTEM            | Unexplored
 MAIN_ALLIED_COLONY                | Allied Colony
@@ -473,6 +490,8 @@ MAIN_PLANET_EVENT_PLAGUE          | Plague
 MAIN_PLANET_EVENT_SUPERNOVA       | Supernova
 MAIN_PLANET_EVENT_AMOEBA          | Space Amoeba
 MAIN_PLANET_EVENT_CRYSTAL         | Space Crystal
+// modnar: add space pirate random event
+MAIN_PLANET_EVENT_PIRATES         | Space Pirates
 MAIN_ADVANCING_YEAR               | Advancing to Year  %1...
 MAIN_ADVANCING_TURN               | Advancing to Turn  %1...
 TURN_SAVING                       | Saving Game
@@ -1121,7 +1140,10 @@ SETUP_DIFFICULTY_NORMAL           | 100%
 SETUP_DIFFICULTY_HARD             | 110%
 SETUP_DIFFICULTY_HARDER           | 140%
 SETUP_DIFFICULTY_HARDEST          | 200%
+SETUP_DIFFICULTY_CUSTOM           | Custom
 SETUP_RESEARCH_RATE_NORMAL        | Normal
+// mondar: add fast research option
+SETUP_RESEARCH_RATE_FAST          | Fast
 SETUP_RESEARCH_RATE_SLOW          | Slow
 SETUP_RESEARCH_RATE_SLOWER        | Slower
 SETUP_RESEARCH_RATE_SLOWEST       | Slowest
@@ -1154,6 +1176,9 @@ SETUP_AI_HOSTILITY_HIGH           | Angry
 SETUP_AI_HOSTILITY_HIGHER         | Angrier
 SETUP_AI_HOSTILITY_HIGHEST        | Angriest
 SETUP_GAME_NUMBER_OPPONENTS       | Opponents
+// modnar: change PLANET_QUALITY settings, add larger and richer
+SETUP_PLANET_QUALITY_LARGER       | Larger
+SETUP_PLANET_QUALITY_RICHER       | Richer
 SETUP_PLANET_QUALITY_POOR         | Poor
 SETUP_PLANET_QUALITY_MEDIOCRE     | Mediocre
 SETUP_PLANET_QUALITY_NORMAL       | Normal
@@ -1182,6 +1207,8 @@ SETUP_BUTTON_BACK                 | Back
 SETUP_BUTTON_NEXT                 | Next
 SETUP_BUTTON_START                | Start
 SETUP_BUTTON_SETTINGS             | Advanced Options
+// modnar: add UI panel for modnar MOD game options
+SETUP_BUTTON_MOD_SETTINGS         | MOD Options
 
 SETUP_SPIRAL_2_ARMS               | Two Arms
 SETUP_SPIRAL_3_ARMS               | Three Arms
@@ -1202,11 +1229,49 @@ SETUP_ELLIPSE_1                   | Ellipse 1
 SETUP_ELLIPSE_2                   | Ellipse 2
 SETUP_ELLIPSE_3                   | Ellipse 3
 SETUP_ELLIPSE_4                   | Ellipse 4
+SETUP_RECTANGLE_0                 | Rectangle
+SETUP_RECTANGLE_1                 | Square
 SETUP_VOID_0                      | No Void
 SETUP_VOID_1                      | Void 1
 SETUP_VOID_2                      | Void 2
 SETUP_VOID_3                      | Void 3
 SETUP_VOID_4                      | Void 4
+SETUP_VOID_5                      | Void 5
+SETUP_TEXT_0                      | Homeworld Name
+SETUP_TEXT_1                      | ROTP
+SETUP_TEXT_2                      | MoO1
+SETUP_1_LINE                      | Single Line
+SETUP_2_LINE                      | Double Line
+SETUP_3_LINE                      | Triple Line
+SETUP_BULLSEYE_0                  | Dartboard
+SETUP_BULLSEYE_1                  | Rings
+SETUP_BULLSEYE_2                  | Squares
+SETUP_CLUSTER_0                   | 4 Clusters
+SETUP_CLUSTER_1                   | 6 Clusters
+SETUP_CLUSTER_2                   | 8 Clusters
+SETUP_FRACTAL_0                   | Sierpinski
+SETUP_FRACTAL_1                   | Chaos Game
+SETUP_GRID_0                      | Some Clusters
+SETUP_GRID_1                      | All Clusters
+SETUP_GRID_2                      | No Clusters
+SETUP_LORENZ_0                    | Lorenz-1
+SETUP_LORENZ_1                    | Lorenz-2
+SETUP_VIEW_0                      | View A
+SETUP_VIEW_1                      | View B
+SETUP_VIEW_2                      | View C
+SETUP_MAZE_0                      | Maze A
+SETUP_MAZE_1                      | Maze B
+SETUP_MAZE_2                      | Maze C
+SETUP_SHURIKEN_0                  | 9 Spikes
+SETUP_SHURIKEN_1                  | 11 Spikes
+SETUP_SHURIKEN_2                  | 13 Spikes
+SETUP_SPIRALARMS_0                | Normal
+SETUP_SPIRALARMS_1                | Loose
+SETUP_SPIRALARMS_2                | Tight
+SETUP_SWIRLCLUSTERS_0             | Clusters Along
+SETUP_SWIRLCLUSTERS_1             | Clusters Across
+SETUP_SWIRLCLUSTERS_2             | No Clusters
+SETUP_NOT_AVAILABLE               | N/A
 
 
 // Advanced Settings
@@ -1230,21 +1295,41 @@ SETTINGS_COLONIZING               | Colonizing: %1
 SETTINGS_FUEL_RANGE               | Fuel Range: %1
 SETTINGS_AI_HOSTILITY             | Hostility: %1
 SETTINGS_RANDOM_EVENTS_DESC       | Space Monsters are random events and considerable mid-game threats. Turn off space monsters or all random events. 
-SETTINGS_WARP_SPEED_DESC          | Increase the speed of more advanced warp technologies. This can be desirable on very large maps.
+SETTINGS_WARP_SPEED_DESC          | Increase the speed of more advanced warp technologies. This can be desirable on very large maps. [Fastest speeds reduced in modnar MOD]
 SETTINGS_GALAXY_AGE_DESC          | Compared to normal galaxies, young galaxies have more white and blue stars while old galaxies have more red and neutron stars.
 SETTINGS_TECH_TRADING_DESC        | Turn off all technology trades or restrict these trades to allies.
 SETTINGS_STAR_DENSITY_DESC        | Set to high to reduce the chance of empires being stranded early in the game.
-SETTINGS_RESEARCH_RATE_DESC       | Slow the research rate of new technologies, lengthening the useful life of current technologies.
+SETTINGS_RESEARCH_RATE_DESC       | Slow the research rate of new technologies, lengthening the useful life of current technologies. [Asymptotic in modnar MOD]
 SETTINGS_NEBULAE_DESC             | Nebulae slow down ship travel and render shields useless. Increase or decrease their frequency.
-SETTINGS_PLANET_QUALITY_DESC      | Increases or decreases the frequency of higher quality planets.
+// modnar: change PLANET_QUALITY settings, only Normal, Larger, and Richer
+SETTINGS_PLANET_QUALITY_DESC      | [modnar MOD: "Larger" gives +50% Planet Size, +20% Poor, -20% Rich; "Richer" gives -20% Planet Size, -20% Poor, +50% Rich, +50% Artifact.]
+//SETTINGS_PLANET_QUALITY_DESC      | Increases or decreases the frequency of higher quality planets.
 SETTINGS_TERRAFORMING_DESC        | Reduce or eliminate the benefits of the Improved Terraforming technologies on hostile planets.
 SETTINGS_COLONIZING_DESC          | Restrict the colonization of systems to only those for which you have acquired the specific technology.
 SETTINGS_COUNCIL_DESC             | Disable the council victory condition or allow enemy empires to rebel against a player victory.
 SETTINGS_RANDOMIZE_AI_DESC        | Randomize the AI player personalities, racial abilities, or both.
 SETTINGS_AUTOPLAY_DESC            | Completely automate the game by having an AI play for the player. This is useful for a first-hand view of how the AI works.
 SETTINGS_AUTOPLAY_WARNING         | Warning! Autoplay is currently enabled which will prevent user gameplay. Use "Advanced Options" to disable.
-SETTINGS_FUEL_RANGE_DESC          | Increase the range of fuel range technologies and reserve fuel tanks.
+SETTINGS_FUEL_RANGE_DESC          | Increase the range of fuel range technologies and reserve fuel tanks. [Deactivated in modnar MOD]
 SETTINGS_AI_HOSTILITY_DESC        | Increase or decrease the general level of hostility between alien races.
+// modnar: add UI panel for modnar MOD game options
+SETTINGS_MOD_TITLE                   | modnar MOD Options
+SETTINGS_MOD_ALWAYS_STARGATES        | Always Star Gates: %1
+SETTINGS_MOD_ALWAYS_THORIUM          | Always Thorium: %1
+SETTINGS_MOD_CHALLENGE_MODE          | Challenge Mode: %1
+SETTINGS_MOD_BATLLE_SCOUT            | Battle Scout: %1
+SETTINGS_MOD_COMPANION_WORLDS        | Companion Worlds: %1
+SETTINGS_MOD_RANDOM_TECH_START       | Random Tech Start: %1
+SETTINGS_MOD_CUSTOM_DIFFICULTY       | Custom Difficulty: %1%
+SETTINGS_MOD_DYNAMIC_DIFFICULTY      | Dynamic Difficulty: %1
+SETTINGS_MOD_ALWAYS_STARGATES_DESC   | Always include "Intergalactic Star Gates" in the Tech Tree for ALL Empires. Selecting NO leaves Tech availability up to chance.
+SETTINGS_MOD_ALWAYS_THORIUM_DESC     | Always include "Thorium Cells" in the Tech Tree for ALL Empires. Selecting NO leaves Tech availability up to chance.
+SETTINGS_MOD_CHALLENGE_MODE_DESC     | Give AI Empires additional starting resources (more Population, Factories, and Ships).
+SETTINGS_MOD_BATTLE_SCOUT_DESC       | Medium-Hull armed Scout Design for the Player at start of game. Buildable despite breaking Ship Space limitations.
+SETTINGS_MOD_COMPANION_WORLDS_DESC   | Give 0 to 4 additional Colonies around ALL Empire Homeworlds at start of game.
+SETTINGS_MOD_RANDOM_TECH_START_DESC  | Give ALL Empires 2 random first Tier Techs at start of game. No Artifact Planets will be generated in the Galaxy. (Techs can differ from Empire to Empire.)
+SETTINGS_MOD_CUSTOM_DIFFICULTY_DESC  | Sets the AI Production Modifier from 20% to 500%. Make sure to select "Difficulty: Custom". (Hold down Shift/Ctrl, then scroll the mouse wheel to change in units of 5%/20%.)
+SETTINGS_MOD_DYNAMIC_DIFFICULTY_DESC | Scales the AI Production up/down when weaker/stronger than the Player. Effect ramps up at around Turn-150. (Will not infinitely scale, very strong AI Empires will be almost un-changed.)
 
 // Tech UI labels
 TECH_RESEARCH                     | Technology Research
@@ -1517,6 +1602,8 @@ SHIP_COMBAT_STATS_OFF             | Combat Stats: Off
 SHIP_COMBAT_EXIT                  | Exit
 SHIP_COMBAT_COUNT_NAME            | %1  %2
 SHIP_COMBAT_MONSTER_TARGET        | Space monster targeted.
+// modnar: add space pirate random event
+SHIP_COMBAT_PIRATES_TARGET        | Space Pirates targeted.
 SHIP_COMBAT_ENEMY_TARGET          | Enemy fleet targeted.
 SHIP_COMBAT_ALLY_TARGET           | Friendly fleet targeted.
 SHIP_COMBAT_ENEMY_COLONY          | Enemy planet targeted.
@@ -1803,12 +1890,13 @@ NOTICE_SPYING_MISSION_SABOTAGE    | Sabotage
 HISTORY_TITLE                     | Known Galactic History
 HISTORY_TITLE_ALL                 | Full Galactic History
 HISTORY_TURN_DESC                 | Turn %1 of %2
-HISTORY_FORWARD                   | Forward
-HISTORY_BACK                      | Back
-HISTORY_PLAY                      | Play
-HISTORY_PAUSE                     | Pause
-HISTORY_RESET                     | Reset
-HISTORY_EXIT                      | Exit
+// modnar: add media control symbols for history buttons
+HISTORY_FORWARD                   | Forward ▷
+HISTORY_BACK                      | ◁ Back
+HISTORY_PLAY                      | Play ▶
+HISTORY_PAUSE                     | Pause ⏸
+HISTORY_RESET                     | Reset ⏮
+HISTORY_EXIT                      | Exit ⮿
 HISTORY_EXTINCT                   | Extinct
 HISTORY_SYSTEMS                   | Systems
 HISTORY_EMPIRE                    | Empire
@@ -1914,6 +2002,8 @@ SYSTEMS_STATUS_PLAGUE             | The colony is experiencing a global plague t
 SYSTEMS_STATUS_PIRACY             | Pirates are affecting trade routes in this system.
 SYSTEMS_STATUS_SPACE_AMOEBA       | A giant space amoeba is heading towards this system.
 SYSTEMS_STATUS_SPACE_CRYSTAL      | A gigantic space crystal is heading towards this system.
+// modnar: add space pirate random event
+SYSTEMS_STATUS_SPACE_PIRATES      | A fleet of space pirates are headed towards this system.
 
 
 DIPLOMACY_RECEIVING               | Translating Incoming Message...

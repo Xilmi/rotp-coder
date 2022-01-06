@@ -547,64 +547,115 @@ public final class SystemsUI extends BasePanel implements IMapHandler, ActionLis
     private Color expandAlertColor(SystemView sv) { 
         if (!sv.scouted())
             return null;   
-                
-        String eventMessage = randomEventStatus(sv);
-        if (!eventMessage.isEmpty()) {
-            if (sv.empire() == player())
-                return MainUI.redAlertC;
-        }
 
-        if (sv.isColonized()) 
-            return null;
-        
-        float sysDistance = sv.distance();
-        Empire pl = player();
-                 
-        if ((sysDistance <= colonyShipRange) && pl.canColonize(sv.sysId)) {
-            if (this.expandGuardedSystems.containsKey(sv.sysId))
-                return MainUI.redAlertC;
-            else if (expandEnRouteSystems.containsKey(sv.sysId))
+        // modnar: switch "expand" alert display type with year/turn display
+        // with year, default previous display
+        // with turn, display green for all colonizable planets scouted (regardless if in range or already colonized)
+        //            display red if not currently colonizable, display purple if no planet at star system
+        if (UserPreferences.displayYear()) {
+            String eventMessage = randomEventStatus(sv);
+            if (!eventMessage.isEmpty()) {
+                if (sv.empire() == player())
+                    return MainUI.redAlertC;
+            }
+            
+            if (sv.isColonized()) 
                 return null;
-            else
-                return MainUI.greenAlertC;
+            
+            float sysDistance = sv.distance();
+            Empire pl = player();
+            if ((sysDistance <= colonyShipRange) && pl.canColonize(sv.sysId)) {
+                if (this.expandGuardedSystems.containsKey(sv.sysId))
+                    return MainUI.redAlertC;
+                else if (expandEnRouteSystems.containsKey(sv.sysId))
+                    return null;
+                else
+                    return MainUI.greenAlertC;
+            }
+            
+            String rangeTech = pl.rangeTechNeededToReach(sv.sysId);
+            String envTech = pl.environmentTechNeededToColonize(sv.sysId);   
+            if ((rangeTech != null) && (envTech != null))
+                return MainUI.yellowAlertC;
+            if ((envTech != null) && (sysDistance <= colonyShipRange))
+                return MainUI.yellowAlertC;
+            if ((rangeTech != null) && pl.canColonize(sv.sysId)) 
+                return MainUI.yellowAlertC;
+            return null; 
         }
-        
-        String rangeTech = pl.rangeTechNeededToReach(sv.sysId);
-        String envTech = pl.environmentTechNeededToColonize(sv.sysId);   
-        if ((rangeTech != null) && (envTech != null))
-            return MainUI.yellowAlertC;
-        if ((envTech != null) && (sysDistance <= colonyShipRange))
-            return MainUI.yellowAlertC;
-        if ((rangeTech != null) && pl.canColonize(sv.sysId)) 
-            return MainUI.yellowAlertC;
-        return null; 
+        else {
+            // modnar: show alert colors for all scouted systems
+            Empire pl = player();
+            if (pl.canColonize(sv.sysId)) {
+                return MainUI.greenAlertC;
+            }
+            else if (sv.planet().isEnvironmentNone()) {
+                return MainUI.purpleAlertC;
+            }
+            else {
+                return MainUI.redAlertC;
+            }
+        }
     }
     private Color exploitAlertColor(SystemView sv) { 
-        if (sv.empire() != player())
-            return null;
-        
-        String eventMessage = randomEventStatus(sv);
-        if (!eventMessage.isEmpty()) {
-            if (sv.empire() == player())
+        // modnar: switch "exploit" alert display type with year/turn display
+        // with year, default previous display with adjusted pct tiers
+        // with turn, display for all planets scouted (regardless if in range or already colonized)
+        //            red     if poor or ultra poor
+        //            yellow  if normal resource
+        //            green   if rich or ultra rich
+        //            blue    if artifact
+        //            purple  if no planet
+        if (UserPreferences.displayYear()) {
+            if (sv.empire() != player())
+                return null;
+            
+            String eventMessage = randomEventStatus(sv);
+            if (!eventMessage.isEmpty()) {
+                if (sv.empire() == player())
+                    return MainUI.redAlertC;
+            }
+            
+            Colony col = sv.system().colony();
+            
+            if (col.inRebellion())
                 return MainUI.redAlertC;
+            
+            if (col.creatingWaste()) 
+                return MainUI.redAlertC;
+            
+            int pct = (int) (100*col.currentProductionCapacity());
+            // modnar: add additional "exploit" production capacity tiers with alert colors
+            if (pct < 20)
+                return MainUI.redAlertC;
+            else if (pct < 40)
+                return MainUI.orangeAlertC;
+            else if (pct < 60)
+                return MainUI.yellowAlertC;
+            else if (pct < 80)
+                return MainUI.limeAlertC;
+            else if (pct < 100)
+                return MainUI.greenAlertC;
+            return null; 
         }
-        
-        Colony col = sv.system().colony();
-        
-        if (col.inRebellion())
-            return MainUI.redAlertC;
-        
-        if (col.creatingWaste()) 
-            return MainUI.redAlertC;
-        
-        int pct = (int) (100*col.currentProductionCapacity());
-        if (pct < 34)
-            return MainUI.redAlertC;
-        else if (pct < 67)
-            return MainUI.yellowAlertC;
-        else if (pct < 100)
-            return MainUI.greenAlertC;
-        return null; 
+        else {
+            // modnar: show alert colors for all scouted systems
+            if (!sv.scouted())
+                return null; 
+            
+            if (sv.planet().isEnvironmentNone())
+                return MainUI.purpleAlertC;
+            else if (sv.planet().isArtifact())
+                return MainUI.blueAlertC;
+            else if (sv.planet().isResourceUltraPoor() || sv.planet().isResourcePoor())
+                return MainUI.redAlertC;
+            else if (sv.planet().isResourceRich() || sv.planet().isResourceUltraRich())
+                return MainUI.greenAlertC;
+            else if (sv.planet().isResourceNormal())
+                return MainUI.yellowAlertC;
+            else
+                return null;
+        }
     }
     private Color exterminateAlertColor(SystemView sv)       { 
         Empire pl = player();

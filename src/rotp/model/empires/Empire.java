@@ -97,7 +97,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     public static final int SHAPE_TRIANGLE2 = 4;
 
     public static Empire thePlayer() { return Galaxy.current().player(); }
-    
+
     public static long[] times = new long[6];
 
     public final int id;
@@ -107,6 +107,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     private TechTree tech = new TechTree();
     private final ShipDesignLab shipLab;
     private final int homeSysId;
+    private final int[] compSysId; // modnar: add option to start game with additional colonies
     private int capitalSysId;
     public final SystemInfo sv;
     private final EmpireView[] empireViews;
@@ -158,6 +159,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     private transient Color scoutBorderColor;
     private transient Color empireRangeColor;
     private transient float totalEmpireProduction;
+    private transient float totalEmpireNonDynaProduction; // modnar: create unscaled production, to avoid infinite recursion
     private transient float totalEmpireShipMaintenanceCost;
     private transient float totalEmpireStargateCost;
     private transient float totalEmpireMissileBaseCost;
@@ -184,6 +186,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     public EmpireStatus status()                  { return status; }
     public int homeSysId()                        { return homeSysId; }
     public int capitalSysId()                     { return capitalSysId; }
+    public int compSysId(int i)                   { return compSysId[i]; } // modnar: add option to start game with additional colonies
     public String unparsedRaceName()              { return race().nameVariant(raceNameIndex); }
     public String raceName()                      { return raceName(0); }
     public String raceName(int i) {
@@ -382,11 +385,14 @@ public final class Empire implements Base, NamedObject, Serializable {
         }
         return reachColor;
     }
-    public Empire(Galaxy g, int empId, String rk, StarSystem s, Integer cId, String name) {
+    // modnar: add option to start game with additional colonies
+    // modnar: compId is the System ID array for these additional colonies
+    public Empire(Galaxy g, int empId, String rk, StarSystem s, int[] compId, Integer cId, String name) {
         log("creating empire for ",  rk);
         id = empId;
         raceKey = rk;
-        homeSysId = capitalSysId = s.id;     
+        homeSysId = capitalSysId = s.id;
+        compSysId = compId; // modnar: add option to start game with additional colonies
         empireViews = new EmpireView[options().selectedNumberOpponents()+1];
         status = new EmpireStatus(this);
         sv = new SystemInfo(this);
@@ -705,6 +711,18 @@ public final class Empire implements Base, NamedObject, Serializable {
         sv.refreshFullScan(homeSysId);
         return c;
     }
+    // modnar: add option to start game with additional colonies
+    public Colony colonizeCompanionWorld(int sysId) {
+        StarSystem sys1 = galaxy().system(sysId);
+        sys1.addEvent(new SystemColonizedEvent(id));
+        newSystems.add(sys1);
+        colonizedSystems.add(sys1);
+        Colony c1 = sys1.becomeColonized(sys1.name(), this);
+        c1.setCompanionWorldValues();
+        governorAI().setInitialAllocations(c1);
+        sv.refreshFullScan(sys1.id);
+        return c1;
+    }
     public boolean isHomeworld(StarSystem sys) {
         return sys.id == homeSysId;
     }
@@ -839,7 +857,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         return income / empireBC;
     }
     public void nextTurn() {
-        log(this + ": NextTurn");       
+        log(this + ": NextTurn");
         shipBuildingSystems.clear();
         newSystems.clear();
         recalcPlanetaryProduction();
@@ -969,11 +987,11 @@ public final class Empire implements Base, NamedObject, Serializable {
     }
     public void makeNextTurnDecisions() {
         recalcPlanetaryProduction();
-        
+
         log(this + ": make NextTurnDecisions");
         NoticeMessage.setSubstatus(text("TURN_SCRAP_SHIPS"));
         shipLab.nextTurn();
-        
+
         // empire settings
         if (isAIControlled()) {
             scientistAI().setTechTreeAllocations();
@@ -2175,7 +2193,7 @@ public final class Empire implements Base, NamedObject, Serializable {
             if (sys.distanceTo(loc) <= planetRange)
                 return true;
         }
-        
+
         float shipRange = shipScanningRange();
         for (Ship sh: ships) {
             if (sh.distanceTo(loc) <= shipRange)
@@ -2352,6 +2370,13 @@ public final class Empire implements Base, NamedObject, Serializable {
         TechTree t0 = e == this ? tech() : viewForEmpire(e).spies().tech();
         float prod = totalPlanetaryProduction(e);
         float techLvl = t0.avgTechLevel();
+        return prod*techLvl;
+    }
+    // modnar: add dynamic difficulty option, change AI colony production
+    // create unscaled production power level, to avoid infinite recursion
+    public float nonDynaIndPowerLevel() {
+        float prod = nonDynaTotalProd();
+        float techLvl = tech().avgTechLevel();
         return prod*techLvl;
     }
     public void clearDataForExtinctEmpire(int empId) {
@@ -3272,6 +3297,7 @@ public final class Empire implements Base, NamedObject, Serializable {
     }
     public void recalcPlanetaryProduction() {
         totalEmpireProduction = -999;
+        totalEmpireNonDynaProduction = -999;
         totalEmpireShipMaintenanceCost = -999;
         totalEmpireStargateCost = -999;
         totalEmpireMissileBaseCost = -999;
@@ -3295,6 +3321,29 @@ public final class Empire implements Base, NamedObject, Serializable {
         for (int i=0; i<sv.count(); i++) {
             if ((sv.empire(i) == emp) && (sv.colony(i) != null))
                 totalProductionBC += sv.colony(i).production();
+        }
+        return totalProductionBC;
+    }
+    // modnar: add dynamic difficulty option, change AI colony production
+    // create unscaled production, nonDynaTotalProd, to avoid infinite recursion
+    public Float nonDynaTotalProd() {
+        if (totalEmpireNonDynaProduction <= 0) {
+            float totalProductionBC = 0;
+            List<StarSystem> systems = new ArrayList<>(allColonizedSystems());
+            for (StarSystem sys: systems) 
+                totalProductionBC += sys.colony().nonDynaProd();
+            totalEmpireNonDynaProduction = totalProductionBC;
+        }
+        return totalEmpireNonDynaProduction;
+    }
+    public float nonDynaTotalProd(Empire emp) {
+        if (emp == this)
+            return nonDynaTotalProd();
+
+        float totalProductionBC = 0;
+        for (int i=0; i<sv.count(); i++) {
+            if ((sv.empire(i) == emp) && (sv.colony(i) != null))
+                totalProductionBC += sv.colony(i).nonDynaProd();
         }
         return totalProductionBC;
     }
@@ -3630,11 +3679,11 @@ public final class Empire implements Base, NamedObject, Serializable {
                     StarSystem sys = g.system(sh.destSysId());
                     if (sys != null) {
                         // don't care about ships going to already-added systems or AI systems
-                        if (!list.contains(sys) && (sys.empire() == pl)) { 
+                        if (!list.contains(sys) && (sys.empire() == pl)) {
                             Empire emp = g.empire(sh.empId());
                             // add if incoming fleet is hostile to player
                             if (emp.aggressiveWith(pl.id)) {
-                                boolean showShip = showUnarmed 
+                                boolean showShip = showUnarmed
                                         || (showTransports && (sh instanceof Transport)) || sh.isPotentiallyArmed(pl);
                                 if (showShip)
                                     list.add(sys);

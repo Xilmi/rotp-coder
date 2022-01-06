@@ -118,6 +118,7 @@ public class CombatStack implements Base {
     public boolean isShip()             { return false; }
     public boolean isColony()           { return false; }
     public boolean isMonster()          { return false; }
+	public boolean isNeutralShip()      { return false; } // modnar: add new type, for SpacePirates scan display
     public boolean isPlayer()           { return (empire != null) && empire.isPlayer(); }
     public boolean isPlayerControlled() { return (empire != null) && empire.isPlayerControlled(); }
     public boolean isMissile()          { return false; }
@@ -672,6 +673,22 @@ public class CombatStack implements Base {
             AlphaComposite ac = java.awt.AlphaComposite.getInstance(AlphaComposite.SRC_OVER,max(0,transparency));
             g.setComposite(ac);
         }
+		// modnar: one-step progressive image downscaling, slightly better
+		// there should be better methods
+		if (scale0 < 0.5) {
+			BufferedImage tmp = new BufferedImage(w0/2, h0/2, BufferedImage.TYPE_INT_ARGB);
+			Graphics2D g2D = tmp.createGraphics();
+			g2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+			g2D.drawImage(img, 0, 0, w0/2, h0/2, 0, 0, w0, h0, ui);
+			g2D.dispose();
+			img = tmp;
+			w0 = img.getWidth(null);
+			h0 = img.getHeight(null);
+			scale0 = scale0*2;
+		}
+		// modnar: use (slightly) better downsampling
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         if (reversed)  // XOR
             g.drawImage(img, x1, y1, x1+w1, y1+h1, w0, 0, 0, h0, ui);
         else

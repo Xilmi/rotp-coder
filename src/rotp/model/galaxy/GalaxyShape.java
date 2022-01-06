@@ -21,12 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 import rotp.model.game.IGameOptions;
 import rotp.util.Base;
+import rotp.ui.UserPreferences; // modnar: add option to start game with additional colonies
 
 public abstract class GalaxyShape implements Base, Serializable {
     private static final long serialVersionUID = 1L;
     static final int GALAXY_EDGE_BUFFER = 12;
-    static float orionBuffer = 8;
-    static float empireBuffer = 6;
+    static float orionBuffer = 10;
+    static float empireBuffer = 8;
     float[] x;
     float[] y;
     ShapeRegion[][] regions;
@@ -51,6 +52,11 @@ public abstract class GalaxyShape implements Base, Serializable {
     public abstract void setRandom(Point.Float p);
     public abstract boolean valid(float x, float y);
     protected abstract float sizeFactor(String size);
+    
+    // modnar: add possibility for specific placement of homeworld/orion locations
+    // indexWorld variable will be used by setSpecific in each Map Shape for locations
+    public abstract void setSpecific(Point.Float p);
+    public int indexWorld;
 
     public boolean valid(Point.Float p) { return valid(p.x, p.y); }
     public float maxScaleAdj()               { return 1.0f; }
@@ -77,7 +83,9 @@ public abstract class GalaxyShape implements Base, Serializable {
         }
     }
     public int numberStarSystems()            { return num; }
-    public int totalStarSystems()             { return num+homeStars;}
+    // modnar: add option to start game with additional colonies
+    // modnar: these colonies are in addition to number of stars chosen in galaxy
+    public int totalStarSystems()             { return num+homeStars+UserPreferences.companionWorlds()*(opts.selectedNumberOpponents()+1);}
     public List<EmpireSystem> empireSystems() { return empSystems; }
     public int empireSystemStars()            { return homeStars; }
     public float adjustedSizeFactor()        { return sizeFactor(opts.selectedGalaxySize()) + (genAttempt/3); }
@@ -149,9 +157,9 @@ public abstract class GalaxyShape implements Base, Serializable {
         
         // systemBuffer() is minimum distance between any 2 stars
         float sysBuffer = systemBuffer();
-        float minEmpireBuffer = 3*sysBuffer;
+        float minEmpireBuffer = 4*sysBuffer; // modnar: increase spacing between empires
         float maxMinEmpireBuffer = 15*sysBuffer;
-        float minOrionBuffer = 4*sysBuffer;
+        float minOrionBuffer = 5*sysBuffer; // modnar: increase spacing between empires and orion
         
         // the stars/empires ratio for the most "densely" populated galaxy is about 8:1
         // we want to set the minimum distance between empires to half that in ly, with a minimum 
@@ -173,6 +181,7 @@ public abstract class GalaxyShape implements Base, Serializable {
             homeStars = 0;
             num = 0;
             orionXY = addOrion();
+            indexWorld = 1; // modnar: after specific orion placement, set indexWorld=1 for homeworlds
             for (int i=0;i<numOpps;i++) {
                 EmpireSystem sys = new EmpireSystem(this);
                 if (sys.valid) {
@@ -213,7 +222,9 @@ public abstract class GalaxyShape implements Base, Serializable {
     }
     protected Point.Float addOrion() {
         Point.Float pt = new Point.Float();
-        findAnyValidLocation(pt);
+        indexWorld = 0; // modnar: explicitly set indexWorld=0 for orion
+        findSpecificValidLocation(pt); // modnar: specific placement for orion location
+        //findAnyValidLocation(pt);
         addSystem(pt);
         return pt;
     }
@@ -237,6 +248,18 @@ public abstract class GalaxyShape implements Base, Serializable {
         while (!valid(p)) 
             setRandom(p);
         
+        return p;
+    }
+    // modnar: add specific placement of orion/homeworld locations
+    public Point.Float findSpecificValidLocation(Point.Float p) {
+        setSpecific(p);
+        indexWorld++; // modnar: increment indexWorld for subsequent homeworld locations
+        while (!valid(p)) {
+            setSpecific(p);
+            // modnar: incrementing indexWorld here to prevent accidental infinite loop of bad locations,
+            // but need setSpecific to have some form of repeating modulo cut-off
+            indexWorld++;
+        }
         return p;
     }
     private void addSystem(Point.Float pt) {
@@ -359,7 +382,8 @@ public abstract class GalaxyShape implements Base, Serializable {
             int attempts = 0;
             Point.Float pt = new Point.Float();
             while (attempts++ < 100) {
-                findAnyValidLocation(pt);
+                findSpecificValidLocation(pt); // modnar: add specific placement of homeworld locations
+                //findAnyValidLocation(pt);
                 if (!sp.isTooNearExistingSystem(pt.x,pt.y,true)) {
                     addSystem(pt.x,pt.y);
                     return true;

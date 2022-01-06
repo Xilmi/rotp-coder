@@ -4,6 +4,7 @@ name: Ssslaura, Reptara, Saura, Raptora, Tyranna
 desc1: Aggressive Expansionists
 desc2: Increased Population Growth
 desc3: The zealots of the [race] Conclave strive to perfect the worlds they conquer.
+desc4: POP Growth +100%
 
 // possible home system names
 home: Sssla, Repta, Saur, Raptor, Tyrann

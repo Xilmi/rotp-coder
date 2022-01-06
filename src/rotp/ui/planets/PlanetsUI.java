@@ -42,6 +42,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
+import java.awt.RenderingHints; // modnar: needed for adding RenderingHints
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -558,6 +559,7 @@ public class PlanetsUI extends BasePanel implements SystemViewer {
                 else
                     viewSelectionPane.selectPreviousTab();
                 return;
+            case KeyEvent.VK_Q:
             case KeyEvent.VK_UP:     repaint = listingUI.scrollUp(); break;
             case KeyEvent.VK_DOWN:   repaint = listingUI.scrollDown(); break;
             case KeyEvent.VK_1:
@@ -1236,28 +1238,28 @@ public class PlanetsUI extends BasePanel implements SystemViewer {
 
             Graphics2D g2 = (Graphics2D) g;
             g2.drawImage(pl.sv.starBackground(this), 0, 0, null);
-            drawStar(g2, anchorSys.starType(), s80, getWidth()/3, s70);
+            drawStar(g2, anchorSys.starType(), s80, getWidth()-s20, s20); //modnar: move star due to increased planet size
             starCircle.setFrame((getWidth()/3)-s20, s10, s40, s40);
 
             g.setFont(narrowFont(36));
             String str = sys == null ? text("PLANETS_MULTI_SYSTEMS", systems.size()) : player().sv.name(sys.id);
             scaledFont(g, str, w-s30, 36, 24);
-            int y0 = s42;
+            int y0 = s32; //modnar: move colony name up due to increase planet size
             int x0 = s25;
             drawBorderedString(g, str, 2, x0, y0, Color.black, SystemPanel.orangeText);
 
-            int x1 = s20;
-            int y1 = s70;
-            int r = s40;
+            int x1 = s5;
+            int y1 = s70/2;
+            int r = s80; //modnar: increase planet size
             anchorSys.planet().draw(g, w, h, x1, y1, r+r, 45);
             planetCircle.setFrame(x1, y1, r+r, r+r);
             
             if (sys != null)
-                parent.drawPlanetInfo(g2, sys, false, false, s40, getWidth(), getHeight()-s12);
+                parent.drawPlanetInfo(g2, sys, false, false, s40, getWidth()+s5, getHeight()-s5);
         }
         @Override
         public void animate() {
-            if (animationCount() % 3 == 0) {
+            if (animationCount() % 1 == 0) { //modnar: faster/more rotation
                 try {
                     lastSelectedSystem().planet().rotate(1);
                     repaint();
@@ -1346,6 +1348,7 @@ public class PlanetsUI extends BasePanel implements SystemViewer {
             return colonies;
         }
         private void drawShipIcon(Graphics2D g, int x, int y, int w, int h) {
+			// modnar: draw ship icons "Colonies" tab screen
             g.setColor(Color.black);
             g.fillRect(x, y, w, h);
             
@@ -1377,6 +1380,22 @@ public class PlanetsUI extends BasePanel implements SystemViewer {
                 int h1 = (int)(scale*h0);
                 int x1 = x+(w - w1) / 2;
                 int y1 = y+(h - h1) / 2;
+                // modnar: one-step progressive image downscaling, slightly better
+                // there should be better methods
+                if (scale < 0.5) {
+                    BufferedImage tmp = new BufferedImage(w0/2, h0/2, BufferedImage.TYPE_INT_ARGB);
+                    Graphics2D g2D = tmp.createGraphics();
+                    g2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                    g2D.drawImage(img, 0, 0, w0/2, h0/2, 0, 0, w0, h0, this);
+                    g2D.dispose();
+                    img = tmp;
+                    w0 = img.getWidth(null);
+                    h0 = img.getHeight(null);
+                    scale = scale*2;
+                }
+                // modnar: use (slightly) better downsampling
+                g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
                 g.drawImage(img, x1, y1, x1+w1, y1+h1, 0, 0, w0, h0, this);
             }
 

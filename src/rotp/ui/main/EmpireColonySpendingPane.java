@@ -23,6 +23,8 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
+import java.util.List; // modnar: change to cleaner icon set
+import java.util.ArrayList; // modnar: change to cleaner icon set
 
 import rotp.Rotp;
 import rotp.model.colony.Colony;
@@ -513,10 +515,12 @@ public class EmpireColonySpendingPane extends BasePanel {
                 if (governorOptionsFrame == null) {
                     governorOptionsFrame = new JFrame("GovernorOptions");
                     // make this window have an icon, same as main window
-                    Image img = ImageManager.current().image("LANDSCAPE_RUINS_ORION");
-                    BufferedImage bimg = Rotp.toBufferedImage(img);
-                    BufferedImage square = bimg.getSubimage(bimg.getWidth()-bimg.getHeight(), 0, bimg.getHeight(), bimg.getHeight());
-                    governorOptionsFrame.setIconImage(square);
+                    // modnar: change to cleaner icon set
+                    List<Image> iconImages = new ArrayList<Image>();
+                    iconImages.add(ImageManager.current().image("ROTP_MOD_ICON3"));
+                    iconImages.add(ImageManager.current().image("ROTP_MOD_ICON2"));
+                    iconImages.add(ImageManager.current().image("ROTP_MOD_ICON1"));
+                    governorOptionsFrame.setIconImages(iconImages);
                     governorOptionsFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 
                     //Create and set up the content pane.

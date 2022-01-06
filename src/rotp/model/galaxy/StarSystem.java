@@ -47,6 +47,7 @@ import rotp.ui.BasePanel;
 import rotp.ui.main.GalaxyMapPanel;
 import rotp.ui.sprites.ShipRelocationSprite;
 import rotp.ui.sprites.SystemTransportSprite;
+import rotp.ui.UserPreferences; // modnar: use for shield display selection
 import rotp.util.Base;
 
 public class StarSystem implements Base, Sprite, IMappedObject, Serializable {
@@ -229,8 +230,10 @@ public class StarSystem implements Base, Sprite, IMappedObject, Serializable {
     }
     public float population()   { return isColonized() ? colony().population() : 0.0f; }
     public Planet planet() {
+        // modnar: change planet sizes with selectedPlanetQualityOption, pass to createPlanet
+        float quality_bonus = options().planetSizeBonus();
         if (planet == null)
-            planet = PlanetFactory.createPlanet(this, session().populationBonus());
+            planet = PlanetFactory.createPlanet(this, quality_bonus*session().populationBonus());
         return planet;
     }
     public void planet(Planet p)                { planet = p; }
@@ -515,7 +518,7 @@ public class StarSystem implements Base, Sprite, IMappedObject, Serializable {
     }
     private int drawRadius() {
         if (drawRadius == 0)
-            drawRadius = scaled(roll(4,6));
+            drawRadius = scaled(roll(7,9)); // modnar: larger star/flare
         return drawRadius;
     }
     @Override
@@ -855,54 +858,94 @@ public class StarSystem implements Base, Sprite, IMappedObject, Serializable {
         if (shieldLevel == 0)
             return;
 
-        if (r < 10)
+        if (r < 6) // modnar: maintain shield display longer
             return;
         
         Stroke prevStroke = g.getStroke();
         Stroke shieldStroke = BasePanel.stroke4; // modnar: thicker shield strokes
-        Stroke shieldBorderStroke = BasePanel.stroke6; // modnar: thicker shield strokes
+        Stroke shieldBorderStroke = BasePanel.stroke7; // modnar: thicker shield strokes
         
-        if (r < 16) {
+        if (r < 10) { // modnar: maintain shield display longer
             shieldStroke = BasePanel.stroke2;
             shieldBorderStroke = BasePanel.stroke3;
         }
-        else if (r < 24) {
+        else if (r < 16) { // modnar: maintain shield display longer
             shieldStroke = BasePanel.stroke3;
             shieldBorderStroke = BasePanel.stroke5;
         }
         g.setStroke(shieldStroke);
         switch (shieldLevel) {
             case 5:
-                g.setColor(Color.black);
-                g.setStroke(shieldBorderStroke);
-                g.drawArc(x-r, y-r, r+r, r+r, 30, 120);
-                g.setColor(shield5C);
-                g.setStroke(shieldStroke);
-                g.drawArc(x-r, y-r, r+r, r+r, 30, 120);
+				if (UserPreferences.displayYear()) { // modnar: adjust shield display type with year/turn display
+					g.setColor(Color.black);
+					g.setStroke(shieldBorderStroke);
+					g.drawArc(x-r, y-r, r+r, r+r, 30, 120);
+					g.setColor(shield5C);
+					g.setStroke(shieldStroke);
+					g.drawArc(x-r, y-r, r+r, r+r, 30, 120);
+				}
+				else { // modnar: full circle for all shields, changing thickness
+					g.setColor(Color.black);
+					g.setStroke(BasePanel.stroke4);
+					g.drawArc(x-r, y-r, r+r, r+r, 0, 360);
+					g.setColor(shield5C);
+					g.setStroke(BasePanel.stroke1);
+					g.drawArc(x-r, y-r, r+r, r+r, 0, 360);
+				}
                 break;
             case 10:
-                g.setColor(Color.black);
-                g.setStroke(shieldBorderStroke);
-                g.drawArc(x-r, y-r, r+r, r+r,0, 180);
-                g.setColor(shield10C);
-                g.setStroke(shieldStroke);
-                g.drawArc(x-r, y-r, r+r, r+r,0, 180);
+                if (UserPreferences.displayYear()) { // modnar: adjust shield display type with year/turn display
+					g.setColor(Color.black);
+					g.setStroke(shieldBorderStroke);
+					g.drawArc(x-r, y-r, r+r, r+r,0, 180);
+					g.setColor(shield10C);
+					g.setStroke(shieldStroke);
+					g.drawArc(x-r, y-r, r+r, r+r,0, 180);
+				}
+				else { // modnar: full circle for all shields, changing thickness
+					g.setColor(Color.black);
+					g.setStroke(BasePanel.stroke6);
+					g.drawArc(x-r, y-r, r+r, r+r, 0, 360);
+					g.setColor(shield10C);
+					g.setStroke(BasePanel.stroke3);
+					g.drawArc(x-r, y-r, r+r, r+r, 0, 360);
+				}
                 break;
             case 15:
-                g.setColor(Color.black);
-                g.setStroke(shieldBorderStroke);
-                g.drawArc(x-r, y-r, r+r, r+r, 330, 240);
-                g.setColor(shield15C);
-                g.setStroke(shieldStroke);
-                g.drawArc(x-r, y-r, r+r, r+r, 330, 240);
+                if (UserPreferences.displayYear()) { // modnar: adjust shield display type with year/turn display
+					g.setColor(Color.black);
+					g.setStroke(shieldBorderStroke);
+					g.drawArc(x-r, y-r, r+r, r+r, 330, 240);
+					g.setColor(shield15C);
+					g.setStroke(shieldStroke);
+					g.drawArc(x-r, y-r, r+r, r+r, 330, 240);
+				}
+				else { // modnar: full circle for all shields, changing thickness
+					g.setColor(Color.black);
+					g.setStroke(BasePanel.stroke8);
+					g.drawArc(x-r, y-r, r+r, r+r, 0, 360);
+					g.setColor(shield15C);
+					g.setStroke(BasePanel.stroke5);
+					g.drawArc(x-r, y-r, r+r, r+r, 0, 360);
+				}
                 break;
             case 20:
-                g.setColor(Color.black);
-                g.setStroke(shieldBorderStroke);
-                g.drawArc(x-r, y-r, r+r, r+r, 0, 360); // modnar: make shield-20 full circle
-                g.setColor(shield20C);
-                g.setStroke(shieldStroke);
-                g.drawArc(x-r, y-r, r+r, r+r, 0, 360); // modnar: make shield-20 full circle
+                if (UserPreferences.displayYear()) { // modnar: adjust shield display type with year/turn display
+					g.setColor(Color.black);
+					g.setStroke(shieldBorderStroke);
+					g.drawArc(x-r, y-r, r+r, r+r, 0, 360); // modnar: make shield-20 full circle
+					g.setColor(shield20C);
+					g.setStroke(shieldStroke);
+					g.drawArc(x-r, y-r, r+r, r+r, 0, 360); // modnar: make shield-20 full circle
+				}
+				else { // modnar: full circle for all shields, changing thickness
+					g.setColor(Color.black);
+					g.setStroke(BasePanel.stroke10);
+					g.drawArc(x-r, y-r, r+r, r+r, 0, 360);
+					g.setColor(shield20C);
+					g.setStroke(BasePanel.stroke7);
+					g.drawArc(x-r, y-r, r+r, r+r, 0, 360);
+				}
                 break;
         }
         g.setStroke(prevStroke);

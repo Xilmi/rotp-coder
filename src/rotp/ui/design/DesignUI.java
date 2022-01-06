@@ -1015,8 +1015,11 @@ public class DesignUI extends BasePanel {
         private void drawShip(Graphics g) {
             int boxH = getHeight()-s10;
             int boxW = boxH*6/5;
-            g.setColor(ShipBattleUI.spaceBlue);
-            g.fillRect(s5,s5,boxW,boxH);
+			// modnar: Graphics2D to use RenderingHints
+			// NOTE: drawing various small ship designs on right-side of Design screen
+			Graphics2D g2 = (Graphics2D) g;
+            g2.setColor(ShipBattleUI.spaceBlue);
+            g2.fillRect(s5,s5,boxW,boxH);
 
             ShipDesign des = slotDesign();
             if (!des.active())
@@ -1033,7 +1036,24 @@ public class DesignUI extends BasePanel {
 
             int x1 = (boxW - w1) / 2;
             int y1 = (boxH - h1) / 2;
-            g.drawImage(img, x1+s5, y1+s5, x1+w1, y1+h1, 0, 0, w0, h0, this);
+			
+			// modnar: one-step progressive image downscaling, slightly better
+			// there should be better methods
+			if (scale < 0.5) {
+				BufferedImage tmp = new BufferedImage(w0/2, h0/2, BufferedImage.TYPE_INT_ARGB);
+				Graphics2D g2D = tmp.createGraphics();
+				g2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+				g2D.drawImage(img, 0, 0, w0/2, h0/2, 0, 0, w0, h0, this);
+				g2D.dispose();
+				img = tmp;
+				w0 = img.getWidth(null);
+				h0 = img.getHeight(null);
+				scale = scale*2;
+			}
+			// modnar: use (slightly) better downsampling
+			g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+			g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+            g2.drawImage(img, x1+s5, y1+s5, x1+w1, y1+h1, 0, 0, w0, h0, this);
         }
         @Override
         public void mouseClicked(MouseEvent mouseEvent) {}
@@ -1156,7 +1176,31 @@ public class DesignUI extends BasePanel {
                 int h1 = (int)(scale*h0);
                 BufferedImage resizedImg = new BufferedImage(w1,h1, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D g = resizedImg.createGraphics();
-                g.drawImage(img, 0, 0, w1, h1, null);
+				// modnar: one-step progressive image downscaling, mostly for Sakkra ships (higher-res image files)
+				// there should be better methods
+				if (scale < 0.5) {
+					BufferedImage tmp = new BufferedImage(w0/2, h0/2, BufferedImage.TYPE_INT_ARGB);
+					Graphics2D g2D = tmp.createGraphics();
+					g2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+					//g2D.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+					g2D.drawImage(img, 0, 0, w0/2, h0/2, 0, 0, w0, h0, this);
+					g2D.dispose();
+					img = tmp;
+					w0 = img.getWidth(null);
+					h0 = img.getHeight(null);
+					scale = scale*2;
+				}
+				// modnar: use (slightly) better downsampling
+				// NOTE: drawing current ship design on upper-left of Design screen
+				// https://docs.oracle.com/javase/tutorial/2d/advanced/quality.html
+				// should be possible to be even better
+                //g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                //g.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY); 
+                //g.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
+                g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+				g.drawImage(img, 0, 0, w1, h1, 0, 0, w0, h0, null);
+                //g.drawImage(img, 0, 0, w1, h1, null);
                 g.dispose();
                 shipImages.add(resizedImg);
             }
@@ -1345,6 +1389,105 @@ public class DesignUI extends BasePanel {
             int y6 = y5+rowH;
             if (des.availableSpace() < 0)
                 g.setColor(errorRedC);
+
+            int autoScoutWidth;
+            {
+                scoutButtonArea.setBounds(0,0,0,0);
+                String str = text("SHIP_DESIGN_AUTO_SCOUT");
+                int sw = g.getFontMetrics().stringWidth(str);
+                int buttonW = sw + s20;
+                autoScoutWidth = buttonW;
+                if (shipDesign().active()) {
+                    g.setColor(Color.black);
+                    int y7 = y6 + rowH;
+                    int buttonH = rowH;
+                    int buttonX = x1;
+                    int buttonY = y7 - rowH / 2 - s3;
+                    scoutButtonArea.setBounds(buttonX, buttonY, buttonW, buttonH);
+
+                    boolean hovering = hoverTarget == scoutButtonArea;
+
+                    LinearGradientPaint scoutBackground;
+                    if (shipDesign().isAutoScout()) {
+                        if (scoutBackgroundOn == null) {
+                            float[] dist = {0.0f, 0.5f, 1.0f};
+                            Point2D ptStart = new Point2D.Float(buttonX, 0);
+                            Point2D ptEnd = new Point2D.Float(buttonX + buttonW, 0);
+                            Color[] yesColors = {greenEdgeC, greenMidC, greenEdgeC};
+                            scoutBackgroundOn = new LinearGradientPaint(ptStart, ptEnd, dist, yesColors);
+                        }
+                        scoutBackground = scoutBackgroundOn;
+                    } else {
+                        if (scoutBackgroundOff == null) {
+                            float[] dist = {0.0f, 0.5f, 1.0f};
+                            Point2D ptStart = new Point2D.Float(buttonX, 0);
+                            Point2D ptEnd = new Point2D.Float(buttonX + buttonW, 0);
+                            Color[] yesColors = {brownEdgeC, brownMidC, brownEdgeC};
+                            scoutBackgroundOff = new LinearGradientPaint(ptStart, ptEnd, dist, yesColors);
+                        }
+                        scoutBackground = scoutBackgroundOff;
+                    }
+
+                    g.setPaint(scoutBackground);
+                    g.fillRoundRect(buttonX, buttonY, buttonW, buttonH, s3, s3);
+                    Color c0 = hovering ? SystemPanel.yellowText : SystemPanel.whiteText;
+                    g.setColor(c0);
+                    Stroke prevStr = g.getStroke();
+                    g.setStroke(BasePanel.stroke1);
+                    g.drawRoundRect(buttonX, buttonY, buttonW, buttonH, s3, s3);
+                    g.setStroke(prevStr);
+                    int x2a = buttonX + ((buttonW - sw) / 2);
+                    drawBorderedString(g, str, x2a, buttonY + buttonH - s5, SystemPanel.textShadowC, c0);
+                }
+            }
+            {
+                attackButtonArea.setBounds(0,0,0,0);
+                if (shipDesign().active() && shipDesign().isArmed()) {
+                    g.setColor(Color.black);
+                    int y7 = y6 + rowH;
+                    String str = text("SHIP_DESIGN_AUTO_ATTACK");
+                    int sw = g.getFontMetrics().stringWidth(str);
+                    int buttonW = sw + s20;
+                    int buttonH = rowH;
+                    int buttonX = x1 +autoScoutWidth+s20;
+                    int buttonY = y7 - rowH / 2 - s3;
+                    attackButtonArea.setBounds(buttonX, buttonY, buttonW, buttonH);
+
+                    boolean hovering = hoverTarget == attackButtonArea;
+
+                    LinearGradientPaint attackBackground;
+                    if (shipDesign().isAutoAttack()) {
+                        if (attackBackgroundOn == null) {
+                            float[] dist = {0.0f, 0.5f, 1.0f};
+                            Point2D ptStart = new Point2D.Float(buttonX, 0);
+                            Point2D ptEnd = new Point2D.Float(buttonX + buttonW, 0);
+                            Color[] yesColors = {greenEdgeC, greenMidC, greenEdgeC};
+                            attackBackgroundOn = new LinearGradientPaint(ptStart, ptEnd, dist, yesColors);
+                        }
+                        attackBackground = attackBackgroundOn;
+                    } else {
+                        if (attackBackgroundOff == null) {
+                            float[] dist = {0.0f, 0.5f, 1.0f};
+                            Point2D ptStart = new Point2D.Float(buttonX, 0);
+                            Point2D ptEnd = new Point2D.Float(buttonX + buttonW, 0);
+                            Color[] yesColors = {brownEdgeC, brownMidC, brownEdgeC};
+                            attackBackgroundOff = new LinearGradientPaint(ptStart, ptEnd, dist, yesColors);
+                        }
+                        attackBackground = attackBackgroundOff;
+                    }
+
+                    g.setPaint(attackBackground);
+                    g.fillRoundRect(buttonX, buttonY, buttonW, buttonH, s3, s3);
+                    Color c0 = hovering ? SystemPanel.yellowText : SystemPanel.whiteText;
+                    g.setColor(c0);
+                    Stroke prevStr = g.getStroke();
+                    g.setStroke(BasePanel.stroke1);
+                    g.drawRoundRect(buttonX, buttonY, buttonW, buttonH, s3, s3);
+                    g.setStroke(prevStr);
+                    int x2a = buttonX + ((buttonW - sw) / 2);
+                    drawBorderedString(g, str, x2a, buttonY + buttonH - s5, SystemPanel.textShadowC, c0);
+                }
+            }
             drawString(g,text("SHIP_DESIGN_AVAIL_SPACE_LABEL"), x1, y6);
             
             if (!des.active())
@@ -3038,7 +3181,6 @@ public class DesignUI extends BasePanel {
                 hoverTarget = colonizeButtonArea;
             else if (attackButtonArea.contains(x,y))
                 hoverTarget = attackButtonArea;
-
             if (shipDesign().active()) {
                 if (prevHover != hoverTarget)
                     repaint();
@@ -3204,7 +3346,7 @@ public class DesignUI extends BasePanel {
                 }
                 return;
             }
-            
+
             if (shipDesign().active())
                 return;
             
@@ -3404,22 +3546,24 @@ public class DesignUI extends BasePanel {
                         shipWeaponIncrement(i);
                     return;
                 }
+                // modnar: switch weapon count scrolling behavior back to:
+                // scrolling up increases count, scrolling down decreases count
                 if (hoverTarget == weaponCountArea[i]) {
                     if (count < 0) {
-                        if (shiftPressed) 
-                            shipWeaponCountDecrement(i,5);
-                        else if (ctrlPressed) 
-                            shipWeaponCountDecrement(i,20);
-                        else 
-                            shipWeaponCountDecrement(i,1);
-                    }
-                    else {
                         if (shiftPressed) 
                             shipWeaponCountIncrement(i,5);
                         else if (ctrlPressed) 
                             shipWeaponCountIncrement(i,20);
                         else 
                             shipWeaponCountIncrement(i,1);
+                    }
+                    else {
+                        if (shiftPressed) 
+                            shipWeaponCountDecrement(i,5);
+                        else if (ctrlPressed) 
+                            shipWeaponCountDecrement(i,20);
+                        else 
+                            shipWeaponCountDecrement(i,1);
                     }
                     return;
                 }

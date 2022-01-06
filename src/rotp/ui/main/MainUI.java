@@ -74,6 +74,11 @@ public class MainUI extends BasePanel implements IMapHandler {
     public static final Color greenAlertC  = new Color(0,255,0,192);
     public static final Color redAlertC    = new Color(255,0,0,192);
     public static final Color yellowAlertC = new Color(255,255,0,192);
+    // modnar: add additional alert colors
+    public static final Color blueAlertC   = new Color(0,120,255,192);
+    public static final Color limeAlertC   = new Color(160,255,0,192);
+    public static final Color orangeAlertC = new Color(255,160,0,192);
+    public static final Color purpleAlertC = new Color(180,0,255,192);
     
     public static int panelWidth, panelHeight;
     static LinearGradientPaint alertBack;
@@ -690,17 +695,17 @@ public class MainUI extends BasePanel implements IMapHandler {
         sp8.setLine(x3+(w2*3/4), y3, w-scaled(54), scaled(430));        
 
         if (showTreasuryResearchBar()) {
-            int x12 = scaled(115);
-            int y12 = scaled(440);
+            int x12 = scaled(80); // modnar: TreasuryResearchBar made horizontal, change help line/box
+            int y12 = scaled(440); // modnar: TreasuryResearchBar made horizontal, change help line/box
             int w12 = scaled(220);
             HelpSpec sp12 = helpUI.addBlueHelpText(x12, y12, w12, 3, text("MAIN_HELP_2L"));
-            sp12.setLine(x12, y12+(sp12.height()/2), s45, h-scaled(298));
+            sp12.setLine(x12, y12+(sp12.height()/2), s35, scaled(655)); // modnar: TreasuryResearchBar made horizontal, change help line/box
 
             int x13 = scaled(120);
             int y13 = scaled(540);
             int w13 = scaled(220);
             HelpSpec sp13 = helpUI.addBlueHelpText(x13, y13, w13, 3, text("MAIN_HELP_2M"));
-            sp13.setLine(x13, y13+(sp13.height()/2), s45, h-scaled(173));
+            sp13.setLine(x13+sp13.height(), y13+sp13.height(), scaled(160), scaled(655)); // modnar: TreasuryResearchBar made horizontal, change help line/box
         }
     }
     private void loadEmpireColonyHelpFrame2() {

@@ -275,6 +275,7 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
             baseControls.add(new ShipDisplaySprite(10,85,30,30));
             baseControls.add(new SystemNameDisplaySprite(10,50,30,30));
 
+            /*
             int y0 = unscaled(getHeight())-310;
             baseControls.add(new TechStatusSprite(TechCategory.WEAPON,       10,y0+210,30,30));
             baseControls.add(new TechStatusSprite(TechCategory.PROPULSION,   10,y0+175,30,30));
@@ -283,8 +284,20 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
             baseControls.add(new TechStatusSprite(TechCategory.CONSTRUCTION, 10,y0+70, 30,30));
             baseControls.add(new TechStatusSprite(TechCategory.COMPUTER,     10,y0+35, 30,30));
             baseControls.add(new TreasurySprite(10,y0, 30,30));
+            */
+            // modnar: make TreasuryResearchBar horizontal
+            int x0 = 10;
+            int y0 = unscaled(getHeight())-100;
+            baseControls.add(new TechStatusSprite(TechCategory.WEAPON,       x0+210,y0,30,30));
+            baseControls.add(new TechStatusSprite(TechCategory.PROPULSION,   x0+175,y0,30,30));
+            baseControls.add(new TechStatusSprite(TechCategory.PLANETOLOGY,  x0+140,y0,30,30));
+            baseControls.add(new TechStatusSprite(TechCategory.FORCE_FIELD,  x0+105,y0,30,30));
+            baseControls.add(new TechStatusSprite(TechCategory.CONSTRUCTION, x0+70,y0, 30,30));
+            baseControls.add(new TechStatusSprite(TechCategory.COMPUTER,     x0+35,y0, 30,30));
+            baseControls.add(new TreasurySprite(x0,y0, 30,30));
 
-            baseControls.add(new SpyReportSprite(10,y0-70, 30,30));
+            // modnar: shift spy report with horizontal TreasuryResearchBar
+            baseControls.add(new SpyReportSprite(x0,y0-50, 30,30));
         }
         
         addMouseListener(this);
@@ -365,7 +378,7 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
 
         setScale(scaleY());
         //log("map scale:", fmt(scaleX(),2), "@", fmt(scaleY(),2), "  center:", fmt(center().x(),2), "@", fmt(center().y(),2), "  x-rng:", fmt(mapMinX()), "-", fmt(mapMaxX(),2), "  y-rng:", fmt(mapMinY()), "-", fmt(mapMaxY(),2));
-        drawBackground(g2);
+        //drawBackground(g2); // modnar: not needed due to drawShipRanges below
         if (parent.drawBackgroundStars() && showStars()) {
             float alpha = 8/5*sizeX()/scaleX();
             Composite prev = g2.getComposite();
@@ -378,6 +391,9 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
         }
         if (UserPreferences.texturesMap())
             drawBackgroundNebula(g2);
+        
+        // modnar: cover starry background with drawShipRanges
+		drawShipRanges(g2);
         
         drawGrids(g2);
 
@@ -494,6 +510,19 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
             g.drawImage(rangeMapBuffer,0,0,null);
         }
     }
+	// modnar: make regular ship fuel range cover starry background
+	private void drawShipRanges(Graphics2D g) {
+		if (showShipRanges()) {
+			if (redrawRangeMap) {
+                //redrawRangeMap = false;
+				//Graphics2D g0 = (Graphics2D) rangeMapBuffer.getGraphics();
+				Graphics2D g0 = (Graphics2D) g.create(); // use create() to not leave afterimage
+				setFontHints(g0);
+				drawExtendedRangeDisplay(g0);
+				drawOwnershipDisplay(g0);
+			}
+        }
+	}
 
     private void drawGrids(Graphics2D g) {
         if (showGridCircular) {
@@ -590,9 +619,9 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
             long time1 = System.nanoTime();
             List<Area> toAdd = new ArrayList<>();
             for (StarSystem sv: alliedSystems)
-                toAdd.add(new Area( new Ellipse2D.Float(fMapX(sv.x())-extR, fMapY(sv.y())-extR, 2*extR, 2*extR) ));
+                toAdd.add(new Area( new Ellipse2D.Float(fMapX(sv.x())-extR, fMapY(sv.y())-extR, 2*extR, 2*extR) )); 
             for (StarSystem sv: systems)
-                toAdd.add(new Area( new Ellipse2D.Float(fMapX(sv.x())-extR, fMapY(sv.y())-extR, 2*extR, 2*extR) ));
+                toAdd.add(new Area( new Ellipse2D.Float(fMapX(sv.x())-extR, fMapY(sv.y())-extR, 2*extR, 2*extR) )); 
             tmpRangeArea = parallelAdd(toAdd);
             scoutRangeArea = tmpRangeArea;
             long time2 = System.nanoTime();
@@ -609,9 +638,9 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
             long time1 = System.nanoTime();
             List<Area> toAdd = new ArrayList<>();
             for (StarSystem sv: alliedSystems)
-                toAdd.add(new Area( new Ellipse2D.Float(mapX(sv.x())-baseR, mapY(sv.y())-baseR, 2*baseR, 2*baseR) ));
+                toAdd.add(new Area( new Ellipse2D.Float(fMapX(sv.x())-baseR, fMapY(sv.y())-baseR, 2*baseR, 2*baseR) )); 
             for (StarSystem sv: systems)
-                toAdd.add(new Area( new Ellipse2D.Float(mapX(sv.x())-baseR, mapY(sv.y())-baseR, 2*baseR, 2*baseR) ));
+                toAdd.add(new Area( new Ellipse2D.Float(fMapX(sv.x())-baseR, fMapY(sv.y())-baseR, 2*baseR, 2*baseR) ));
             tmpRangeArea = parallelAdd(toAdd);
             shipRangeArea = tmpRangeArea;
             long time2 = System.nanoTime();

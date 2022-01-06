@@ -26,6 +26,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
+import java.awt.RenderingHints; // modnar: needed for adding RenderingHints
 import java.util.List;
 import javax.swing.border.Border;
 import rotp.model.empires.Empire;
@@ -104,6 +105,9 @@ public class GNNUI extends FadeInPanel implements Base, MouseListener, MouseMoti
         Image screenImg = this.screenBuffer();
         Graphics2D g = (Graphics2D) screenImg.getGraphics();
         super.paintComponent(g);
+		// modnar: use (slightly) better sampling
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         // resize background image to screen size
         g.drawImage(backImg, 0, 0, resizedW, resizedH, 0, 0, backImg.getWidth(), backImg.getHeight(), null);
         // fade in event image

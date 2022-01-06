@@ -26,6 +26,7 @@ import rotp.model.galaxy.StarSystem;
 import rotp.model.planet.Planet;
 import rotp.model.tech.TechEngineWarp;
 import rotp.ui.game.SetupGalaxyUI;
+import rotp.ui.UserPreferences; // modnar: add custom difficulty level option
 
 public interface IGameOptions {
     public static final int MAX_OPPONENTS = SetupGalaxyUI.MAX_DISPLAY_OPPS;
@@ -51,6 +52,17 @@ public interface IGameOptions {
     public static final String SHAPE_RECTANGLE = "SETUP_GALAXY_SHAPE_RECTANGLE";
     public static final String SHAPE_ELLIPTICAL = "SETUP_GALAXY_SHAPE_ELLIPSE";
     public static final String SHAPE_SPIRAL = "SETUP_GALAXY_SHAPE_SPIRAL";
+    // mondar: add new map shapes
+    public static final String SHAPE_TEXT = "SETUP_GALAXY_SHAPE_TEXT";
+    public static final String SHAPE_LORENZ = "SETUP_GALAXY_SHAPE_LORENZ";
+    public static final String SHAPE_FRACTAL = "SETUP_GALAXY_SHAPE_FRACTAL";
+    public static final String SHAPE_MAZE = "SETUP_GALAXY_SHAPE_MAZE";
+    public static final String SHAPE_SHURIKEN = "SETUP_GALAXY_SHAPE_SHURIKEN";
+    public static final String SHAPE_BULLSEYE = "SETUP_GALAXY_SHAPE_BULLSEYE";
+    public static final String SHAPE_GRID = "SETUP_GALAXY_SHAPE_GRID";
+    public static final String SHAPE_CLUSTER = "SETUP_GALAXY_SHAPE_CLUSTER";
+    public static final String SHAPE_SWIRLCLUSTERS = "SETUP_GALAXY_SHAPE_SWIRLCLUSTERS";
+    public static final String SHAPE_SPIRALARMS = "SETUP_GALAXY_SHAPE_SPIRALARMS";
 
     public static final String DIFFICULTY_EASIEST = "SETUP_DIFFICULTY_EASIEST";
     public static final String DIFFICULTY_EASIER  = "SETUP_DIFFICULTY_EASIER";
@@ -59,8 +71,12 @@ public interface IGameOptions {
     public static final String DIFFICULTY_HARD    = "SETUP_DIFFICULTY_HARD";
     public static final String DIFFICULTY_HARDER  = "SETUP_DIFFICULTY_HARDER";
     public static final String DIFFICULTY_HARDEST = "SETUP_DIFFICULTY_HARDEST";
+    // mondar: add custom difficulty level option, set in Remnants.cfg
+    public static final String DIFFICULTY_CUSTOM  = "SETUP_DIFFICULTY_CUSTOM";
     
     public static final String RESEARCH_NORMAL  = "SETUP_RESEARCH_RATE_NORMAL";
+    // mondar: add fast research option
+    public static final String RESEARCH_FAST    = "SETUP_RESEARCH_RATE_FAST";
     public static final String RESEARCH_SLOW    = "SETUP_RESEARCH_RATE_SLOW";
     public static final String RESEARCH_SLOWER  = "SETUP_RESEARCH_RATE_SLOWER";
     public static final String RESEARCH_SLOWEST = "SETUP_RESEARCH_RATE_SLOWEST";
@@ -99,6 +115,9 @@ public interface IGameOptions {
     public static final String STAR_DENSITY_HIGHER   = "SETUP_STAR_DENSITY_HIGHER";
     public static final String STAR_DENSITY_HIGHEST  = "SETUP_STAR_DENSITY_HIGHEST";
     
+    // modnar: change PLANET_QUALITY settings, add larger and richer
+    public static final String PLANET_QUALITY_LARGER = "SETUP_PLANET_QUALITY_LARGER";
+    public static final String PLANET_QUALITY_RICHER = "SETUP_PLANET_QUALITY_RICHER";
     public static final String PLANET_QUALITY_POOR   = "SETUP_PLANET_QUALITY_POOR";
     public static final String PLANET_QUALITY_MEDIOCRE  = "SETUP_PLANET_QUALITY_MEDIOCRE";
     public static final String PLANET_QUALITY_NORMAL = "SETUP_PLANET_QUALITY_NORMAL";
@@ -297,9 +316,12 @@ public interface IGameOptions {
     default float fuelRangeMultiplier() {
         switch(selectedFuelRangeOption()) {
             case FUEL_RANGE_NORMAL: return 1;
-            case FUEL_RANGE_HIGH: return 1.5f;
-            case FUEL_RANGE_HIGHER: return 2;
-            case FUEL_RANGE_HIGHEST: return 2.5f;
+            // modnar: set all fuelRangeMultiplier to 1
+            // this keeps save game compatibility with official version
+            // but does not allow high range multipliers
+            case FUEL_RANGE_HIGH: return 1; // original: return 2
+            case FUEL_RANGE_HIGHER: return 1; // original: return 3
+            case FUEL_RANGE_HIGHEST: return 1; // original: return 5
             default: return 1;
         }
     }
@@ -521,22 +543,41 @@ public interface IGameOptions {
                 prevIndex = lastIndex;
         }
     }
+    // modnar: change difficulty production modifiers
+    // from 0.5, 0.75, 0.9, 1.0, 1.1, 1.4, 2.0
+    // to   0.7, 0.85, 1.0, 1.2, 1.4, 1.7, 2.0 (smoother step-to-step increases between 1.0 to 2.0)
+    // modnar: add custom difficulty level option, set in Remnants.cfg
+    // UserPreferences.customDifficulty(), custom difficulty range: 20% to 500%
     default float aiProductionModifier() {
         switch(selectedGameDifficulty()) {
-            case DIFFICULTY_EASIEST: return 0.5f;
-            case DIFFICULTY_EASIER:  return 0.75f;
-            case DIFFICULTY_EASY:    return 0.9f;
-            case DIFFICULTY_HARD:    return 1.1f;
-            case DIFFICULTY_HARDER:  return 1.4f;
+            case DIFFICULTY_EASIEST: return 0.7f;
+            case DIFFICULTY_EASIER:  return 0.85f;
+            case DIFFICULTY_EASY:    return 1.0f;
+            case DIFFICULTY_NORMAL:  return 1.2f;
+            case DIFFICULTY_HARD:    return 1.4f;
+            case DIFFICULTY_HARDER:  return 1.7f;
             case DIFFICULTY_HARDEST: return 2.0f;
+            case DIFFICULTY_CUSTOM:  return (float)(0.01f*UserPreferences.customDifficulty());
             default: return 1.0f;
         }
     }
+    // modnar: change difficulty waste modifiers, with production changes above
+    // modnar: if custom difficulty level option is set to less than 100%, also change waste modifiers
     default float aiWasteModifier() {
         switch(selectedGameDifficulty()) {
-            case DIFFICULTY_EASIEST: return 0.5f;
-            case DIFFICULTY_EASIER:  return 0.75f;
-            case DIFFICULTY_EASY:    return 0.9f;
+            case DIFFICULTY_EASIEST: return 0.7f;
+            case DIFFICULTY_EASIER:  return 0.85f;
+            case DIFFICULTY_EASY:    return 1.0f;
+            case DIFFICULTY_CUSTOM:  return (float)(Math.min(1.0f, 0.01f*UserPreferences.customDifficulty()));
+            default: return 1.0f;
+        }
+    }
+    // modnar: change PLANET_QUALITY settings, set planet size bonus, 150% for LARGER, 80% for RICHER
+    default float planetSizeBonus() {
+        switch(selectedPlanetQualityOption()) {
+            case PLANET_QUALITY_LARGER:   return 1.5f;
+            case PLANET_QUALITY_RICHER:   return 0.8f;
+            case PLANET_QUALITY_NORMAL:   return 1.0f;
             default: return 1.0f;
         }
     }

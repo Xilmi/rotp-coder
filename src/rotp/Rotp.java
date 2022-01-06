@@ -29,6 +29,8 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.URISyntaxException;
+import java.util.List; // modnar: change to cleaner icon set
+import java.util.ArrayList; // modnar: change to cleaner icon set
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import rotp.model.game.GameSession;
@@ -43,6 +45,7 @@ public class Rotp {
     private static final int MB = 1048576;
     public static int IMG_W = 1229;
     public static int IMG_H = 768;
+
     public static String jarFileName = "rotp-"+RotpGovernor.governorVersion()+RotpGovernor.miniSuffix()+".jar";
     public static String exeFileName = "Remnants.exe";
     public static boolean countWords = false;
@@ -86,6 +89,13 @@ public class Rotp {
         // which loads in sounds, images, etc
         frame.setLayout(new BorderLayout());
         frame.add(RotPUI.instance(), BorderLayout.CENTER);
+
+        // modnar: change to cleaner icon set
+        List<Image> iconImages = new ArrayList<Image>();
+        iconImages.add(ImageManager.current().image("ROTP_MOD_ICON3"));
+        iconImages.add(ImageManager.current().image("ROTP_MOD_ICON2"));
+        iconImages.add(ImageManager.current().image("ROTP_MOD_ICON1"));
+        frame.setIconImages(iconImages);
 
         // check after ROTPUI is created
         stopIfNoFilePermissions(frame);

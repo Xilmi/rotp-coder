@@ -34,6 +34,7 @@ import java.awt.event.MouseListener;
 import java.awt.geom.Point2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
+import java.awt.RenderingHints; // modnar: needed for adding RenderingHints
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.border.Border;
@@ -103,27 +104,28 @@ public class RaceIntroUI extends BasePanel implements MouseListener {
     }
     public void drawHomeStar(Graphics2D g) {
         int graphicPaneW = scaled(247);
-        int x0 = getWidth()-graphicPaneW+s13;
-        int y0 = s29;
-        drawStar(g, galaxy().system(player().homeSysId()).starType(), s80, x0+(graphicPaneW/3), y0+s30);
+        int x0 = getWidth()-graphicPaneW-4*s60;
+        int y0 = s60;
+		//modnar: move star due to increased planet size
+        drawStar(g, galaxy().system(player().homeSysId()).starType(), s80, x0+(graphicPaneW*3/4), y0+s30);
     }
     public void drawHomePlanet(Graphics2D g) {
         //w & h of graphic pane
         int w = scaled(247);
         int h = scaled(120);
 
-        int x0 = getWidth()-w+s14;
-        int y0 = s42+(h/4);
-        int r = s38;
-        galaxy().system(player().homeSysId()).planet().draw(g, w, h, x0, y0, r+r, 45);
+        int x0 = getWidth()-w+s24;
+        int y0 = (h/4)+s10;
+        int r = s100; //modnar: increase planet size
+        galaxy().system(player().homeSysId()).planet().draw(g, w, h, x0, y0, r+r, 135);
     }
     public void drawSystemName(Graphics2D g) {
         Empire pl = player();
         String str = pl.sv.name(pl.homeSysId());
         g.setFont(narrowFont(36));
 
-        int y0 = s46;
-        int x0 = getWidth()-scaled(225);
+        int y0 = s50; //modnar: move name due to increased planet size
+        int x0 = getWidth()-scaled(247)-2*s60;
 
         drawBorderedString(g, str, 1, x0, y0, Color.black, SystemPanel.orangeText);
     }
@@ -200,7 +202,13 @@ public class RaceIntroUI extends BasePanel implements MouseListener {
         g.setColor(Color.black);
         g.fillRect(0,0, w, h);
         drawStars(g);
-        g.drawImage(fadeLab(w1,h1), 0, 0, w1, h1, this);
+		// modnar: use (slightly) better sampling
+		int w0 = player().race().laboratory().getWidth();
+        int h0 = player().race().laboratory().getHeight();
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+		g.drawImage(fadeLab(w0,h0), 0, 0, w1, h1, 0, 0, w0, h0, this);
+        //g.drawImage(fadeLab(w1,h1), 0, 0, w1, h1, this);
         drawHomeStar(g);
         drawSystemName(g);
         drawIntroductionTitle(g);

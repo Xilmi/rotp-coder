@@ -1,12 +1,12 @@
 /*
  * Copyright 2015-2020 Ray Fowler
- * 
+ *
  * Licensed under the GNU General Public License, Version 3 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.gnu.org/licenses/gpl-3.0.html
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,15 +15,16 @@
  */
 package rotp.util.sound;
 
+import rotp.ui.UserPreferences;
+import rotp.ui.game.GameUI;
+import rotp.util.Base;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import rotp.ui.UserPreferences;
-import rotp.ui.game.GameUI;
-import rotp.util.Base;
 
 public enum SoundManager implements Base {
     INSTANCE;
@@ -44,13 +45,13 @@ public enum SoundManager implements Base {
     }
 
     private SoundManager() {  }
-    
+
     public static void loadSounds() {
         INSTANCE.init();
     }
 
     private void init() {
-        sounds.clear();        
+        sounds.clear();
         long st = System.currentTimeMillis();
         try {
             loadSoundFiles(soundListDir);
