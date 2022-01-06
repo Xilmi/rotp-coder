@@ -17,15 +17,15 @@
     <scm>
         <connection>scm:git:${project.scm.url}</connection>
         <developerConnection>scm:git:${project.scm.url}</developerConnection>
-        <url>https://github.com/coder111111/rotp-public.git</url>
+        <url>https://github.com/xilmi/rotp-public.git</url>
         <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
         <repository>
             <id>github</id>
-            <name>coder111111</name>
-            <url>https://maven.pkg.github.com/coder111111/rotp-public</url>
+            <name>xilmi</name>
+            <url>https://maven.pkg.github.com/xilmi/rotp-public</url>
         </repository>
     </distributionManagement>
 
@@ -196,7 +196,7 @@
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>rotp.Rotp</mainClass>
                                     <manifestEntries>
-                                        <Built-By>coder111@protonmail.com</Built-By>
+                                        <Built-By>ail.st@gmx.de</Built-By>
                                         <Mini>true</Mini>
                                     </manifestEntries>
                                 </transformer>
@@ -228,7 +228,7 @@
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>rotp.RotpGovernor</mainClass>
                                     <manifestEntries>
-                                        <Built-By>coder111@protonmail.com</Built-By>
+                                        <Built-By>ail.st@gmx.de</Built-By>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>
@@ -345,8 +345,8 @@
                     <execution>
                         <id>default-cli</id>
                         <configuration>
-                            <owner>coder111111</owner>
-                            <repository>rotp-public</repository>
+                            <owner>xilmi</owner>
+                            <repository>rotp-coder</repository>
                             <authToken>${GITHUB_TOKEN}</authToken>
                             <tagName>v${project.version}</tagName>
                             <name>ROTP with Planetary Governor v${project.version} beta</name>
