@@ -133,12 +133,15 @@ public interface IGameOptions {
     public static final String OPPONENT_AI_BASE       = "SETUP_OPPONENT_AI_BASE";
     public static final String OPPONENT_AI_MODNAR     = "SETUP_OPPONENT_AI_MODNAR";
     public static final String OPPONENT_AI_XILMI      = "SETUP_OPPONENT_AI_XILMI";
+    public static final String OPPONENT_AI_CRUEL      = "SETUP_OPPONENT_AI_CRUEL";
+    public static final String OPPONENT_AI_UNFAIR     = "SETUP_OPPONENT_AI_UNFAIR";
     public static final String OPPONENT_AI_SELECTABLE = "SETUP_OPPONENT_AI_SELECT";
     
     public static final String AUTOPLAY_OFF           = "SETUP_AUTOPLAY_OFF";
     public static final String AUTOPLAY_AI_BASE       = "SETUP_AUTOPLAY_AI_BASE";
     public static final String AUTOPLAY_AI_MODNAR     = "SETUP_AUTOPLAY_AI_MODNAR";
     public static final String AUTOPLAY_AI_XILMI      = "SETUP_AUTOPLAY_AI_XILMI";
+    public static final String AUTOPLAY_AI_CRUEL     = "SETUP_AUTOPLAY_AI_CRUEL";
     
     public default boolean isAutoPlay()          { return !selectedAutoplayOption().equals(AUTOPLAY_OFF); }
     public default boolean communityAI()         { return false; }
@@ -149,7 +152,7 @@ public interface IGameOptions {
     public default float hostileTerraformingPct() { return 1.0f; }
     public default boolean restrictedColonization() { return selectedColonizingOption().equals(COLONIZING_RESTRICTED); }
     public default int baseAIRelationsAdj()       { return 0; }
-    public default int selectedAI(Empire e)       { return AI.BASE; }
+    public default int selectedAI(Empire e)       { return AI.XILMI; }
     public default boolean randomizeAIPersonality()  { 
         switch (selectedRandomizeAIOption()) {
             case RANDOMIZE_AI_PERSONALITY:

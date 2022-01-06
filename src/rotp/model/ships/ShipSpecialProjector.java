@@ -50,7 +50,10 @@ public final class ShipSpecialProjector extends ShipSpecial {
             st.hits = min(st.hits-1, st.maxHits);
         }
         if (source.mgr.showAnimations())
+        {
+            tech().drawSpecialAttack(source, target, 1, 0);
             tech().drawSuccessfulAttack(source, target, source.weaponNum(this), 0);
+        }
         if (target.hits <= 0)
             target.loseShip();
         if (target.maxHits <= 0)

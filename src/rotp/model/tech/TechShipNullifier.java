@@ -65,7 +65,7 @@ public final class TechShipNullifier extends Tech {
                 minECMRed = 2;
                 maxECMRed = 6;
                 range = 4;
-                beamColor = new Color(255,0,0,64);
+                beamColor = new Color(170,170,170,64);
                 break;
             case 1:
                 cost = 65;
@@ -152,7 +152,7 @@ public final class TechShipNullifier extends Tech {
             h0 += dH;
         }
         
-        int repeat = 4;
+        int repeat = 1;
         
         // create shade boxes for target as it gets increasingly in stasis
 

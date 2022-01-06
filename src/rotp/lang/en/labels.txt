@@ -1102,22 +1102,25 @@ SETUP_OPPONENTS_HEADER_1          | %1 vs.
 SETUP_OPPONENTS_HEADER_2          | Rival Empires
 SETUP_OPPONENT_RANDOM             | ???
 SETUP_OPPONENT_AI                 | Play against:
-SETUP_OPPONENT_AI_BASE            | AI: Base
-SETUP_OPPONENT_AI_MODNAR          | AI: Modnar
-SETUP_OPPONENT_AI_XILMI           | AI: Xilmi
+SETUP_OPPONENT_AI_BASE            | AI: Rookie
+SETUP_OPPONENT_AI_MODNAR          | AI: Advanced
+SETUP_OPPONENT_AI_XILMI           | AI: Expert
+SETUP_OPPONENT_AI_CRUEL           | AI: Cruel
+SETUP_OPPONENT_AI_UNFAIR          | AI: Unfair
 SETUP_OPPONENT_AI_SELECT          | AI: Selectable
 SETUP_AUTOPLAY_OFF                | Off
-SETUP_AUTOPLAY_AI_BASE            | AI: Base
-SETUP_AUTOPLAY_AI_MODNAR          | AI: Modnar
-SETUP_AUTOPLAY_AI_XILMI           | AI: Xilmi
-SETUP_GAME_DIFFICULTY_LABEL       | Difficulty
-SETUP_DIFFICULTY_EASIEST          | Easiest
-SETUP_DIFFICULTY_EASIER           | Easier
-SETUP_DIFFICULTY_EASY             | Easy
-SETUP_DIFFICULTY_NORMAL           | Normal
-SETUP_DIFFICULTY_HARD             | Hard
-SETUP_DIFFICULTY_HARDER           | Harder
-SETUP_DIFFICULTY_HARDEST          | Hardest
+SETUP_AUTOPLAY_AI_BASE            | AI: Rookie
+SETUP_AUTOPLAY_AI_MODNAR          | AI: Advanced
+SETUP_AUTOPLAY_AI_XILMI           | AI: Expert
+SETUP_AUTOPLAY_AI_CRUEL           | AI: Cruel
+SETUP_GAME_DIFFICULTY_LABEL       | AI-Production
+SETUP_DIFFICULTY_EASIEST          | 50%
+SETUP_DIFFICULTY_EASIER           | 75%
+SETUP_DIFFICULTY_EASY             | 90%
+SETUP_DIFFICULTY_NORMAL           | 100%
+SETUP_DIFFICULTY_HARD             | 110%
+SETUP_DIFFICULTY_HARDER           | 140%
+SETUP_DIFFICULTY_HARDEST          | 200%
 SETUP_RESEARCH_RATE_NORMAL        | Normal
 SETUP_RESEARCH_RATE_SLOW          | Slow
 SETUP_RESEARCH_RATE_SLOWER        | Slower

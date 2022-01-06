@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package rotp.model.ai.xilmi;
+package rotp.model.ai.unfair;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,15 +23,10 @@ import rotp.model.ai.interfaces.Diplomat;
 import rotp.model.combat.CombatStack;
 import rotp.model.combat.ShipCombatResults;
 import rotp.model.empires.DiplomaticEmbassy;
-import rotp.model.empires.DiplomaticTreaty;
 import rotp.model.empires.Empire;
 import rotp.model.empires.EmpireView;
 import rotp.model.empires.GalacticCouncil;
 import rotp.model.empires.Leader;
-import rotp.model.empires.SpyNetwork;
-import rotp.model.empires.SpyNetwork.Mission;
-import rotp.model.empires.SpyReport;
-import rotp.model.empires.TreatyWar;
 import rotp.model.events.StarSystemEvent;
 import rotp.model.galaxy.Galaxy;
 import rotp.model.galaxy.ShipFleet;
@@ -633,6 +628,8 @@ public class AIDiplomat implements Base, Diplomat {
             }
         }
         */
+        if(!v.empire().isPlayer())
+            return true;
         return false;
     }
     //-----------------------------------
@@ -730,8 +727,8 @@ public class AIDiplomat implements Base, Diplomat {
             }
         }
         */
-        /*if(e == bestAlly())
-            return true;*/
+        if(!e.isPlayer())
+            return true;
         return false;
     }
     public float popRatioOfAllianceAmongstContatacts(Empire e)
@@ -1030,7 +1027,7 @@ public class AIDiplomat implements Base, Diplomat {
     private boolean wantToBreakPact(EmpireView v) {
         if (!v.embassy().pact())
             return false;
-        if(empire.generalAI().bestVictim() == v.empire())
+        if(v.empire().isPlayer())
             return true;
         return false;
     }
@@ -1108,15 +1105,11 @@ public class AIDiplomat implements Base, Diplomat {
         }
         
         decidedToExchangeTech(v);
-        //Okay, this was a bit ridiculous ^^
-        /*if(UserPreferences.xilmiRoleplayMode() && empire.leader().isErratic())
+        
+        if(!offerableTechnologies(v.empire()).isEmpty() && empire.allies().contains(v.empire()))
         {
-            if(!offerableTechnologies(v.empire()).isEmpty() && v.empire() != empire.generalAI().bestVictim() && empire.tradingWith(v.empire()))
-            {
-                System.out.println(empire.galaxy().currentTurn()+" "+ empire.name()+" offers "+offerableTechnologies(v.empire()).get(0).id+" to "+v.empire().name());
-                v.empire().diplomatAI().receiveTechnologyAid(empire, offerableTechnologies(v.empire()).get(0).id);
-            }
-        }*/
+            v.empire().diplomatAI().receiveTechnologyAid(empire, offerableTechnologies(v.empire()).get(0).id);
+        }
         
         if (canOfferPact(v.empire()) && willingToOfferPact(v)) {
             v.empire().diplomatAI().receiveOfferPact(empire);
@@ -1417,7 +1410,7 @@ public class AIDiplomat implements Base, Diplomat {
             warAllowed = true;
         //System.out.println(galaxy().currentTurn()+" "+empire.name()+" popCap: "+empire.generalAI().totalEmpirePopulationCapacity(empire)+" popCapRank: "+popCapRank+" facCapRank: " +facCapRank()+" tech-rank: "+techLevelRank()+" has good RP-ROI: "+reseachHasGoodROI+" war Allowed: "+warAllowed);
         if(warAllowed)
-            if(v.empire() == empire.generalAI().bestVictim())
+            if(v.empire().isPlayer())
             {
                 //System.out.println(galaxy().currentTurn()+" "+empire.name()+" war against " +empire.generalAI().bestVictim()+" should be allowed.");
                 return true;
@@ -1505,7 +1498,7 @@ public class AIDiplomat implements Base, Diplomat {
     }
     private boolean giveLoyaltyTo(Empire c) {
         // ail: Very simple decision
-        return empire.generalAI().timeToKill(empire, c) > empire.generalAI().timeToKill(c, empire);
+        return empire.generalAI().timeToKill(empire, c) > empire.generalAI().timeToKill(c, empire) || empire.allies().contains(c);
     }
     // ----------------------------------------------------------
 // PRIVATE METHODS
@@ -1711,7 +1704,7 @@ public class AIDiplomat implements Base, Diplomat {
         if(galaxy().options().baseAIRelationsAdj() <= -30)
             return false;
         //ail: If we are not fighting our preferred target, we don't really want a war
-        if(v.empire() != empire.generalAI().bestVictim())
+        if(!v.empire().isPlayer())
             return true;
         //ail: If I have more than one war, we try to go to peace with everyone of our multiple enemies to increase the likelyness of at least one saying yes
         if(empire.warEnemies().size() > 1)

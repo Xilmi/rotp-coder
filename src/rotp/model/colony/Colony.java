@@ -1,7 +1,7 @@
 /*
  * Copyright 2015-2020 Ray Fowler
  * 
- * Licensed under the GNU General Public License, Version 3 (the "License");
+ * Licensed under the GNU GeneraFl Public License, Version 3 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
@@ -967,8 +967,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         if ((dest == starSystem()) || (xPop == 0))
             clearTransport();
         else {
-            StarSystem oldDest = transport().destination();
-            transport().size(xPop);
+            transport().size(pop);
             transport().setDest(dest);
             transport().setDefaultTravelSpeed();
             if (oldDest != null && oldDest != dest) {

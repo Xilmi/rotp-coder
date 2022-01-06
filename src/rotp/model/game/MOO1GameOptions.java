@@ -141,7 +141,7 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
     @Override
     public void selectedTechTradeOption(String s)   { selectedTechTradeOption = s; }
     @Override
-    public String selectedRandomEventOption()       { return selectedRandomEventOption == null ? RANDOM_EVENTS_ON : selectedRandomEventOption; }
+    public String selectedRandomEventOption()       { return selectedRandomEventOption == null ? RANDOM_EVENTS_NO_MONSTERS : selectedRandomEventOption; }
     @Override
     public void selectedRandomEventOption(String s) { selectedRandomEventOption = s; }
     @Override
@@ -393,23 +393,28 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
             switch(selectedAutoplayOption()) {
                 case AUTOPLAY_AI_BASE:   return AI.BASE;
                 case AUTOPLAY_AI_MODNAR: return AI.MODNAR;
+                case AUTOPLAY_AI_CRUEL: return AI.CRUEL;
                 case AUTOPLAY_AI_XILMI:  return AI.XILMI;
                 case AUTOPLAY_OFF:
                 default:
-                    return AI.BASE;  // doesn't matter; won't be used if autoplay off
+                    return AI.XILMI;  // it does matter both for spending reallocation and for ship-captain
             }
         }
         else {
             switch(selectedOpponentAIOption()) {
                 case OPPONENT_AI_BASE:   return AI.BASE;
                 case OPPONENT_AI_MODNAR: return AI.MODNAR;
+                case OPPONENT_AI_CRUEL: return AI.CRUEL;
                 case OPPONENT_AI_XILMI:  return AI.XILMI;
+                case OPPONENT_AI_UNFAIR: return AI.UNFAIR;
                 case OPPONENT_AI_SELECTABLE:
                     String specificAI = specificOpponentAIOption(e.id);
                     switch(specificAI) {
                         case OPPONENT_AI_BASE:   return AI.BASE;
                         case OPPONENT_AI_MODNAR: return AI.MODNAR;
+                        case OPPONENT_AI_CRUEL: return AI.CRUEL;
                         case OPPONENT_AI_XILMI:  return AI.XILMI;
+                        case OPPONENT_AI_UNFAIR: return AI.UNFAIR;
                     }
             }
         }
@@ -798,6 +803,7 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         list.add(AUTOPLAY_AI_BASE);
         list.add(AUTOPLAY_AI_MODNAR);
         list.add(AUTOPLAY_AI_XILMI);
+        list.add(AUTOPLAY_AI_CRUEL);
         return list;
     }
     @Override
@@ -806,6 +812,8 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         list.add(OPPONENT_AI_BASE);
         list.add(OPPONENT_AI_MODNAR);
         list.add(OPPONENT_AI_XILMI);
+        list.add(OPPONENT_AI_CRUEL);
+        list.add(OPPONENT_AI_UNFAIR);
         list.add(OPPONENT_AI_SELECTABLE);
         return list;
     }
@@ -815,6 +823,8 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         list.add(OPPONENT_AI_BASE);
         list.add(OPPONENT_AI_MODNAR);
         list.add(OPPONENT_AI_XILMI);
+        list.add(OPPONENT_AI_CRUEL);
+        list.add(OPPONENT_AI_UNFAIR);
         return list;
     }
     @Override
@@ -842,10 +852,10 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         selectedGalaxyAge = galaxyAgeOptions().get(1);
         selectedNumberOpponents = defaultOpponentsOptions();
         selectedPlayerRace(random(startingRaceOptions()));
-        selectedGameDifficulty = DIFFICULTY_EASY;
-        selectedOpponentAIOption = OPPONENT_AI_BASE;
+        selectedGameDifficulty = DIFFICULTY_NORMAL;
+        selectedOpponentAIOption = OPPONENT_AI_XILMI;
         for (int i=0;i<specificOpponentAIOption.length;i++)
-            specificOpponentAIOption[i] = OPPONENT_AI_BASE;
+            specificOpponentAIOption[i] = OPPONENT_AI_XILMI;
         setToDefault();
         generateGalaxy();
     }
@@ -857,7 +867,7 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         selectedColonizingOption = COLONIZING_NORMAL;
         selectedResearchRate = RESEARCH_NORMAL;
         selectedTechTradeOption = TECH_TRADING_YES;
-        selectedRandomEventOption = RANDOM_EVENTS_ON;
+        selectedRandomEventOption = RANDOM_EVENTS_NO_MONSTERS;
         selectedWarpSpeedOption = WARP_SPEED_NORMAL;
         selectedFuelRangeOption = FUEL_RANGE_NORMAL;
         selectedNebulaeOption = NEBULAE_NORMAL;

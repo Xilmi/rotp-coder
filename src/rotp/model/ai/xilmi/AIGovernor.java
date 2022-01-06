@@ -70,7 +70,6 @@ public class AIGovernor implements Base, Governor {
             col.validate();
             return;
         }
-
         StarSystem sys = col.starSystem();
         String name = empire.sv.name(sys.id);
         boolean cleanupOK = ensureMinimumCleanup(col);
@@ -131,7 +130,7 @@ public class AIGovernor implements Base, Governor {
         int orderedInd = col.industry().orderedAllocation();
         int orderedEco = col.ecology().orderedAllocation();
         int orderedDef = col.defense().orderedAllocation();
-
+        
         // reset all unlocked allocations to zero
         col.clearUnlockedSpending();
         col.hasNewOrders(false);
@@ -184,6 +183,10 @@ public class AIGovernor implements Base, Governor {
         if (!col.locked(ECOLOGY))
             col.setAllocation(ECOLOGY, maxEco2);
 
+        // if this is a ship-building-colony that is not researching put rest in ships
+        if(!col.locked(SHIP) && prevShip > 0 && prevRes == 0)
+            col.addAllocation(SHIP, col.allocationRemaining());
+        
         // if research not locked go there
         if (!col.locked(RESEARCH))
             col.addAllocation(RESEARCH, col.allocationRemaining());
@@ -199,6 +202,8 @@ public class AIGovernor implements Base, Governor {
     private void baseSetColonyAllocations(Colony col) {                
         int maxAllocation = ColonySpendingCategory.MAX_TICKS;
 
+        if(col.shipyard().canLowerMaintenance())
+            col.shipyard().lowerMaintenance();
         // for systems that have a research project, focus research and forget
         // everything else until the project is done
         if (col.research().hasProject()) {

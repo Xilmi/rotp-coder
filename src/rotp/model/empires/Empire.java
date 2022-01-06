@@ -677,7 +677,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         newSystems.add(sys);
         addColonizedSystem(sys);
         sys.becomeColonized(sys.name(), this);
-        sys.colony().setPopulation(tr.size());
+        sys.colony().setPopulation(min(sys.planet().currentSize(),tr.size()));
         tr.size(0);
     }
     public Colony colonize(String sysName, StarSystem sys) {
@@ -3592,6 +3592,22 @@ public final class Empire implements Base, NamedObject, Serializable {
         for (ShipFleet fl: fleets) {
             if (!fl.isEmpty())
                 list.add(fl);
+        }
+        Collections.sort(list, IMappedObject.MAP_ORDER);
+        return list;
+    }
+    public List<ShipFleet> orderedIdleFleets() {
+        List<ShipFleet> list = new ArrayList<>();
+        List<ShipFleet> fleets = galaxy().ships.allFleets(id);
+        for (ShipFleet fl: fleets) {
+            if (!fl.isEmpty())
+            {
+                if(fl.isDeployed() || fl.isInTransit())
+                    continue;
+                if(fl.system() != null && warEnemies().contains(fl.system().empire()))
+                    continue;
+                list.add(fl);                
+            }
         }
         Collections.sort(list, IMappedObject.MAP_ORDER);
         return list;

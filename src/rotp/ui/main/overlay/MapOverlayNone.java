@@ -169,6 +169,7 @@ public class MapOverlayNone extends MapOverlay {
                         StarSystem sys = (StarSystem) parent.clickedSprite();
                         if (player().canSendTransportsFrom(sys)) {
                             softClick();
+                            TransportDeploymentPanel.enableAbandon = false; 
                             parent.hoveringOverSprite(null);
                             parent.clickedSprite(sys.transportSprite());
                             parent.displayPanel().repaint();
@@ -428,6 +429,41 @@ public class MapOverlayNone extends MapOverlay {
                 break;
             case KeyEvent.VK_F12:
                 fleets = player().orderedEnemyFleets();
+                currFleet = null;
+                if (fleets.isEmpty())
+                    misClick();
+                else {
+                    //softClick();
+                    if (parent.clickedSprite() instanceof ShipFleet)
+                        currFleet = (ShipFleet)parent.clickedSprite();
+                    index = fleets.indexOf(currFleet)-1;
+                    if (index < 0)
+                        index = fleets.size()-1;
+                    parent.clickingOnSprite(fleets.get(index), 1, false, true);
+                    parent.map().recenterMapOn(fleets.get(index));
+                    parent.repaint();
+                }
+                break;
+            case KeyEvent.VK_PAGE_DOWN:
+            case KeyEvent.VK_SPACE:
+                fleets = player().orderedIdleFleets();
+                currFleet = null;
+                if (fleets.isEmpty())
+                    misClick();
+                else {
+                    //softClick();
+                    if (parent.clickedSprite() instanceof ShipFleet)
+                        currFleet = (ShipFleet)parent.clickedSprite();
+                    index = fleets.indexOf(currFleet)+1;
+                    if (index == fleets.size())
+                        index = 0;
+                    parent.clickingOnSprite(fleets.get(index), 1, false, true);
+                    parent.map().recenterMapOn(fleets.get(index));
+                    parent.repaint();
+                }
+                break;
+            case KeyEvent.VK_PAGE_UP:
+                fleets = player().orderedIdleFleets();
                 currFleet = null;
                 if (fleets.isEmpty())
                     misClick();
