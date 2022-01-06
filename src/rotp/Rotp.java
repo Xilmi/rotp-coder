@@ -15,11 +15,7 @@
  */
 package rotp;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
@@ -56,8 +52,8 @@ public class Rotp {
     private static float resizeAmt =  -1.0f;
     public static int actualAlloc = -1;
     public static boolean reloadRecentSave = false;
-    
-    static GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+    static GraphicsDevice device = GraphicsEnvironment
+            .getLocalGraphicsEnvironment().getDefaultScreenDevice();
     public static void main(String[] args) {
         frame = new JFrame("Remnants of the Precursors");
         String loadSaveFile = "";
@@ -103,12 +99,11 @@ public class Rotp {
         else if (UserPreferences.borderless()) {
             frame.setExtendedState(JFrame.MAXIMIZED_BOTH); 
             frame.setUndecorated(true);
-            resizeAmt();
+            device.setFullScreenWindow(frame);
         }
         else {
             frame.setResizable(false);
             device.setFullScreenWindow(null);
-            setFrameSize();
         }
 
         // this will not catch 32-bit JREs on all platforms, but better than nothing
