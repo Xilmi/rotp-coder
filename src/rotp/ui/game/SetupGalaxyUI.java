@@ -291,6 +291,8 @@ public final class SetupGalaxyUI  extends BasePanel implements MouseListener, Mo
         // append this custom difficulty percentage to diffLbl if selected
         if (diffLbl.equals("Custom")) {
             diffLbl = diffLbl + " (" + Integer.toString(UserPreferences.customDifficulty()) + "%)";
+        } else {
+            diffLbl = diffLbl + " (" + Integer.toString(Math.round(100 * newGameOptions().aiProductionModifier())) + "%)";
         }
         
         int diffSW = g.getFontMetrics().stringWidth(diffLbl);
