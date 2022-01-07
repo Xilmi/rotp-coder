@@ -8,3 +8,4 @@ launch4j/Remnants/
 target/
 .idea/
 *.iml
+*.log
