@@ -1,6 +1,7 @@
 package rotp.model.game;
 
 import java.io.Serializable;
+import rotp.ui.UserPreferences;
 
 /**
  * Governor options.
@@ -14,7 +15,7 @@ public class GovernorOptions implements Serializable {
         All
     }
     // keep backwards compatibility with system properties
-    private boolean governorOnByDefault = !"false".equalsIgnoreCase(System.getProperty("defaultgovernor", "true"));;
+    private boolean governorOnByDefault = UserPreferences.governorOnByDefault();
     private boolean autotransport = "true".equalsIgnoreCase(System.getProperty("autotransport", "false"));
     private GatesGovernor gates = "false".equalsIgnoreCase(System.getProperty("autogate", "true")) ? GatesGovernor.None : GatesGovernor.Rich;
 
@@ -62,6 +63,7 @@ public class GovernorOptions implements Serializable {
 
     public void setGovernorOnByDefault(boolean governorOnByDefault) {
         this.governorOnByDefault = governorOnByDefault;
+        UserPreferences.setGovernorOn(governorOnByDefault);
     }
 
     public void setAutotransport(boolean autotransport) {

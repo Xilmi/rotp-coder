@@ -64,6 +64,7 @@ public class UserPreferences {
     private static int soundVolume = 10;
     private static int defaultMaxBases = 0;
     private static boolean displayYear = false;
+    private static boolean governorOnByDefault = true;
     private static int customDifficulty = 100; // mondar: add custom difficulty level option, in units of percent
     private static boolean dynamicDifficulty = false; // modnar: add dynamic difficulty option, change AI colony production
     private static boolean alwaysStarGates = false; // modnar: add option to always have Star Gates tech
@@ -283,6 +284,8 @@ public class UserPreferences {
     public static void toggleYearDisplay()    { displayYear = !displayYear; save(); }
     public static boolean displayYear()       { return displayYear; }
     public static int defaultMaxBases()    { return defaultMaxBases; }
+    public static void setGovernorOn(boolean governorOn)    { governorOnByDefault = governorOn; save(); }
+    public static boolean governorOnByDefault() { return governorOnByDefault; }
     public static boolean divertColonyExcessToResearch()  { return divertColonyExcessToResearch; }
     public static boolean xilmiRoleplayMode() { return xilmiRoleplayMode; }
     public static void uiTexturePct(int i)    { uiTexturePct = i / 100.0f; }
@@ -331,6 +334,7 @@ public class UserPreferences {
             out.println(keyFormat("SHOW_MEMORY")+ yesOrNo(showMemory));
             out.println(keyFormat("DISPLAY_YEAR")+ yesOrNo(displayYear));
             out.println(keyFormat("DEFAULT_MAX_BASES") + defaultMaxBases);
+            out.println(keyFormat("GOVERNOR_ON_BY_DEFAULT") + yesOrNo(governorOnByDefault));
             out.println(keyFormat("DIVERT_COLONY_EXCESS_TO_RESEARCH")+ yesOrNo(divertColonyExcessToResearch));
             out.println(keyFormat("XILMI_ROLEPLAY_MODE") + yesOrNo(xilmiRoleplayMode));
             out.println(keyFormat("SCREEN_SIZE_PCT")+ screenSizePct());
@@ -388,6 +392,7 @@ public class UserPreferences {
             case "SHOW_MEMORY":  showMemory = yesOrNo(val); return;
             case "DISPLAY_YEAR": displayYear = yesOrNo(val); return;
             case "DEFAULT_MAX_BASES": defaultMaxBases = Integer.valueOf(val); return;
+            case "GOVERNOR_ON_BY_DEFAULT": governorOnByDefault = yesOrNo(val); return;
             case "DIVERT_COLONY_EXCESS_TO_RESEARCH": divertColonyExcessToResearch = yesOrNo(val); return;
             case "XILMI_ROLEPLAY_MODE": xilmiRoleplayMode = yesOrNo(val); return;
             case "SCREEN_SIZE_PCT": screenSizePct(Integer.valueOf(val)); return;
