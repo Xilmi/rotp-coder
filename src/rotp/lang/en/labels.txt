@@ -606,7 +606,7 @@ MAIN_COLONY_DEFENSE               | Def
 MAIN_COLONY_INDUSTRY              | Ind
 MAIN_COLONY_ECOLOGY               | Eco
 MAIN_COLONY_TECHNOLOGY            | Tech
-MAIN_COLONY_ALLOCATE_SPENDING     | Allocate Spending
+MAIN_COLONY_ALLOCATE_SPENDING     | Governor Toggle
 GOVERNOR_OPTIONS                  | Options
 MAIN_COLONY_SPENDING_NONE         | None
 MAIN_COLONY_SPENDING_RESERVE      | Reserve
