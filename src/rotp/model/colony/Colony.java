@@ -1023,7 +1023,6 @@ public final class Colony implements Base, IMappedObject, Serializable {
         return inTransport();
     }
     public void clearTransport() {
-        StarSystem oldDest = transport().destination();
         starSystem().clearTransportSprite();
         StarSystem oldDest = transport().destination();
         transport().reset(empire);

@@ -1493,7 +1493,6 @@ public class DesignUI extends BasePanel {
             if (!des.active())
                 drawColorOptions(g, x1, y6, w-s20, rowH);
 
-            int autoScoutWidth;
             {
                 scoutButtonArea.setBounds(0,0,0,0);
                 String str = text("SHIP_DESIGN_AUTO_SCOUT");
