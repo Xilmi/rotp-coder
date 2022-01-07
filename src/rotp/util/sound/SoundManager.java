@@ -263,7 +263,7 @@ public enum SoundManager implements Base {
             try {
                 try (InputStream is = WavClip.wavFileStream(oggFilename)) {
                     if (is != null) {
-                        System.out.println("Found ogg sound file "+oggFilename);
+                        //System.out.println("Found ogg sound file "+oggFilename);
                         log("Found ogg sound file "+oggFilename);
                         formatOgg = true;
                     } else {
