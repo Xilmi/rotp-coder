@@ -349,7 +349,7 @@
                             <repository>rotp-coder</repository>
                             <authToken>${GITHUB_TOKEN}</authToken>
                             <tagName>v${project.version}</tagName>
-                            <name>ROTP with Planetary Governor v${project.version} beta</name>
+                            <name>ROTP with Fusion-MOD v${project.version}</name>
                             <targetCommitish>master</targetCommitish>
                             <releaseNotes>target/classes/README.md</releaseNotes>
                             <assets>
