@@ -249,8 +249,8 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
     }
     @Override
     public int maximumOpponentsOptions() {
-        // modnar: change maxEmpires to be ~12 stars/empire, original ~8 stars/empire
-        int maxEmpires = min(numberStarSystems()/12, colors.size(), MAX_OPPONENT_TYPE*startingRaceOptions().size());
+        // xilmi: change maxEmpires to be ~3 stars/empire, original ~8 stars/empire
+        int maxEmpires = min(numberStarSystems()/3, colors.size(), MAX_OPPONENT_TYPE*startingRaceOptions().size());
         int maxOpponents = min(SetupGalaxyUI.MAX_DISPLAY_OPPS);
         return min(maxOpponents, maxEmpires-1);
     }
