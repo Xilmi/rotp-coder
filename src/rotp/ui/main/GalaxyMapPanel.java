@@ -275,7 +275,6 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
             baseControls.add(new ShipDisplaySprite(10,85,30,30));
             baseControls.add(new SystemNameDisplaySprite(10,50,30,30));
 
-            /*
             int y0 = unscaled(getHeight())-310;
             baseControls.add(new TechStatusSprite(TechCategory.WEAPON,       10,y0+210,30,30));
             baseControls.add(new TechStatusSprite(TechCategory.PROPULSION,   10,y0+175,30,30));
@@ -284,20 +283,7 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
             baseControls.add(new TechStatusSprite(TechCategory.CONSTRUCTION, 10,y0+70, 30,30));
             baseControls.add(new TechStatusSprite(TechCategory.COMPUTER,     10,y0+35, 30,30));
             baseControls.add(new TreasurySprite(10,y0, 30,30));
-            */
-            // modnar: make TreasuryResearchBar horizontal
-            int x0 = 10;
-            int y0 = unscaled(getHeight())-100;
-            baseControls.add(new TechStatusSprite(TechCategory.WEAPON,       x0+210,y0,30,30));
-            baseControls.add(new TechStatusSprite(TechCategory.PROPULSION,   x0+175,y0,30,30));
-            baseControls.add(new TechStatusSprite(TechCategory.PLANETOLOGY,  x0+140,y0,30,30));
-            baseControls.add(new TechStatusSprite(TechCategory.FORCE_FIELD,  x0+105,y0,30,30));
-            baseControls.add(new TechStatusSprite(TechCategory.CONSTRUCTION, x0+70,y0, 30,30));
-            baseControls.add(new TechStatusSprite(TechCategory.COMPUTER,     x0+35,y0, 30,30));
-            baseControls.add(new TreasurySprite(x0,y0, 30,30));
-
-            // modnar: shift spy report with horizontal TreasuryResearchBar
-            baseControls.add(new SpyReportSprite(x0,y0-50, 30,30));
+            baseControls.add(new SpyReportSprite(10,y0-70, 30,30));
         }
         
         addMouseListener(this);
