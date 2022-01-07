@@ -1132,14 +1132,14 @@ SETUP_AUTOPLAY_AI_BASE            | AI: Rookie
 SETUP_AUTOPLAY_AI_MODNAR          | AI: Advanced
 SETUP_AUTOPLAY_AI_XILMI           | AI: Expert
 SETUP_AUTOPLAY_AI_CRUEL           | AI: Cruel
-SETUP_GAME_DIFFICULTY_LABEL       | AI-Production
-SETUP_DIFFICULTY_EASIEST          | 50%
-SETUP_DIFFICULTY_EASIER           | 75%
-SETUP_DIFFICULTY_EASY             | 90%
-SETUP_DIFFICULTY_NORMAL           | 100%
-SETUP_DIFFICULTY_HARD             | 110%
-SETUP_DIFFICULTY_HARDER           | 140%
-SETUP_DIFFICULTY_HARDEST          | 200%
+SETUP_GAME_DIFFICULTY_LABEL       | Difficulty
+SETUP_DIFFICULTY_EASIEST          | Nuclear
+SETUP_DIFFICULTY_EASIER           | Hyper-X
+SETUP_DIFFICULTY_EASY             | Merculite
+SETUP_DIFFICULTY_NORMAL           | Stinger
+SETUP_DIFFICULTY_HARD             | Pulson
+SETUP_DIFFICULTY_HARDER           | Hercular
+SETUP_DIFFICULTY_HARDEST          | Zeon
 SETUP_DIFFICULTY_CUSTOM           | Custom
 SETUP_RESEARCH_RATE_NORMAL        | Normal
 // mondar: add fast research option
