@@ -636,6 +636,14 @@ public class PlanetsUI extends BasePanel implements SystemViewer {
                 else
                     multiSpendingPane.setSpendingLevel(1);
                 return;
+            case KeyEvent.VK_G:
+                if(control)
+                    multiSpendingPane.setGovernor(true);
+                else if(shift)
+                    multiSpendingPane.setGovernor(false);
+                else
+                    multiSpendingPane.toggleGovernor();
+                return;
         }
         if (repaint)
             repaint();

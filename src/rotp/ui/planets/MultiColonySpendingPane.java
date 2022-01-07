@@ -210,6 +210,26 @@ public class MultiColonySpendingPane extends BasePanel implements MouseListener,
             repaint();
         }        
     }
+    public void toggleGovernor() {
+        List<StarSystem> systems = parent.systemsToDisplay();
+        for (StarSystem sys: systems) {
+            Colony c = sys.colony();
+            if (c != null) {
+                c.setGovernor(!c.isGovernor());
+            }
+        }
+        parent.repaintAll();
+    }
+    public void setGovernor(boolean gov) {
+        List<StarSystem> systems = parent.systemsToDisplay();
+        for (StarSystem sys: systems) {
+            Colony c = sys.colony();
+            if (c != null) {
+                c.setGovernor(gov);
+            }
+        }
+        parent.repaintAll();
+    }
     public void setSpendingLevel(float pct) {
         List<StarSystem> systems = parent.systemsToDisplay();
         for (StarSystem sys: systems) {
