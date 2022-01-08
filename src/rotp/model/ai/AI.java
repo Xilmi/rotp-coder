@@ -46,8 +46,9 @@ public class AI implements Base {
     public static final int BASE = 0;
     public static final int MODNAR = 1;
     public static final int XILMI = 2;
-    public static final int CRUEL = 3;
-    public static final int UNFAIR = 4;
+    public static final int DIPLOMAT = 3;
+    public static final int CRUEL = 4;
+    public static final int UNFAIR = 5;
     
     private final Empire empire;
 
@@ -108,6 +109,17 @@ public class AI implements Base {
                 fleetCommander = new rotp.model.ai.base.AIFleetCommander(empire);
                 spyMaster =      new rotp.model.ai.base.AISpyMaster(empire);
                 treasurer =      new rotp.model.ai.base.AITreasurer(empire);
+                break;
+            case DIPLOMAT:
+                general =        new rotp.model.ai.xilmi.AIGeneral(empire);
+                captain =        new rotp.model.ai.xilmi.AIShipCaptain(empire);
+                governor =       new rotp.model.ai.xilmi.AIGovernor(empire);
+                scientist =      new rotp.model.ai.xilmi.AIScientist(empire);
+                diplomat =       new rotp.model.ai.diplomat.AIDiplomat(empire);
+                shipDesigner =   new rotp.model.ai.xilmi.AIShipDesigner(empire);
+                fleetCommander = new rotp.model.ai.xilmi.AIFleetCommander(empire);
+                spyMaster =      new rotp.model.ai.xilmi.AISpyMaster(empire);
+                treasurer =      new rotp.model.ai.xilmi.AITreasurer(empire);
                 break;
             case CRUEL:
             default:

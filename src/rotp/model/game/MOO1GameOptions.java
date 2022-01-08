@@ -431,6 +431,7 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
                 case AUTOPLAY_AI_MODNAR: return AI.MODNAR;
                 case AUTOPLAY_AI_CRUEL: return AI.CRUEL;
                 case AUTOPLAY_AI_XILMI:  return AI.XILMI;
+                case AUTOPLAY_AI_DIPLOMAT:  return AI.DIPLOMAT;
                 case AUTOPLAY_OFF:
                 default:
                     return AI.XILMI;  // it does matter both for spending reallocation and for ship-captain
@@ -442,6 +443,7 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
                 case OPPONENT_AI_MODNAR: return AI.MODNAR;
                 case OPPONENT_AI_CRUEL: return AI.CRUEL;
                 case OPPONENT_AI_XILMI:  return AI.XILMI;
+                case OPPONENT_AI_DIPLOMAT:  return AI.DIPLOMAT;
                 case OPPONENT_AI_UNFAIR: return AI.UNFAIR;
                 case OPPONENT_AI_SELECTABLE:
                     String specificAI = specificOpponentAIOption(e.id);
@@ -450,6 +452,7 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
                         case OPPONENT_AI_MODNAR: return AI.MODNAR;
                         case OPPONENT_AI_CRUEL: return AI.CRUEL;
                         case OPPONENT_AI_XILMI:  return AI.XILMI;
+                        case OPPONENT_AI_DIPLOMAT:  return AI.DIPLOMAT;
                         case OPPONENT_AI_UNFAIR: return AI.UNFAIR;
                     }
             }
@@ -890,6 +893,7 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         list.add(AUTOPLAY_AI_BASE);
         list.add(AUTOPLAY_AI_MODNAR);
         list.add(AUTOPLAY_AI_XILMI);
+        list.add(AUTOPLAY_AI_DIPLOMAT);
         list.add(AUTOPLAY_AI_CRUEL);
         return list;
     }
@@ -899,6 +903,7 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         list.add(OPPONENT_AI_BASE);
         list.add(OPPONENT_AI_MODNAR);
         list.add(OPPONENT_AI_XILMI);
+        list.add(OPPONENT_AI_DIPLOMAT);
         list.add(OPPONENT_AI_CRUEL);
         list.add(OPPONENT_AI_UNFAIR);
         list.add(OPPONENT_AI_SELECTABLE);
@@ -910,6 +915,7 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         list.add(OPPONENT_AI_BASE);
         list.add(OPPONENT_AI_MODNAR);
         list.add(OPPONENT_AI_XILMI);
+        list.add(OPPONENT_AI_DIPLOMAT);
         list.add(OPPONENT_AI_CRUEL);
         list.add(OPPONENT_AI_UNFAIR);
         return list;
@@ -940,9 +946,9 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         selectedNumberOpponents = defaultOpponentsOptions();
         selectedPlayerRace(random(startingRaceOptions()));
         selectedGameDifficulty = DIFFICULTY_EASY;
-        selectedOpponentAIOption = OPPONENT_AI_XILMI;
+        selectedOpponentAIOption = OPPONENT_AI_DIPLOMAT;
         for (int i=0;i<specificOpponentAIOption.length;i++)
-            specificOpponentAIOption[i] = OPPONENT_AI_XILMI;
+            specificOpponentAIOption[i] = OPPONENT_AI_DIPLOMAT;
         setToDefault();
         generateGalaxy();
     }
