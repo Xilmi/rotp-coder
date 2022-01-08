@@ -123,6 +123,7 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
     public static BufferedImage sharedNebulaBackground;
     private final float zoomBase = 1.1f;
     boolean dragSelecting = false;
+    public boolean historyMode = false;
     private int selectX0, selectY0, selectX1, selectY1;
     private int lastMouseX, lastMouseY;
     private long lastMouseTime;
@@ -504,7 +505,8 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
 				//Graphics2D g0 = (Graphics2D) rangeMapBuffer.getGraphics();
 				Graphics2D g0 = (Graphics2D) g.create(); // use create() to not leave afterimage
 				setFontHints(g0);
-				drawExtendedRangeDisplay(g0);
+				if(!historyMode)
+                                    drawExtendedRangeDisplay(g0);
 				drawOwnershipDisplay(g0);
 			}
         }

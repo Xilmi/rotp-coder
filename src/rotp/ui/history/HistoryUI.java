@@ -667,6 +667,7 @@ public final class HistoryUI extends BasePanel implements MouseListener {
             setLayout(new BorderLayout(s10,s10));
             map = new GalaxyMapPanel(this);
             map.setBounds(0,0,w,h);
+            map.historyMode = true;
 
             int bpW = scaled(600);
             int bpH = scaled(60);
