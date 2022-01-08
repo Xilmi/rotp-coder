@@ -88,7 +88,7 @@ public class Leader implements Base, Serializable {
         
         // when using the random personality option, use the most common attitude for  
         // contact dialogue since there is not text for every race/attitude combination
-        if (options().randomizeAIPersonality())
+        if (options().randomizeAIPersonality() || empire.diplomatAI().masksDiplomacy())
             p = Personality.values()[empire.race().mostCommonLeaderAttitude()];
 
         switch(p) {
