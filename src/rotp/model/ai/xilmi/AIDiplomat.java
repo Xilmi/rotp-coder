@@ -28,6 +28,15 @@ import rotp.model.empires.Empire;
 import rotp.model.empires.EmpireView;
 import rotp.model.empires.GalacticCouncil;
 import rotp.model.empires.Leader;
+import static rotp.model.empires.Leader.Objective.DIPLOMAT;
+import static rotp.model.empires.Leader.Objective.ECOLOGIST;
+import static rotp.model.empires.Leader.Objective.EXPANSIONIST;
+import static rotp.model.empires.Leader.Objective.INDUSTRIALIST;
+import static rotp.model.empires.Leader.Objective.MILITARIST;
+import static rotp.model.empires.Leader.Objective.TECHNOLOGIST;
+import static rotp.model.empires.Leader.Personality.AGGRESSIVE;
+import static rotp.model.empires.Leader.Personality.PACIFIST;
+import static rotp.model.empires.Leader.Personality.XENOPHOBIC;
 import rotp.model.empires.SpyNetwork;
 import rotp.model.empires.SpyNetwork.Mission;
 import rotp.model.empires.SpyReport;
@@ -1057,6 +1066,7 @@ public class AIDiplomat implements Base, Diplomat {
 //----------------
     @Override
     public void makeDiplomaticOffers(EmpireView v) {
+        updatePersonality();
         if(empire.enemies().contains(v.empire()) && !empire.warEnemies().contains(v.empire()))
         {
             if(!empire.inShipRange(v.empId()))
@@ -1375,6 +1385,21 @@ public class AIDiplomat implements Base, Diplomat {
             System.out.println(empire.name()+" best ally for me would be "+best.name()+" with score: "+highestMatchScore);*/
         return best;
     }
+    public boolean readyForWar() {
+        boolean warAllowed = true;
+        if(empire.generalAI().additionalColonizersToBuild(false) > 0)
+            warAllowed = false;
+        if(!techIsAdequateForWar())
+            warAllowed = false;
+        if(!empire.generalAI().isRusher() && facCapRank() > 1)
+            warAllowed = false;
+        //Ail: If there's only two empires left, there's no time for preparation. We cannot allow them the first-strike-advantage!
+        if(galaxy().numActiveEmpires() < 3)
+            warAllowed = true;
+        if(UserPreferences.xilmiRoleplayMode() && empire.leader().isAggressive())
+            warAllowed = true;
+        return warAllowed;
+    }
     public boolean wantToDeclareWar(EmpireView v) {
         //System.out.println(empire.name()+" atpeace: "+v.embassy().atPeace()+" no enemies:  "+empire.enemies().isEmpty());
         if (v.embassy().atPeace())
@@ -1389,39 +1414,8 @@ public class AIDiplomat implements Base, Diplomat {
             return true;
         if (!empire.enemies().isEmpty())
             return false;
-        boolean warAllowed = true;
-        if(empire.generalAI().additionalColonizersToBuild(false) > 0)
-            warAllowed = false;
-        int popCapRank = popCapRank(empire, false);
-        /*if(!everyoneMet() && popCapRank < 3)
-            warAllowed = false;*/
-        boolean reseachHasGoodROI = false;
-        for(int i = 0; i < NUM_CATEGORIES; ++i)
-        {
-            int levelToCheck = (int)Math.ceil(empire.tech().category(i).techLevel());
-            float techCost = empire.tech().category(i).baseResearchCost(levelToCheck) * levelToCheck * levelToCheck * empire.techMod(i);
-            if(techCost < empire.totalIncome())
-            {
-                //System.out.println(galaxy().currentTurn()+" "+empire.name()+" cat: "+empire.tech().category(i).id()+" techlevel: "+levelToCheck+" techcost: "+techCost+" income: "+empire.totalIncome());
-                reseachHasGoodROI = true;
-                break;
-            }
-        }
-        if(reseachHasGoodROI && techLevelRank() > 1)
-            warAllowed = false;
-        if(techLevelRank() > popCapRank)
-        {
-            warAllowed = false;
-        }
-        if(!empire.generalAI().isRusher() && facCapRank() > 1)
-            warAllowed = false;
-        //Ail: If there's only two empires left, there's no time for preparation. We cannot allow them the first-strike-advantage!
-        if(galaxy().numActiveEmpires() < 3)
-            warAllowed = true;
-        if(UserPreferences.xilmiRoleplayMode() && empire.leader().isAggressive())
-            warAllowed = true;
         //System.out.println(galaxy().currentTurn()+" "+empire.name()+" popCap: "+empire.generalAI().totalEmpirePopulationCapacity(empire)+" popCapRank: "+popCapRank+" facCapRank: " +facCapRank()+" tech-rank: "+techLevelRank()+" has good RP-ROI: "+reseachHasGoodROI+" war Allowed: "+warAllowed);
-        if(warAllowed)
+        if(readyForWar())
             if(v.empire() == empire.generalAI().bestVictim())
             {
                 //System.out.println(galaxy().currentTurn()+" "+empire.name()+" war against " +empire.generalAI().bestVictim()+" should be allowed.");
@@ -1926,6 +1920,48 @@ public class AIDiplomat implements Base, Diplomat {
     public boolean masksDiplomacy()
     {
         return true;
+    }
+    public void updatePersonality()
+    {
+        empire.leader().personality = XENOPHOBIC;
+        if(empire.atWar() || !empire.enemies().isEmpty())
+            empire.leader().objective = MILITARIST;
+        else if(empire.generalAI().additionalColonizersToBuild(false) > 0)
+            empire.leader().objective = EXPANSIONIST;
+        else if(!empire.generalAI().isRusher() && facCapRank() > 1)
+            empire.leader().objective = INDUSTRIALIST;
+        else if(!techIsAdequateForWar())
+            empire.leader().objective = TECHNOLOGIST;
+        else if(empire.totalPlanetaryPopulation() < empire.generalAI().totalEmpirePopulationCapacity(empire))
+            empire.leader().objective = ECOLOGIST;
+        else
+            empire.leader().objective = DIPLOMAT;
+    }
+    public boolean techIsAdequateForWar()
+    {
+        boolean warAllowed = true;
+        int popCapRank = popCapRank(empire, false);
+        /*if(!everyoneMet() && popCapRank < 3)
+            warAllowed = false;*/
+        boolean reseachHasGoodROI = false;
+        for(int i = 0; i < NUM_CATEGORIES; ++i)
+        {
+            int levelToCheck = (int)Math.ceil(empire.tech().category(i).techLevel());
+            float techCost = empire.tech().category(i).baseResearchCost(levelToCheck) * levelToCheck * levelToCheck * empire.techMod(i);
+            if(techCost < empire.totalIncome())
+            {
+                //System.out.println(galaxy().currentTurn()+" "+empire.name()+" cat: "+empire.tech().category(i).id()+" techlevel: "+levelToCheck+" techcost: "+techCost+" income: "+empire.totalIncome());
+                reseachHasGoodROI = true;
+                break;
+            }
+        }
+        if(reseachHasGoodROI && techLevelRank() > 1)
+            warAllowed = false;
+        if(techLevelRank() > popCapRank)
+        {
+            warAllowed = false;
+        }
+        return warAllowed;
     }
 }
 
