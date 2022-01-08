@@ -169,6 +169,10 @@ public class AIGovernor implements Base, Governor {
         if (!col.locked(DEFENSE))
             col.setAllocation(DEFENSE,  min(prevDef, maxDef));
 
+        // if this is a ship-building-colony that is not researching put rest in ships
+        if(!col.locked(SHIP) && prevShip > 0 && prevRes == 0)
+            col.addAllocation(SHIP, col.allocationRemaining());
+        
         // SPEND THE EXCESS
         // if there is industry left to build, go there first
         if (!col.locked(INDUSTRY))
@@ -182,10 +186,6 @@ public class AIGovernor implements Base, Governor {
         // if there is population to grow, go there
         if (!col.locked(ECOLOGY))
             col.setAllocation(ECOLOGY, maxEco2);
-
-        // if this is a ship-building-colony that is not researching put rest in ships
-        if(!col.locked(SHIP) && prevShip > 0 && prevRes == 0)
-            col.addAllocation(SHIP, col.allocationRemaining());
         
         // if research not locked go there
         if (!col.locked(RESEARCH))
