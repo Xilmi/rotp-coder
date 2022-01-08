@@ -757,7 +757,9 @@ public class AIDiplomat implements Base, Diplomat {
     public boolean willingToRequestAllyToJoinWar(Empire friend, Empire target) {
         // this method is called only for targets that we are at explicit war with
         // and the friend is our ALLY
-        
+        //xilmi: It is possible to be in range but not have contact
+        if(!friend.hasContact(target))
+            return false;
         // if he's already at war, don't bother
         if (friend.atWarWith(target.id))
             return false;
@@ -770,6 +772,9 @@ public class AIDiplomat implements Base, Diplomat {
         // this method is called only for targets that we are at war with
         // or targets we are preparing for war with
         // only ask people who we are in real contact with
+        //xilmi: It is possible to be in range but not have contact
+        if(!friend.hasContact(target))
+            return false;
         if (!empire.inEconomicRange(friend.id))
             return false;
         if (friend.isPlayerControlled()) {
