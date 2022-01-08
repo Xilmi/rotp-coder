@@ -35,7 +35,6 @@ public class StarSystemFactory implements Base {
         IGameOptions opts = GameSession.instance().options();
         String type = opts.randomOrionStarType();
         StarSystem sys = StarSystem.create(type, gal);
-        // modnar: revert session().populationBonus(), Ray has modified PlanetFactory instead
         sys.planet(PlanetFactory.createOrion(sys, session().populationBonus()));
         sys.monster(new OrionGuardianShip());
         sys.name(text("PLANET_ORION"));
