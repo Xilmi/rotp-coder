@@ -1122,7 +1122,7 @@ SETUP_OPPONENTS_HEADER_2          | Rival Empires
 SETUP_OPPONENT_RANDOM             | ???
 SETUP_OPPONENT_AI                 | Play against:
 SETUP_OPPONENT_AI_BASE            | AI: Rookie
-SETUP_OPPONENT_AI_MODNAR          | AI: Advanced
+SETUP_OPPONENT_AI_MODNAR          | AI: Disciple
 SETUP_OPPONENT_AI_XILMI           | AI: Roleplay
 SETUP_OPPONENT_AI_DIPLOMAT        | AI: Diplomat
 SETUP_OPPONENT_AI_CRUEL           | AI: Xenophobe
@@ -1130,9 +1130,10 @@ SETUP_OPPONENT_AI_UNFAIR          | AI: Unfair
 SETUP_OPPONENT_AI_SELECT          | AI: Selectable
 SETUP_AUTOPLAY_OFF                | Off
 SETUP_AUTOPLAY_AI_BASE            | AI: Rookie
-SETUP_AUTOPLAY_AI_MODNAR          | AI: Advanced
-SETUP_AUTOPLAY_AI_XILMI           | AI: Expert
-SETUP_AUTOPLAY_AI_CRUEL           | AI: Cruel
+SETUP_AUTOPLAY_AI_MODNAR          | AI: Disciple
+SETUP_AUTOPLAY_AI_XILMI           | AI: Roleplay
+SETUP_AUTOPLAY_AI_DIPLOMAT        | AI: Diplomat
+SETUP_AUTOPLAY_AI_CRUEL           | AI: Xenophobe
 SETUP_GAME_DIFFICULTY_LABEL       | Difficulty
 SETUP_DIFFICULTY_EASIEST          | Nuclear
 SETUP_DIFFICULTY_EASIER           | Hyper-X
