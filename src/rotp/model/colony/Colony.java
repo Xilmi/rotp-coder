@@ -1,7 +1,7 @@
 /*
  * Copyright 2015-2020 Ray Fowler
  * 
- * Licensed under the GNU General Public License, Version 3 (the "License");
+ * Licensed under the GNU GeneraFl Public License, Version 3 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
@@ -968,7 +968,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
             clearTransport();
         else {
             StarSystem oldDest = transport().destination();
-            transport().size(xPop);
+            transport().size(pop);
             transport().setDest(dest);
             transport().setDefaultTravelSpeed();
             if (oldDest != null && oldDest != dest) {
@@ -987,6 +987,13 @@ public final class Colony implements Base, IMappedObject, Serializable {
         dest.colony().governIfNeeded();
     }
     public void acceptTransport(Transport t) {
+        if (!t.empire().canColonize(starSystem())) {
+            // no appropriate alert message for this transport loss. This is an edge case anyway
+            // as it occurs only when the destination system has been rendered inhabitable by a
+            // random event while the transport was in transits
+            t.size(0);
+            return;
+        }
         setPopulation(min(planet.currentSize(), (population() + t.size())));
         log("Accepting ", str(t.size()), " transports at: ", starSystem().name(), ". New pop:", fmt(population(), 2));
         t.size(0);
@@ -997,6 +1004,13 @@ public final class Colony implements Base, IMappedObject, Serializable {
     public void resistTransportWithRebels(Transport tr) {
         log(str(rebels), " ", empire().raceName(), " rebels at ", starSystem().name(), " resisting ",
                     str(tr.size()), " ", tr.empire().raceName(), " transports");
+
+        if (!tr.empire().canColonize(starSystem())) {
+            // no appropriate alert message for this transport loss. Even more of an edge case.
+            tr.size(0);
+            return;
+        }
+
         captives = population() - rebels;
         setPopulation(rebels);
 
@@ -1023,6 +1037,16 @@ public final class Colony implements Base, IMappedObject, Serializable {
     public void resistTransport(Transport tr) {
         log(empire().raceName() + " colony at " + starSystem().name() + " resisting " + tr.size() + " "
                         + tr.empire().raceName() + " transports");
+
+        if (!tr.empire().canColonize(starSystem())) {
+            if (tr.empire().isPlayerControlled())
+                TransportsKilledAlert.create(empire(), starSystem(), tr.launchSize());
+            else if (empire().isPlayerControlled())
+                InvadersKilledAlert.create(tr.empire(), starSystem(), tr.launchSize());
+            tr.size(0);
+            return;
+        }
+
         int passed = 0;
         int num = tr.size();
         float pct = tr.combatTransportPct();

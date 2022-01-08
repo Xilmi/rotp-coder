@@ -677,7 +677,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         newSystems.add(sys);
         addColonizedSystem(sys);
         sys.becomeColonized(sys.name(), this);
-        sys.colony().setPopulation(tr.size());
+        sys.colony().setPopulation(min(sys.planet().currentSize(),tr.size()));
         tr.size(0);
     }
     public Colony colonize(String sysName, StarSystem sys) {
@@ -2674,8 +2674,6 @@ public final class Empire implements Base, NamedObject, Serializable {
         EmpireView v = viewForEmpire(c);
         if (v == null)
             return true;
-        if (v.embassy().peaceTreatyInEffect())
-            return false;
         return v.embassy().canAttackWithoutPenalty(s);
     }
     public boolean atWarWith(int empId) {

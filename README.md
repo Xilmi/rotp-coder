@@ -19,10 +19,9 @@ https://github.com/rayfowler/rotp-public
 
 This governor manages planet spending to:
 
-* Set ecology to minimum "clean"
-* Set max production until all factories are built.
-* Set max ecology until max population is reached.
-* Set max defence until required number of bases is built.
+* Balance spending between Industry and Ecology to maximize growth.
+* Build all terraforming and factory upgrades when available.
+* Build and upgrade defences when needed.
 * Build a stargate if technology is available.
 * If all above have been built, research.
 
@@ -30,6 +29,12 @@ It can be toggled on or off for each planet. You can basically enable it on any
 planet not building ships and leave it untouched for most of the game. With new 
 tech discoveries it will readjust the sliders automatically. This cuts down the
 amount of micromanagement needed drastically.
+
+In addition Governor can:
+
+* Auto-transport population.
+* Auto-scout and Auto-colonize.
+* Very simple auto-attack.
 
 To run the mod:
 
@@ -43,7 +48,7 @@ or
 * Place it in same directory that contains original Remnants.jar
 * Run rotp-${project.version}-governor.jar
 
-Binary files are now built by github and available here: https://github.com/coder111111/rotp-public/packages/
+Binary files are now built by github and available here: https://github.com/coder111111/rotp-public/releases/
 
 To enable governor, use 'q' key on keyboard, or else click "Allocate Spending"
 text in the planetary spending screen. Since version 1.8 Governor is on by default.
@@ -51,6 +56,10 @@ text in the planetary spending screen. Since version 1.8 Governor is on by defau
 ---
 
 Additional features / changelog
+
+* 4.00.3 Merge 1.02a. Update Readme.
+
+* 4.00.2 Merge 1.01. No other changes so far.
 
 * 4.00.1 Merge 1.00. No other changes so far.
 
@@ -152,7 +161,7 @@ maximum population reached message should not be shown for governed planets and
 governor won't spend production on population growth if only 1-3 population remains 
 until limit. Also, my email is shown in case of error.
 
-* ROTP-1.11-mini.jar is now provided. It uses WebP images and Ooo Vorbis sounds.
+* ROTP-1.11-mini.jar is now provided. It uses WebP images and Ogg Vorbis sounds.
 It should have all the same features as ROTP but take up less space (~193 MB). Since
 WebP library uses native parts, this will only work on Windows (32 and 64 bit),
 Mac OSX 64 bit, Linux 64 bit. If you have a different system, use full-size ROTP.
@@ -190,4 +199,11 @@ It's a maven build. Git clone the sources, then do "mvn package" and you have en
 project built and packaged in "target" directory.
 
 Minimized build is provided on a separate branch. Minimized assets are not committed 
-to git, use shell scripts provided to do the conversion yourself.
+to git. Minimized assets are converted during the build using "cwebp" and "oggenc" tools. 
+Please make sure these are in your PATH or else the build will fail. You can find them:
+
+https://developers.google.com/speed/webp/docs/precompiled
+
+https://www.rarewares.org/ogg-oggenc.php
+
+Or install them using your Linux distribution package manager.
