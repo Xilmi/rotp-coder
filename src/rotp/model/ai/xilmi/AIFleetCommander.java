@@ -381,6 +381,7 @@ public class AIFleetCommander implements Base, FleetCommander {
             float enemyBombardDamage = 0.0f;
             float bombardDamage = 0.0f;
             float bc = 0.0f;
+            float myFightingBc = 0.0f;
             int colonizationBonus = 0;
             int colonizerEnroute = 0;
             boolean canScanTo = false;
@@ -392,6 +393,7 @@ public class AIFleetCommander implements Base, FleetCommander {
                 transports = systemInfoBuffer.get(id).enemyIncomingTransports;
                 bombardDamage = systemInfoBuffer.get(id).myBombardDamage;
                 bc = systemInfoBuffer.get(id).myTotalBc;
+                myFightingBc = systemInfoBuffer.get(id).myFightingBc;
                 myTransports = systemInfoBuffer.get(id).myIncomingTransports;
                 colonizationBonus = systemInfoBuffer.get(id).additionalSystemsInRangeWhenColonized;
                 colonizerEnroute = systemInfoBuffer.get(id).colonizersEnroute;
@@ -480,6 +482,8 @@ public class AIFleetCommander implements Base, FleetCommander {
                 {
                     continue;
                 }
+                if(myFightingBc > enemyFightingBc)
+                    continue;
             }
             else
             {
@@ -542,7 +546,8 @@ public class AIFleetCommander implements Base, FleetCommander {
                     speed = 1;
                 score /= pow(max(1, fleet.distanceTo(current) / speed), 2) + 1;
             }
-            //System.out.print("\n"+galaxy().currentTurn()+" "+fleet.empire().name()+" Fleet at "+empire.sv.name(fleet.system().id)+" => "+empire.sv.name(current.id)+" score: "+score+" enemy-transports: "+transports);
+            /*if(score > 0)
+                System.out.print("\n"+galaxy().currentTurn()+" "+fleet.empire().name()+" Fleet at "+empire.sv.name(fleet.system().id)+" => "+empire.sv.name(current.id)+" score: "+score+" enemy-transports: "+transports);*/
             if(score > bestScore)
             {
                 bestScore = score;
@@ -852,7 +857,7 @@ public class AIFleetCommander implements Base, FleetCommander {
                     }
                     if(target != null)
                     {
-                        //System.out.print("\n"+galaxy().currentTurn()+" "+fleet.empire().name()+" Fleet at "+empire.sv.name(fleet.system().id)+" wants to go for "+empire.sv.name(target.id));
+                        System.out.print("\n"+galaxy().currentTurn()+" "+fleet.empire().name()+" Fleet at "+empire.sv.name(fleet.system().id)+" wants to go for "+empire.sv.name(target.id));
                         UpdateSystemInfo(fleet.sysId());
                         Empire tgtEmpire = empire.sv.empire(target.id);
                         float stayToKillTransports = 0;
