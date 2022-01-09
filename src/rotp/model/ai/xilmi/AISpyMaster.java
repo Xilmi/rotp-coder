@@ -44,6 +44,8 @@ public class AISpyMaster implements Base, SpyMaster {
         float highestOpponentTechLevel = 0;
         for (EmpireView cv : empire.empireViews()) {
             if ((cv != null) && cv.embassy().contact() && cv.inEconomicRange()) {
+                if(empire.allies().contains(cv.empire()))
+                    continue;
                 if(cv.empire().tech().avgTechLevel() > highestOpponentTechLevel)
                     highestOpponentTechLevel = cv.empire().tech().avgTechLevel();
             }

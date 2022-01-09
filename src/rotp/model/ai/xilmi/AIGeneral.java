@@ -729,6 +729,18 @@ public class AIGeneral implements Base, General {
             //Since there's allied victory, there's no reason to ever break up with our alliance
             if(empire.alliedWith(emp.id))
                 continue;
+            //skip allies of our allies too because that makes for stupid situations
+            boolean skip = false;
+            for(Empire ally : empire.allies())
+            {
+                if(ally.alliedWith(emp.id))
+                {
+                    skip = true;
+                    break;
+                }
+            }
+            if(skip)
+                continue;
             if(!empire.inShipRange(emp.id))
                 continue;
             if(empire.tech().topSpeed() < empire.viewForEmpire(emp).spies().tech().topSpeed())

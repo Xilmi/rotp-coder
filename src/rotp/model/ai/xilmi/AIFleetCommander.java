@@ -1353,7 +1353,7 @@ public class AIFleetCommander implements Base, FleetCommander {
     public StarSystem RetreatSystem(ShipFleet fl) {
         float shortestDistance = Float.MAX_VALUE;
         StarSystem best = null;
-        for(StarSystem sys : empire.allColonizedSystems())
+        for(StarSystem sys : empire.allySystems())
         {
             UpdateSystemInfo(sys.id);
             if(systemInfoBuffer.get(sys.id).enemyFightingBc > bcValue(fl, false, true, false, false) + systemInfoBuffer.get(sys.id).myFightingBc)

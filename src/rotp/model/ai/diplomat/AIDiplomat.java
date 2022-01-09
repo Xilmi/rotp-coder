@@ -625,20 +625,18 @@ public class AIDiplomat implements Base, Diplomat {
         v.embassy().resetPactTimer();
         return DiplomaticReply.answer(false, declineReasonText(v));
     }
-    //ail: pacts just restrict us unnecessarily
     private boolean willingToOfferPact(EmpireView v) {
-        /*
-        if(UserPreferences.xilmiRoleplayMode() && empire.leader().isPacifist())
-            return true;
-        if(UserPreferences.xilmiRoleplayMode() && empire.leader().isHonorable())
+        boolean alliedWithAlly = false;
+        for(Empire ally : empire.allies())
         {
-            for(Empire enemy : empire.enemies())
+            if(ally.alliedWith(v.empId()))
             {
-                if(v.empire().warEnemies().contains(enemy))
-                    return true;
+                alliedWithAlly = true;
+                break;
             }
         }
-        */
+        if(alliedWithAlly)
+            return true;
         return willingToOfferAlliance(v.empire());
     }
     //-----------------------------------
@@ -733,7 +731,16 @@ public class AIDiplomat implements Base, Diplomat {
             }
         }
         */
-        if(determineGoal() == SURVIVAL && e != empire.generalAI().bestVictim() && !e.atWar())
+        boolean isEnemyOfAlly = false;
+        for(Empire ally : empire.allies())
+        {
+            if(ally.atWarWith(v.empId()))
+            {
+                isEnemyOfAlly = true;
+                break;
+            }
+        }
+        if(determineGoal() == SURVIVAL && e != empire.generalAI().bestVictim() && !isEnemyOfAlly)
             return true;
         return false;
     }
@@ -1117,23 +1124,17 @@ public class AIDiplomat implements Base, Diplomat {
         if (willingToOfferTrade(v, v.trade().maxLevel())) {
             v.empire().diplomatAI().receiveOfferTrade(v.owner(), v.trade().maxLevel());
         }
-        
-        decidedToExchangeTech(v);
-        //Okay, this was a bit ridiculous ^^
-        /*if(UserPreferences.xilmiRoleplayMode() && empire.leader().isErratic())
-        {
-            if(!offerableTechnologies(v.empire()).isEmpty() && v.empire() != empire.generalAI().bestVictim() && empire.tradingWith(v.empire()))
-            {
-                System.out.println(empire.galaxy().currentTurn()+" "+ empire.name()+" offers "+offerableTechnologies(v.empire()).get(0).id+" to "+v.empire().name());
-                v.empire().diplomatAI().receiveTechnologyAid(empire, offerableTechnologies(v.empire()).get(0).id);
-            }
-        }*/
-        
         if (canOfferPact(v.empire()) && willingToOfferPact(v)) {
             v.empire().diplomatAI().receiveOfferPact(empire);
         }
         if (canOfferAlliance(v.empire()) && willingToOfferAlliance(v.empire())) {
             v.empire().diplomatAI().receiveOfferAlliance(v.owner());
+        }
+        decidedToExchangeTech(v);
+        if(empire.allies().contains(v.empire()))
+        {
+            while(canOfferTechnology(v.empire()))
+                v.empire().diplomatAI().receiveTechnologyAid(empire, offerableTechnologies(v.empire()).get(0).id);
         }
         decidedToIssuePraise(v);
     }
@@ -1697,7 +1698,7 @@ public class AIDiplomat implements Base, Diplomat {
     }
     //when I'm part of an alliance, I have to follow different rules of whether I'm war-weary. I can't just use my own private logic
     private boolean warWearyAlliance(EmpireView v) {
-        if(empire.warEnemies().size() > empire.allies().size() + 1)
+        if(empire.warEnemies().size() > empire.allies().size())
             return true;
         if(determineGoal() == SURVIVAL)
             return true;
