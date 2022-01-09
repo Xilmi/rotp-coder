@@ -23,7 +23,6 @@ import rotp.model.ai.interfaces.Diplomat;
 import rotp.model.combat.CombatStack;
 import rotp.model.combat.ShipCombatResults;
 import rotp.model.empires.DiplomaticEmbassy;
-import rotp.model.empires.DiplomaticTreaty;
 import rotp.model.empires.Empire;
 import rotp.model.empires.EmpireView;
 import rotp.model.empires.GalacticCouncil;
@@ -37,10 +36,6 @@ import static rotp.model.empires.Leader.Objective.TECHNOLOGIST;
 import static rotp.model.empires.Leader.Personality.AGGRESSIVE;
 import static rotp.model.empires.Leader.Personality.PACIFIST;
 import static rotp.model.empires.Leader.Personality.XENOPHOBIC;
-import rotp.model.empires.SpyNetwork;
-import rotp.model.empires.SpyNetwork.Mission;
-import rotp.model.empires.SpyReport;
-import rotp.model.empires.TreatyWar;
 import rotp.model.events.StarSystemEvent;
 import rotp.model.galaxy.Galaxy;
 import rotp.model.galaxy.ShipFleet;
@@ -79,7 +74,6 @@ import rotp.ui.notifications.DiplomaticNotification;
 import rotp.util.Base;
 
 public class AIDiplomat implements Base, Diplomat {
-    private static final float ERRATIC_WAR_PCT = .02f;
     private final Empire empire;
     private float cumulativeSeverity = 0;
 
@@ -1066,7 +1060,7 @@ public class AIDiplomat implements Base, Diplomat {
 //----------------
     @Override
     public void makeDiplomaticOffers(EmpireView v) {
-        updatePersonality();
+        //updatePersonality(); this is too telling but I'll leave the code in
         if(empire.enemies().contains(v.empire()) && !empire.warEnemies().contains(v.empire()))
         {
             if(!empire.inShipRange(v.empId()))

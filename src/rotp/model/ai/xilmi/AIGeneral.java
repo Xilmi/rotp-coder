@@ -1169,6 +1169,8 @@ public class AIGeneral implements Base, General {
                 continue;
             if(emp == empire)
                 continue;
+            if(empire.alliedWith(emp.id))
+                continue;
             float threat = emp.powerLevel(emp) * 1 / (fleetCenter(emp).distanceTo(colonyCenter(empire)));
             //System.out.println(galaxy().currentTurn()+" "+empire.name()+" fear-level of: "+emp.name()+": "+threat);
             if(threat > highestThreat)

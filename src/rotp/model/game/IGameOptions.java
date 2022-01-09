@@ -151,18 +151,30 @@ public interface IGameOptions {
     
     public static final String OPPONENT_AI_BASE       = "SETUP_OPPONENT_AI_BASE";
     public static final String OPPONENT_AI_MODNAR     = "SETUP_OPPONENT_AI_MODNAR";
+    public static final String OPPONENT_AI_PACIFIST   = "SETUP_OPPONENT_AI_PACIFIST";
     public static final String OPPONENT_AI_XILMI      = "SETUP_OPPONENT_AI_XILMI";
     public static final String OPPONENT_AI_DIPLOMAT   = "SETUP_OPPONENT_AI_DIPLOMAT";
     public static final String OPPONENT_AI_CRUEL      = "SETUP_OPPONENT_AI_CRUEL";
+    public static final String OPPONENT_AI_RUTHLESS   = "SETUP_OPPONENT_AI_RUTHLESS";
+    public static final String OPPONENT_AI_AGGRESSIVE = "SETUP_OPPONENT_AI_AGGRESSIVE";
     public static final String OPPONENT_AI_UNFAIR     = "SETUP_OPPONENT_AI_UNFAIR";
+    public static final String OPPONENT_AI_PERSONAL   = "SETUP_OPPONENT_AI_PERSONAL";
+    public static final String OPPONENT_AI_RANDOM     = "SETUP_OPPONENT_AI_RANDOM";
+    public static final String OPPONENT_AI_ALLRANDOM  = "SETUP_OPPONENT_AI_ALLRANDOM";
     public static final String OPPONENT_AI_SELECTABLE = "SETUP_OPPONENT_AI_SELECT";
     
     public static final String AUTOPLAY_OFF           = "SETUP_AUTOPLAY_OFF";
     public static final String AUTOPLAY_AI_BASE       = "SETUP_AUTOPLAY_AI_BASE";
     public static final String AUTOPLAY_AI_MODNAR     = "SETUP_AUTOPLAY_AI_MODNAR";
+    public static final String AUTOPLAY_AI_PACIFIST   = "SETUP_AUTOPLAY_AI_PACIFIST";
     public static final String AUTOPLAY_AI_XILMI      = "SETUP_AUTOPLAY_AI_XILMI";
     public static final String AUTOPLAY_AI_DIPLOMAT   = "SETUP_AUTOPLAY_AI_DIPLOMAT";
     public static final String AUTOPLAY_AI_CRUEL      = "SETUP_AUTOPLAY_AI_CRUEL";
+    public static final String AUTOPLAY_AI_RUTHLESS   = "SETUP_AUTOPLAY_AI_RUTHLESS";
+    public static final String AUTOPLAY_AI_AGGRESSIVE = "SETUP_AUTOPLAY_AI_AGGRESSIVE";
+    public static final String AUTOPLAY_AI_PERSONAL   = "SETUP_AUTOPLAY_AI_PERSONAL";
+    public static final String AUTOPLAY_AI_RANDOM     = "SETUP_AUTOPLAY_AI_RANDOM";
+    public static final String AUTOPLAY_AI_ALLRANDOM  = "SETUP_AUTOPLAY_AI_ALLRANDOM";
     
     public default boolean isAutoPlay()          { return !selectedAutoplayOption().equals(AUTOPLAY_OFF); }
     public default boolean communityAI()         { return false; }
