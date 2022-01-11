@@ -545,7 +545,7 @@ public class Ships implements Base, Serializable {
         List<ShipFleet> fleets = new ArrayList<>();
         
         for (ShipFleet fl: fleetsAll) {
-            if ((fl.sysId() == sysId))
+            if ((fl.sysId() == sysId) && fl.inOrbit())
                 fleets.add(fl);
         }
         return fleets;
