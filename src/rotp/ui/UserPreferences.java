@@ -77,7 +77,7 @@ public class UserPreferences {
     private static boolean divertColonyExcessToResearch = true;
     private static boolean xilmiRoleplayMode = false;
     private static String autoBombardMode = AUTOBOMBARD_NO;
-    private static String displayMode = FULLSCREEN_MODE;
+    private static String displayMode = BORDERLESS_MODE;
     private static String graphicsMode = GRAPHICS_HIGH;
     private static String texturesMode = TEXTURES_MAP; // modnar: set default texture to only map, no interface
     private static String sensitivityMode = SENSITIVITY_MEDIUM;
