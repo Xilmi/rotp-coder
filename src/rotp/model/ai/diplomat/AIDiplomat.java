@@ -740,7 +740,7 @@ public class AIDiplomat implements Base, Diplomat {
                 break;
             }
         }
-        if(determineGoal() == SURVIVAL && e != empire.generalAI().bestVictim() && !isEnemyOfAlly)
+        if(determineGoal() == SURVIVAL && e != empire.generalAI().bestVictim() && !isEnemyOfAlly && e == empire.generalAI().bestAlly())
             return true;
         return false;
     }
@@ -1937,7 +1937,7 @@ public class AIDiplomat implements Base, Diplomat {
     @Override
     public boolean masksDiplomacy()
     {
-        return true;
+        return false;
     }
     public int determineGoal() 
     {
@@ -1945,18 +1945,20 @@ public class AIDiplomat implements Base, Diplomat {
         float myPopCap = empire.generalAI().totalEmpirePopulationCapacity(empire);
         float myAlliancePopCap = myPopCap;
         float totalPopCap = myPopCap;
+        float contactCount = 0;
         for(Empire emp:empire.contactedEmpires())
         {
             if(!empire.inEconomicRange(emp.id))
                 continue;
+            contactCount++;
             float currentPop = empire.generalAI().totalEmpirePopulationCapacity(emp);
             totalPopCap += currentPop;
             if(empire.alliedWith(emp.id))
                 myAlliancePopCap += currentPop;
         }
-        if(myPopCap > 1f/3 * totalPopCap)
+        if(myPopCap > 1f/contactCount * totalPopCap)
             currentGoal = SOLO_VICTORY;
-        else if(myAlliancePopCap > 1f/3 * totalPopCap)
+        else if(myAlliancePopCap > 1f/contactCount * totalPopCap)
             currentGoal = ALLIED_VICTORY;
         return currentGoal;
     }

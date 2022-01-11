@@ -857,7 +857,7 @@ public class AIFleetCommander implements Base, FleetCommander {
                     }
                     if(target != null)
                     {
-                        System.out.print("\n"+galaxy().currentTurn()+" "+fleet.empire().name()+" Fleet at "+empire.sv.name(fleet.system().id)+" wants to go for "+empire.sv.name(target.id));
+                        //System.out.print("\n"+galaxy().currentTurn()+" "+fleet.empire().name()+" Fleet at "+empire.sv.name(fleet.system().id)+" wants to go for "+empire.sv.name(target.id));
                         UpdateSystemInfo(fleet.sysId());
                         Empire tgtEmpire = empire.sv.empire(target.id);
                         float stayToKillTransports = 0;

@@ -309,7 +309,6 @@ public class AIDiplomat implements Base, Diplomat {
             Tech wantedTech = empire.ai().scientist().mostDesirableTech(availableTechs);
             availableTechs.remove(wantedTech);
             if (empire.ai().scientist().researchValue(wantedTech) > 1) {
-                
                 List<Tech> counterTechs = v.empire().diplomatAI().techsRequestedForCounter(empire, wantedTech);
                 if (!counterTechs.isEmpty()) {
                     List<Tech> previouslyOffered = v.embassy().alreadyOfferedTechs(wantedTech);
