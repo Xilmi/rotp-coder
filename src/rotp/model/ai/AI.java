@@ -46,16 +46,11 @@ import rotp.util.Base;
 public class AI implements Base {
     public static final int BASE = 0;
     public static final int MODNAR = 1;
-    public static final int PACIFIST = 2;
-    public static final int XILMI = 3;
-    public static final int DIPLOMAT = 4;
-    public static final int AGGRESSIVE = 5;
-    public static final int CRUEL = 6;
-    public static final int RUTHLESS = 7;
-    public static final int UNFAIR = 8;
-    public static final int PERSONAL = 9;
-    public static final int RANDOM = 10;
-    public static final int ALLRANDOM = 11;
+    public static final int XILMI = 2;
+    public static final int CRUEL = 3;
+    public static final int UNFAIR = 4;
+    public static final int RANDOM = 5;
+    public static final int ALLRANDOM = 6;
     
     private final Empire empire;
 
@@ -73,33 +68,11 @@ public class AI implements Base {
         empire = e;
         
         switch (aiType) {
-            case PERSONAL:
-                switch(empire.leader().personality)
-                {
-                    case HONORABLE:
-                        aiType = DIPLOMAT;
-                        break;
-                    case XENOPHOBIC:
-                        aiType = CRUEL;
-                        break;
-                    case AGGRESSIVE:
-                        aiType = AGGRESSIVE;
-                        break;
-                    case RUTHLESS:
-                        aiType = RUTHLESS;
-                        break;
-                    case PACIFIST:
-                        aiType = PACIFIST;
-                        break;
-                    case ERRATIC:
-                    default:
-                        aiType = XILMI;
-                }   break;
             case RANDOM:
-                aiType = random.nextInt(8);
+                aiType = random.nextInt(4);
                 break;
             case ALLRANDOM:
-                aiType = random.nextInt(9);
+                aiType = random.nextInt(5);
                 break;
             default:
                 break;
@@ -138,56 +111,12 @@ public class AI implements Base {
                 spyMaster =      new rotp.model.ai.xilmi.AISpyMaster(empire);
                 treasurer =      new rotp.model.ai.xilmi.AITreasurer(empire);
                 break;
-            case PACIFIST:
-                general =        new rotp.model.ai.xilmi.AIGeneral(empire);
-                captain =        new rotp.model.ai.xilmi.AIShipCaptain(empire);
-                governor =       new rotp.model.ai.xilmi.AIGovernor(empire);
-                scientist =      new rotp.model.ai.xilmi.AIScientist(empire);
-                diplomat =       new rotp.model.ai.pacifist.AIDiplomat(empire);
-                shipDesigner =   new rotp.model.ai.xilmi.AIShipDesigner(empire);
-                fleetCommander = new rotp.model.ai.xilmi.AIFleetCommander(empire);
-                spyMaster =      new rotp.model.ai.xilmi.AISpyMaster(empire);
-                treasurer =      new rotp.model.ai.xilmi.AITreasurer(empire);
-                break;
-            case AGGRESSIVE:
-                general =        new rotp.model.ai.xilmi.AIGeneral(empire);
-                captain =        new rotp.model.ai.xilmi.AIShipCaptain(empire);
-                governor =       new rotp.model.ai.xilmi.AIGovernor(empire);
-                scientist =      new rotp.model.ai.xilmi.AIScientist(empire);
-                diplomat =       new rotp.model.ai.aggressive.AIDiplomat(empire);
-                shipDesigner =   new rotp.model.ai.xilmi.AIShipDesigner(empire);
-                fleetCommander = new rotp.model.ai.xilmi.AIFleetCommander(empire);
-                spyMaster =      new rotp.model.ai.xilmi.AISpyMaster(empire);
-                treasurer =      new rotp.model.ai.xilmi.AITreasurer(empire);
-                break;
             case UNFAIR:
                 general =        new rotp.model.ai.xilmi.AIGeneral(empire);
                 captain =        new rotp.model.ai.xilmi.AIShipCaptain(empire);
                 governor =       new rotp.model.ai.xilmi.AIGovernor(empire);
                 scientist =      new rotp.model.ai.xilmi.AIScientist(empire);
                 diplomat =       new rotp.model.ai.unfair.AIDiplomat(empire);
-                shipDesigner =   new rotp.model.ai.xilmi.AIShipDesigner(empire);
-                fleetCommander = new rotp.model.ai.xilmi.AIFleetCommander(empire);
-                spyMaster =      new rotp.model.ai.xilmi.AISpyMaster(empire);
-                treasurer =      new rotp.model.ai.xilmi.AITreasurer(empire);
-                break;
-            case DIPLOMAT:
-                general =        new rotp.model.ai.xilmi.AIGeneral(empire);
-                captain =        new rotp.model.ai.xilmi.AIShipCaptain(empire);
-                governor =       new rotp.model.ai.xilmi.AIGovernor(empire);
-                scientist =      new rotp.model.ai.xilmi.AIScientist(empire);
-                diplomat =       new rotp.model.ai.diplomat.AIDiplomat(empire);
-                shipDesigner =   new rotp.model.ai.xilmi.AIShipDesigner(empire);
-                fleetCommander = new rotp.model.ai.xilmi.AIFleetCommander(empire);
-                spyMaster =      new rotp.model.ai.xilmi.AISpyMaster(empire);
-                treasurer =      new rotp.model.ai.xilmi.AITreasurer(empire);
-                break;
-            case RUTHLESS:
-                general =        new rotp.model.ai.xilmi.AIGeneral(empire);
-                captain =        new rotp.model.ai.xilmi.AIShipCaptain(empire);
-                governor =       new rotp.model.ai.xilmi.AIGovernor(empire);
-                scientist =      new rotp.model.ai.xilmi.AIScientist(empire);
-                diplomat =       new rotp.model.ai.ruthless.AIDiplomat(empire);
                 shipDesigner =   new rotp.model.ai.xilmi.AIShipDesigner(empire);
                 fleetCommander = new rotp.model.ai.xilmi.AIFleetCommander(empire);
                 spyMaster =      new rotp.model.ai.xilmi.AISpyMaster(empire);
