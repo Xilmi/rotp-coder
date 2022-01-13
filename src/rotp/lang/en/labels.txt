@@ -261,6 +261,36 @@ INC_PARANOIA_DESC2                | A marginal faction within the [my_empire] be
 INC_PARANOIA_DESC3                | A vocal minority within the [my_empire] are expressing concerns that the [your_race] represent an existential threat to their species. The [your_empire] now occupies [num] systems originally founded by the [my_empire].
 INC_PARANOIA_DESC4                | A huge swathe among the [my_empire] is calling for action over the growing fears that the [your_race] may indeed be an existential threat to their species. The [your_empire] now occupies [num] systems originally founded by the [my_empire].
 INC_PARANOIA_DESC5                | Mass panics have gripped the [my_empire] over the realization that the [your_race] have clearly become an existential threat to their species. The [your_empire] now occupies [num] systems originally founded by the [my_empire].
+INC_DIPLOMAT_TITLE                | Diplomat
+INC_DIPLOMAT_DESC1                | The [your_empire] is the least popular empire [my_empire] is aware of.
+INC_DIPLOMAT_DESC2                | The [your_empire] is not exactly popular among other empires.
+INC_DIPLOMAT_DESC3                | The [your_empire] is quite popular among other empires.
+INC_DIPLOMAT_DESC4                | The [your_empire] is famous and admired by other empires.
+INC_ECOLOGIST_TITLE               | Ecologist
+INC_ECOLOGIST_DESC1               | The [my_empire] badly wants to improve your terrible ecologies.
+INC_ECOLOGIST_DESC2               | The [my_empire] considers your ecologies to need some work.
+INC_ECOLOGIST_DESC3               | The [your_empire] has created decent living-conditions for their people.
+INC_ECOLOGIST_DESC4               | The [my_empire] admires the ability of the [your_empire] to turn planets into such lush dwellings.
+INC_EXPANSIONIST_TITLE            | Expansionist
+INC_EXPANSIONIST_DESC1            | The [your_empire] is blocking most of the planets that should belong to the [my_empire].
+INC_EXPANSIONIST_DESC2            | The [your_empire] is blocking a lot of the planets that should belong to the [my_empire].
+INC_EXPANSIONIST_DESC3            | The [your_empire] was wise not to colonize too many planets and leave more for the [my_empire].
+INC_EXPANSIONIST_DESC4            | The [your_empire] seems happy with the planet-count that the [my_empire] allows them to have.
+INC_INDUSTRIALIST_TITLE           | Industrialist
+INC_INDUSTRIALIST_DESC1           | The [your_empire] has the least efficient industry.
+INC_INDUSTRIALIST_DESC2           | The [your_empire] has an inefficient industry.
+INC_INDUSTRIALIST_DESC3           | The [your_empire] runs a decently efficient industry.
+INC_INDUSTRIALIST_DESC4           | The [my_empire] admires the ability of the [your_empire] to maximize productivity.
+INC_MILITARIST_TITLE              | Militarist
+INC_MILITARIST_DESC1              | The [your_empire] doesn't seem to want to protect their empire.
+INC_MILITARIST_DESC2              | The [your_empire] shows vulnerabilites in their defenses.
+INC_MILITARIST_DESC3              | The [your_empire] maintains a solid standing army.
+INC_MILITARIST_DESC4              | The [my_empire] is impressed by your dedication for military.
+INC_TECHNOLOGIST_TITLE            | Technolgoist
+INC_TECHNOLOGIST_DESC1            | The [your_empire] does not seem to be interested in modern technology.
+INC_TECHNOLOGIST_DESC2            | The [your_empire] is not very ambitious at driving technological progress.
+INC_TECHNOLOGIST_DESC3            | The [your_empire] contributes to technological advancement quite nicely.
+INC_TECHNOLOGIST_DESC4            | The [your_empire] is a leading contributor to technological advancement.
 INC_EXPANSION_TITLE               | Expansion
 INC_EXPANSION_DESC                | With control of [num] systems, the [your_empire] has grown too large.
 INC_GENOCIDE_TITLE                | Genocide
@@ -1123,37 +1153,27 @@ SETUP_OPPONENT_RANDOM             | ???
 SETUP_OPPONENT_AI                 | Play against:
 SETUP_OPPONENT_AI_BASE            | AI: Rookie
 SETUP_OPPONENT_AI_MODNAR          | AI: Disciple
-SETUP_OPPONENT_AI_PACIFIST        | AI: Pacifist
-SETUP_OPPONENT_AI_XILMI           | AI: Roleplay
-SETUP_OPPONENT_AI_DIPLOMAT        | AI: Diplomat
-SETUP_OPPONENT_AI_AGGRESSIVE      | AI: Aggressive
-SETUP_OPPONENT_AI_RUTHLESS        | AI: Ruthless
-SETUP_OPPONENT_AI_CRUEL           | AI: Xenophobe
+SETUP_OPPONENT_AI_XILMI           | AI: Expert
+SETUP_OPPONENT_AI_CRUEL           | AI: Legacy
 SETUP_OPPONENT_AI_UNFAIR          | AI: Unfair
-SETUP_OPPONENT_AI_PERSONAL        | AI: Leader
 SETUP_OPPONENT_AI_RANDOM          | AI: Random
 SETUP_OPPONENT_AI_ALLRANDOM       | AI: Random+
 SETUP_OPPONENT_AI_SELECT          | AI: Selectable
 SETUP_AUTOPLAY_OFF                | Off
 SETUP_AUTOPLAY_AI_BASE            | AI: Rookie
 SETUP_AUTOPLAY_AI_MODNAR          | AI: Disciple
-SETUP_AUTOPLAY_AI_PACIFIST        | AI: Pacifist
-SETUP_AUTOPLAY_AI_XILMI           | AI: Roleplay
-SETUP_AUTOPLAY_AI_DIPLOMAT        | AI: Diplomat
-SETUP_AUTOPLAY_AI_AGGRESSIVE      | AI: Aggressive
-SETUP_AUTOPLAY_AI_RUTHLESS        | AI: Ruthless
-SETUP_AUTOPLAY_AI_CRUEL           | AI: Xenophobe
-SETUP_AUTOPLAY_AI_PERSONAL        | AI: Leader
+SETUP_AUTOPLAY_AI_XILMI           | AI: Expert
+SETUP_AUTOPLAY_AI_CRUEL           | AI: Legacy
 SETUP_AUTOPLAY_AI_RANDOM          | AI: Random
 SETUP_AUTOPLAY_AI_ALLRANDOM       | AI: Random+
 SETUP_GAME_DIFFICULTY_LABEL       | Difficulty
-SETUP_DIFFICULTY_EASIEST          | Nuclear
-SETUP_DIFFICULTY_EASIER           | Hyper-X
-SETUP_DIFFICULTY_EASY             | Merculite
-SETUP_DIFFICULTY_NORMAL           | Stinger
-SETUP_DIFFICULTY_HARD             | Pulson
-SETUP_DIFFICULTY_HARDER           | Hercular
-SETUP_DIFFICULTY_HARDEST          | Zeon
+SETUP_DIFFICULTY_EASIEST          | Easiest
+SETUP_DIFFICULTY_EASIER           | Easier
+SETUP_DIFFICULTY_EASY             | Easy
+SETUP_DIFFICULTY_NORMAL           | Normal
+SETUP_DIFFICULTY_HARD             | Hard
+SETUP_DIFFICULTY_HARDER           | Harder
+SETUP_DIFFICULTY_HARDEST          | Hardest
 SETUP_DIFFICULTY_CUSTOM           | Custom
 SETUP_RESEARCH_RATE_NORMAL        | Normal
 // mondar: add fast research option
