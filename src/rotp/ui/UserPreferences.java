@@ -75,7 +75,6 @@ public class UserPreferences {
     private static int companionWorlds = 0; // modnar: add option to start game with additional colonies
     private static boolean autoColonize = false;
     private static boolean divertColonyExcessToResearch = true;
-    private static boolean xilmiRoleplayMode = false;
     private static String autoBombardMode = AUTOBOMBARD_NO;
     private static String displayMode = BORDERLESS_MODE;
     private static String graphicsMode = GRAPHICS_HIGH;
@@ -287,7 +286,6 @@ public class UserPreferences {
     public static void setGovernorOn(boolean governorOn)    { governorOnByDefault = governorOn; save(); }
     public static boolean governorOnByDefault() { return governorOnByDefault; }
     public static boolean divertColonyExcessToResearch()  { return divertColonyExcessToResearch; }
-    public static boolean xilmiRoleplayMode() { return xilmiRoleplayMode; }
     public static void uiTexturePct(int i)    { uiTexturePct = i / 100.0f; }
     public static float uiTexturePct()        { return uiTexturePct; }
 
@@ -336,7 +334,6 @@ public class UserPreferences {
             out.println(keyFormat("DEFAULT_MAX_BASES") + defaultMaxBases);
             out.println(keyFormat("GOVERNOR_ON_BY_DEFAULT") + yesOrNo(governorOnByDefault));
             out.println(keyFormat("DIVERT_COLONY_EXCESS_TO_RESEARCH")+ yesOrNo(divertColonyExcessToResearch));
-            out.println(keyFormat("XILMI_ROLEPLAY_MODE") + yesOrNo(xilmiRoleplayMode));
             out.println(keyFormat("SCREEN_SIZE_PCT")+ screenSizePct());
             out.println(keyFormat("UI_TEXTURE_LEVEL")+(int) (uiTexturePct()*100));
             out.println(keyFormat("CUSTOM_DIFFICULTY")+ customDifficulty); // mondar: add custom difficulty level option, in units of percent
@@ -394,7 +391,6 @@ public class UserPreferences {
             case "DEFAULT_MAX_BASES": defaultMaxBases = Integer.valueOf(val); return;
             case "GOVERNOR_ON_BY_DEFAULT": governorOnByDefault = yesOrNo(val); return;
             case "DIVERT_COLONY_EXCESS_TO_RESEARCH": divertColonyExcessToResearch = yesOrNo(val); return;
-            case "XILMI_ROLEPLAY_MODE": xilmiRoleplayMode = yesOrNo(val); return;
             case "SCREEN_SIZE_PCT": screenSizePct(Integer.valueOf(val)); return;
             case "UI_TEXTURE_LEVEL": uiTexturePct(Integer.valueOf(val)); return;
             case "CUSTOM_DIFFICULTY": setCustomDifficulty(val); return; // mondar: add custom difficulty level option, in units of percent
