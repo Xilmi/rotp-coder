@@ -482,7 +482,7 @@ public class AIFleetCommander implements Base, FleetCommander {
                 {
                     continue;
                 }
-                if(myFightingBc > enemyFightingBc)
+                if(myFightingBc > enemyFightingBc && !handleEvent)
                     continue;
             }
             else
