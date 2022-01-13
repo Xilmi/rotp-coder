@@ -746,23 +746,6 @@ public class AIGeneral implements Base, General {
             if(empire.tech().topSpeed() < empire.viewForEmpire(emp).spies().tech().topSpeed())
                 continue;
             float currentScore = totalEmpirePopulationCapacity(emp) / (fleetCenter(empire).distanceTo(colonyCenter(emp)) + colonyCenter(empire).distanceTo(colonyCenter(emp)));
-            if(UserPreferences.xilmiRoleplayMode() && empire.leader().isHonorable())
-            {
-                if(!emp.atWar())
-                    continue;
-                currentScore = emp.totalPlanetaryIncome() + emp.totalFleetCost();
-            }
-            if(UserPreferences.xilmiRoleplayMode() && empire.leader().isErratic())
-            {
-                //As Erratic we want to do something that is arbitrary but not random.
-                currentScore = 0;
-                for(EmpireView ev : emp.contacts())
-                {
-                    if(emp.atWarWith(ev.empId()))
-                        continue;
-                    currentScore += emp.contactAge(ev.empire());
-                }
-            }
             //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" vs "+emp.name()+" dist: "+fleetCenter(empire).distanceTo(colonyCenter(emp))+" rev-dist: "+fleetCenter(emp).distanceTo(colonyCenter(empire))+" milrank: "+empire.diplomatAI().militaryRank(emp, true)+" poprank: "+empire.diplomatAI().popCapRank(emp, true)+" score: "+currentScore);
             if(currentScore > highestScore)
             {

@@ -1016,11 +1016,6 @@ public class AIDiplomat implements Base, Diplomat {
     }
     //ail: no good reason to ever break an alliance
     private boolean wantToBreakAlliance(EmpireView v) {
-        if(UserPreferences.xilmiRoleplayMode() && empire.leader().isPacifist())
-        {
-            if(v.empire().atWar())
-                return true;
-        }
         if(!canBreakAlliance(v.empire()))
             return false;
         return false;
@@ -1065,11 +1060,7 @@ public class AIDiplomat implements Base, Diplomat {
             if(!empire.inShipRange(v.empId()))
                 v.embassy().endWarPreparations();
         }
-        if(UserPreferences.xilmiRoleplayMode() && empire.leader().isXenophobic() && !empire.atWarWith(v.empId()))
-        {
-            if(!v.embassy().diplomatGone())
-                v.embassy().recallAmbassador();
-        } else if(v.embassy().diplomatGone()) {
+        if(v.embassy().diplomatGone()) {
             v.embassy().openEmbassy();
         }
             
@@ -1389,8 +1380,6 @@ public class AIDiplomat implements Base, Diplomat {
         //Ail: If there's only two empires left, there's no time for preparation. We cannot allow them the first-strike-advantage!
         if(galaxy().numActiveEmpires() < 3)
             warAllowed = true;
-        if(UserPreferences.xilmiRoleplayMode() && empire.leader().isAggressive())
-            warAllowed = true;
         return warAllowed;
     }
     public boolean wantToDeclareWar(EmpireView v) {
@@ -1399,8 +1388,6 @@ public class AIDiplomat implements Base, Diplomat {
         {
             return false;
         }
-        if(UserPreferences.xilmiRoleplayMode() && empire.leader().isPacifist())
-            return false;
         if(!empire.inShipRange(v.empId()))
             return false;
         if(galaxy().options().baseAIRelationsAdj() <= -30)
@@ -1686,8 +1673,6 @@ public class AIDiplomat implements Base, Diplomat {
    private boolean warWeary(EmpireView v) {
         if (v.embassy().finalWar() || galaxy().activeEmpires().size() < 3)
             return false;
-        if(UserPreferences.xilmiRoleplayMode() && empire.leader().isPacifist())
-            return true;
         //ail: when we have incoming transports, we don't want them to perish
         for(Transport trans:empire.transports())
         {
@@ -1709,7 +1694,7 @@ public class AIDiplomat implements Base, Diplomat {
         if(empire.warEnemies().size() > 1)
             return true;
         //ail: If I'm outteched by others I also don't really want to stick to a war anymore, except for aggressive leader as that would lead to contradictory behavior
-        if(techLevelRank() > popCapRank(empire, false) && !(UserPreferences.xilmiRoleplayMode() && empire.leader().isAggressive()))
+        if(techLevelRank() > popCapRank(empire, false))
             return true;
         boolean everythingUnderSiege = true;
         for(StarSystem sys : empire.allColonizedSystems())

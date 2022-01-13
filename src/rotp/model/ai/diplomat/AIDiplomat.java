@@ -731,16 +731,7 @@ public class AIDiplomat implements Base, Diplomat {
             }
         }
         */
-        boolean isEnemyOfAlly = false;
-        for(Empire ally : empire.allies())
-        {
-            if(ally.atWarWith(v.empId()))
-            {
-                isEnemyOfAlly = true;
-                break;
-            }
-        }
-        if(determineGoal() == SURVIVAL && e != empire.generalAI().bestVictim() && !isEnemyOfAlly && e == empire.generalAI().bestAlly())
+        if(determineGoal() == SURVIVAL && e == empire.generalAI().bestAlly(false))
             return true;
         return false;
     }
@@ -1024,12 +1015,9 @@ public class AIDiplomat implements Base, Diplomat {
     }
     //ail: no good reason to ever break an alliance
     private boolean wantToBreakAlliance(EmpireView v) {
-        if(UserPreferences.xilmiRoleplayMode() && empire.leader().isPacifist())
-        {
-            if(v.empire().atWar())
-                return true;
-        }
         if(!canBreakAlliance(v.empire()))
+            return false;
+        if(empire.leader().isHonorable())
             return false;
         if(determineGoal() == SOLO_VICTORY)
             return true;
@@ -1074,13 +1062,6 @@ public class AIDiplomat implements Base, Diplomat {
         {
             if(!empire.inShipRange(v.empId()))
                 v.embassy().endWarPreparations();
-        }
-        if(UserPreferences.xilmiRoleplayMode() && empire.leader().isXenophobic() && !empire.atWarWith(v.empId()))
-        {
-            if(!v.embassy().diplomatGone())
-                v.embassy().recallAmbassador();
-        } else if(v.embassy().diplomatGone()) {
-            v.embassy().openEmbassy();
         }
             
         if (v.embassy().unity() || v.embassy().finalWar())
@@ -1390,12 +1371,10 @@ public class AIDiplomat implements Base, Diplomat {
             warAllowed = false;
         if(!empire.generalAI().isRusher() && facCapRank() > 1)
             warAllowed = false;
-        if(determineGoal() == SURVIVAL)
+        if(determineGoal() == SURVIVAL && empire.leader().isPacifist())
             return false;
         //Ail: If there's only two empires left, there's no time for preparation. We cannot allow them the first-strike-advantage!
         if(galaxy().numActiveEmpires() < 3)
-            warAllowed = true;
-        if(UserPreferences.xilmiRoleplayMode() && empire.leader().isAggressive())
             warAllowed = true;
         return warAllowed;
     }
@@ -1405,8 +1384,6 @@ public class AIDiplomat implements Base, Diplomat {
         {
             return false;
         }
-        if(UserPreferences.xilmiRoleplayMode() && empire.leader().isPacifist())
-            return false;
         if(!empire.inShipRange(v.empId()))
             return false;
         if(galaxy().options().baseAIRelationsAdj() <= -30)
@@ -1479,7 +1456,13 @@ public class AIDiplomat implements Base, Diplomat {
         if (cv2.embassy().anyWar() && !cv1.embassy().anyWar())
             return castVoteFor(civ1);
         
-        //ail: I want it to be deterministic, so I pick whoever I fear more
+        // relations more important than rest
+        if(cv1.embassy().relations() > cv2.embassy().relations())
+            return castVoteFor(civ1);
+        if(cv1.embassy().relations() < cv2.embassy().relations())
+            return castVoteFor(civ2);
+        
+        //ail: I only get here when relations are equal, which should be pretty rare
         if(empire.generalAI().timeToKill(civ1, empire) < empire.generalAI().timeToKill(civ2, empire) && empire.generalAI().timeToKill(empire, civ1) > empire.generalAI().timeToKill(civ1, empire))
             return castVoteFor(civ1);
         if(empire.generalAI().timeToKill(civ2, empire) < empire.generalAI().timeToKill(civ1, empire) && empire.generalAI().timeToKill(empire, civ2) > empire.generalAI().timeToKill(civ2, empire))
@@ -1707,8 +1690,6 @@ public class AIDiplomat implements Base, Diplomat {
     private boolean warWeary(EmpireView v) {
         if (v.embassy().finalWar() || galaxy().activeEmpires().size() < 3)
             return false;
-        if(UserPreferences.xilmiRoleplayMode() && empire.leader().isPacifist())
-            return true;
         if(!empire.allies().isEmpty())
             return warWearyAlliance(v);
         //ail: when we have incoming transports, we don't want them to perish
@@ -1732,7 +1713,7 @@ public class AIDiplomat implements Base, Diplomat {
         if(empire.warEnemies().size() > 1)
             return true;
         //ail: If I'm outteched by others I also don't really want to stick to a war anymore, except for aggressive leader as that would lead to contradictory behavior
-        if(techLevelRank() > popCapRank(empire, false) && !(UserPreferences.xilmiRoleplayMode() && empire.leader().isAggressive()))
+        if(techLevelRank() > popCapRank(empire, false))
             return true;
         if(determineGoal() == SURVIVAL)
             return true;
@@ -1945,50 +1926,27 @@ public class AIDiplomat implements Base, Diplomat {
         float myPopCap = empire.generalAI().totalEmpirePopulationCapacity(empire);
         float myAlliancePopCap = myPopCap;
         float totalPopCap = myPopCap;
-        float contactCount = 0;
+        float biggestPopCap = 0;
+        float contactCount = 1;
         for(Empire emp:empire.contactedEmpires())
         {
             if(!empire.inEconomicRange(emp.id))
                 continue;
             contactCount++;
             float currentPop = empire.generalAI().totalEmpirePopulationCapacity(emp);
+            if(currentPop > biggestPopCap)
+                biggestPopCap = currentPop;
             totalPopCap += currentPop;
             if(empire.alliedWith(emp.id))
                 myAlliancePopCap += currentPop;
         }
-        if(myPopCap > 1f/contactCount * totalPopCap)
+        if(myPopCap > totalPopCap / contactCount)
             currentGoal = SOLO_VICTORY;
-        else if(myAlliancePopCap > 1f/contactCount * totalPopCap)
+        else if(myAlliancePopCap > totalPopCap / contactCount)
             currentGoal = ALLIED_VICTORY;
-        return currentGoal;
-    }
-    public void updatePersonality()
-    {
-        empire.leader().personality = PACIFIST;
-        if(determineGoal() < SURVIVAL)
-        {
-            if(empire.atWar())
-            {
-                boolean wantPeace = true;
-                for(Empire enemy : empire.warEnemies())
-                    if(!warWeary(empire.viewForEmpire(enemy)))
-                        wantPeace = false;
-                if(!wantPeace)
-                    empire.leader().personality = AGGRESSIVE;
-            }
-        }
-        if(empire.atWar() || !empire.enemies().isEmpty())
-            empire.leader().objective = MILITARIST;
-        else if(empire.generalAI().additionalColonizersToBuild(false) > 0)
-            empire.leader().objective = EXPANSIONIST;
-        else if(!empire.generalAI().isRusher() && facCapRank() > 1)
-            empire.leader().objective = INDUSTRIALIST;
-        else if(!techIsAdequateForWar())
-            empire.leader().objective = TECHNOLOGIST;
-        else if(empire.totalPlanetaryPopulation() < empire.generalAI().totalEmpirePopulationCapacity(empire))
-            empire.leader().objective = ECOLOGIST;
-        else
-            empire.leader().objective = DIPLOMAT;
+        //System.out.println(galaxy().currentTurn()+" "+empire.name()+" current goal: "+currentGoal+" myPopCap: "+myPopCap+" myAlliancePopCap: "+myAlliancePopCap+" threshold: "+totalPopCap/contactCount+" totalPopCap: "+totalPopCap);
+        //return currentGoal;
+        return SOLO_VICTORY;
     }
     public boolean techIsAdequateForWar()
     {
