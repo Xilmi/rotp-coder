@@ -704,7 +704,7 @@ public class AIGeneral implements Base, General {
         return warROI;
     }
     @Override
-    public Empire bestAlly() {
+    public Empire bestAlly(boolean includeCurrentAllies) {
         if(searchedAllyThisTurn)
         {
             return bestAlly;
@@ -720,9 +720,22 @@ public class AIGeneral implements Base, General {
         for(Empire emp : empire.contactedEmpires())
         {
             //those who we are already allied with don't count
-            if(empire.alliedWith(emp.id))
+            if(empire.alliedWith(emp.id) && !includeCurrentAllies)
                 continue;
             if(!empire.inEconomicRange(emp.id))
+                continue;
+            if(empire.enemies().contains(emp))
+                continue;
+            boolean isEnemyOfAlly = false;
+            for(Empire ally : empire.allies())
+            {
+                if(ally.atWarWith(emp.id))
+                {
+                    isEnemyOfAlly = true;
+                    break;
+                }
+            }
+            if(isEnemyOfAlly)
                 continue;
             EmpireView v = empire.viewForEmpire(emp);
             float currentScore = v.embassy().relations();
@@ -731,15 +744,15 @@ public class AIGeneral implements Base, General {
                 currentScore *= 2;
             else
                 currentScore += v.embassy().otherRelations();
-            System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" ally-score for "+emp.name()+": "+currentScore+" their: "+v.embassy().otherRelations()+" mine: "+v.embassy().relations());
+            //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" ally-score for "+emp.name()+": "+currentScore+" their: "+v.embassy().otherRelations()+" mine: "+v.embassy().relations());
             if(currentScore > bestScore)
             {
                 bestScore = currentScore;
                 topAlly = emp;
             }
         }
-        if(topAlly != null)
-            System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" Top-Ally: "+topAlly.name()+" score: "+bestScore);
+        /*if(topAlly != null)
+            System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" Top-Ally: "+topAlly.name()+" score: "+bestScore);*/
         bestAlly = topAlly;
         return bestAlly;
     }
@@ -780,15 +793,15 @@ public class AIGeneral implements Base, General {
                 continue;
             EmpireView v = empire.viewForEmpire(emp);
             float currentScore = v.embassy().relations();
-            System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" enemy-score for "+emp.name()+" score: "+currentScore);
+            //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" enemy-score for "+emp.name()+" score: "+currentScore);
             if(currentScore < lowestScore)
             {
                 lowestScore = currentScore;
                 archEnemy = emp;
             }
         }
-        if(archEnemy != null)
-            System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" Top-enemy: "+archEnemy.name()+" score: "+lowestScore);
+        /*if(archEnemy != null)
+            System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" Top-enemy: "+archEnemy.name()+" score: "+lowestScore);*/
         bestVictim = archEnemy;
         return bestVictim;
     }
@@ -1035,10 +1048,7 @@ public class AIGeneral implements Base, General {
     @Override
     public boolean isRusher()
     {
-        if(empire.race().shipAttackBonus() > 0 
-                || empire.race().shipDefenseBonus() > 0 
-                || isInvader()
-                || empire.race().spyInfiltrationAdj() > 0)
+        if(empire.leader().isAggressive() || empire.leader().isRuthless() || empire.leader().isXenophobic())
             return true;
         return false;
     }
