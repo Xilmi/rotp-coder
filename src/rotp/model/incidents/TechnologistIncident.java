@@ -66,9 +66,9 @@ public class TechnologistIncident extends DiplomaticIncident {
 
             if(emp == iev.empire())
                 currentScore = score;
-            if(score > max)
+            if(score >= max)
                 max = score;
-            if(score < min)
+            if(score <= min)
                 min = score;
             avgScore += score;
             empiresChecked++;

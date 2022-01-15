@@ -41,7 +41,7 @@ public class ErraticIncident extends DiplomaticIncident {
         dateOccurred = galaxy().currentYear();
         severityGoal = 0;
         
-        if (iev.embassy().unity() || !iev.empire().inEconomicRange(iev.ownerId())) {
+        if (iev.embassy().unity() || !iev.owner().inEconomicRange(iev.empId())) {
             severity = 0;
             return;
         }

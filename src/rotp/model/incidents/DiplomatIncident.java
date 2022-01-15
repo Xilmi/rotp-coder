@@ -41,7 +41,7 @@ public class DiplomatIncident extends DiplomaticIncident {
         dateOccurred = galaxy().currentYear();
         severityGoal = 0;
         
-        if (iev.embassy().unity() || !iev.empire().inEconomicRange(iev.ownerId())) {
+        if (iev.embassy().unity() || !iev.owner().inEconomicRange(iev.empId())) {
             severity = 0;
             return;
         }
@@ -75,9 +75,9 @@ public class DiplomatIncident extends DiplomaticIncident {
             }
             if(emp == iev.empire())
                 currentDiploScore = score;
-            if(score > maxPopularity)
+            if(score >= maxPopularity)
                 maxPopularity = score;
-            if(score < minPopularity)
+            if(score <= minPopularity)
                 minPopularity = score;
             avgDiploScore += score;
             empiresChecked++;

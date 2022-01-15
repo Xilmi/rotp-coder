@@ -41,7 +41,7 @@ public class MilitaristIncident extends DiplomaticIncident {
         dateOccurred = galaxy().currentYear();
         severityGoal = 0;
         
-        if (iev.embassy().unity() || !iev.empire().inEconomicRange(iev.ownerId())) {
+        if (iev.embassy().unity() || !iev.owner().inEconomicRange(iev.empId())) {
             return;
         }
         if(iev.owner().generalAI().absolution() < 1 || !iev.owner().leader().isMilitarist())
@@ -64,9 +64,9 @@ public class MilitaristIncident extends DiplomaticIncident {
 
             if(emp == iev.empire())
                 currentScore = score;
-            if(score > max)
+            if(score >= max)
                 max = score;
-            if(score < min)
+            if(score <= min)
                 min = score;
             avgScore += score;
             empiresChecked++;
