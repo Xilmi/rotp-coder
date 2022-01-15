@@ -787,6 +787,8 @@ public class AIGeneral implements Base, General {
             }
             if(skip)
                 continue;
+            if(empire.pactWith(emp.id) && empire.leader().isHonorable())
+                continue;
             if(!empire.inShipRange(emp.id))
                 continue;
             if(empire.tech().topSpeed() < empire.viewForEmpire(emp).spies().tech().topSpeed())
