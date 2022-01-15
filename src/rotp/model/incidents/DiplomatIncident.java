@@ -22,22 +22,30 @@ public class DiplomatIncident extends DiplomaticIncident {
     private static final long serialVersionUID = 1L;
     final int empYou;
     final int empMe;
+    float severityGoal;
+    EmpireView iev;
     public static DiplomatIncident create(EmpireView ev) {
         return new DiplomatIncident(ev);
     }
     @Override
     public boolean triggeredByAction()   { return false; }
     private DiplomatIncident(EmpireView ev) {
-        empYou = ev.empire().id;
-        empMe = ev.ownerId();
-        dateOccurred = galaxy().currentYear();
-        duration = 1;
+        iev = ev;
+        empYou = iev.empire().id;
+        empMe = iev.ownerId();
         severity = 0;
+    }
+    @Override
+    public void update()
+    {
+        dateOccurred = galaxy().currentYear();
+        severityGoal = 0;
         
-        if (ev.embassy().unity() || !ev.empire().inEconomicRange(ev.ownerId())) {
+        if (iev.embassy().unity() || !iev.empire().inEconomicRange(iev.ownerId())) {
+            severity = 0;
             return;
         }
-        if(ev.owner().generalAI().absolution() < 1 || !ev.owner().leader().isDiplomat())
+        if(iev.owner().generalAI().absolution() < 1 || !iev.owner().leader().isDiplomat())
         {
             severity = 0;
             return;
@@ -49,9 +57,9 @@ public class DiplomatIncident extends DiplomaticIncident {
         float maxPopularity = -Float.MAX_VALUE;
         float minPopularity = Float.MAX_VALUE;
         
-        for(Empire emp : ev.owner().contactedEmpires())
+        for(Empire emp : iev.owner().contactedEmpires())
         {
-            if(!ev.owner().inEconomicRange(emp.id))
+            if(!iev.owner().inEconomicRange(emp.id))
                 continue;
             float score = 0;
             for(Empire contacts : emp.contactedEmpires())
@@ -65,7 +73,7 @@ public class DiplomatIncident extends DiplomaticIncident {
                 else
                     score += 1;
             }
-            if(emp == ev.empire())
+            if(emp == iev.empire())
                 currentDiploScore = score;
             if(score > maxPopularity)
                 maxPopularity = score;
@@ -75,29 +83,37 @@ public class DiplomatIncident extends DiplomaticIncident {
             empiresChecked++;
         }  
         
-        avgDiploScore /= empiresChecked;
+        if(empiresChecked > 0)
+            avgDiploScore /= empiresChecked;
         if(currentDiploScore < avgDiploScore)
-            severity = -50 * (currentDiploScore - avgDiploScore) / (minPopularity - avgDiploScore);
+            severityGoal = -50 * (currentDiploScore - avgDiploScore) / (minPopularity - avgDiploScore);
         if(currentDiploScore > avgDiploScore)
-            severity = 50 * (currentDiploScore - avgDiploScore) / (maxPopularity - avgDiploScore);
-        //System.out.println(galaxy().currentTurn()+" "+ev.owner().name()+" evaluates "+ev.empire().name()+" score: "+currentDiploScore+" min: "+minPopularity+" max: "+maxPopularity+" avg: "+avgDiploScore+" severity: "+severity);
+            severityGoal = 50 * (currentDiploScore - avgDiploScore) / (maxPopularity - avgDiploScore);
+        severity = (severityGoal - severity) / 10 + severity;
+        //System.out.println(galaxy().currentTurn()+" "+iev.owner().name()+" evaluates "+iev.empire().name()+" diplo-score: "+currentDiploScore+" min: "+minPopularity+" max: "+maxPopularity+" avg: "+avgDiploScore+" severityGoal: "+severityGoal+" severity: "+severity);
+    }
+    @Override
+    public float currentSeverity()
+    {
+        return severity;
+    }
+    @Override
+    public boolean isForgotten()
+    {
+        return false;
     }
     @Override
     public String title()            { return text("INC_DIPLOMAT_TITLE"); }
     @Override
     public String description()      { 
-        if (severity == -50)
+        if(severity < 0)
             return decode(text("INC_DIPLOMAT_DESC1"));
-        else if(severity < 0)
-            return decode(text("INC_DIPLOMAT_DESC2"));
-        else if(severity < 50)
-            return decode(text("INC_DIPLOMAT_DESC3"));
         else
-            return decode(text("INC_DIPLOMAT_DESC4"));
+            return decode(text("INC_DIPLOMAT_DESC2"));
     }
     @Override
     public String key() {
-        return concat("Diplomat", str(dateOccurred));
+        return "Diplomat";
     }
     @Override
     public String decode(String s) {

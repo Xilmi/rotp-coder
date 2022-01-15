@@ -22,22 +22,29 @@ public class ExpansionistIncident extends DiplomaticIncident {
     private static final long serialVersionUID = 1L;
     final int empYou;
     final int empMe;
+    float severityGoal;
+    EmpireView iev;
     public static ExpansionistIncident create(EmpireView ev) {
         return new ExpansionistIncident(ev);
     }
     @Override
     public boolean triggeredByAction()   { return false; }
     private ExpansionistIncident(EmpireView ev) {
-        empYou = ev.empire().id;
-        empMe = ev.ownerId();
-        dateOccurred = galaxy().currentYear();
-        duration = 1;
+        iev = ev;
+        empYou = iev.empire().id;
+        empMe = iev.ownerId();
         severity = 0;
+    }
+    @Override
+    public void update()
+    {
+        dateOccurred = galaxy().currentYear();
+        severityGoal = 0;
         
-        if (ev.embassy().unity() || !ev.empire().inEconomicRange(ev.ownerId())) {
+        if (iev.embassy().unity() || !iev.empire().inEconomicRange(iev.ownerId())) {
             return;
         }
-        if(ev.owner().generalAI().absolution() < 1 || !ev.owner().leader().isExpansionist())
+        if(iev.owner().generalAI().absolution() < 1 || !iev.owner().leader().isExpansionist())
         {
             severity = 0;
             return;
@@ -49,13 +56,13 @@ public class ExpansionistIncident extends DiplomaticIncident {
         float max = 0;
         float min = Float.MAX_VALUE;
         
-        for(Empire emp : ev.owner().contactedEmpires())
+        for(Empire emp : iev.owner().contactedEmpires())
         {
-            if(!ev.owner().inEconomicRange(emp.id))
+            if(!iev.owner().inEconomicRange(emp.id))
                 continue;
             float score = 1f / emp.numColonizedSystems();
 
-            if(emp == ev.empire())
+            if(emp == iev.empire())
                 currentScore = score;
             if(score > max)
                 max = score;
@@ -65,29 +72,37 @@ public class ExpansionistIncident extends DiplomaticIncident {
             empiresChecked++;
         }  
         
-        avgScore /= empiresChecked;
+        if(empiresChecked > 0)
+            avgScore /= empiresChecked;
         if(currentScore < avgScore)
-            severity = -50 * (currentScore - avgScore) / (min - avgScore);
+            severityGoal = -50 * (currentScore - avgScore) / (min - avgScore);
         if(currentScore > avgScore)
-            severity = 50 * (currentScore - avgScore) / (max - avgScore);
-        System.out.println(galaxy().currentTurn()+" "+ev.owner().name()+" evaluates "+ev.empire().name()+" expansion-score: "+currentScore+" min: "+min+" max: "+max+" avg: "+avgScore+" severity: "+severity);
+            severityGoal = 50 * (currentScore - avgScore) / (max - avgScore);
+        //System.out.println(galaxy().currentTurn()+" "+iev.owner().name()+" evaluates "+iev.empire().name()+" expansion-score: "+currentScore+" min: "+min+" max: "+max+" avg: "+avgScore+" severity: "+severity);
+        severity = (severityGoal - severity) / 10 + severity;
+    }
+    @Override
+    public float currentSeverity()
+    {
+        return severity;
+    }
+    @Override
+    public boolean isForgotten()
+    {
+        return false;
     }
     @Override
     public String title()            { return text("INC_EXPANSIONIST_TITLE"); }
     @Override
     public String description()      { 
-        if (severity == -50)
+        if(severity < 0)
             return decode(text("INC_EXPANSIONIST_DESC1"));
-        else if(severity < 0)
-            return decode(text("INC_EXPANSIONIST_DESC2"));
-        else if(severity < 50)
-            return decode(text("INC_EXPANSIONIST_DESC3"));
         else
-            return decode(text("INC_EXPANSIONIST_DESC4"));
+            return decode(text("INC_EXPANSIONIST_DESC2"));
     }
     @Override
     public String key() {
-        return concat("Expansionist", str(dateOccurred));
+        return "Expansionist";
     }
     @Override
     public String decode(String s) {

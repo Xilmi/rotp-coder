@@ -66,4 +66,6 @@ public abstract class DiplomaticIncident implements Base, Serializable {
             return Math.max(0, (dateOccurred() + duration() - galaxy().currentYear()));
     }
     public static Comparator<DiplomaticIncident> DATE = (DiplomaticIncident o1, DiplomaticIncident o2) -> o2.dateOccurred().compareTo(o1.dateOccurred());
+    //for objective-based-incidents in Xilmi-AI
+    public void update() {}
 }

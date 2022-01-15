@@ -22,22 +22,29 @@ public class IndustrialistIncident extends DiplomaticIncident {
     private static final long serialVersionUID = 1L;
     final int empYou;
     final int empMe;
+    float severityGoal;
+    EmpireView iev;
     public static IndustrialistIncident create(EmpireView ev) {
         return new IndustrialistIncident(ev);
     }
     @Override
     public boolean triggeredByAction()   { return false; }
     private IndustrialistIncident(EmpireView ev) {
-        empYou = ev.empire().id;
-        empMe = ev.ownerId();
-        dateOccurred = galaxy().currentYear();
-        duration = 1;
+        iev = ev;
+        empYou = iev.empire().id;
+        empMe = iev.ownerId();
         severity = 0;
+    }
+    @Override
+    public void update()
+    {
+        dateOccurred = galaxy().currentYear();
+        severityGoal = 0;
         
-        if (ev.embassy().unity() || !ev.empire().inEconomicRange(ev.ownerId())) {
+        if (iev.embassy().unity() || !iev.empire().inEconomicRange(iev.ownerId())) {
             return;
         }
-        if(ev.owner().generalAI().absolution() < 1 || !ev.owner().leader().isIndustrialist())
+        if(iev.owner().generalAI().absolution() < 1 || !iev.owner().leader().isIndustrialist())
         {
             severity = 0;
             return;
@@ -49,13 +56,13 @@ public class IndustrialistIncident extends DiplomaticIncident {
         float max = 0;
         float min = Float.MAX_VALUE;
         
-        for(Empire emp : ev.owner().contactedEmpires())
+        for(Empire emp : iev.owner().contactedEmpires())
         {
-            if(!ev.owner().inEconomicRange(emp.id))
+            if(!iev.owner().inEconomicRange(emp.id))
                 continue;
-            float score = emp.netIncome() / emp.totalEmpirePopulation();
+            float score = emp.totalPlanetaryProduction() / emp.totalEmpirePopulation();
 
-            if(emp == ev.empire())
+            if(emp == iev.empire())
                 currentScore = score;
             if(score > max)
                 max = score;
@@ -65,29 +72,37 @@ public class IndustrialistIncident extends DiplomaticIncident {
             empiresChecked++;
         }  
         
-        avgScore /= empiresChecked;
+        if(empiresChecked > 0)
+            avgScore /= empiresChecked;
         if(currentScore < avgScore)
-            severity = -50 * (currentScore - avgScore) / (min - avgScore);
+            severityGoal = -50 * (currentScore - avgScore) / (min - avgScore);
         if(currentScore > avgScore)
-            severity = 50 * (currentScore - avgScore) / (max - avgScore);
-        System.out.println(galaxy().currentTurn()+" "+ev.owner().name()+" evaluates "+ev.empire().name()+" industrial-score: "+currentScore+" min: "+min+" max: "+max+" avg: "+avgScore+" severity: "+severity);
+            severityGoal = 50 * (currentScore - avgScore) / (max - avgScore);
+        //System.out.println(galaxy().currentTurn()+" "+ev.owner().name()+" evaluates "+ev.empire().name()+" industrial-score: "+currentScore+" min: "+min+" max: "+max+" avg: "+avgScore+" severity: "+severity);
+        severity = (severityGoal - severity) / 10 + severity;
+    }
+    @Override
+    public float currentSeverity()
+    {
+        return severity;
+    }
+    @Override
+    public boolean isForgotten()
+    {
+        return false;
     }
     @Override
     public String title()            { return text("INC_INDUSTRIALIST_TITLE"); }
     @Override
     public String description()      { 
-        if (severity == -50)
+        if(severity < 0)
             return decode(text("INC_INDUSTRIALIST_DESC1"));
-        else if(severity < 0)
-            return decode(text("INC_INDUSTRIALIST_DESC2"));
-        else if(severity < 50)
-            return decode(text("INC_INDUSTRIALIST_DESC3"));
         else
-            return decode(text("INC_INDUSTRIALIST_DESC4"));
+            return decode(text("INC_INDUSTRIALIST_DESC2"));
     }
     @Override
     public String key() {
-        return concat("Industrialist", str(dateOccurred));
+        return "Industrialist";
     }
     @Override
     public String decode(String s) {

@@ -262,35 +262,26 @@ INC_PARANOIA_DESC3                | A vocal minority within the [my_empire] are 
 INC_PARANOIA_DESC4                | A huge swathe among the [my_empire] is calling for action over the growing fears that the [your_race] may indeed be an existential threat to their species. The [your_empire] now occupies [num] systems originally founded by the [my_empire].
 INC_PARANOIA_DESC5                | Mass panics have gripped the [my_empire] over the realization that the [your_race] have clearly become an existential threat to their species. The [your_empire] now occupies [num] systems originally founded by the [my_empire].
 INC_DIPLOMAT_TITLE                | Diplomat
-INC_DIPLOMAT_DESC1                | The [your_empire] is the least popular empire [my_empire] is aware of.
-INC_DIPLOMAT_DESC2                | The [your_empire] is not exactly popular among other empires.
-INC_DIPLOMAT_DESC3                | The [your_empire] is quite popular among other empires.
-INC_DIPLOMAT_DESC4                | The [your_empire] is famous and admired by other empires.
+INC_DIPLOMAT_DESC1                | The [your_empire] needs more friends.
+INC_DIPLOMAT_DESC2                | The [your_empire] has friends.
 INC_ECOLOGIST_TITLE               | Ecologist
-INC_ECOLOGIST_DESC1               | The [my_empire] badly wants to improve your terrible ecologies.
-INC_ECOLOGIST_DESC2               | The [my_empire] considers your ecologies to need some work.
-INC_ECOLOGIST_DESC3               | The [your_empire] has created decent living-conditions for their people.
-INC_ECOLOGIST_DESC4               | The [my_empire] admires the ability of the [your_empire] to turn planets into such lush dwellings.
+INC_ECOLOGIST_DESC1               | The [your_empire] needs to treat their planets better.
+INC_ECOLOGIST_DESC2               | The [your_empire] treats their planets well.
 INC_EXPANSIONIST_TITLE            | Expansionist
-INC_EXPANSIONIST_DESC1            | The [your_empire] is blocking most of the planets that should belong to the [my_empire].
-INC_EXPANSIONIST_DESC2            | The [your_empire] is blocking a lot of the planets that should belong to the [my_empire].
-INC_EXPANSIONIST_DESC3            | The [your_empire] was wise not to colonize too many planets and leave more for the [my_empire].
-INC_EXPANSIONIST_DESC4            | The [your_empire] seems happy with the planet-count that the [my_empire] allows them to have.
+INC_EXPANSIONIST_DESC1            | The [your_empire] has expanded too much.
+INC_EXPANSIONIST_DESC2            | The [your_empire] has left enough room for us.
 INC_INDUSTRIALIST_TITLE           | Industrialist
-INC_INDUSTRIALIST_DESC1           | The [your_empire] has the least efficient industry.
-INC_INDUSTRIALIST_DESC2           | The [your_empire] has an inefficient industry.
-INC_INDUSTRIALIST_DESC3           | The [your_empire] runs a decently efficient industry.
-INC_INDUSTRIALIST_DESC4           | The [my_empire] admires the ability of the [your_empire] to maximize productivity.
+INC_INDUSTRIALIST_DESC1           | The [your_empire] has an inefficient industry.
+INC_INDUSTRIALIST_DESC2           | The [your_empire] has an efficient industry.
 INC_MILITARIST_TITLE              | Militarist
-INC_MILITARIST_DESC1              | The [your_empire] doesn't seem to want to protect their empire.
-INC_MILITARIST_DESC2              | The [your_empire] shows vulnerabilites in their defenses.
-INC_MILITARIST_DESC3              | The [your_empire] maintains a solid standing army.
-INC_MILITARIST_DESC4              | The [my_empire] is impressed by your dedication for military.
+INC_MILITARIST_DESC1              | The [your_empire] maintains insufficient military.
+INC_MILITARIST_DESC2              | The [your_empire] maintains sufficient military.
 INC_TECHNOLOGIST_TITLE            | Technolgoist
-INC_TECHNOLOGIST_DESC1            | The [your_empire] does not seem to be interested in modern technology.
-INC_TECHNOLOGIST_DESC2            | The [your_empire] is not very ambitious at driving technological progress.
-INC_TECHNOLOGIST_DESC3            | The [your_empire] contributes to technological advancement quite nicely.
-INC_TECHNOLOGIST_DESC4            | The [your_empire] is a leading contributor to technological advancement.
+INC_TECHNOLOGIST_DESC1            | The [your_empire] does not research enough.
+INC_TECHNOLOGIST_DESC2            | The [your_empire] tries to advance in technology.
+INC_ERRATIC_TITLE                 | Erratic
+INC_ERRATIC_DESC1                 | The [my_empire] dislikes the [your_empire].
+INC_ERRATIC_DESC2                 | The [my_empire] likes the [your_empire].
 INC_EXPANSION_TITLE               | Expansion
 INC_EXPANSION_DESC                | With control of [num] systems, the [your_empire] has grown too large.
 INC_GENOCIDE_TITLE                | Genocide

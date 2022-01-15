@@ -22,22 +22,29 @@ public class TechnologistIncident extends DiplomaticIncident {
     private static final long serialVersionUID = 1L;
     final int empYou;
     final int empMe;
+    float severityGoal;
+    EmpireView iev;
     public static TechnologistIncident create(EmpireView ev) {
         return new TechnologistIncident(ev);
     }
     @Override
     public boolean triggeredByAction()   { return false; }
     private TechnologistIncident(EmpireView ev) {
-        empYou = ev.empire().id;
-        empMe = ev.ownerId();
-        dateOccurred = galaxy().currentYear();
-        duration = 1;
+        iev = ev;
+        empYou = iev.empire().id;
+        empMe = iev.ownerId();
         severity = 0;
+    }
+    @Override
+    public void update()
+    {
+        dateOccurred = galaxy().currentYear();
+        severityGoal = 0;
         
-        if (ev.embassy().unity() || !ev.owner().inEconomicRange(ev.empId())) {
+        if (iev.embassy().unity() || !iev.owner().inEconomicRange(iev.empId())) {
             return;
         }
-        if(ev.owner().generalAI().absolution() < 1 || !ev.owner().leader().isTechnologist())
+        if(iev.owner().generalAI().absolution() < 1 || !iev.owner().leader().isTechnologist())
         {
             severity = 0;
             return;
@@ -49,15 +56,15 @@ public class TechnologistIncident extends DiplomaticIncident {
         float max = 0;
         float min = Float.MAX_VALUE;
         
-        for(Empire emp : ev.owner().contactedEmpires())
+        for(Empire emp : iev.owner().contactedEmpires())
         {
-            if(!ev.owner().inEconomicRange(emp.id))
+            if(!iev.owner().inEconomicRange(emp.id))
                 continue;
             float score = 0;
             if(emp.totalIncome() > 0)
                 score = emp.totalPlanetaryResearchSpending() / emp.totalIncome();
 
-            if(emp == ev.empire())
+            if(emp == iev.empire())
                 currentScore = score;
             if(score > max)
                 max = score;
@@ -67,29 +74,37 @@ public class TechnologistIncident extends DiplomaticIncident {
             empiresChecked++;
         }  
         
-        avgScore /= empiresChecked;
+        if(empiresChecked > 0)
+           avgScore /= empiresChecked;
         if(currentScore < avgScore)
-            severity = -50 * (currentScore - avgScore) / (min - avgScore);
+            severityGoal = -50 * (currentScore - avgScore) / (min - avgScore);
         if(currentScore > avgScore)
-            severity = 50 * (currentScore - avgScore) / (max - avgScore);
-        System.out.println(galaxy().currentTurn()+" "+ev.owner().name()+" evaluates "+ev.empire().name()+" technology-score: "+currentScore+" min: "+min+" max: "+max+" avg: "+avgScore+" severity: "+severity);
+            severityGoal = 50 * (currentScore - avgScore) / (max - avgScore);
+        //System.out.println(galaxy().currentTurn()+" "+iev.owner().name()+" evaluates "+iev.empire().name()+" technology-score: "+currentScore+" min: "+min+" max: "+max+" avg: "+avgScore+" severity: "+severity);
+        severity = (severityGoal - severity) / 10 + severity;
+    }
+    @Override
+    public float currentSeverity()
+    {
+        return severity;
+    }
+    @Override
+    public boolean isForgotten()
+    {
+        return false;
     }
     @Override
     public String title()            { return text("INC_TECHNOLOGIST_TITLE"); }
     @Override
     public String description()      { 
-        if (severity == -50)
+        if(severity < 0)
             return decode(text("INC_TECHNOLOGIST_DESC1"));
-        else if(severity < 0)
-            return decode(text("INC_TECHNOLOGIST_DESC2"));
-        else if(severity < 50)
-            return decode(text("INC_TECHNOLOGIST_DESC3"));
         else
-            return decode(text("INC_TECHNOLOGIST_DESC4"));
+            return decode(text("INC_TECHNOLOGIST_DESC2"));
     }
     @Override
     public String key() {
-        return concat("Technologist", str(dateOccurred));
+        return "Technologist";
     }
     @Override
     public String decode(String s) {

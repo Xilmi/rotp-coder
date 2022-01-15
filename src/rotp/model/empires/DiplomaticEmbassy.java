@@ -31,6 +31,7 @@ import rotp.model.incidents.DiplomatIncident;
 import rotp.model.incidents.DiplomaticIncident;
 import rotp.model.incidents.EcologistIncident;
 import rotp.model.incidents.EncroachmentIncident;
+import rotp.model.incidents.ErraticIncident;
 import rotp.model.incidents.ErraticWarIncident;
 import rotp.model.incidents.ExchangeTechnologyIncident;
 import rotp.model.incidents.ExpansionistIncident;
@@ -698,12 +699,34 @@ public class DiplomaticEmbassy implements Base, Serializable {
 
         List<DiplomaticIncident> newEventsAll = new ArrayList<>();
         addIncident(ParanoiaIncident.create(view));
-        addIncident(DiplomatIncident.create(view));
-        addIncident(EcologistIncident.create(view));
-        addIncident(ExpansionistIncident.create(view));
-        addIncident(IndustrialistIncident.create(view));
-        addIncident(MilitaristIncident.create(view));
-        addIncident(TechnologistIncident.create(view));
+        if(!incidents.containsKey("Diplomat"))
+            addIncident(DiplomatIncident.create(view));
+        else
+            incidents.get("Diplomat").update();
+        if(!incidents.containsKey("Ecologist"))
+            addIncident(EcologistIncident.create(view));
+        else
+            incidents.get("Ecologist").update();
+        if(!incidents.containsKey("Expansionist"))
+            addIncident(ExpansionistIncident.create(view));
+        else
+            incidents.get("Expansionist").update();
+        if(!incidents.containsKey("Industrialist"))
+            addIncident(IndustrialistIncident.create(view));
+        else
+            incidents.get("Industrialist").update();
+        if(!incidents.containsKey("Militarist"))
+            addIncident(MilitaristIncident.create(view));
+        else
+            incidents.get("Militarist").update();
+        if(!incidents.containsKey("Technologist"))
+            addIncident(TechnologistIncident.create(view));
+        else
+            incidents.get("Technologist").update();
+        if(!incidents.containsKey("Erratic"))
+            addIncident(ErraticIncident.create(view));
+        else
+            incidents.get("Erratic").update();
         owner().diplomatAI().noticeNoRelationIncident(view, newEventsAll);
         owner().diplomatAI().noticeAtWarWithAllyIncidents(view, newEventsAll);
         owner().diplomatAI().noticeAlliedWithEnemyIncidents(view, newEventsAll);
