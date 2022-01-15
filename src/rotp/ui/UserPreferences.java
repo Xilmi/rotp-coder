@@ -116,7 +116,7 @@ public class UserPreferences {
     }
     // modnar: set MOD option to defaults, specifically for UI
     public static void setModToDefault() {
-        customDifficulty = 100; // mondar: add custom difficulty level option, in units of percent
+        customDifficulty = 180; // mondar: add custom difficulty level option, in units of percent
         dynamicDifficulty = false; // modnar: add dynamic difficulty option, change AI colony production
         alwaysStarGates = false; // modnar: add option to always have Star Gates tech
         alwaysThorium = false; // modnar: add option to always have Thorium Cells tech
