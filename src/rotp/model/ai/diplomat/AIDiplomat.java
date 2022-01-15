@@ -28,11 +28,6 @@ import rotp.model.empires.EmpireView;
 import rotp.model.empires.GalacticCouncil;
 import rotp.model.empires.Leader;
 import static rotp.model.empires.Leader.Objective.DIPLOMAT;
-import static rotp.model.empires.Leader.Objective.ECOLOGIST;
-import static rotp.model.empires.Leader.Objective.EXPANSIONIST;
-import static rotp.model.empires.Leader.Objective.INDUSTRIALIST;
-import static rotp.model.empires.Leader.Objective.MILITARIST;
-import static rotp.model.empires.Leader.Objective.TECHNOLOGIST;
 import static rotp.model.empires.Leader.Personality.AGGRESSIVE;
 import static rotp.model.empires.Leader.Personality.HONORABLE;
 import static rotp.model.empires.Leader.Personality.PACIFIST;
@@ -74,9 +69,10 @@ import rotp.ui.notifications.DiplomaticNotification;
 import rotp.util.Base;
 
 public class AIDiplomat implements Base, Diplomat {
-    private static final int SOLO_VICTORY = 0;
-    private static final int ALLIED_VICTORY = 1;
-    private static final int SURVIVAL = 2;
+    private static final int VETO_POWER = 0;
+    private static final int SOLO_VICTORY = 1;
+    private static final int ALLIED_VICTORY = 2;
+    private static final int SURVIVAL = 3;
     private final Empire empire;
     private float cumulativeSeverity = 0;
 
@@ -1019,7 +1015,7 @@ public class AIDiplomat implements Base, Diplomat {
             return false;
         if(empire.leader().isHonorable())
             return false;
-        if(determineGoal() == SOLO_VICTORY)
+        if(determineGoal() == VETO_POWER)
             return true;
         return false;
     }
@@ -1112,7 +1108,7 @@ public class AIDiplomat implements Base, Diplomat {
             v.empire().diplomatAI().receiveOfferAlliance(v.owner());
         }
         decidedToExchangeTech(v);
-        if(empire.allies().contains(v.empire()))
+        if(empire.allies().contains(v.empire()) && determineGoal() == SURVIVAL)
         {
             while(canOfferTechnology(v.empire()))
                 v.empire().diplomatAI().receiveTechnologyAid(empire, offerableTechnologies(v.empire()).get(0).id);
@@ -1371,8 +1367,13 @@ public class AIDiplomat implements Base, Diplomat {
             warAllowed = false;
         if(!empire.generalAI().isRusher() && facCapRank() > 1)
             warAllowed = false;
-        if(determineGoal() == SURVIVAL && empire.leader().isPacifist())
-            return false;
+        if(empire.leader().isPacifist())
+        {
+            if(determineGoal() == SURVIVAL)
+                warAllowed = false;
+            if(facCapPct(empire, true) < 1)
+                warAllowed = false;
+        }
         //Ail: If there's only two empires left, there's no time for preparation. We cannot allow them the first-strike-advantage!
         if(galaxy().numActiveEmpires() < 3)
             warAllowed = true;
@@ -1940,13 +1941,14 @@ public class AIDiplomat implements Base, Diplomat {
             if(empire.alliedWith(emp.id))
                 myAlliancePopCap += currentPop;
         }
-        if(myPopCap > totalPopCap / contactCount)
+        if(myPopCap > totalPopCap / 3)
+            currentGoal = VETO_POWER;
+        else if(myPopCap > totalPopCap / contactCount)
             currentGoal = SOLO_VICTORY;
         else if(myAlliancePopCap > totalPopCap / contactCount)
             currentGoal = ALLIED_VICTORY;
         //System.out.println(galaxy().currentTurn()+" "+empire.name()+" current goal: "+currentGoal+" myPopCap: "+myPopCap+" myAlliancePopCap: "+myAlliancePopCap+" threshold: "+totalPopCap/contactCount+" totalPopCap: "+totalPopCap);
-        //return currentGoal;
-        return SOLO_VICTORY;
+        return currentGoal;
     }
     public boolean techIsAdequateForWar()
     {
