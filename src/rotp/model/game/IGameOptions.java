@@ -554,13 +554,13 @@ public interface IGameOptions {
     // UserPreferences.customDifficulty(), custom difficulty range: 20% to 500%
     default float aiProductionModifier() {
         switch(selectedGameDifficulty()) {
-            case DIFFICULTY_EASIEST: return 0.7f;
-            case DIFFICULTY_EASIER:  return 0.85f;
-            case DIFFICULTY_EASY:    return 1.0f;
-            case DIFFICULTY_NORMAL:  return 1.2f;
-            case DIFFICULTY_HARD:    return 1.4f;
-            case DIFFICULTY_HARDER:  return 1.7f;
-            case DIFFICULTY_HARDEST: return 2.0f;
+            case DIFFICULTY_EASIEST: return 0.55f;
+            case DIFFICULTY_EASIER:  return 0.75f;
+            case DIFFICULTY_EASY:    return 0.90f;
+            case DIFFICULTY_NORMAL:  return 1.0f;
+            case DIFFICULTY_HARD:    return 1.1f;
+            case DIFFICULTY_HARDER:  return 1.25f;
+            case DIFFICULTY_HARDEST: return 1.45f;
             case DIFFICULTY_CUSTOM:  return (float)(0.01f*UserPreferences.customDifficulty());
             default: return 1.0f;
         }
@@ -569,9 +569,9 @@ public interface IGameOptions {
     // modnar: if custom difficulty level option is set to less than 100%, also change waste modifiers
     default float aiWasteModifier() {
         switch(selectedGameDifficulty()) {
-            case DIFFICULTY_EASIEST: return 0.7f;
-            case DIFFICULTY_EASIER:  return 0.85f;
-            case DIFFICULTY_EASY:    return 1.0f;
+            case DIFFICULTY_EASIEST: return 0.55f;
+            case DIFFICULTY_EASIER:  return 0.75f;
+            case DIFFICULTY_EASY:    return 0.9f;
             case DIFFICULTY_CUSTOM:  return (float)(Math.min(1.0f, 0.01f*UserPreferences.customDifficulty()));
             default: return 1.0f;
         }
