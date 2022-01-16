@@ -1770,6 +1770,8 @@ public final class Colony implements Base, IMappedObject, Serializable {
         }
         //System.out.println("balance "+this.name()+" indAll final "+indAll);
         //System.out.println("balance "+this.name()+" ecoAll final "+ecoAll);
+        //xilmi: We need to reset ecology-spending because totalIncome conditionally calls a function that sets eco to clean, if we don't we can end up having twice the eco-spending we want
+        allocation(ECOLOGY, 0);
         increment(Colony.ECOLOGY, ecoAll);
         locked(Colony.ECOLOGY, true);
         increment(Colony.INDUSTRY, indAll);
