@@ -951,7 +951,7 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
         selectedGalaxyAge = galaxyAgeOptions().get(1);
         selectedNumberOpponents = defaultOpponentsOptions();
         selectedPlayerRace(random(startingRaceOptions()));
-        selectedGameDifficulty = DIFFICULTY_EASY;
+        selectedGameDifficulty = DIFFICULTY_NORMAL;
         selectedOpponentAIOption = OPPONENT_AI_XILMI;
         for (int i=0;i<specificOpponentAIOption.length;i++)
             specificOpponentAIOption[i] = OPPONENT_AI_XILMI;
