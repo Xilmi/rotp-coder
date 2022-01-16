@@ -170,7 +170,11 @@ public class AIGovernor implements Base, Governor {
             col.setAllocation(DEFENSE,  min(prevDef, maxDef));
 
         // if this is a ship-building-colony that is not researching put rest in ships
-        if(!col.locked(SHIP) && prevShip > 0 && prevRes == 0)
+        if(!col.locked(SHIP)
+                && prevShip > 0
+                && prevRes == 0
+                && !col.shipyard().shipLimitReached()
+                && !col.shipyard().stargateCompleted())
             col.addAllocation(SHIP, col.allocationRemaining());
         
         // SPEND THE EXCESS

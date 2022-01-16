@@ -153,6 +153,9 @@ public class ColonyShipyard extends ColonySpendingCategory {
     }
     @Override
     public void nextTurn(float totalProd, float totalReserve) {
+        //xilmi: setting those to false before potentially leaving function as otherwise the message will keep coming every turn
+        shipLimitReached = false;
+        stargateCompleted = false;
         if (colony().allocation(categoryType()) == 0)
             return;
         
@@ -176,8 +179,6 @@ public class ColonyShipyard extends ColonySpendingCategory {
 
         float cost = design.cost();
         newShips = 0;
-        shipLimitReached = false;
-        stargateCompleted = false;
 
         // should never happen anymore, but hey
         if (buildingObsoleteDesign()) {
