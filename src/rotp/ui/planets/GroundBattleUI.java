@@ -789,7 +789,9 @@ public class GroundBattleUI extends BasePanel implements MouseListener {
                     return descendingFrames.get(i);
                 frame -= descendingFrameRefs.get(i);
             }      
-            return descendingFrames.get(descendingFrames.size()-1);
+            if(descendingFrames.size() > 0)
+                return descendingFrames.get(descendingFrames.size()-1);
+            return null;
         }
         private Image nextOpeningShipImage() {
             int frame = openIndex++;
