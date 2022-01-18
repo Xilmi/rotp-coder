@@ -630,6 +630,7 @@ public class DesignUI extends BasePanel {
             return;
         }
         int k = e.getKeyCode();
+        boolean ctrlPressed = (e.getModifiers() & InputEvent.CTRL_MASK) != 0;
         if (k == KeyEvent.VK_ESCAPE) {
             exit(false);
             return;
@@ -671,7 +672,10 @@ public class DesignUI extends BasePanel {
                 return;
             }
             else if (k == KeyEvent.VK_C) {
-                configPanel.clearDesign();
+                if(ctrlPressed)
+                    configPanel.clearDesign(true);
+                else
+                    configPanel.clearDesign(false);
                 return;
             }            
         }
@@ -2913,8 +2917,8 @@ public class DesignUI extends BasePanel {
             enableGlassPane(confirmCreateUI);
             return;
         }
-        private void clearDesign() {
-            player().shipLab().clearDesign(shipDesign());
+        private void clearDesign(boolean onlyWeapons) {
+            player().shipLab().clearDesign(shipDesign(), onlyWeapons);
             repaint();
             return;
         }
@@ -3312,7 +3316,12 @@ public class DesignUI extends BasePanel {
                 softClick(); openRenameDialog(); return;
             }
             else if (hoverTarget == clearButtonArea) {
-                softClick(); clearDesign(); return;
+                softClick();
+                if(ctrlPressed)
+                    clearDesign(true); 
+                else
+                    clearDesign(false); 
+                return;
             } else if (hoverTarget == scoutButtonArea) {
                 softClick();
                 shipDesign().setAutoScout(!shipDesign().isAutoScout());

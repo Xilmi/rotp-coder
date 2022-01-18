@@ -427,7 +427,13 @@ public class ShipDesignLab implements Base, Serializable {
             design.special(i, specials().get(0));
         return design;
     }
-    public void clearDesign(ShipDesign design) {
+    public void clearDesign(ShipDesign design, boolean onlyWeapons) {
+        for (int i=0;i<ShipDesign.maxWeapons();i++) {
+            design.weapon(i, weapons().get(0));
+            design.wpnCount(i, 0);
+        }
+        if(onlyWeapons)
+            return;
         design.computer(computers().get(0));
         design.shield(shields().get(0));
         design.ecm(ecms().get(0));
@@ -435,10 +441,6 @@ public class ShipDesignLab implements Base, Serializable {
         design.engine(engines().get(0));
         design.maneuver(maneuvers().get(0));
         design.shipColor(0);
-        for (int i=0;i<ShipDesign.maxWeapons();i++) {
-            design.weapon(i, weapons().get(0));
-            design.wpnCount(i, 0);
-        }
         for (int i=0;i<ShipDesign.maxSpecials();i++)
             design.special(i, specials().get(0));
     }
