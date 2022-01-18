@@ -327,9 +327,19 @@ public class AIShipCaptain implements Base, ShipCaptain {
         List<CombatStack> potentialTargets = new ArrayList<>();
         List<CombatStack> activeStacks = new ArrayList<>(combat().activeStacks());
 
+        boolean allTargetsCloaked = true;
         for (CombatStack st: activeStacks) {
             if (stack.hostileTo(st, st.mgr.system()) && !st.inStasis)
+            {
                 potentialTargets.add(st);
+                if(!st.cloaked)
+                {
+                    if(!st.isColony())
+                        allTargetsCloaked = false;
+                    else if(st.num > 0)
+                        allTargetsCloaked = false;
+                }
+            }
         }
         FlightPath bestPath = null;
         CombatStack bestTarget = null;
@@ -344,6 +354,8 @@ public class AIShipCaptain implements Base, ShipCaptain {
                 continue;
             }
             if(target.inStasis)
+                continue;
+            if(target.cloaked && (!allTargetsCloaked || stack.hasWard()))
                 continue;
             // pct of target that this stack thinks it can kill
             float killPct = max(stack.estimatedKillPct(target), expectedPopLossPct(stack, target)); 
@@ -805,6 +817,9 @@ public class AIShipCaptain implements Base, ShipCaptain {
         for (CombatStack st1 : foes) {
             if(st1.inStasis)
                 continue;
+            boolean previousCloakingState = st1.cloaked;
+            if(!st1.hasWard())
+                st1.cloaked = false; //decloack in our mind for estimates
             float pctOfMaxHP = ((st1.num-1) * st1.maxHits + st1.hits) / (st1.num * st1.maxHits);
             float damagePerTurn = 0;
             for (CombatStack st2: friends) {
@@ -832,6 +847,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
                 allyKillTime = Float.MAX_VALUE;
                 break;
             }
+            st1.cloaked = previousCloakingState;
         }
         
         CombatStack invulnerableFriend = null;
@@ -839,6 +855,9 @@ public class AIShipCaptain implements Base, ShipCaptain {
         for (CombatStack st1 : friends) {
             if(st1.inStasis)
                 continue;
+            boolean previousCloakingState = st1.cloaked;
+            if(!st1.hasWard())
+                st1.cloaked = false;
             float pctOfMaxHP = ((st1.num-1) * st1.maxHits + st1.hits) / (st1.num * st1.maxHits);
             float damagePerTurn = 0;
             for (CombatStack st2: foes) {
@@ -868,6 +887,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
                 enemyKillTime = Float.MAX_VALUE;
                 break;
             }
+            st1.cloaked = previousCloakingState;
         }
         
         //If we have an invulnerable friend, we should retreat and let him do the work. Due to the rule-change we will even stay where we are.
