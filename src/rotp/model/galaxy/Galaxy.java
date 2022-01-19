@@ -30,6 +30,7 @@ import rotp.model.empires.Race;
 import rotp.model.events.RandomEvents;
 import rotp.model.game.GameSession;
 import rotp.ui.NoticeMessage;
+import rotp.ui.UserPreferences;
 import rotp.ui.notifications.AdviceNotification;
 import rotp.ui.notifications.BombardSystemNotification;
 import rotp.util.Base;
@@ -183,7 +184,8 @@ public class Galaxy implements Base, Serializable {
     public void giveAdvice(String key) {
         if (!adviceAlreadyGiven(key)) {
             addAdviceGiven(key);
-            AdviceNotification.create(key);
+            if(!UserPreferences.disableAdvisor())
+                AdviceNotification.create(key);
         }
     }
     public void giveAdvice(String key, Empire e1, String s1) {
