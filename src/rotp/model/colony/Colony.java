@@ -1559,7 +1559,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         // add maximum defence
         // don't allocate just for "upgrades" if there are no bases or if there are more bases than we want
         if (!defense().isCompleted() && defense().maxBases() > 0 && defense().maxBases() >= defense().bases()) {
-            moveSlider(Colony.DEFENSE, null, text(ColonySpendingCategory.reserveText));
+            allocation(DEFENSE, defense().maxAllocationNeeded());
             locked(DEFENSE, true);
         }
 
@@ -1579,7 +1579,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         }
         if (noSpending) {
 //            System.out.println("NO SPENDING "+this.name());
-            moveSlider(Colony.RESEARCH, null, text(ColonySpendingCategory.reserveText));
+            allocation(RESEARCH, allocationRemaining());
         }
         // if we finished building stargate, don't build any ships.
         if (!shipyard().stargateCompleted() && buildingShips
