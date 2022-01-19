@@ -818,8 +818,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
             if(st1.inStasis)
                 continue;
             boolean previousCloakingState = st1.cloaked;
-            if(!st1.hasWard())
-                st1.cloaked = false; //decloack in our mind for estimates
+            st1.cloaked = false; //decloack in our mind for estimates
             float pctOfMaxHP = ((st1.num-1) * st1.maxHits + st1.hits) / (st1.num * st1.maxHits);
             float damagePerTurn = 0;
             for (CombatStack st2: friends) {
