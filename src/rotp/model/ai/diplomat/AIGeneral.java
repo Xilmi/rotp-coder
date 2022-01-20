@@ -899,10 +899,8 @@ public class AIGeneral implements Base, General {
         List<StarSystem> alreadyCounted = new ArrayList<>();
         for(StarSystem sys : empire.uncolonizedPlanetsInRange(colonizerRange))
         {
-            if(sys.colony() != null)
-            {
+            if(empire.sv.isColonized(sys.id))
                 continue;
-            }
             if(sys.monster() == null)
             {
                 additional++;
