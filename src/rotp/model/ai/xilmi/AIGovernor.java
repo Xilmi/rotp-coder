@@ -56,11 +56,7 @@ public class AIGovernor implements Base, Governor {
         float pct = col.currentProductionCapacity();
         float estProd = col.industry().factories()*col.planet().productionAdj();
         //System.out.println(galaxy().currentTurn()+" "+empire.name()+" "+col.name()+" estProd: "+estProd+" designCost: "+designCost+" sh.plan.priority(): "+sh.plan.priority()+" Repel: "+FleetPlan.REPEL+" enemy-fleet: "+!empire.enemyFleets().isEmpty());
-        if (pct >= 1.0)  // ail: I don't want them to build scouts instead of factories
-            return true;
-        if(sh.plan.priority() >= 1100)
-            return estProd > designCost;
-        return false;
+        return estProd > designCost;
     }
     @Override
     public void setColonyAllocations(Colony col) {
@@ -254,7 +250,6 @@ public class AIGovernor implements Base, Governor {
         boolean buildingVitalShip = false;
         //Mostly for Sakkra and Meklar, so they expand quicker when they can 72% pop is where the growth drops below 80%
         if(col.shipyard().desiredShips() > 0
-                && col.shipyard().design() != empire.shipDesignerAI().BestDesignToScout()
                 && (col.currentProductionCapacity() > 0.5f || col.production() > col.shipyard().design().cost()))
         {
             workerGoal = 0;
