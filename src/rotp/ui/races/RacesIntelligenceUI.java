@@ -504,10 +504,13 @@ public final class RacesIntelligenceUI extends BasePanel implements MouseListene
         int y2 = y1-techY[num];
         g.setFont(narrowFont(15));
         g.setClip(x1+s1,y1+s1,w1-s1,listH-s2);
-        g.setColor(SystemPanel.orangeText);
         int rows = 0;
         for (String id: aiUnknown) {
             Tech t = tech(id);
+            if(player().viewForEmpire(emp).spies().possibleTechs().contains(id))
+                g.setColor(SystemPanel.yellowText);
+            else
+                g.setColor(SystemPanel.orangeText);
             if ((t.level() > 0) && !t.free) {
                 y2 += rowH;
                 rows++;
