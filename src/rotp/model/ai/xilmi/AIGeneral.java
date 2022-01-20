@@ -739,6 +739,18 @@ public class AIGeneral implements Base, General {
                     break;
                 }
             }
+            
+            float diploMod = 1;
+            for(Empire contacts : emp.contactedEmpires())
+            {
+                if(contacts.alliedWith(emp.id))
+                    diploMod /= 3;
+                else if(contacts.pactWith(emp.id))
+                    diploMod /= 2;
+                else if(contacts.atWarWith(emp.id))
+                    diploMod *= 2;
+            }
+            
             if(skip)
                 continue;
             if(!empire.inShipRange(emp.id))
@@ -746,6 +758,8 @@ public class AIGeneral implements Base, General {
             if(empire.tech().topSpeed() < empire.viewForEmpire(emp).spies().tech().topSpeed())
                 continue;
             float currentScore = totalEmpirePopulationCapacity(emp) / (fleetCenter(empire).distanceTo(colonyCenter(emp)) + colonyCenter(empire).distanceTo(colonyCenter(emp)));
+            currentScore *= diploMod;
+            currentScore *= empire.tech().avgTechLevel() / emp.tech().avgTechLevel();
             //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" vs "+emp.name()+" dist: "+fleetCenter(empire).distanceTo(colonyCenter(emp))+" rev-dist: "+fleetCenter(emp).distanceTo(colonyCenter(empire))+" milrank: "+empire.diplomatAI().militaryRank(emp, true)+" poprank: "+empire.diplomatAI().popCapRank(emp, true)+" score: "+currentScore);
             if(currentScore > highestScore)
             {
@@ -848,12 +862,11 @@ public class AIGeneral implements Base, General {
         int additional = 0;
         int colonizerRange = empire.shipDesignerAI().BestDesignToColonize().range();
         List<StarSystem> alreadyCounted = new ArrayList<>();
+        //2835,6
         for(StarSystem sys : empire.uncolonizedPlanetsInRange(colonizerRange))
         {
-            if(sys.colony() != null)
-            {
+            if(empire.sv.isColonized(sys.id))
                 continue;
-            }
             if(sys.monster() == null)
             {
                 additional++;
