@@ -17,6 +17,7 @@ package rotp.model.incidents;
 
 import rotp.model.empires.Empire;
 import rotp.model.empires.EmpireView;
+import rotp.model.tech.Tech;
 
 public class TechnologistIncident extends DiplomaticIncident {
     private static final long serialVersionUID = 1L;
@@ -53,7 +54,7 @@ public class TechnologistIncident extends DiplomaticIncident {
         float avgScore = 0;
         float currentScore = 0;
         float empiresChecked = 0;
-        float max = 0;
+        float max = -Float.MAX_VALUE;
         float min = Float.MAX_VALUE;
         
         for(Empire emp : iev.owner().contactedEmpires())
@@ -61,8 +62,14 @@ public class TechnologistIncident extends DiplomaticIncident {
             if(!iev.owner().inEconomicRange(emp.id))
                 continue;
             float score = 0;
-            if(emp.totalIncome() > 0)
-                score = emp.totalPlanetaryResearchSpending() / emp.totalIncome();
+            for(Tech t : iev.owner().viewForEmpire(emp).spies().unknownTechs())
+            {
+                score += t.cost;
+            }
+            for(Tech t : emp.viewForEmpire(iev.owner()).spies().unknownTechs())
+            {
+                score -= t.cost;
+            }
 
             if(emp == iev.empire())
                 currentScore = score;
@@ -80,7 +87,7 @@ public class TechnologistIncident extends DiplomaticIncident {
             severityGoal = -50 * (currentScore - avgScore) / (min - avgScore);
         if(currentScore > avgScore)
             severityGoal = 50 * (currentScore - avgScore) / (max - avgScore);
-        //System.out.println(galaxy().currentTurn()+" "+iev.owner().name()+" evaluates "+iev.empire().name()+" technology-score: "+currentScore+" min: "+min+" max: "+max+" avg: "+avgScore+" severity: "+severity);
+        //System.out.println(galaxy().currentTurn()+" "+iev.owner().name()+" evaluates "+iev.empire().name()+" technology-score: "+currentScore+" min: "+min+" max: "+max+" avg: "+avgScore+" severityGoal: "+severityGoal);
         severity = (severityGoal - severity) / 10 + severity;
     }
     @Override

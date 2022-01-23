@@ -35,11 +35,6 @@ public class ExpansionIncident extends DiplomaticIncident {
         dateOccurred = galaxy().currentYear();
         duration = 1;
 
-        //Xilmi-AI doesn't use this as they have their own expanionist-incident which works differently
-        if (ev.embassy().unity() || ev.owner().generalAI().absolution() >= 1) {
-            severity = 0;
-            return;
-        }
         float multiplier = 1.0f;
         // penalty doubled for xenophobes
         if (ev.owner().leader().isXenophobic())

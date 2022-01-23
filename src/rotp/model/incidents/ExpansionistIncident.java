@@ -60,7 +60,7 @@ public class ExpansionistIncident extends DiplomaticIncident {
         {
             if(!iev.owner().inEconomicRange(emp.id))
                 continue;
-            float score = 1f / emp.numColonizedSystems();
+            float score = iev.owner().generalAI().colonyCenter(iev.owner()).distanceTo(iev.owner().generalAI().colonyCenter(emp));
 
             if(emp == iev.empire())
                 currentScore = score;
@@ -70,7 +70,7 @@ public class ExpansionistIncident extends DiplomaticIncident {
                 min = score;
             avgScore += score;
             empiresChecked++;
-        }  
+        }
         
         if(empiresChecked > 0)
             avgScore /= empiresChecked;
@@ -78,7 +78,7 @@ public class ExpansionistIncident extends DiplomaticIncident {
             severityGoal = -50 * (currentScore - avgScore) / (min - avgScore);
         if(currentScore > avgScore)
             severityGoal = 50 * (currentScore - avgScore) / (max - avgScore);
-        //System.out.println(galaxy().currentTurn()+" "+iev.owner().name()+" evaluates "+iev.empire().name()+" expansion-score: "+currentScore+" min: "+min+" max: "+max+" avg: "+avgScore+" severity: "+severity);
+        //System.out.println(galaxy().currentTurn()+" "+iev.owner().name()+" evaluates "+iev.empire().name()+" expansion-score: "+currentScore+" min: "+min+" max: "+max+" avg: "+avgScore+" severityGoal: "+severityGoal);
         severity = (severityGoal - severity) / 10 + severity;
     }
     @Override

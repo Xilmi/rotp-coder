@@ -60,7 +60,7 @@ public class EcologistIncident extends DiplomaticIncident {
         {
             if(!iev.owner().inEconomicRange(emp.id))
                 continue;
-            float score = iev.owner().generalAI().totalEmpirePopulationCapacity(emp) / emp.allColonizedSystems().size();
+            float score = emp.tech().planetology().techLevel();
 
             if(emp == iev.empire())
                 currentScore = score;
