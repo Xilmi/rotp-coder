@@ -329,7 +329,8 @@ public final class SpyNetwork implements Base, Serializable {
         List<String> prevPossible = owner.isPlayer() ? new ArrayList<>(possibleTechs()) : null;
 
         tech.spyOnTechs(emp.tech());
-        float maxTech = owner.tech().maxTechLevelSpy();
+        float maxTech = owner.tech().maxTechLevel();
+        maxTech *= 1 - overallSecurityAdj(true);
         possibleTechs = emp.tech().worseTechsUnknownToCiv(owner.tech(), maxTech);
         
         if (owner.isPlayer()) {
@@ -347,7 +348,7 @@ public final class SpyNetwork implements Base, Serializable {
     }
     private boolean sendSpiesToInfiltrate() {
         boolean confession = false;
-        float adj = overallSecurityAdj();
+        float adj = overallSecurityAdj(false);
         List<Spy> spiesAttempting = new ArrayList<>(activeSpies());
         for (Spy spy: spiesAttempting) {
             spy.attemptInfiltration(adj);
@@ -379,7 +380,7 @@ public final class SpyNetwork implements Base, Serializable {
 
         // from active spies with successful, find the one with the
         // highest "steal number"... he will acquire the best tech
-        float maxTechLevel = owner().tech().maxTechLevelSpy();
+        float maxTechLevel = owner().tech().maxTechLevel();
         float bestStealNumber = 0;
         Spy bestSpy = null;
         for (Spy spy: activeSpies()) {
@@ -391,6 +392,7 @@ public final class SpyNetwork implements Base, Serializable {
                 }
             }
         }
+        bestStealNumber *= 1 - overallSecurityAdj(true);
 
         // if no spies had successful missions,  quit
         if (bestSpy == null)
@@ -494,18 +496,11 @@ public final class SpyNetwork implements Base, Serializable {
 
     private float costForNextSpy() {
         float spyCost = owner().baseSpyCost();
-        float SpySpread = 0;
-        for(EmpireView ev : owner().contacts())
-        {
-            if(ev.spies() != null && ev.spies().hasSpies())
-                SpySpread++;
-        }
-        spyCost *= max(SpySpread, 5) / 5;
         for (int i=1;i<activeSpies.size();i++)
             spyCost *= 2;
         return spyCost;
     }
-    private float overallSecurityAdj() {
+    private float overallSecurityAdj(boolean ignoreHideBonus) {
         // security pct based on their spending
         float adj = empire().totalInternalSecurityPct();
 
@@ -526,7 +521,7 @@ public final class SpyNetwork implements Base, Serializable {
         // if no techs to steal on an espionage mission, then treat as 'hiding' this turn
         // eliminates some micro-managing by player
         if ((isEspionage() && possibleTechs().isEmpty())
-        || isHide())
+        || (isHide() && !ignoreHideBonus))
             adj -= .3;
         return adj;
     }
@@ -545,7 +540,7 @@ public final class SpyNetwork implements Base, Serializable {
     private void startSabotageMission() {
         // from active spies with successful, find the one with the
         // highest "steal number"... he will acquire the best tech
-        float maxTechLevel = owner().tech().maxTechLevelSpy();
+        float maxTechLevel = owner().tech().maxTechLevel();
         float bestStealNumber = 0;
         Spy bestSpy = null;
         for (Spy spy: activeSpies()) {

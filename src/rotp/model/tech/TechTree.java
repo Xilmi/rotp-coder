@@ -575,13 +575,6 @@ public final class TechTree implements Base, Serializable {
         }      
         return null;      
     }
-    public float maxTechLevelSpy()
-    {
-        float lvl = 0;
-        for (TechCategory cat: category)
-            lvl = Math.max(lvl,cat.techLevelSpy());
-        return lvl;
-    }
     public float maxTechLevel() {
         float lvl = 0;
         for (TechCategory cat: category)
