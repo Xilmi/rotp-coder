@@ -268,8 +268,8 @@ INC_ECOLOGIST_TITLE               | Ecologist
 INC_ECOLOGIST_DESC1               | The [your_empire] needs to treat their planets better.
 INC_ECOLOGIST_DESC2               | The [your_empire] treats their planets well.
 INC_EXPANSIONIST_TITLE            | Expansionist
-INC_EXPANSIONIST_DESC1            | The [your_empire] has expanded too much.
-INC_EXPANSIONIST_DESC2            | The [your_empire] has left enough room for us.
+INC_EXPANSIONIST_DESC1            | Our close borders spark tension.
+INC_EXPANSIONIST_DESC2            | The space between the [your_empire] and the [my_empire] relaxes us.
 INC_INDUSTRIALIST_TITLE           | Industrialist
 INC_INDUSTRIALIST_DESC1           | The [your_empire] has an inefficient industry.
 INC_INDUSTRIALIST_DESC2           | The [your_empire] has an efficient industry.
