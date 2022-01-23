@@ -204,7 +204,7 @@ public class CombatStackShip extends CombatStack {
                     missileRange = (int) max(tgt.repulsorRange() + 1, repulsorRange() + 1, missileRange, mslRange);
                 }
             }
-            else
+            else if(!wpn.groundAttacksOnly())
             {
                 if(empire.ai().shipCaptain().useSmartRangeForBeams())
                 {
