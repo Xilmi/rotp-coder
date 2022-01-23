@@ -41,21 +41,24 @@ public class AISpyMaster implements Base, SpyMaster {
         // MAX_SECURITY_TICKS = 10 in model/empires/Empire.java
 
         float paranoia = 0;
-        float highestOpponentTechLevel = 0;
+        float avgOpponentTechLevel = 0;
+        float opponentCount = 0;
         for (EmpireView cv : empire.empireViews()) {
             if ((cv != null) && cv.embassy().contact() && cv.inEconomicRange()) {
                 if(empire.allies().contains(cv.empire()))
                     continue;
-                if(cv.empire().tech().avgTechLevel() > highestOpponentTechLevel)
-                    highestOpponentTechLevel = cv.empire().tech().avgTechLevel();
+                avgOpponentTechLevel += cv.empire().tech().maxTechLevel();
+                opponentCount++;
             }
         }
-        paranoia = empire.tech().avgTechLevel() - highestOpponentTechLevel;
-        if(highestOpponentTechLevel == 0)
+        if(opponentCount > 0)
+            avgOpponentTechLevel /= opponentCount;
+        paranoia = empire.tech().avgTechLevel() - avgOpponentTechLevel;
+        if(avgOpponentTechLevel == 0)
             paranoia = 0;
         if (paranoia < 0)
             paranoia = 0;
-        //System.out.println(empire.galaxy().currentTurn()+" "+ empire.name()+" counter-espionage: "+paranoia+" mt: "+empire.tech().avgTechLevel()+" ot: "+highestOpponentTechLevel);
+        //System.out.println(empire.galaxy().currentTurn()+" "+ empire.name()+" counter-espionage: "+paranoia+" mt: "+empire.tech().avgTechLevel()+" ot: "+avgOpponentTechLevel);
         return min(10, (int)Math.round(paranoia)); // modnar: change max to 10, MAX_SECURITY_TICKS = 10
     }
     @Override
@@ -139,14 +142,6 @@ public class AISpyMaster implements Base, SpyMaster {
             return;
         }
         
-        // don't bother trying to steal/sabotage against Darloks unless we are Darloks ourselves, it's probably just a waste of resources
-        if(emb.empire().race().internalSecurityAdj > empire.race().spyInfiltrationAdj)
-        {
-            spies.beginHide();
-            spies.maxSpies(1);
-            return; 
-        }
- 
         boolean canEspionage = !spies.possibleTechs().isEmpty();
         Sabotage sabMission = bestSabotageChoice(v);
         boolean canSabotage = spies.canSabotage() && (sabMission != null);

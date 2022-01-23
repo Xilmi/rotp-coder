@@ -862,7 +862,6 @@ public class AIGeneral implements Base, General {
         int additional = 0;
         int colonizerRange = empire.shipDesignerAI().BestDesignToColonize().range();
         List<StarSystem> alreadyCounted = new ArrayList<>();
-        //2835,6
         for(StarSystem sys : empire.uncolonizedPlanetsInRange(colonizerRange))
         {
             if(empire.sv.isColonized(sys.id))
