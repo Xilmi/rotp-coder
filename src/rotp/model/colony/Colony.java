@@ -913,7 +913,10 @@ public final class Colony implements Base, IMappedObject, Serializable {
     }
     public void ensureProperSpendingRates() {
         if (recalcSpendingForNewTaxRate) 
+        {
             checkEcoAtClean();
+            governIfNeeded();
+        }
     }
     public float totalProductionIncome() {
         if (inRebellion())
@@ -1559,7 +1562,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         // add maximum defence
         // don't allocate just for "upgrades" if there are no bases or if there are more bases than we want
         if (!defense().isCompleted() && defense().maxBases() > 0 && defense().maxBases() >= defense().bases()) {
-            allocation(DEFENSE, defense().maxAllocationNeeded());
+            allocation(DEFENSE, min(defense().maxAllocationNeeded(), allocation(RESEARCH)+allocation(SHIP)));
             locked(DEFENSE, true);
         }
 
@@ -1772,6 +1775,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         //System.out.println("balance "+this.name()+" ecoAll final "+ecoAll);
         //xilmi: We need to reset ecology-spending because totalIncome conditionally calls a function that sets eco to clean, if we don't we can end up having twice the eco-spending we want
         allocation(ECOLOGY, 0);
+        locked(Colony.ECOLOGY, false);
         increment(Colony.ECOLOGY, ecoAll);
         locked(Colony.ECOLOGY, true);
         increment(Colony.INDUSTRY, indAll);
