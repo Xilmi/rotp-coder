@@ -596,6 +596,8 @@ public class AIShipCaptain implements Base, ShipCaptain {
             distanceToBeAt = max(distanceToBeAt, 2);
         if(tgt.repulsorRange() > 0 && !st.ignoreRepulsors())
             distanceToBeAt = max(distanceToBeAt, 2);
+        if(st.repulsorRange() > 0 && st.optimalFiringRange(tgt) == 1 && (st.move < st.movePointsTo(tgt) || tgt.initiative() > st.initiative()) && !tgt.ignoreRepulsors())
+            distanceToBeAt = max(distanceToBeAt, 2);
         boolean shallGoForFirstStrike = true;
         if(galaxy().shipCombat().results().damageSustained(st.empire) > 0
                 || galaxy().shipCombat().results().damageSustained(tgt.empire) > 0)
