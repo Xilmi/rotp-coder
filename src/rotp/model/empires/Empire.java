@@ -1030,7 +1030,8 @@ public final class Empire implements Base, NamedObject, Serializable {
         NoticeMessage.setSubstatus(text("TURN_COLONY_SPENDING"));
         for (int n=0; n<sv.count(); n++) {
             if (sv.empId(n) == id)
-                governorAI().setColonyAllocations(sv.colony(n));
+                if(!sv.colony(n).isGovernor() || isAIControlled()) //do not overrule the governor if it is enabled!
+                    governorAI().setColonyAllocations(sv.colony(n));
         }
     }
     /**
