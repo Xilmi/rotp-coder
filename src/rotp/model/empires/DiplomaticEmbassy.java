@@ -299,6 +299,17 @@ public class DiplomaticEmbassy implements Base, Serializable {
                 list.add(t.id());
         }
     }
+    //for anything we already offered for anything
+    public List<Tech> alreadyOfferedTechs() {
+        if(offeredTechs().isEmpty())
+            return null;
+        
+        List<Tech> techs = new ArrayList<>();
+        for (String key: offeredTechs().keySet())
+            for (String s: offeredTechs().get(key))
+                techs.add(tech(s));
+        return techs;
+    }
     public List<Tech> alreadyOfferedTechs(Tech wantedTech) {
         if (!offeredTechs().containsKey(wantedTech.id()))
             return null;

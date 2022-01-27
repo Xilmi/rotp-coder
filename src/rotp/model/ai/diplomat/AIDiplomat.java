@@ -308,7 +308,11 @@ public class AIDiplomat implements Base, Diplomat {
                 
                 List<Tech> counterTechs = v.empire().diplomatAI().techsRequestedForCounter(empire, wantedTech);
                 if (!counterTechs.isEmpty()) {
-                    List<Tech> previouslyOffered = v.embassy().alreadyOfferedTechs(wantedTech);
+                    List<Tech> previouslyOffered;
+                    if(v.empire().isPlayerControlled())
+                        previouslyOffered = v.embassy().alreadyOfferedTechs();
+                    else
+                        previouslyOffered = v.embassy().alreadyOfferedTechs(wantedTech);
                     // simplified logic so that if we have ever asked for wantedTech before, don't ask again
                     if (previouslyOffered == null) {
                         //System.out.println(empire.galaxy().currentTurn()+" "+empire.name()+" ask "+v.empire().name()+" for "+wantedTech.name());
