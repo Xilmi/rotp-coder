@@ -1073,7 +1073,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
             clearTransport();
         else {
             StarSystem oldDest = transport().destination();
-            transport().size(xPop);
+            transport().size(pop);
             transport().setDest(dest);
             transport().setDefaultTravelSpeed();
             if (oldDest != null && oldDest != dest) {
