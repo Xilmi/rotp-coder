@@ -1562,7 +1562,10 @@ public final class Colony implements Base, IMappedObject, Serializable {
         // add maximum defence
         // don't allocate just for "upgrades" if there are no bases or if there are more bases than we want
         if (!defense().isCompleted() && defense().maxBases() > 0 && defense().maxBases() >= defense().bases()) {
-            allocation(DEFENSE, min(defense().maxAllocationNeeded(), allocation(RESEARCH)+allocation(SHIP)));
+            int allocationAvailableForDefense = allocation(RESEARCH);
+            if(allocation(SHIP) > 1)
+                allocationAvailableForDefense += allocation(SHIP) - 1;
+            allocation(DEFENSE, min(defense().maxAllocationNeeded(), allocationAvailableForDefense));
             locked(DEFENSE, true);
         }
 
