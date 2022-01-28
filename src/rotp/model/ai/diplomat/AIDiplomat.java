@@ -303,10 +303,11 @@ public class AIDiplomat implements Base, Diplomat {
         // until one is found that we can make counter-offers for... use that one
         while (!availableTechs.isEmpty()) {
             Tech wantedTech = empire.ai().scientist().mostDesirableTech(availableTechs);
+            //System.out.println(empire.galaxy().currentTurn()+" "+empire.name()+" wants from "+v.empire().name()+" the tech "+wantedTech.name() + " value: "+empire.ai().scientist().researchValue(wantedTech));
             availableTechs.remove(wantedTech);
             if (empire.ai().scientist().researchValue(wantedTech) > 1) {
-                
                 List<Tech> counterTechs = v.empire().diplomatAI().techsRequestedForCounter(empire, wantedTech);
+                //System.out.println(empire.galaxy().currentTurn()+" "+empire.name()+" wants from "+v.empire().name()+" the tech "+wantedTech.name() +" countertechs: "+counterTechs.size());
                 if (!counterTechs.isEmpty()) {
                     List<Tech> previouslyOffered;
                     if(v.empire().isPlayerControlled())
@@ -314,7 +315,7 @@ public class AIDiplomat implements Base, Diplomat {
                     else
                         previouslyOffered = v.embassy().alreadyOfferedTechs(wantedTech);
                     // simplified logic so that if we have ever asked for wantedTech before, don't ask again
-                    if (previouslyOffered == null) {
+                    if (previouslyOffered == null || !previouslyOffered.containsAll(counterTechs)) {
                         //System.out.println(empire.galaxy().currentTurn()+" "+empire.name()+" ask "+v.empire().name()+" for "+wantedTech.name());
                         v.embassy().logTechExchangeRequest(wantedTech, counterTechs);
                         //only now send the request
