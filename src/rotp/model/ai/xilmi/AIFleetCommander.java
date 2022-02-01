@@ -1177,6 +1177,9 @@ public class AIFleetCommander implements Base, FleetCommander {
         
         if(empire.generalAI().needScoutRepellers())
             Repeller = empire.shipDesignerAI().BestDesignToRepell();
+        //when the system is colonizable we'll also leave at least one ship that can fight behind
+        if(!fl.isInTransit() && !fl.system().isColonized() && empire.canColonize(fl.system()))
+            needToKeep = max(needToKeep, 1);
         
         for (int speed=(int)fl.slowestStackSpeed();speed<=(int)empire.tech().topSpeed();speed++)
         {
