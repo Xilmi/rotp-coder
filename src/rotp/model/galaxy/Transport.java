@@ -297,7 +297,10 @@ public class Transport implements Base, Ship, Sprite, Serializable {
             troopShieldId = tr.troopShieldId;
     }
     public void land() {
-        if (!dest.isColonized()) {
+        //there's a chance that our empire was destroyed between the arrival of our transport and it's landing
+        if(empire().extinct())
+            size = 0;
+        else if (!dest.isColonized()) {
             if (dest.abandoned() && !dest.unnamed() && empire.canColonize(dest))
                 empire().takeAbandonedSystem(dest, this);
             else {
