@@ -1457,6 +1457,13 @@ public final class Colony implements Base, IMappedObject, Serializable {
 
     public void setGovernor(boolean governor) {
         this.governor = governor;
+        //removing locks after disabling governor:
+        if(!isGovernor())
+        {
+            for (int i = 0; i <= 4; i++) {
+                locked(i, false);
+            }
+        }
     }
 
     public boolean isAutoShips() {
