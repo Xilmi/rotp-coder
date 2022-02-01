@@ -1376,7 +1376,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
             destroy();
     }
     public void takeBioweaponDamage(float damage) {
-        float popLost = max(0, damage - tech().antidoteLevel());
+        float popLost = damage;
 
         setPopulation(max(0, population() - popLost));
 
