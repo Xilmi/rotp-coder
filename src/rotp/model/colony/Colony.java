@@ -1565,7 +1565,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
             int allocationAvailableForDefense = allocation(RESEARCH);
             if(allocation(SHIP) > 1)
                 allocationAvailableForDefense += allocation(SHIP) - 1;
-            allocation(DEFENSE, min(defense().maxAllocationNeeded(), allocationAvailableForDefense));
+            increment(DEFENSE, min(defense().maxAllocationNeeded(), allocationAvailableForDefense));
             locked(DEFENSE, true);
         }
 
