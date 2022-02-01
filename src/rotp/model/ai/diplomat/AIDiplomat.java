@@ -1945,7 +1945,7 @@ public class AIDiplomat implements Base, Diplomat {
         }
         if(myPopCap > totalPopCap / 2)
             currentGoal = VETO_POWER;
-        else if(myPopCap > totalPopCap / contactCount)
+        else if(myPopCap > totalPopCap / contactCount || contactCount < 3)
             currentGoal = SOLO_VICTORY;
         else if(myAlliancePopCap > totalPopCap / contactCount)
             currentGoal = ALLIED_VICTORY;
