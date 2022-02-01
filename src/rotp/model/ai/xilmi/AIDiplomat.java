@@ -268,7 +268,7 @@ public class AIDiplomat implements Base, Diplomat {
         // what are all of the unknown techs that we could ask for
         List<Tech> allTechs = view.spies().unknownTechs();
         Tech.comparatorCiv = empire;
-        Collections.sort(allTechs, Tech.BASE_VALUE); 
+        Collections.sort(allTechs, tech.OBJECT_TRADE_PRIORITY); 
         // include only those techs which have a research value >= the trade value
         // of the requestedTech we would be trading away
         List<Tech> worthyTechs = new ArrayList<>(allTechs.size());
@@ -278,7 +278,7 @@ public class AIDiplomat implements Base, Diplomat {
         }
 
         // sort techs by the diplomat's research priority (hi to low)
-        Collections.sort(worthyTechs, Tech.BASE_VALUE);        
+        Collections.sort(worthyTechs, tech.OBJECT_TRADE_PRIORITY);        
         
         // limit return to top 5 techs
         Tech.comparatorCiv = requestor;
@@ -288,7 +288,7 @@ public class AIDiplomat implements Base, Diplomat {
         List<Tech> topFiveTechs = new ArrayList<>(maxTechs);
         for (int i=0; i<maxTechs;i++)
             topFiveTechs.add(worthyTechs.get(i));
-        Collections.sort(topFiveTechs, Tech.RESEARCH_VALUE);
+        Collections.sort(topFiveTechs, tech.OBJECT_TRADE_PRIORITY);
         return topFiveTechs;
     }
 
