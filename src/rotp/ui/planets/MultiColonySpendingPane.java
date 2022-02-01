@@ -216,6 +216,9 @@ public class MultiColonySpendingPane extends BasePanel implements MouseListener,
             Colony c = sys.colony();
             if (c != null) {
                 c.setGovernor(!c.isGovernor());
+                if (c.isGovernor()) {
+                    c.govern();
+                }
             }
         }
         parent.repaintAll();
@@ -226,6 +229,9 @@ public class MultiColonySpendingPane extends BasePanel implements MouseListener,
             Colony c = sys.colony();
             if (c != null) {
                 c.setGovernor(gov);
+                if (c.isGovernor()) {
+                    c.govern();
+                }
             }
         }
         parent.repaintAll();
