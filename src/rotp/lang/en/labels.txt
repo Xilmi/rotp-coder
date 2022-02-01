@@ -1605,6 +1605,7 @@ SHIP_COMBAT_FACTORIES             | %1 Factories
 SHIP_COMBAT_ENTER_BATTLE          | Enter battle
 SHIP_COMBAT_MISS                  | Miss
 SHIP_COMBAT_DEFLECTED             | Deflected
+SHIP_COMBAT_IMMUNE                | Immune
 SHIP_COMBAT_DESTROYED             | Destroyed!
 SHIP_COMBAT_STASIS                | Stasis
 SHIP_COMBAT_TITLE                 | Battle at %1

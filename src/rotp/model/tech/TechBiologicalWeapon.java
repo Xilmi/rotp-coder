@@ -197,7 +197,7 @@ public final class TechBiologicalWeapon extends Tech {
             sleep(200);
         }
         g.setStroke(prev);
-        String missLabel = dmg < 0 ? text("SHIP_COMBAT_DEFLECTED") : text("SHIP_COMBAT_MISS");
+        String missLabel = dmg < 0 ? text("SHIP_COMBAT_IMMUNE") : text("SHIP_COMBAT_MISS");
         target.drawAttackResult(g, x1,y1,x0, dmg,missLabel);   
         ui.paintAllImmediately();
         sleep(250);
