@@ -355,7 +355,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
             }
             if(target.inStasis)
                 continue;
-            if(target.cloaked && (!allTargetsCloaked || stack.hasWard()))
+            if(target.cloaked && (!allTargetsCloaked || stack.hasWard()) && stack.isShip())
                 continue;
             // pct of target that this stack thinks it can kill
             float killPct = max(stack.estimatedKillPct(target), expectedPopLossPct(stack, target)); 
