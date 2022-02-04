@@ -487,9 +487,14 @@ public class AIGovernor implements Base, Governor {
     }
     public boolean wantShield(Colony col) {
         StarSystem sys = col.starSystem();
-        if(!col.defense().shieldAtMaxLevel()
-                && (empire.sv.isAttackTarget(sys.id) || empire.sv.isBorderSystem(sys.id))) {
-            return true;
+        if(!col.defense().shieldAtMaxLevel()) {
+            for(Empire emp : empire.contactedEmpires())
+            {
+                if(empire.friendlyWith(emp.id))
+                    continue;
+                if(emp.sv.inShipRange(sys.id))
+                    return true;
+            }
         }
         return false;
     }
