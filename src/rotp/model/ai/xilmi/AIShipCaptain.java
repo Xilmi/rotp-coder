@@ -755,7 +755,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
         
         // if stack is pacted with colony and doesn't want war, then retreat
         // ail: Whether I want a war or not depends on whether the other faction is an enemy, not on relation!
-        if ((colView != null) && !empire.enemies().contains(col.empire))  
+        if ((colView != null) && !empire.enemies().contains(colView.empire()))  
             return true;
         
         // threatened to be completely disabled by warp-dissipater

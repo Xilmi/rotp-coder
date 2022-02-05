@@ -343,7 +343,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
         
         // if stack is pacted with colony and doesn't want war, then retreat
         // modnar: change condition to only "doesn't want war"
-        if ((colView != null) && !colView.embassy().wantWar())  
+        if ((colView != null) && !empire.enemies().contains(colView.empire()))  
             return true;
 
         // if stack has ward still in combat, don't retreat
