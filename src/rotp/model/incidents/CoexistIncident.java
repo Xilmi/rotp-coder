@@ -51,20 +51,17 @@ public class CoexistIncident extends DiplomaticIncident {
             severityGoal += 20;
         else if(iev.embassy().treaty().isAlliance())
             severityGoal += 35;
-        float nastyMalus = 0;
         for(DiplomaticIncident inc : iev.embassy().allIncidents())
         {
             if(inc.currentSeverity() < 0)
             {
-                nastyMalus += inc.currentSeverity();
+                severityGoal += inc.currentSeverity();
             }
         }
-        severityGoal += nastyMalus;
         severityGoal = max(0, severityGoal);
         if(severity < severityGoal)
             severity++;
         severity = min(severity, severityGoal);
-        severity = max(0, severity + nastyMalus);
         //System.out.println(galaxy().currentTurn()+" "+iev.owner().name()+" shifts CoExist-Incident towards "+iev.empire().name()+" to: "+severityGoal+" current: "+severity);
     }
     @Override
