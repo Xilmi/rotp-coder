@@ -45,7 +45,7 @@ public class ErraticIncident extends DiplomaticIncident {
             severity = 0;
             return;
         }
-        if(iev.owner().generalAI().absolution() < 1 || !iev.owner().leader().isErratic())
+        if(!iev.owner().leader().isErratic())
         {
             severity = 0;
             return;
