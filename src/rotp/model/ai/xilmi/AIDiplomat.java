@@ -231,14 +231,14 @@ public class AIDiplomat implements Base, Diplomat {
     public DiplomaticReply receiveCounterOfferTech(Empire diplomat, Tech offeredTech, Tech requestedTech) {
         EmpireView view = empire.viewForEmpire(diplomat);
         view.embassy().resetTechTimer();
-        //System.out.println(empire.galaxy().currentTurn()+" "+empire.name()+" gets "+offeredTech.name()+" Trade-Value: "+offeredTech.tradeValue(empire) + " for "+requestedTech.name()+" "+requestedTech.tradeValue(empire)+" from "+diplomat.name());
+        System.out.println(empire.galaxy().currentTurn()+" "+empire.name()+" gets "+offeredTech.name()+" Trade-Value: "+offeredTech.tradeValue(empire) + " for "+requestedTech.name()+" "+requestedTech.tradeValue(empire)+" from "+diplomat.name());
         DiplomaticIncident inc = view.embassy().exchangeTechnology(offeredTech, requestedTech);
         return view.otherView().accept(DialogueManager.ACCEPT_TECH_EXCHANGE, inc);
     }
     @Override
     public List<Tech> techsAvailableForRequest(Empire diplomat) {
         EmpireView view = empire.viewForEmpire(diplomat);
-        List<Tech> allUnknownTechs = view.spies().unknownTechs();
+        List<Tech> allUnknownTechs = diplomat.diplomatAI().offerableTechnologies(empire);
 
         List<Tech> allTechs = new ArrayList<>();
         for (int i=0; i<allUnknownTechs.size();i++) {
@@ -263,16 +263,21 @@ public class AIDiplomat implements Base, Diplomat {
         if (tech.isObsolete(requestor))
             return new ArrayList<>();
         
+        if(!willingToTradeTech(tech))
+            return new ArrayList<>();
+        
         EmpireView view = empire.viewForEmpire(requestor);
 
         // what are all of the unknown techs that we could ask for
-        List<Tech> allTechs = view.spies().unknownTechs();
+        List<Tech> allTechs = requestor.diplomatAI().offerableTechnologies(empire);
         Tech.comparatorCiv = empire;
         Collections.sort(allTechs, tech.OBJECT_TRADE_PRIORITY); 
         // include only those techs which have a research value >= the trade value
         // of the requestedTech we would be trading away
+        //System.out.println(empire.galaxy().currentTurn()+" "+empire.name()+" report age on "+requestor.name()+": "+view.spies().reportAge());
         List<Tech> worthyTechs = new ArrayList<>(allTechs.size());
         for (Tech t: allTechs) {
+            //System.out.println(empire.galaxy().currentTurn()+" "+empire.name()+" could like "+t.name()+" in return for "+tech.name()+" obsolete: "+t.isObsolete(empire)+" value: "+t.baseValue(empire));
             if (!t.isObsolete(empire) && t.baseValue(empire) > 0)
                 worthyTechs.add(t);
         }
@@ -296,7 +301,7 @@ public class AIDiplomat implements Base, Diplomat {
         if (!willingToOfferTechExchange(v))
             return false;
 
-        List<Tech> availableTechs = v.spies().unknownTechs();
+        List<Tech> availableTechs = v.empire().diplomatAI().offerableTechnologies(empire);
         if (availableTechs.isEmpty())
             return false;
 
@@ -308,8 +313,13 @@ public class AIDiplomat implements Base, Diplomat {
             availableTechs.remove(wantedTech);
             if (empire.ai().scientist().researchValue(wantedTech) > 1) {
                 List<Tech> counterTechs = v.empire().diplomatAI().techsRequestedForCounter(empire, wantedTech);
+                List<Tech> willingToTradeCounterTechs = new ArrayList<>(counterTechs.size());
+                for (Tech t: counterTechs) {
+                    if (willingToTradeTech(t))
+                        willingToTradeCounterTechs.add(t);
+                }
                 //System.out.println(empire.galaxy().currentTurn()+" "+empire.name()+" wants from "+v.empire().name()+" the tech "+wantedTech.name() +" countertechs: "+counterTechs.size());
-                if (!counterTechs.isEmpty()) {
+                if (!willingToTradeCounterTechs.isEmpty()) {
                     List<Tech> previouslyOffered;
                     if(v.empire().isPlayerControlled())
                         previouslyOffered = v.embassy().alreadyOfferedTechs();
@@ -324,9 +334,9 @@ public class AIDiplomat implements Base, Diplomat {
                         if ((reply != null) && reply.accepted()) {
                             // techs the AI is willing to consider in exchange for wantedTech
                             // find the tech with the lowest trade value
-                            Collections.sort(counterTechs, Tech.TRADE_PRIORITY);
-                            Collections.reverse(counterTechs);
-                            Tech cheapestCounter = counterTechs.get(0);
+                            Collections.sort(willingToTradeCounterTechs, Tech.TRADE_PRIORITY);
+                            Collections.reverse(willingToTradeCounterTechs);
+                            Tech cheapestCounter = willingToTradeCounterTechs.get(0);
                             // if the lowest trade value tech is not the requested tech, then make the deal
                             if (cheapestCounter != wantedTech)
                                 v.empire().diplomatAI().receiveCounterOfferTech(empire, cheapestCounter, wantedTech);
@@ -348,7 +358,7 @@ public class AIDiplomat implements Base, Diplomat {
         return true;
     }
     public Tech mostDesirableTech(EmpireView v) {
-        return empire.ai().scientist().mostDesirableTech(v.spies().unknownTechs());
+        return empire.ai().scientist().mostDesirableTech(v.empire().diplomatAI().offerableTechnologies(empire));
     }
     private float techDealValue(EmpireView v) {
         return 1.0f;
@@ -1941,6 +1951,24 @@ public class AIDiplomat implements Base, Diplomat {
             warAllowed = false;
         }
         return warAllowed;
+    }
+    boolean willingToTradeTech(Tech tech)
+    {
+        //The player can decide for themselves what they want to give away!
+        if(!empire.isAIControlled())
+            return true;
+        for(Empire emp : empire.contactedEmpires())
+        {
+            EmpireView ev = empire.viewForEmpire(emp);
+            if(!ev.inEconomicRange())
+                continue;
+            if(ev.spies().tech().allKnownTechs().contains(tech.id()))
+                return true;
+            if(emp.viewForEmpire(empire).spies().possibleTechs().contains(tech.id()) && emp.viewForEmpire(empire).spies().isEspionage())
+                return true;
+        }
+        //System.out.println(empire.galaxy().currentTurn()+" "+empire.name()+" is not willing to trade "+tech.name());
+        return false;
     }
 }
 
