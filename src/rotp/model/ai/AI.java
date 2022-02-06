@@ -83,7 +83,7 @@ public class AI implements Base {
                 captain =        new rotp.model.ai.base.AIShipCaptain(empire);
                 governor =       new rotp.model.ai.base.AIGovernor(empire);
                 scientist =      new rotp.model.ai.base.AIScientist(empire);
-                diplomat =       new rotp.model.ai.base.AIDiplomat(empire);
+                diplomat =       new rotp.model.ai.diplomat.AIDiplomat(empire);
                 shipDesigner =   new rotp.model.ai.base.AIShipDesigner(empire);
                 fleetCommander = new rotp.model.ai.base.AIFleetCommander(empire);
                 spyMaster =      new rotp.model.ai.base.AISpyMaster(empire);
@@ -94,7 +94,7 @@ public class AI implements Base {
                 captain =        new rotp.model.ai.modnar.AIShipCaptain(empire);
                 governor =       new rotp.model.ai.modnar.AIGovernor(empire);
                 scientist =      new rotp.model.ai.modnar.AIScientist(empire);
-                diplomat =       new rotp.model.ai.modnar.AIDiplomat(empire);
+                diplomat =       new rotp.model.ai.diplomat.AIDiplomat(empire);
                 shipDesigner =   new rotp.model.ai.modnar.AIShipDesigner(empire);
                 fleetCommander = new rotp.model.ai.modnar.AIFleetCommander(empire);
                 spyMaster =      new rotp.model.ai.modnar.AISpyMaster(empire);
