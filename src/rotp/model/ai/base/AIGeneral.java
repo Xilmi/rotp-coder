@@ -730,16 +730,23 @@ public class AIGeneral implements Base, General {
                 continue;
             //skip allies of our allies too because that makes for stupid situations
             boolean skip = false;
+            float diploMod = 1;
             for(Empire ally : empire.allies())
             {
+                if(ally.treaty(emp).isPact())
+                    diploMod /= 2;
+                if(ally.treaty(emp).isPeace())
+                {
+                    skip = true;
+                    break;
+                }
                 if(ally.alliedWith(emp.id))
                 {
                     skip = true;
                     break;
                 }
             }
-            
-            float diploMod = 1;
+
             for(Empire contacts : emp.contactedEmpires())
             {
                 if(contacts.alliedWith(emp.id))
