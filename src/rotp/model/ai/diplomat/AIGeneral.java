@@ -763,12 +763,18 @@ public class AIGeneral implements Base, General {
             return bestVictim;
         }
         searchedVictimThisTurn = true;
-        float lowestScore = Float.MAX_VALUE;
+        float highestScore = 0;
         Empire archEnemy = null;
         if(empire.contactedEmpires().isEmpty())
         {
             bestVictim = archEnemy;
             return bestVictim;
+        }
+        int opponentsInRange = 1;
+        for(Empire emp : empire.contactedEmpires())
+        {
+            if(empire.inShipRange(emp.id))
+                opponentsInRange++;
         }
         for(Empire emp : empire.contactedEmpires())
         {
@@ -785,25 +791,37 @@ public class AIGeneral implements Base, General {
                     break;
                 }
             }
+            
+            float diploMod = 1;
+            for(Empire contacts : emp.contactedEmpires())
+            {
+                if(contacts.alliedWith(emp.id))
+                    diploMod /= 3;
+                else if(contacts.atWarWith(emp.id))
+                    diploMod *= 2;
+            }
+            
+            if(empire.pactWith(emp.id))
+                diploMod /= 2;
+            
             if(skip)
-                continue;
-            if(empire.pactWith(emp.id) && empire.leader().isHonorable())
                 continue;
             if(!empire.inShipRange(emp.id))
                 continue;
             if(empire.tech().topSpeed() < empire.viewForEmpire(emp).spies().tech().topSpeed())
                 continue;
-            EmpireView v = empire.viewForEmpire(emp);
-            float currentScore = v.embassy().relations();
-            //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" enemy-score for "+emp.name()+" score: "+currentScore);
-            if(currentScore < lowestScore)
+            float currentScore = totalEmpirePopulationCapacity(emp) / (fleetCenter(empire).distanceTo(colonyCenter(emp)) + colonyCenter(empire).distanceTo(colonyCenter(emp)));
+            currentScore *= diploMod;
+            currentScore *= empire.militaryPowerLevel() + 200 / emp.militaryPowerLevel() + 200;
+            //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" vs "+emp.name()+" dist: "+fleetCenter(empire).distanceTo(colonyCenter(emp))+" rev-dist: "+fleetCenter(emp).distanceTo(colonyCenter(empire))+" milrank: "+empire.diplomatAI().militaryRank(emp, true)+" poprank: "+empire.diplomatAI().popCapRank(emp, true)+" score: "+currentScore);
+            if(currentScore > highestScore)
             {
-                lowestScore = currentScore;
+                highestScore = currentScore;
                 archEnemy = emp;
             }
         }
         /*if(archEnemy != null)
-            System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" Top-enemy: "+archEnemy.name()+" score: "+lowestScore);*/
+            System.out.println(galaxy().currentTurn()+" "+empire.name()+" => "+archEnemy.name()+" score: "+highestScore);*/
         bestVictim = archEnemy;
         return bestVictim;
     }
@@ -1210,5 +1228,5 @@ public class AIGeneral implements Base, General {
         return biggestThreat;
     }
     @Override
-    public float absolution() { return 1f; }
+    public float absolution() { return 0f; }
 }
