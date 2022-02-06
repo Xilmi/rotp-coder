@@ -136,7 +136,36 @@ public class AISpyMaster implements Base, SpyMaster {
         }
 
         // we've been warned and they are not our enemy (i.e. no war preparations)
-        if (!emb.isEnemy() && spies.threatened()) {
+        boolean shouldHide = false;
+        if (!v.embassy().anyWar() && (v.spies().maxSpies() > 0)
+        && v.otherView().embassy().timerIsActive(DiplomaticEmbassy.TIMER_SPY_WARNING)) {
+            if (!v.spies().isHide()
+            || (v.empire().leader().isXenophobic())) {
+                shouldHide = true;
+            }
+        }
+        
+        //When I'm ruthless or they can't reach me anyways, no reason to listen to their threats
+        if(empire.leader().isRuthless() || !v.empire().inShipRange(empire.id))
+            shouldHide = false;
+        
+        //check if they are in trouble. If they are, we don't care about their threat
+        if(shouldHide)
+        {
+            float theirPower = v.empire().militaryPowerLevel();
+            float theirEnemyPower = 0;
+            for(Empire theirEnemy : v.empire().warEnemies())
+                theirEnemyPower += theirEnemy.militaryPowerLevel();
+            if(theirEnemyPower > theirPower)
+                shouldHide = false;
+        }
+        
+        if (!emb.isEnemy() && shouldHide) {
+            if(v.empire().leader().isXenophobic())
+            {
+                spies.shutdownSpyNetworks();
+                return;
+            }
             spies.beginHide();
             spies.maxSpies(1);
             return;
