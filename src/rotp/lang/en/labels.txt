@@ -282,6 +282,11 @@ INC_TECHNOLOGIST_DESC2            | The [your_empire] tries to advance in techno
 INC_ERRATIC_TITLE                 | Erratic
 INC_ERRATIC_DESC1                 | The [my_empire] dislikes the [your_empire].
 INC_ERRATIC_DESC2                 | The [my_empire] likes the [your_empire].
+INC_COEXIST_TITLE                 | Coexistence
+INC_COEXIST_DESC1                 | The [your_empire] hasn't caused any trouble recently.
+INC_COEXIST_DESC2                 | The [your_empire] is a reliable friend.
+INC_COEXIST_DESC3                 | The [your_empire] is a reliable ally.
+INC_COEXIST_DESC4                 | The [your_empire] is a great ally.
 INC_EXPANSION_TITLE               | Expansion
 INC_EXPANSION_DESC                | With control of [num] systems, the [your_empire] has grown too large.
 INC_GENOCIDE_TITLE                | Genocide
