@@ -25,6 +25,7 @@ import rotp.model.galaxy.StarSystem;
 import rotp.model.incidents.BreakAllianceIncident;
 import rotp.model.incidents.BreakPactIncident;
 import rotp.model.incidents.BreakTradeIncident;
+import rotp.model.incidents.CoexistIncident;
 import rotp.model.incidents.DeclareWarIncident;
 import rotp.model.incidents.DemandTributeIncident;
 import rotp.model.incidents.DiplomatIncident;
@@ -710,30 +711,6 @@ public class DiplomaticEmbassy implements Base, Serializable {
 
         List<DiplomaticIncident> newEventsAll = new ArrayList<>();
         addIncident(ParanoiaIncident.create(view));
-        if(!incidents.containsKey("Diplomat"))
-            addIncident(DiplomatIncident.create(view));
-        else
-            incidents.get("Diplomat").update();
-        if(!incidents.containsKey("Ecologist"))
-            addIncident(EcologistIncident.create(view));
-        else
-            incidents.get("Ecologist").update();
-        if(!incidents.containsKey("Expansionist"))
-            addIncident(ExpansionistIncident.create(view));
-        else
-            incidents.get("Expansionist").update();
-        if(!incidents.containsKey("Industrialist"))
-            addIncident(IndustrialistIncident.create(view));
-        else
-            incidents.get("Industrialist").update();
-        if(!incidents.containsKey("Militarist"))
-            addIncident(MilitaristIncident.create(view));
-        else
-            incidents.get("Militarist").update();
-        if(!incidents.containsKey("Technologist"))
-            addIncident(TechnologistIncident.create(view));
-        else
-            incidents.get("Technologist").update();
         if(!incidents.containsKey("Erratic"))
             addIncident(ErraticIncident.create(view));
         else
@@ -747,6 +724,11 @@ public class DiplomaticEmbassy implements Base, Serializable {
 
         for (DiplomaticIncident ev: newEventsAll)
             addIncident(ev);
+        
+        if(!incidents.containsKey("Coexist"))
+            addIncident(CoexistIncident.create(view));
+        else
+            incidents.get("Coexist").update();
 
         // make special list of incidents added in this turn
         for (DiplomaticIncident ev: incidents.values()) {
