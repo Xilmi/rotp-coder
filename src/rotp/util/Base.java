@@ -1238,26 +1238,7 @@ public interface Base {
             int  blue  =  clr & 0x000000ff;
             int minPixelValue = 0;
             int roll = (int) Math.ceil(random()*100);
-            // modnar: test reduce background star speckle
-			/*
             if (roll <= 50)
-                minPixelValue = 32;
-            else if (roll <= 75)
-                minPixelValue = 48;
-            else if (roll <= 87)
-                minPixelValue = 64;
-            else if (roll <= 93)
-                minPixelValue = 96;
-            else if (roll <= 97)
-                minPixelValue = 128;
-            else if (roll <= 99)
-                minPixelValue = 144;
-            else
-                minPixelValue = 196;
-			*/
-			// modnar: test reduce background star speckle
-			
-			if (roll <= 50)
                 minPixelValue = 96;
             else if (roll <= 75)
                 minPixelValue = 128;
@@ -1270,32 +1251,6 @@ public interface Base {
                 g.fillRoundRect(x1, y1, s2, s2, s2, s2);
             else if (random() < .1)
                 g.fillRect(x1,y1,s1,s1);
-			
-			
-			// modnar: test small spiral galaxy background
-			float numSpirals = (float) (15.5 + random()*5);
-			int width_x = (int) (2000*(10 + Math.ceil(random()*20)));
-			int width_y = (int) (2000*(10 + Math.ceil(random()*20)));
-			int numSteps = 200;
-			int stepStart = (int) (5 + 2*Math.ceil(random()*5));
-			int flipGalaxy = random() >= 0.5 ? 1 : -1;
-			
-			if (random() < 0.004) {
-				for (int i = stepStart; i < numSteps; i++) {
-					int spiral_x1 = (int) (x1 + flipGalaxy*(width_x/i)*Math.cos(numSpirals*i*Math.PI/numSteps)/numSteps);
-					int spiral_y1 = (int) (y1 + (width_y/i)*Math.sin(numSpirals*i*Math.PI/numSteps)/numSteps);
-					int spiral_x2 = (int) (x1 - flipGalaxy*(width_x/i)*Math.cos(numSpirals*i*Math.PI/numSteps)/numSteps);
-					int spiral_y2 = (int) (y1 - (width_y/i)*Math.sin(numSpirals*i*Math.PI/numSteps)/numSteps);
-					
-					minPixelValue = 40 + i/3;
-					g.setColor(new Color(max(red,minPixelValue), max(green, minPixelValue), max(blue, minPixelValue)));
-					
-					g.fillRect(spiral_x1,spiral_y1,s1,s1);
-					g.fillRect(spiral_x2,spiral_y2,s1,s1);
-				}
-				g.fillOval(x1-s2,y1-s2,s4,s4);
-			}
-			
         }
     }
     public default BufferedImage makeTransparent(Image img, Color c) {
