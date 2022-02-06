@@ -366,6 +366,7 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
         setScale(scaleY());
         //log("map scale:", fmt(scaleX(),2), "@", fmt(scaleY(),2), "  center:", fmt(center().x(),2), "@", fmt(center().y(),2), "  x-rng:", fmt(mapMinX()), "-", fmt(mapMaxX(),2), "  y-rng:", fmt(mapMinY()), "-", fmt(mapMaxY(),2));
         //drawBackground(g2); // modnar: not needed due to drawShipRanges below
+        drawShipRanges(g2);
         if (parent.drawBackgroundStars() && showStars()) {
             float alpha = 8/5*sizeX()/scaleX();
             Composite prev = g2.getComposite();
@@ -378,10 +379,7 @@ public class GalaxyMapPanel extends BasePanel implements ActionListener, MouseLi
         }
         if (UserPreferences.texturesMap())
             drawBackgroundNebula(g2);
-        
-        // modnar: cover starry background with drawShipRanges
-		drawShipRanges(g2);
-        
+       
         drawGrids(g2);
 
         drawNebulas(g2);
