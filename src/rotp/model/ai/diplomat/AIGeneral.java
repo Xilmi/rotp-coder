@@ -799,7 +799,6 @@ public class AIGeneral implements Base, General {
                     break;
                 }
             }
-            
 
             for(Empire contacts : emp.contactedEmpires())
             {

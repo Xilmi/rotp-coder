@@ -64,6 +64,7 @@ public class AIGovernor implements Base, Governor {
             baseSetColonyAllocations(col);
             ensureMinimumCleanup(col);
             col.validate();
+            //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" "+col.name()+" col.pct(SHIP): "+col.pct(SHIP)+" col.pct(DEFENSE): "+col.pct(DEFENSE)+" col.pct(INDUSTRY): "+col.pct(INDUSTRY)+" col.pct(ECOLOGY): "+col.pct(ECOLOGY)+" col.pct(TECH): "+col.pct(RESEARCH)+" yard: "+col.shipyardProject());
             return;
         }
         StarSystem sys = col.starSystem();
@@ -474,7 +475,6 @@ public class AIGovernor implements Base, Governor {
 
         for (int i=0;i<col.spending.length;i++)
             col.locked(i, false);
-        //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" "+col.name()+" col.pct(SHIP): "+col.pct(SHIP)+" col.pct(DEFENSE): "+col.pct(DEFENSE)+" col.pct(INDUSTRY): "+col.pct(INDUSTRY)+" col.pct(ECOLOGY): "+col.pct(ECOLOGY)+" col.pct(TECH): "+col.pct(RESEARCH)+" yard: "+col.shipyardProject());
     }
     @Override
     public float maxShipBCPermitted(Colony col) {

@@ -954,21 +954,15 @@ public class AIDiplomat implements Base, Diplomat {
         if (empire.atWarWith(id(e)))
             return false;
         
-        SpyReport rpt = e.viewForEmpire(empire).spies().report();
-        Mission miss = rpt.confessedMission();
-        return ((rpt.spiesLost() > 0)
-            && ((miss == Mission.ESPIONAGE) || (miss == Mission.SABOTAGE)));
-            
+        for (DiplomaticIncident ev: empire.viewForEmpire(e).embassy().allIncidents()) {
+            if (ev.isSpying())
+                return true;
+        }
+        return false;
     }
     @Override
     public boolean canEvictSpies(Empire e) { 
-        if (!empire.inEconomicRange(id(e)))
-            return false;
-        if (empire.atWarWith(id(e)))
-            return false;
-       
-        SpyReport rpt = e.viewForEmpire(empire).spies().report();
-        return rpt.spiesLost() > 0;
+        return false;
     }
     @Override
     public boolean canThreatenAttacking(Empire e) { 
@@ -1024,22 +1018,54 @@ public class AIDiplomat implements Base, Diplomat {
         EmpireView v = empire.viewForEmpire(dip);
         
         v.embassy().noteRequest();
-        //v.embassy().withdrawAmbassador();
+        v.embassy().withdrawAmbassador();
         
-        v.spies().ignoreThreat();
+        boolean shouldHide = false;
+        if (!empire.enemies().contains(dip))
+            shouldHide = true;
+        
+        //When I'm ruthless or they can't reach me anyways, no reason to listen to their threats
+        if(empire.leader().isRuthless() || !v.empire().inShipRange(empire.id))
+            shouldHide = false;
+        
+        //check if they are in trouble. If they are, we don't care about their threat
+        if(shouldHide)
+        {
+            float theirPower = v.empire().militaryPowerLevel();
+            float theirEnemyPower = 0;
+            for(Empire theirEnemy : v.empire().warEnemies())
+                theirEnemyPower += theirEnemy.militaryPowerLevel();
+            if(theirEnemyPower > theirPower)
+                shouldHide = false;
+        }
+        
+        if (empire.leader().isPacifist() || empire.leader().isHonorable())
+            shouldHide = true;
+        
+        if (!shouldHide) {
+            v.spies().ignoreThreat();
+            return empire.respond(DialogueManager.RESPOND_IGNORE_THREAT, dip);
+        }
+        DiplomaticIncident spyIncident = null;
+        int longestDuration = 0;
+        //System.out.println(empire.galaxy().currentTurn()+" "+ empire.name()+" "+v.embassy().empire().name()+" incidents: "+v.otherView().embassy().allIncidents().size());
+        for (DiplomaticIncident ev: v.otherView().embassy().allIncidents()) {
+            //System.out.println(empire.galaxy().currentTurn()+" "+ empire.name()+" "+v.embassy().empire().name()+" "+ev.title()+" "+ev.duration());
+            if (ev.isSpying() && ev.duration() > longestDuration)
+                spyIncident = ev;
+        }
+        if(spyIncident != null)
+        {
+            v.otherView().embassy().logWarning(spyIncident);
+            //setting mission immediately as we potentially receive that in player turn before we can react next time
+            empire.spyMasterAI().setSpyingMission(v);
+            return empire.respond(DialogueManager.RESPOND_STOP_SPYING, dip);
+        }
         return empire.respond(DialogueManager.RESPOND_IGNORE_THREAT, dip);
     }
+    //Not an option anymore:
     @Override
     public DiplomaticReply receiveThreatEvictSpies(Empire dip) {
-        EmpireView v = empire.viewForEmpire(dip);
-        
-        v.embassy().noteRequest();
-        //v.embassy().withdrawAmbassador();
-
-        EvictedSpiesIncident inc = EvictedSpiesIncident.create(v);
-        v.embassy().addIncident(inc);
-        
-        v.spies().ignoreThreat();
         return empire.respond(DialogueManager.RESPOND_IGNORE_THREAT, dip);
     }
     @Override
@@ -1764,39 +1790,15 @@ public class AIDiplomat implements Base, Diplomat {
                 break;
             }
         }
-        if(everythingUnderSiege)
+        float allyPower = empire.powerLevel(empire);
+        float enemyPower = 0;
+        for(Empire ally : empire.allies())
+            allyPower+=ally.powerLevel(ally);
+        for(Empire enemy : empire.enemies())
+            enemyPower+=enemy.powerLevel(enemy);
+        if(everythingUnderSiege && enemyPower > allyPower)
             return true;
-        float enemyMod = (float) ((empire.numEnemies() + 10) / (v.empire().numEnemies() + 10));
-        
-        Empire emp = v.owner();
-        TreatyWar treaty = (TreatyWar) v.embassy().treaty();
-        if (treaty.colonyChange(emp) < (int)Math.min(0.85, enemyMod*warColonyLossLimit(v)))
-            return true;
-        if (treaty.populationChange(emp) < (int)Math.min(0.85, enemyMod*warPopulationLossLimit(v)))
-            return true;
-        if (treaty.factoryChange(emp) < (int)Math.min(0.85, enemyMod*warFactoryLossLimit(v)))
-            return true;
-        if (treaty.fleetSizeChange(emp) < (int)Math.min(0.85, enemyMod*warFleetSizeLossLimit(v)))
-            return true;
-
-        // for pop, factories and ships, calculate the pct lost vs the
-        // pct we were willing to lose (1-limit). If any of those are >1
-        // or if they total up to > 2, then we are tired.
-        
-        // Example: Pacifist will quit at 20% pop loss,
-        float popPct = treaty.populationLostPct(emp) / (1-warPopulationLossLimit(v));
-        if (popPct >= 1)
-            return true;
-        
-        float factPct = treaty.factoryLostPct(emp) / (1-warFactoryLossLimit(v));
-        if (factPct >= 1)
-            return true;
-        
-        float fleetPct = treaty.fleetSizeLostPct(emp) / (1-warFleetSizeLossLimit(v));
-        if (fleetPct >= 1)
-            return true;
-        
-        return (popPct + factPct + fleetPct) > 2;     
+        return false;
     }
     private float warColonyLossLimit(EmpireView v) {
         switch(v.owner().leader().objective) {
@@ -2114,6 +2116,23 @@ public class AIDiplomat implements Base, Diplomat {
             base *= 156f / 170f;
         base -= 100;
         return base;
+    }
+    @Override
+    public boolean setSeverityAndDuration(EspionageTechIncident inc, float spySeverity)  { 
+        inc.severity = max(-30,-10+spySeverity); // modnar: increase tech steal severity
+        inc.duration = empire.leader().isTechnologist()? 25 : 15; // modnar: increase tech steal duration
+        return true;
+    }
+    @Override
+    public boolean setSeverityAndDuration(FinancialAidIncident inc)  { 
+        inc.duration = 5; // modnar: increase duration
+        return true;
+    }
+    @Override
+    public boolean setSeverityAndDuration(SpyConfessionIncident inc, float spySeverity)  { 
+        inc.severity = max(-40, -10+spySeverity); // modnar: increase spy confession severity
+        inc.duration = 15; // modnar: increase spy confession duration
+        return true;
     }
 }
 

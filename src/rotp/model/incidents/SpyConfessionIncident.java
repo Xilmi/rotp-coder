@@ -36,10 +36,11 @@ public class SpyConfessionIncident extends DiplomaticIncident {
             mission = text("NOTICE_SPYING_MISSION_ESPIONAGE");
             missionType = 1;
             
-            if (ev.owner().diplomatAI().setSeverityAndDuration(this, ev.embassy().currentSpyIncidentSeverity()))
-                return;
-            severity = max(-20, -5+ev.embassy().currentSpyIncidentSeverity());
-            duration = 5;
+            if (!ev.owner().diplomatAI().setSeverityAndDuration(this, ev.embassy().currentSpyIncidentSeverity()))
+            {
+                severity = max(-20, -5+ev.embassy().currentSpyIncidentSeverity());
+                duration = 5;
+            }
         }
         else if (spies.isHide() && ev.owner().diplomatAI().leaderHatesAllSpies()) {
             mission = text("NOTICE_SPYING_MISSION_SABOTAGE");
