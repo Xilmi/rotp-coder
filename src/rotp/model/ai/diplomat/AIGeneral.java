@@ -778,22 +778,28 @@ public class AIGeneral implements Base, General {
         }
         for(Empire emp : empire.contactedEmpires())
         {
-            //Since there's allied victory, there's no reason to ever break up with our alliance
-            if(empire.alliedWith(emp.id))
-                continue;
-            //skip allies of our allies too because that makes for stupid situations
             boolean skip = false;
             float diploMod = 1;
+            if(empire.alliedWith(emp.id))
+            {
+                if(empire.leader().isHonorable())
+                    diploMod /= 10;
+                else
+                    diploMod /= 3;
+            }
             for(Empire ally : empire.allies())
             {
-                if(ally.treaty(emp).isPact())
-                    diploMod /= 2;
-                if(ally.treaty(emp).isPeace())
+                if(ally.treaty(emp)!= null)
                 {
-                    skip = true;
-                    break;
+                    if(ally.treaty(emp).isPact())
+                        diploMod /= 2;
+                    if(ally.treaty(emp).isPeace() && !(empire.leader().isErratic() || empire.leader().isRuthless()))
+                    {
+                        skip = true;
+                        break;
+                    }
                 }
-                if(ally.alliedWith(emp.id))
+                if(ally.alliedWith(emp.id) && !(empire.leader().isErratic() || empire.leader().isRuthless()))
                 {
                     skip = true;
                     break;
@@ -803,13 +809,17 @@ public class AIGeneral implements Base, General {
             for(Empire contacts : emp.contactedEmpires())
             {
                 if(contacts.alliedWith(emp.id))
-                    diploMod /= 3;
+                    diploMod /= 2;
                 else if(contacts.atWarWith(emp.id))
                     diploMod *= 2;
             }
             
             if(empire.pactWith(emp.id))
                 diploMod /= 2;
+            
+            //Erratic and Ruthless don't care about logical diplomacy
+            if(empire.leader().isErratic() || empire.leader().isRuthless())
+                diploMod = 1;
             
             if(skip)
                 continue;
@@ -820,7 +830,8 @@ public class AIGeneral implements Base, General {
             float currentScore = totalEmpirePopulationCapacity(emp) / (fleetCenter(empire).distanceTo(colonyCenter(emp)) + colonyCenter(empire).distanceTo(colonyCenter(emp)));
             currentScore *= diploMod;
             currentScore *= empire.militaryPowerLevel() + 200 / emp.militaryPowerLevel() + 200;
-            //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" vs "+emp.name()+" dist: "+fleetCenter(empire).distanceTo(colonyCenter(emp))+" rev-dist: "+fleetCenter(emp).distanceTo(colonyCenter(empire))+" milrank: "+empire.diplomatAI().militaryRank(emp, true)+" poprank: "+empire.diplomatAI().popCapRank(emp, true)+" score: "+currentScore);
+            currentScore /= max(empire.viewForEmpire(emp.id).embassy().relations() + 100, 1);
+            //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" vs "+emp.name()+" dist: "+fleetCenter(empire).distanceTo(colonyCenter(emp))+" rev-dist: "+fleetCenter(emp).distanceTo(colonyCenter(empire))+" milrank: "+empire.diplomatAI().militaryRank(emp, true)+" poprank: "+empire.diplomatAI().popCapRank(emp, true)+" relations-mod: "+max(empire.viewForEmpire(emp.id).embassy().relations() + 100, 1)+" score: "+currentScore);
             if(currentScore > highestScore)
             {
                 highestScore = currentScore;
