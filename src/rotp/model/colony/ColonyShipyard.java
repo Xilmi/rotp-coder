@@ -180,6 +180,9 @@ public class ColonyShipyard extends ColonySpendingCategory {
         if (colony().allocation(categoryType()) == 0)
             return;
 
+        if (colony().allocation(categoryType()) == 0)
+            return;
+        
         // should never happen anymore, but hey
         if (buildingObsoleteDesign()) {
             empire().addReserve(newBC);
