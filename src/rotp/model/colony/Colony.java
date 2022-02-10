@@ -1666,7 +1666,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         float indBC = 0;
         int ecoAll = 0;
         int indAll = 0;
-        boolean refit = industry().effectiveRobotControls() < empire().maxRobotControls();
+        boolean refit = industry().effectiveRobotControls() < empire().maxRobotControls() && !empire.race().ignoresFactoryRefit;
         boolean hasAlienFactories = planet().numAlienFactories() > 0;
 
         /*
@@ -1694,7 +1694,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
         // If there's alien factories or refitting, allocate ECO to clean and then the rest (up to max needed) to industry.
         // Any leftovers go to ECO up to max.
         // To properly balance this would require changes to ColonyIndustry to expose some internal numbers.
-        if (!industry().isCompleted() && refit && baseNewPop >= factories / empire().maxRobotControls()) {
+        if (!industry().isCompleted() && refit && baseNewPop >= factories / empire().maxRobotControls() && ecology().terraformSpendingNeeded() <= minimumCleanupCost()) {
             //System.out.println("balance "+this.name()+" has alien factories or refit");
             indAll = Math.min(MAX_TICKS - ecoAll, industry().maxAllocationNeeded());
             indBC = indAll * totalBC / MAX_TICKS;
