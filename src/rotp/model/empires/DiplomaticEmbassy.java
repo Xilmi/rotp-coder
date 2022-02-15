@@ -110,6 +110,8 @@ public class DiplomaticEmbassy implements Base, Serializable {
     public Empire owner()                                { return view.owner(); }
     public float treatyDate()                            { return treatyDate; }
     public DiplomaticTreaty treaty()                     { return treaty; }
+    public String casusBelli()                           { return casusBelli; }
+    public DiplomaticIncident casusBelliInc()            { return casusBelliInc; }
     public String treatyStatus()                         { return treaty.status(owner()); }
     public Collection<DiplomaticIncident> allIncidents() { return incidents.values(); }
     public int requestCount()                            { return requestCount; }
@@ -137,7 +139,7 @@ public class DiplomaticEmbassy implements Base, Serializable {
         // we are assessing turn and about to enter diplomacy. Are our reasons
         // for going to war still relevant? If not, fuhgeddaboudit
         if (casusBelliInc != null) {
-            if (!casusBelliInc.triggersWar())
+            if (!casusBelliInc.triggersWar() && !timerIsActive(casusBelliInc.timerKey()))
                 endWarPreparations();
             return;
         }
@@ -151,6 +153,10 @@ public class DiplomaticEmbassy implements Base, Serializable {
                     break;
                 case DialogueManager.DECLARE_OPPORTUNITY_WAR:
                     if (!view.owner().diplomatAI().wantToDeclareWarOfOpportunity(view))
+                        endWarPreparations();
+                    break;
+                case DialogueManager.DECLARE_DESPERATION_WAR:
+                    if (!view.owner().diplomatAI().wantToDeclareWarOfDesperation(view))
                         endWarPreparations();
                     break;
             }
@@ -339,7 +345,9 @@ public class DiplomaticEmbassy implements Base, Serializable {
     }
     public void assessTurn() {
         log(view+" Embassy: assess turn");
-        evaluateWarPreparations();
+        //Don't evaluate war-preparations when war is already started as this could remove our casus belli
+        if(treaty != null && !treaty.isWar())
+            evaluateWarPreparations();
         checkForIncidents();
 
         recalculateRelationsLevel();
@@ -487,7 +495,12 @@ public class DiplomaticEmbassy implements Base, Serializable {
                 if ((casusBelli == null) || casusBelli.isEmpty())
                     DiplomaticNotification.createAndNotify(view, DialogueManager.DECLARE_HATE_WAR);
                 else
-                    DiplomaticNotification.createAndNotify(view, casusBelli);
+                {
+                    if(casusBelli.equals(DialogueManager.DECLARE_DESPERATION_WAR))
+                        DiplomaticNotification.createAndNotify(view, DialogueManager.DECLARE_HATE_WAR);
+                    else
+                        DiplomaticNotification.createAndNotify(view, casusBelli);
+                }
             }
         }
 
@@ -555,9 +568,9 @@ public class DiplomaticEmbassy implements Base, Serializable {
     public DiplomaticIncident signPeace() {
         beginTreaty();
         int duration = roll(10,15);
-        endWarPreparations();
         otherEmbassy().endWarPreparations();
         beginPeace(duration);
+        endWarPreparations();
         otherEmbassy().beginPeace(duration);
         owner().hideSpiesAgainst(empire().id);
         empire().hideSpiesAgainst(owner().id);
