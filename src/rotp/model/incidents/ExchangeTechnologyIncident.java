@@ -33,7 +33,7 @@ public class ExchangeTechnologyIncident extends DiplomaticIncident {
         empYou = e2.id;
         received = recv.id();
         given = give.id();
-        severity = 5;
+        severity = 10 * recv.researchCost() / (recv.researchCost() + give.researchCost());
 
         dateOccurred = galaxy().currentYear();
         duration = 3;
