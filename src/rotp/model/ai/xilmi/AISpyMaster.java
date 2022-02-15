@@ -153,11 +153,7 @@ public class AISpyMaster implements Base, SpyMaster {
         //check if they are in trouble. If they are, we don't care about their threat
         if(shouldHide)
         {
-            float theirPower = v.empire().militaryPowerLevel();
-            float theirEnemyPower = 0;
-            for(Empire theirEnemy : v.empire().warEnemies())
-                theirEnemyPower += theirEnemy.militaryPowerLevel();
-            if(theirEnemyPower > theirPower)
+            if(empire.diplomatAI().readyForWar(v, false))
                 shouldHide = false;
         }
         
