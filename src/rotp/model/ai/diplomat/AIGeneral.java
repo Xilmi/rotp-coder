@@ -302,6 +302,7 @@ public class AIGeneral implements Base, General {
     public float invasionCost(EmpireView v, StarSystem sys)
     {
         float needed = troopsNecessaryToTakePlanet(v, sys);
+        needed += empire.sv.currentSize(sys.id) * 0.25f * (1 - empire.fleetCommanderAI().bridgeHeadConfidence(sys));
         float invasionCost = needed * empire.tech().populationCost() / empire.race().growthRateMod();
         return invasionCost;
     }
@@ -322,7 +323,7 @@ public class AIGeneral implements Base, General {
         float techCaptureCountEstimate = min(6, techCount, 0.02f * empire.sv.factories(sys.id));
         float techCaputureGain = techCaptureCountEstimate * avgTechCost;
         invasionGain += techCaputureGain;
-        //System.out.println(galaxy().currentTurn()+" "+empire.name()+": Considering invasion of "+sys.name()+" potential techs: "+techCaptureCountEstimate+" avg cost: "+avgTechCost+" techCaptureGain: "+techCaputureGain);
+        //System.out.println(galaxy().currentTurn()+" "+empire.name()+": Considering invasion of "+sys.name()+" potential techs: "+techCaptureCountEstimate+" avg cost: "+avgTechCost+" techCaptureGain: "+techCaputureGain+" bridgeHeadConfidence: "+empire.fleetCommanderAI().bridgeHeadConfidence(sys)+" invasionGain: "+invasionGain);
         return invasionGain;
     }
     public boolean willingToInvade(EmpireView v, StarSystem sys) {
@@ -332,7 +333,8 @@ public class AIGeneral implements Base, General {
             return false;
         //we gain factories, save us from building a colonizer and killing enemy-population also has value to us of half of what they pay for it
         float invasionGain = invasionGain(v, sys) + empire.shipDesignerAI().BestDesignToColonize().cost();
-        //System.out.println(galaxy().currentTurn()+" "+empire.name()+": Considering invasion of "+sys.name()+" cost: "+invasionCost(v, sys)+" gain: "+invasionGain+" cs: "+empire.shipLab().colonyDesign().cost());
+        invasionGain *= empire.fleetCommanderAI().bridgeHeadConfidence(sys);
+        //System.out.println(galaxy().currentTurn()+" "+empire.name()+": Considering invasion of "+sys.name()+" cost: "+invasionCost(v, sys)+" gain: "+invasionGain+" bridgeHeadConfidence: "+empire.fleetCommanderAI().bridgeHeadConfidence(sys));
         return invasionCost(v, sys) <= invasionGain;
     }
     public void orderRebellionFleet(StarSystem sys) {
@@ -770,15 +772,10 @@ public class AIGeneral implements Base, General {
             bestVictim = archEnemy;
             return bestVictim;
         }
-        int opponentsInRange = 1;
         for(Empire emp : empire.contactedEmpires())
         {
-            if(empire.inShipRange(emp.id))
-                opponentsInRange++;
-        }
-        for(Empire emp : empire.contactedEmpires())
-        {
-            boolean skip = false;
+            if(!empire.inShipRange(emp.id))
+                continue;
             float diploMod = 1;
             if(empire.alliedWith(emp.id))
             {
@@ -795,42 +792,29 @@ public class AIGeneral implements Base, General {
                         diploMod /= 2;
                     if(ally.treaty(emp).isPeace() && !(empire.leader().isErratic() || empire.leader().isRuthless()))
                     {
-                        skip = true;
-                        break;
+                        diploMod /= 2;
                     }
                 }
                 if(ally.alliedWith(emp.id) && !(empire.leader().isErratic() || empire.leader().isRuthless()))
                 {
-                    skip = true;
-                    break;
+                    diploMod /= 3;
                 }
             }
-
-            for(Empire contacts : emp.contactedEmpires())
-            {
-                if(contacts.alliedWith(emp.id))
-                    diploMod /= 2;
-                else if(contacts.atWarWith(emp.id))
-                    diploMod *= 2;
-            }
-            
             if(empire.pactWith(emp.id))
                 diploMod /= 2;
-            
             //Erratic and Ruthless don't care about logical diplomacy
             if(empire.leader().isErratic() || empire.leader().isRuthless())
                 diploMod = 1;
             
-            if(skip)
-                continue;
-            if(!empire.inShipRange(emp.id))
-                continue;
-            if(empire.tech().topSpeed() < empire.viewForEmpire(emp).spies().tech().topSpeed())
-                continue;
-            float currentScore = totalEmpirePopulationCapacity(emp) / (fleetCenter(empire).distanceTo(colonyCenter(emp)) + colonyCenter(empire).distanceTo(colonyCenter(emp)));
-            currentScore *= diploMod;
-            currentScore *= empire.militaryPowerLevel() + 200 / emp.militaryPowerLevel() + 200;
-            currentScore /= max(empire.viewForEmpire(emp.id).embassy().relations() + 100, 1);
+            float myPower = empire.militaryPowerLevel();
+            float enemyPower = emp.militaryPowerLevel();
+            for(Empire theirEnemy : emp.enemies())
+            {
+                myPower += theirEnemy.militaryPowerLevel();
+            }
+            
+            float currentScore = (myPower + 200) / (enemyPower + 200);
+            currentScore *= empire.tech().topSpeed() / empire.viewForEmpire(emp).spies().tech().topSpeed();
             //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" vs "+emp.name()+" dist: "+fleetCenter(empire).distanceTo(colonyCenter(emp))+" rev-dist: "+fleetCenter(emp).distanceTo(colonyCenter(empire))+" milrank: "+empire.diplomatAI().militaryRank(emp, true)+" poprank: "+empire.diplomatAI().popCapRank(emp, true)+" relations-mod: "+max(empire.viewForEmpire(emp.id).embassy().relations() + 100, 1)+" score: "+currentScore);
             if(currentScore > highestScore)
             {
@@ -930,7 +914,7 @@ public class AIGeneral implements Base, General {
     {
         if(additionalColonizersToBuild >= 0 && !returnPotentialUncolonizedInstead)
             return additionalColonizersToBuild;
-        int additional = 0;
+        double additional = 0;
         int colonizerRange = empire.shipDesignerAI().BestDesignToColonize().range();
         List<StarSystem> alreadyCounted = new ArrayList<>();
         for(StarSystem sys : empire.uncolonizedPlanetsInRange(colonizerRange))
@@ -939,7 +923,7 @@ public class AIGeneral implements Base, General {
                 continue;
             if(sys.monster() == null)
             {
-                additional++;
+                additional+=colonizationProbability(sys);
                 alreadyCounted.add(sys);
             }
         }
@@ -951,7 +935,7 @@ public class AIGeneral implements Base, General {
                 continue;
             if(sys.monster() != null)
                 continue;
-            additional++;
+            additional+=colonizationProbability(sys);
             //System.out.print("\n"+empire.name()+" "+sys.name()+" counted as uncolonized.");
             alreadyCounted.add(sys);
         }
@@ -982,7 +966,7 @@ public class AIGeneral implements Base, General {
                             if(empire.canColonize(sys.id)
                                     || empire.unexploredSystems().contains(sys))
                             {
-                                additional++;
+                                additional+=colonizationProbability(sys);
                                 alreadyCounted.add(sys);
                             }
                         }
@@ -991,7 +975,7 @@ public class AIGeneral implements Base, General {
             }
         }
         if(returnPotentialUncolonizedInstead)
-            return additional;
+            return (int)Math.ceil(additional);
         boolean knowSomeoneAtWar = false;
         for(EmpireView contact : empire.contacts())
         {
@@ -1001,8 +985,8 @@ public class AIGeneral implements Base, General {
                 knowSomeoneAtWar = true;
         }
         if(knowSomeoneAtWar)
-            additional = max(additional, empire.numColonies() / 5);
-        //System.out.println("\n"+empire.name()+" required colonizers: "+additional);
+            additional = max((int)Math.ceil(additional), empire.numColonies() / 5);
+        //System.out.println(galaxy().currentTurn()+" "+empire.name()+" required colonizers: "+additional);
         int[] counts = galaxy().ships.shipDesignCounts(empire.id);
         for (int i=0;i<counts.length;i++) 
         {
@@ -1019,10 +1003,28 @@ public class AIGeneral implements Base, General {
                 //System.out.println("\n"+empire.name()+" available: "+counts[i]+" "+empire.shipLab().design(i).name());
             }
         }
-        //System.out.print("\n"+empire.name()+" after substracting the already existing ones: "+additional);
-        additional = max(additional, 0);
-        additionalColonizersToBuild = additional;
+        //System.out.println(galaxy().currentTurn()+" "+empire.name()+" after substracting the already existing ones: "+additional);
+        additional = max((float)additional, 0);
+        additionalColonizersToBuild = (int)Math.ceil(additional);
         return additionalColonizersToBuild;
+    }
+    public float colonizationProbability(StarSystem sys)
+    {
+        if(empire.leader().isExpansionist())
+            return 1;
+        float myProduction = empire.totalPlanetaryProduction();
+        float myDistance = colonyCenter(empire).distanceTo(sys);
+        float myScore = myProduction / myDistance;
+        float totalScore = myScore;
+        for(Empire emp : empire.contactedEmpires())
+        {
+            float currentProd = emp.totalPlanetaryProduction();
+            float currentDistance = colonyCenter(emp).distanceTo(sys);
+            totalScore += currentProd / currentDistance;
+        }
+        float colProb = myScore / totalScore;
+        //System.out.println(galaxy().currentTurn()+" "+empire.name()+" colonization-probability for "+empire.sv.name(sys.id)+": "+colProb);
+        return colProb;
     }
     public int fightersToBuild()
     {
