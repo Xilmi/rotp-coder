@@ -792,7 +792,7 @@ public class AIDiplomat implements Base, Diplomat {
             return false;
         if (!empire.inEconomicRange(friend.id))
             return false;
-        if (friend.isPlayerControlled()) {
+        if (friend.isPlayerControlled() && !friend.alliedWith(empire.id)) {
             EmpireView v = empire.viewForEmpire(friend);
             if (!v.otherView().embassy().readyForJointWar())
                 return false;
