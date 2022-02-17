@@ -1125,6 +1125,8 @@ public class AIShipCaptain implements Base, ShipCaptain {
     {
         boolean retVal = false;
         List<CombatStack> activeStacks = new ArrayList<>(currStack.mgr.activeStacks());
+        float killPct = 0;
+        float maxHit = 0;
         for (CombatStack st: activeStacks) {
             for (CombatStackMissile miss: st.missiles()) {
                 if (miss.target == currStack && st.isShip())
@@ -1135,8 +1137,8 @@ public class AIShipCaptain implements Base, ShipCaptain {
                         hitPct = (5 + miss.attackLevel - miss.target.missileDefense()) / 10;
                         hitPct = max(.05f, hitPct);
                         hitPct = min(hitPct, 1.0f);
-                        float killPct = ((miss.maxDamage()-miss.target.shieldLevel())*miss.num*hitPct)/(miss.target.maxHits*miss.target.num);
-                        float maxHit = (miss.maxDamage() - currStack.shieldLevel()) * miss.num;
+                        killPct += ((miss.maxDamage()-miss.target.shieldLevel())*miss.num*hitPct)/(miss.target.maxHits*miss.target.num);
+                        maxHit += (miss.maxDamage() - currStack.shieldLevel()) * miss.num;
                         //System.out.print("\n"+currStack.fullName()+" will be hit by missiles for approx "+killPct);
                         if(killPct > 0.05f && maxHit >= currStack.hits)
                             retVal = true;
