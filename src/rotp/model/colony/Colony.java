@@ -18,10 +18,6 @@ package rotp.model.colony;
 import java.io.Serializable;
 import java.util.EnumMap;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Collections;
 import static rotp.model.colony.ColonySpendingCategory.MAX_TICKS;
 import rotp.model.empires.DiplomaticTreaty;
 import rotp.model.empires.Empire;
@@ -1658,8 +1654,10 @@ public final class Colony implements Base, IMappedObject, Serializable {
         float popCost = tech().populationCost();
         float factoryCost = industry().newFactoryCost() * indFactor;
         float robotControls = industry().effectiveRobotControls();
+        if(empire().ignoresFactoryRefit())
+            robotControls = industry().maxRobotControls();
         float factories = industry().factories();
-        float canBeUsed = baseNewPop * (float)industry().effectiveRobotControls();
+        float canBeUsed = baseNewPop * robotControls;
         // limit growth based on target population
         float maxGrowth = Math.max(popTarget - baseNewPop, 0);
         float ecoBC = cleanupCost;
@@ -1667,7 +1665,6 @@ public final class Colony implements Base, IMappedObject, Serializable {
         int ecoAll = 0;
         int indAll = 0;
         boolean refit = industry().effectiveRobotControls() < empire().maxRobotControls() && !empire.race().ignoresFactoryRefit;
-        boolean hasAlienFactories = planet().numAlienFactories() > 0;
 
         /*
         System.out.println("balance "+this.name()+" popTarget "+popTarget);
@@ -1708,7 +1705,6 @@ public final class Colony implements Base, IMappedObject, Serializable {
 
             // Build factories to max out population use of factories
             indBC = Math.min(Math.max(canBeUsed - factories, 0) * factoryCost, remainingBC);
-            float newFactories = indBC / factoryCost;
             remainingBC = Math.max(remainingBC - indBC, 0);
             //System.out.println("balance "+this.name()+" newFactories "+newFactories);
             //System.out.println("balance "+this.name()+" indBC "+indBC);
@@ -1751,7 +1747,6 @@ public final class Colony implements Base, IMappedObject, Serializable {
             if (popTarget < maxSize() && indBC < maxIndBC) {
                 float extraIndBC = Math.min(maxIndBC - indBC, remainingBC);
                 indBC += extraIndBC;
-                remainingBC = Math.max(remainingBC - extraIndBC, 0);
                 //System.out.println("balance "+this.name()+" extraIndBC "+extraIndBC);
                 //System.out.println("balance "+this.name()+" remainingBC "+remainingBC);
             }
