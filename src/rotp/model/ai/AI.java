@@ -31,7 +31,6 @@ import rotp.model.ai.interfaces.Treasurer;
 import rotp.model.colony.Colony;
 import rotp.model.empires.Empire;
 import rotp.model.empires.EmpireView;
-import static rotp.model.empires.Leader.Personality.HONORABLE;
 import rotp.model.empires.SystemView;
 import rotp.model.galaxy.IMappedObject;
 import rotp.model.galaxy.ShipFleet;
@@ -77,6 +76,8 @@ public class AI implements Base {
             default:
                 break;
         }
+        if(empire.selectedAI < 0)
+            empire.selectedAI = aiType;
         switch(aiType) {
             case BASE:
                 general =        new rotp.model.ai.base.AIGeneral(empire);

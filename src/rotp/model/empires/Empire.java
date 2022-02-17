@@ -100,6 +100,7 @@ public final class Empire implements Base, NamedObject, Serializable {
 
     public static long[] times = new long[6];
 
+    public int selectedAI = -1;
     public final int id;
     private Leader leader;
     private final String raceKey;
@@ -168,8 +169,12 @@ public final class Empire implements Base, NamedObject, Serializable {
     private transient String empireName;
 
     public AI ai() {
-        if (ai == null)
-            ai = new AI(this, options().selectedAI(this));
+        if (ai == null) {
+            if(selectedAI < 0)
+                ai = new AI(this, options().selectedAI(this));
+            else
+                ai = new AI(this, selectedAI);
+        }
         return ai;
     }
     public Diplomat diplomatAI()                  { return ai().diplomat(); }
