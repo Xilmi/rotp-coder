@@ -728,6 +728,8 @@ public class AIShipCaptain implements Base, ShipCaptain {
             return false;
 
         // don't retreat if we still have missiles in flight
+        float killPct = 0;
+        float maxHit = 0;
         List<CombatStack> activeStacks = new ArrayList<>(currStack.mgr.activeStacks());
         for (CombatStack st: activeStacks) {
             for (CombatStackMissile miss: st.missiles()) {
@@ -741,10 +743,10 @@ public class AIShipCaptain implements Base, ShipCaptain {
                         hitPct = (5 + miss.attackLevel - miss.target.missileDefense()) / 10;
                         hitPct = max(.05f, hitPct);
                         hitPct = min(hitPct, 1.0f);
-                        float killPct = ((miss.maxDamage()-miss.target.shieldLevel())*miss.num*hitPct)/(miss.target.maxHits*miss.target.num);
-                        float maxHit = (miss.maxDamage() - currStack.shieldLevel()) * miss.num*hitPct;
+                        killPct += ((miss.maxDamage()-miss.target.shieldLevel())*miss.num*hitPct)/(miss.target.maxHits*miss.target.num);
+                        maxHit += (miss.maxDamage() - currStack.shieldLevel()) * miss.num*hitPct;
                         //System.out.print("\n"+currStack.fullName()+" will be hit by missiles for approx "+killPct+" dmg: "+maxHit+" hp: "+currStack.hits);
-                        if(killPct > 0.2f && maxHit >= currStack.hits )
+                        if((killPct > 0.2f && maxHit >= currStack.hits) || (currStack.num == 1 && maxHit >= currStack.hits))
                             return true;
                     }
                 }
@@ -1157,7 +1159,6 @@ public class AIShipCaptain implements Base, ShipCaptain {
                     hitPct = max(.05f, hitPct);
                     hitPct = min(hitPct, 1.0f);
                     float killPct = ((miss.maxDamage()-miss.target.shieldLevel())*miss.num*hitPct)/(miss.target.maxHits*miss.target.num);
-                    float maxHit = (miss.maxDamage() - currStack.shieldLevel()) * miss.num;
                     //System.out.print("\n"+currStack.fullName()+" will be hit by missiles for approx "+killPct);
                     retVal += killPct;
                 }
