@@ -1204,7 +1204,8 @@ public class AIGeneral implements Base, General {
                     continue;
                 if(contactOfContact.alliedWith(contact.id))
                     continue;
-                float score = fleetCenter(contact).distanceTo(colonyCenter(contactOfContact));
+                float score = 1 / fleetCenter(contact).distanceTo(colonyCenter(contactOfContact));
+                //System.out.println(galaxy().currentTurn()+" "+empire.name()+" thinks "+contact.name()+" likelyness to attack "+contactOfContact.name()+" is: "+score);
                 if(score > bestScoreForContactToAttack)
                 {
                     bestTargetOfContact = contactOfContact;
