@@ -231,7 +231,7 @@ public class AIDiplomat implements Base, Diplomat {
     public DiplomaticReply receiveCounterOfferTech(Empire diplomat, Tech offeredTech, Tech requestedTech) {
         EmpireView view = empire.viewForEmpire(diplomat);
         view.embassy().resetTechTimer();
-        System.out.println(empire.galaxy().currentTurn()+" "+empire.name()+" gets "+offeredTech.name()+" Trade-Value: "+offeredTech.tradeValue(empire) + " for "+requestedTech.name()+" "+requestedTech.tradeValue(empire)+" from "+diplomat.name());
+        //System.out.println(empire.galaxy().currentTurn()+" "+empire.name()+" gets "+offeredTech.name()+" Trade-Value: "+offeredTech.tradeValue(empire) + " for "+requestedTech.name()+" "+requestedTech.tradeValue(empire)+" from "+diplomat.name());
         DiplomaticIncident inc = view.embassy().exchangeTechnology(offeredTech, requestedTech);
         return view.otherView().accept(DialogueManager.ACCEPT_TECH_EXCHANGE, inc);
     }
@@ -1391,6 +1391,7 @@ public class AIDiplomat implements Base, Diplomat {
         //Ail: If there's only two empires left, there's no time for preparation. We cannot allow them the first-strike-advantage!
         if(galaxy().numActiveEmpires() < 3)
             warAllowed = true;
+        //System.out.println(galaxy().currentTurn()+" "+empire.name()+" col: "+empire.generalAI().additionalColonizersToBuild(false)+" tech: "+techIsAdequateForWar());
         return warAllowed;
     }
     public boolean wantToDeclareWar(EmpireView v) {
@@ -1698,12 +1699,21 @@ public class AIDiplomat implements Base, Diplomat {
         //ail: no war-weariness in always-war-mode
         if(galaxy().options().baseAIRelationsAdj() <= -30)
             return false;
-        //ail: If we are not fighting our preferred target, we don't really want a war
-        if(v.empire() != empire.generalAI().bestVictim())
-            return true;
-        //ail: If I have more than one war, we try to go to peace with everyone of our multiple enemies to increase the likelyness of at least one saying yes
-        if(empire.warEnemies().size() > 1)
-            return true;
+        //new: If we are strong enough, we are okay with fighting the wrong target or several enemies at once
+        float enemyPower = 0;
+        for(Empire enemy : empire.enemies())
+        {
+            enemyPower+= enemy.powerLevel(enemy);
+        }
+        if(empire.powerLevel(empire) < enemyPower * 2)
+        {
+            //ail: If we are not fighting our preferred target, we don't really want a war
+            if(v.empire() != empire.generalAI().bestVictim())
+                return true;
+            //ail: If I have more than one war, we try to go to peace with everyone of our multiple enemies to increase the likelyness of at least one saying yes
+            if(empire.warEnemies().size() > 1)
+                return true;
+        }
         //ail: If I'm outteched by others I also don't really want to stick to a war anymore, except for aggressive leader as that would lead to contradictory behavior
         if(techLevelRank() > popCapRank(empire, false))
             return true;
@@ -1844,6 +1854,7 @@ public class AIDiplomat implements Base, Diplomat {
         {
             if(!empire.inEconomicRange(emp.id))
                 continue;
+            //System.out.println(galaxy().currentTurn()+" "+empire.name()+" myTechLevel: " +myTechLevel+" their TechLevel: "+emp.tech().avgTechLevel());
             if(emp.tech().avgTechLevel() > myTechLevel)
                 rank++;
         }
@@ -1926,6 +1937,7 @@ public class AIDiplomat implements Base, Diplomat {
         else
             empire.leader().objective = DIPLOMAT;
     }
+    @Override
     public boolean techIsAdequateForWar()
     {
         boolean warAllowed = true;
@@ -1950,6 +1962,7 @@ public class AIDiplomat implements Base, Diplomat {
         {
             warAllowed = false;
         }
+        //System.out.println(galaxy().currentTurn()+" "+empire.name()+" techLevelRank(): " +techLevelRank()+" popCapRank: "+popCapRank+" has good RP-ROI: "+reseachHasGoodROI+" war Allowed: "+warAllowed);
         return warAllowed;
     }
     boolean willingToTradeTech(Tech tech)

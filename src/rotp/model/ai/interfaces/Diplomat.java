@@ -132,4 +132,5 @@ public interface Diplomat {
     default boolean masksDiplomacy() { return false; }
     default boolean readyForWar(EmpireView v, boolean considerBestVictim) { return true; }
     default boolean wantToDeclareWarOfDesperation(EmpireView v) { return false; }
+    default boolean techIsAdequateForWar() { return true; }
 }

@@ -741,28 +741,33 @@ public class AIGeneral implements Base, General {
                     break;
                 }
             }
-            
-            float diploMod = 1;
-            for(Empire contacts : emp.contactedEmpires())
-            {
-                if(contacts.alliedWith(emp.id))
-                    diploMod /= 3;
-                else if(contacts.pactWith(emp.id))
-                    diploMod /= 2;
-                else if(contacts.atWarWith(emp.id))
-                    diploMod *= 2;
-            }
-            
             if(skip)
+                continue;
+            //Attacking stronger empires is okay unless it would be suicidal. It's considered suicidal when all their enemies combined + me are less than half their power
+            float enemyPower = empire.powerLevel(empire);
+            for(Empire enemy : emp.warEnemies())
+            {
+                enemyPower += enemy.powerLevel(enemy);
+            }
+            if(emp.powerLevel(emp) > enemyPower * 2)
+                continue;
+            //or when my power is less than 1/4th their power
+            if(emp.powerLevel(emp) > empire.powerLevel(empire) * 4)
                 continue;
             if(!empire.inShipRange(emp.id))
                 continue;
             if(empire.tech().topSpeed() < empire.viewForEmpire(emp).spies().tech().topSpeed())
                 continue;
             float currentScore = totalEmpirePopulationCapacity(emp) / (fleetCenter(empire).distanceTo(colonyCenter(emp)) + colonyCenter(empire).distanceTo(colonyCenter(emp)));
-            currentScore *= diploMod;
             currentScore *= empire.tech().avgTechLevel() / emp.tech().avgTechLevel();
-            //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" vs "+emp.name()+" dist: "+fleetCenter(empire).distanceTo(colonyCenter(emp))+" rev-dist: "+fleetCenter(emp).distanceTo(colonyCenter(empire))+" milrank: "+empire.diplomatAI().militaryRank(emp, true)+" poprank: "+empire.diplomatAI().popCapRank(emp, true)+" score: "+currentScore);
+            currentScore *= enemyPower;
+            float tradeMod = 1;
+            if(empire.viewForEmpire(emp).trade() != null && empire.totalPlanetaryIncome() > 0)
+                tradeMod += empire.viewForEmpire(emp).trade().profit() / empire.totalPlanetaryIncome();
+            else
+                tradeMod = 0.9f;
+            currentScore /= tradeMod;
+            //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" vs "+emp.name()+" dist: "+fleetCenter(empire).distanceTo(colonyCenter(emp))+" rev-dist: "+fleetCenter(emp).distanceTo(colonyCenter(empire))+" milrank: "+empire.diplomatAI().militaryRank(emp, true)+" poprank: "+empire.diplomatAI().popCapRank(emp, true)+" tradeMod: "+tradeMod+" score: "+currentScore);
             if(currentScore > highestScore)
             {
                 highestScore = currentScore;
@@ -1136,33 +1141,36 @@ public class AIGeneral implements Base, General {
                 }
             }
         }
-        for(Empire contact : empire.contactedEmpires())
+        if(empire.diplomatAI().techIsAdequateForWar() && !senseDanger)
         {
-            if(!contact.inShipRange(empire.id))
-                continue;
-            if(contact.atWar())
-                continue;
-            if(contact.alliedWith(empire.id))
-                continue;
-            float bestScoreForContactToAttack = 0;
-            Empire bestTargetOfContact = null;
-            for(Empire contactOfContact : contact.contactedEmpires())
+            for(Empire contact : empire.contactedEmpires())
             {
-                if(!contact.inShipRange(contactOfContact.id))
+                if(!contact.inShipRange(empire.id))
                     continue;
-                if(contactOfContact.alliedWith(contact.id))
+                if(contact.atWar())
                     continue;
-                float score = fleetCenter(contact).distanceTo(colonyCenter(contactOfContact));
-                if(score > bestScoreForContactToAttack)
+                if(contact.alliedWith(empire.id))
+                    continue;
+                float bestScoreForContactToAttack = 0;
+                Empire bestTargetOfContact = null;
+                for(Empire contactOfContact : contact.contactedEmpires())
                 {
-                    bestTargetOfContact = contactOfContact;
-                    bestScoreForContactToAttack = score;
+                    if(!contact.inShipRange(contactOfContact.id))
+                        continue;
+                    if(contactOfContact.alliedWith(contact.id))
+                        continue;
+                    float score = 1 / fleetCenter(contact).distanceTo(colonyCenter(contactOfContact));
+                    if(score > bestScoreForContactToAttack)
+                    {
+                        bestTargetOfContact = contactOfContact;
+                        bestScoreForContactToAttack = score;
+                    }
                 }
-            }
-            if(bestTargetOfContact == empire && contact.militaryPowerLevel() > empire.militaryPowerLevel())
-            {
-                senseDanger = true;
-                break;
+                if(bestTargetOfContact == empire && contact.militaryPowerLevel() > empire.militaryPowerLevel())
+                {
+                    senseDanger = true;
+                    break;
+                }
             }
         }
         /*if(senseDanger)
