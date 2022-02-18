@@ -954,7 +954,7 @@ public class AIDiplomat implements Base, Diplomat {
         if (empire.atWarWith(id(e)))
             return false;
         
-        for (DiplomaticIncident ev: empire.viewForEmpire(e).embassy().allIncidents()) {
+        for (DiplomaticIncident ev: empire.viewForEmpire(e).otherView().embassy().allIncidents()) {
             if (ev.isSpying())
                 return true;
         }
