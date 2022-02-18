@@ -74,7 +74,6 @@ import rotp.model.tech.TechSubspaceInterdictor;
 import rotp.model.tech.TechTeleporter;
 import rotp.model.tech.TechTorpedoWeapon;
 import rotp.model.tech.TechTree;
-import rotp.ui.UserPreferences;
 import rotp.ui.notifications.SelectTechNotification;
 import rotp.util.Base;
 
@@ -450,10 +449,10 @@ public class AIScientist implements Base, Scientist {
                 continue;
             if(ev.empire().race().internalSecurityAdj() > empire.race().spyInfiltrationAdj())
                 continue;
-            if(t.isType(Tech.ENGINE_WARP))
+            if(isImportant(t))
                 continue;
             //If others, who we are not at war with, have it, we value it lower because in that case we can try and trade for it
-            if(!empire.atWarWith(ev.empId()) && ev.spies().unknownTechs().contains(t))
+            if(!empire.atWarWith(ev.empId()) && ev.empire().diplomatAI().techsAvailableForRequest(empire).contains(t))
                 ownerFactor /= 2;
             //If we could steal it we don't want to research it ourselves at all
             if(ev.spies().possibleTechs().contains(t.id()) && ev.spies().isEspionage() && ev.spies().hasSpies())
@@ -802,7 +801,7 @@ public class AIScientist implements Base, Scientist {
     }
     @Override
     public float baseValue(TechShipInertial t) {
-        return 1;
+        return 2;
     }
     @Override
     public float baseValue(TechShipNullifier t) {
@@ -892,5 +891,31 @@ public class AIScientist implements Base, Scientist {
         float chance = (empire.tech().category(category).upcomingDiscoveryChance() - 1) * 60;
         empire.tech().category(category).allocation(allocationBefore);
         return chance;
+    }
+    @Override
+    public boolean isImportant(Tech t)
+    {
+        if(t.techType == Tech.ENGINE_WARP
+            || t.techType == Tech.ROBOTIC_CONTROLS
+            || t.techType == Tech.CLOAKING
+            || t.techType == Tech.SOIL_ENRICHMENT)
+            return true;
+        return false;
+    }
+    @Override
+    public boolean isOptional(Tech t)
+    {
+        if(t.techType == Tech.BEAM_FOCUS
+            || t.techType == Tech.BIOLOGICAL_ANTIDOTE
+            || t.techType == Tech.BIOLOGICAL_WEAPON
+            || t.techType == Tech.DISPLACEMENT
+            || t.techType == Tech.ECM_JAMMER
+            || t.techType == Tech.ENERGY_PULSAR
+            || t.techType == Tech.MISSILE_SHIELD
+            || t.techType == Tech.SHIP_NULLIFIER
+            || t.techType == Tech.STARGATE
+            || t.techType == Tech.TORPEDO_WEAPON)
+            return true;
+        return false;
     }
 }

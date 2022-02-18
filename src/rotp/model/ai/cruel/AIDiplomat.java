@@ -276,6 +276,18 @@ public class AIDiplomat implements Base, Diplomat {
         //System.out.println(empire.galaxy().currentTurn()+" "+empire.name()+" report age on "+requestor.name()+": "+view.spies().reportAge());
         List<Tech> worthyTechs = new ArrayList<>(allTechs.size());
         for (Tech t: allTechs) {
+            if(!empire.scientistAI().isOptional(tech))
+                if(empire.scientistAI().isOptional(t) && t.level() < tech.level() + 5 )
+                    continue;
+            if(empire.scientistAI().isImportant(tech))
+            {
+                //System.out.println(empire.galaxy().currentTurn()+" "+empire.name()+" was asked what they want in return for "+tech.name()+" by "+requestor.name());
+                if(empire.scientistAI().isOptional(t))
+                    continue;
+                if(t.level() < tech.level() + 5 
+                    && !empire.scientistAI().isImportant(t))
+                    continue;
+            }
             //System.out.println(empire.galaxy().currentTurn()+" "+empire.name()+" could like "+t.name()+" in return for "+tech.name()+" obsolete: "+t.isObsolete(empire)+" value: "+t.baseValue(empire));
             if (!t.isObsolete(empire) && t.baseValue(empire) > 0)
                 worthyTechs.add(t);
@@ -315,7 +327,12 @@ public class AIDiplomat implements Base, Diplomat {
                 List<Tech> willingToTradeCounterTechs = new ArrayList<>(counterTechs.size());
                 for (Tech t: counterTechs) {
                     if (willingToTradeTech(t))
-                        willingToTradeCounterTechs.add(t);
+                    {
+                        //now check if I would give them something for their counter
+                        List<Tech> countersToCounter = techsRequestedForCounter(v.empire(), t);
+                        if(!countersToCounter.isEmpty())
+                            willingToTradeCounterTechs.add(t);
+                    }
                 }
                 //System.out.println(empire.galaxy().currentTurn()+" "+empire.name()+" wants from "+v.empire().name()+" the tech "+wantedTech.name() +" countertechs: "+counterTechs.size());
                 if (!willingToTradeCounterTechs.isEmpty()) {
