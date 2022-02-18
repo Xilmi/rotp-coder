@@ -716,8 +716,6 @@ public class DiplomaticEmbassy implements Base, Serializable {
         rel += treatyRelationsAdj();
         for (DiplomaticIncident ev: incidents.values()) 
             rel += ev.currentSeverity();
-        if(empire().generalAI().absolution() == 1)
-            rel = 100;
         relations = bounds(-100,rel,100);
     }
     private void checkForIncidents() {

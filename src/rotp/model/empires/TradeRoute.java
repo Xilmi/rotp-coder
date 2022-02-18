@@ -46,7 +46,14 @@ public class TradeRoute implements Base, Serializable {
             stopRoute();
             return;
         }
-        float pct = (roll(1,200) + view.embassy().relations() + 25) / 6000.0f;
+        float relationBonus = 0;
+        boolean relationImmuneAI = false;
+        for(Empire emp : galaxy().activeEmpires())
+            if(emp.generalAI().absolution() > 1)
+                relationImmuneAI = true;
+        if(!relationImmuneAI)
+            relationBonus = view.embassy().relations();
+        float pct = (roll(1,200) + relationBonus + 25) / 6000.0f;
         civProd = view.empire().totalPlanetaryProduction();
         ownerProd = view.owner().totalPlanetaryProduction();
         float prevProfit = profit;
