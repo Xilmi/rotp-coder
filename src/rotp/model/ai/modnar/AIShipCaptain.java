@@ -352,6 +352,9 @@ public class AIShipCaptain implements Base, ShipCaptain {
                 return false;
         }
 
+        // if we are out of ammo, bail
+        if (!currStack.isArmed())
+            return true;
         // don't retreat if all enemies can only target planets
         boolean canBeTargeted = false;
         for (CombatStack st: activeStacks) {
