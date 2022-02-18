@@ -1,36 +1,43 @@
-UI:
+Includes all changes of official 1.03
 
-Add mouse-wheel-scrolling for flags on unexplored alien systems. (Ray)
-Genocide notice now uses the same way of determining whether killer and victim where known rather an inconsistent one.
-
-Translations:
-
-Fixed some issues for Italian and French. (Ray)
+Additional changes:
 
 Bugfixes:
 
-Ray fixed some bug about ship-deployment but I don't really know what exactly. (Ray)
+When loading a game that included opponents with their AI set to "Random", those shall now get the same AI assigned as they had before instead of getting a new random one.
+
+Governor:
+
+Fixed an issue that prevented the governor from realizing that Meklonar get maximum robotics-control-level automatically without refitting.
 
 AI:
 
+Renamed "Expert" into "Advanced".
+Renamed "Legacy" into "Cruel" and made "Cruel" the new default.
+Removed "Intermediate" and merged it with "Rookie" instead as they were so similar in the first place.
+The new "Rookie" uses primarily modules from the Modnar-AI with a fix to the "fake wars"-issue but also 3 base-modules, where that seemed more advanced or equal.
+"Random+" is no longer available as auto-play-option.
+
 General:
-AI now computes a probability of how likely they think they'll be able to colonize a system when there's also others who could compete for the same system. This is then used in the calculation how many colony-ships should be built.
-AI now computes a confidence-value for the stability of their bridge-heads and considers this value in both how it should reinforce the position (all fleets individually or wait for bigger fleet) and whether it should risk an invasion of a system.
+Now all missile-stacks are added up instead of looked at individually when it comes to the decision of whether to retreat from them or try to dodge them.
+Fixed an issue where opponents that were further away were considered more scary than closer ones, which could lead to stuff like unnecessary preparations for war or positioning fleets on the wrong border in peacetime.
+AI is now a lot smarter about what tech-trades to take:
+It will not trade important techs against regular techs unless those are at least 5 level higher.
+It will not trade important techs against unimportant techs at all.
+It will not trade regular techs against unimportant techs unless those are at least 5 levels higher.
 
-Ship-Combat:
-Fixed an issue where ships would keep attacking a planet instead of going for a ships.
-Fixed an issue where ships would stay out of range of their own weapons when they had repulsors but where slower than their target when the target had enough range to hit them anyways.
-When a fleet that thinks it would lose but could destroy a colony before, is blocked by a repulsor-ship or 5 stacks surrounding the colony, they will fall back to their normal retreat-check.
-Cloaking is now also ignored for superiority check of own ships.
+Cruel:
+Now internally likes everyone a lot independed from their behavior for questionable reasons.
+Being more sensible what opponents could be taken on.
+Now will be okay with having several wars at once if none of the opponents poses a threat.
+When not planning to go to war will take more risks teching up compared to maintainig a defensive fleet.
+Take trade-pact-value into account for victim-choice. Better trade means less likely to declare war than worse or no trade.
+Take espionage-incidents into account for victim-choice. Having lots of them means you are more likely to get declared war on.
 
-Expert:
-For uneven tech-trades you now get more or less reputation depending on the cost-difference. It'll still be 5 if it's even.
-The decision on whether spies should remain hidden after being warned is now based on whether a war is considered acceptable.
-Expansionist leaders ignore the bew probability-check for colonizations and will always try to compete for all systems.
-The victim-selection for opportunity-wars was simplyfied and should now always prefer the easiest-to-beat opponent.
-Opportunity wars are now only started when a leader-personality-specific threshold of superiority has been exceeded.
-There's now a new type of war: Desperation-war. It will always target the empire with the most room for population amongst those in reach. Wars of this type are only started when an AI couldn't do anything else anymore. (No wars, nothing to colonize, all colonies fully developed, tech-rank appropriate to their size)
-There's now different types of war-wearyness depending on the type of war and who declared it. Empires stubbornly continuing wars that are just to their disadvantage should be a thing of the past.
-Allies don't have to wait for a cooldown to ask the human player to join a war against their foes since this decision will have direct consequences on the alliance.
-Only Xenophobic leaders will continue to break up with their allies if both are up for election.
-Any leader could break an alliance if their ally is the best target for a desperation war. So better keep your allies busy.
+Advanced:
+No longer hiding spies in allied empires.
+Fixed that they only allowed you to ask them to stop spying when you were caught instead of when they caught you.
+
+Authors notes:
+
+The general theme of this update is to establish "Cruel", formerly known as "Legacy", as the default to play against. One of the main-complaints was that eventually everyone ended up having all techs and there was barely any disparity in the tech-levels and available techs. By making them more picky what to trade for what and taking enemy spies more seriously, this should be a bit better now. I think this mode is simply more exciting to play as the AI cannot really be manipulated to do anything that is against their interest and just helps the player.
