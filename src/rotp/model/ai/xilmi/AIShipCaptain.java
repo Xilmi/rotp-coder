@@ -382,6 +382,19 @@ public class AIShipCaptain implements Base, ShipCaptain {
                     if(!canStillFireShipWeapon)
                         killPct = 0;
                 }
+                //no point in targetting the colony if we can't attack it either
+                if(target.isColony())
+                {
+                    boolean canStillFireShipWeapon = false;
+                    for (int i=0;i<stack.numWeapons(); i++) {
+                        if(stack.shotsRemaining(i) > 0)
+                        {
+                            canStillFireShipWeapon = true;
+                        }
+                    }
+                    if(!canStillFireShipWeapon)
+                        killPct = 0;
+                }
             }
             //System.out.print("\n"+stack.fullName()+" onlyships: "+onlyShips+" onlyInAttackRange: "+onlyInAttackRange+" looking at "+target.fullName()+" killPct: "+killPct+" rangeAdj: "+rangeAdj+" cnt: "+target.num+" target.designCost(): "+target.designCost());
             if (killPct > 0) {
