@@ -31,6 +31,8 @@ import static rotp.model.empires.Leader.Objective.DIPLOMAT;
 import static rotp.model.empires.Leader.Personality.AGGRESSIVE;
 import static rotp.model.empires.Leader.Personality.HONORABLE;
 import static rotp.model.empires.Leader.Personality.PACIFIST;
+import rotp.model.empires.SpyNetwork;
+import rotp.model.empires.SpyReport;
 import rotp.model.empires.TreatyWar;
 import rotp.model.events.StarSystemEvent;
 import rotp.model.galaxy.Galaxy;
@@ -967,11 +969,10 @@ public class AIDiplomat implements Base, Diplomat {
         if (empire.atWarWith(id(e)))
             return false;
         
-        for (DiplomaticIncident ev: empire.viewForEmpire(e).otherView().embassy().allIncidents()) {
-            if (ev.isSpying())
-                return true;
-        }
-        return false;
+        SpyReport rpt = e.viewForEmpire(empire).spies().report();
+        SpyNetwork.Mission miss = rpt.confessedMission();
+        return ((rpt.spiesLost() > 0)
+            && ((miss == SpyNetwork.Mission.ESPIONAGE) || (miss == SpyNetwork.Mission.SABOTAGE)));
     }
     @Override
     public boolean canEvictSpies(Empire e) { 
