@@ -24,7 +24,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
 
-import rotp.Rotp;
+import rotp.RotpGovernor;
 import rotp.model.colony.Colony;
 import rotp.model.galaxy.StarSystem;
 import rotp.ui.BasePanel;
@@ -514,7 +514,7 @@ public class EmpireColonySpendingPane extends BasePanel {
                     governorOptionsFrame = new JFrame("GovernorOptions");
                     // make this window have an icon, same as main window
                     Image img = ImageManager.current().image("LANDSCAPE_RUINS_ORION");
-                    BufferedImage bimg = Rotp.toBufferedImage(img);
+                    BufferedImage bimg = RotpGovernor.toBufferedImage(img);
                     BufferedImage square = bimg.getSubimage(bimg.getWidth()-bimg.getHeight(), 0, bimg.getHeight(), bimg.getHeight());
                     governorOptionsFrame.setIconImage(square);
                     governorOptionsFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);

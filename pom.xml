@@ -75,12 +75,14 @@
             <version>2.11.3</version>
         </dependency>
         <!-- My attempt to produce GraalVM native executables, unfinished -->
+<!--
         <dependency>
             <groupId>org.graalvm.nativeimage</groupId>
             <artifactId>svm</artifactId>
             <version>21.1.0</version>
             <scope>provided</scope>
         </dependency>
+-->
     </dependencies>
     <build>
         <sourceDirectory>src</sourceDirectory>
@@ -323,6 +325,7 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>windows</id>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
@@ -332,6 +335,28 @@
                             <descriptors>
                                 <descriptor>src/assembly/windows.xml</descriptor>
                             </descriptors>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>governor</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <appendAssemblyId>true</appendAssemblyId>
+                            <descriptors>
+                                <descriptor>src/assembly/governor.xml</descriptor>
+                            </descriptors>
+                            <archive>
+                                <manifest>
+                                    <mainClass>rotp.RotpGovernor</mainClass>
+                                </manifest>
+                                <manifestEntries>
+                                    <Class-Path>Remnants.jar</Class-Path>
+                                    <Built-By>coder111@protonmail.com</Built-By>
+                                </manifestEntries>
+                            </archive>
                         </configuration>
                     </execution>
                 </executions>

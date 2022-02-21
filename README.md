@@ -30,7 +30,7 @@ planet not building ships and leave it untouched for most of the game. With new
 tech discoveries it will readjust the sliders automatically. This cuts down the
 amount of micromanagement needed drastically.
 
-In addition Governor can:
+In addition, Governor can:
 
 * Auto-transport population.
 * Auto-scout and Auto-colonize.
@@ -56,6 +56,12 @@ text in the planetary spending screen. Since version 1.8 Governor is on by defau
 ---
 
 Additional features / changelog
+
+* 4.03.0 Merge 1.03. Since the change to increase minimum transport cost to 10BC was never implemented upstream, 
+revamp auto-transport. Revert to transporting only organic population growth 1-2 at a time. And eco spending
+will not spend on population growth when close to maximum population leaving room for natural growth. Also
+update startup to be more robust when restart to increase memory size is needed. Re-enable "code only" small
+jar packaging which is designed to run along with vanilla Remnants.jar
 
 * 4.00.3 Merge 1.02a. Update Readme.
 

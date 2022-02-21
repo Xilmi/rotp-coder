@@ -16,6 +16,8 @@
 package rotp;
 
 import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,6 +66,26 @@ public class RotpGovernor {
         }
     }
 
+    // This needs to be moved to RotpGovernor, as "class only" packagiong of governor retains
+    // original Rotp.java, which means this method would be unavailable
+    public static BufferedImage toBufferedImage(Image img)
+    {
+        if (img instanceof BufferedImage)
+        {
+            return (BufferedImage) img;
+        }
+
+        // Create a buffered image with transparency
+        BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+
+        // Draw the image on to the buffered image
+        Graphics2D bGr = bimage.createGraphics();
+        bGr.drawImage(img, 0, 0, null);
+        bGr.dispose();
+
+        // Return the buffered image
+        return bimage;
+    }
 
     public static void main(String[] args) throws IOException {
 
@@ -95,7 +117,10 @@ public class RotpGovernor {
                 System.exit(1);
             }
         }
-        Rotp.jarFileName = jarFilename;
+        // only do this if we are packaged as a class-only-jar and we're running with original Remnants.jar
+        if (Rotp.jarFileName.startsWith("Remnants.jar")) {
+            Rotp.jarFileName = jarFilename;
+        }
         Rotp.main(args);
     }
 

@@ -182,18 +182,6 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="autotransport" min="-2" max="-2" attributes="0"/>
                       <Group type="102" alignment="0" attributes="0">
-                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                              <Component id="transportPop" max="32767" attributes="0"/>
-                              <Component id="transportMaxPercent" max="32767" attributes="0"/>
-                          </Group>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="transportPopLabel" min="-2" max="-2" attributes="0"/>
-                              <Component id="transportMaxPercentLabel" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                      </Group>
-                      <Component id="transportSizeLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Group type="102" alignment="0" attributes="0">
                           <Component id="transportMaxTurns" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="transportMaxTurnsLabel" min="-2" max="-2" attributes="0"/>
@@ -210,19 +198,7 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
                   <Component id="autotransport" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="transportPop" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="transportPopLabel" alignment="3" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="transportMaxPercent" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="transportMaxPercentLabel" alignment="3" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="transportSizeLabel" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="transportMaxTurns" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="transportMaxTurnsLabel" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -241,57 +217,6 @@
         <Component class="javax.swing.JCheckBox" name="autotransport">
           <Properties>
             <Property name="text" type="java.lang.String" value="Population automatically transported from colonies at max production capacity"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JSpinner" name="transportPop">
-          <Properties>
-            <Property name="model" type="javax.swing.SpinnerModel" editor="org.netbeans.modules.form.editors2.SpinnerModelEditor">
-              <SpinnerModel initial="10" maximum="30" minimum="1" numberType="java.lang.Integer" stepSize="1" type="number"/>
-            </Property>
-          </Properties>
-          <Events>
-            <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="transportPopStateChanged"/>
-            <EventHandler event="mouseWheelMoved" listener="java.awt.event.MouseWheelListener" parameters="java.awt.event.MouseWheelEvent" handler="transportPopMouseWheelMoved"/>
-          </Events>
-        </Component>
-        <Component class="javax.swing.JLabel" name="transportPopLabel">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Population to transport"/>
-          </Properties>
-          <Events>
-            <EventHandler event="mouseWheelMoved" listener="java.awt.event.MouseWheelListener" parameters="java.awt.event.MouseWheelEvent" handler="transportPopLabelMouseWheelMoved"/>
-          </Events>
-          <AuxValues>
-            <AuxValue name="JavaCodeGenerator_VariableLocal" type="java.lang.Boolean" value="true"/>
-            <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="0"/>
-          </AuxValues>
-        </Component>
-        <Component class="javax.swing.JSpinner" name="transportMaxPercent">
-          <Properties>
-            <Property name="model" type="javax.swing.SpinnerModel" editor="org.netbeans.modules.form.editors2.SpinnerModelEditor">
-              <SpinnerModel initial="20" maximum="20" minimum="3" numberType="java.lang.Integer" stepSize="1" type="number"/>
-            </Property>
-          </Properties>
-          <Events>
-            <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="transportMaxPercentStateChanged"/>
-            <EventHandler event="mouseWheelMoved" listener="java.awt.event.MouseWheelListener" parameters="java.awt.event.MouseWheelEvent" handler="transportMaxPercentMouseWheelMoved"/>
-          </Events>
-        </Component>
-        <Component class="javax.swing.JLabel" name="transportMaxPercentLabel">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Maximum population % to transport"/>
-          </Properties>
-          <Events>
-            <EventHandler event="mouseWheelMoved" listener="java.awt.event.MouseWheelListener" parameters="java.awt.event.MouseWheelEvent" handler="transportMaxPercentLabelMouseWheelMoved"/>
-          </Events>
-          <AuxValues>
-            <AuxValue name="JavaCodeGenerator_VariableLocal" type="java.lang.Boolean" value="true"/>
-            <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="0"/>
-          </AuxValues>
-        </Component>
-        <Component class="javax.swing.JLabel" name="transportSizeLabel">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Only planets size X and above will transport population"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JSpinner" name="transportMaxTurns">
