@@ -19,8 +19,9 @@ public class GovernorOptions implements Serializable {
     private boolean autotransport = "true".equalsIgnoreCase(System.getProperty("autotransport", "false"));
     private GatesGovernor gates = "false".equalsIgnoreCase(System.getProperty("autogate", "true")) ? GatesGovernor.None : GatesGovernor.Rich;
 
-    // Moved from GovernorOptions2
+    @Deprecated
     private int transportPopulation = 10;
+    @Deprecated
     private int transportMaxPercent = 10;
     // 1.5x for destinations inside nebulae
     private int transportMaxTurns = 5;
@@ -72,22 +73,6 @@ public class GovernorOptions implements Serializable {
 
     public void setGates(GatesGovernor gates) {
         this.gates = gates;
-    }
-
-    public int getTransportPopulation() {
-        return transportPopulation;
-    }
-
-    public void setTransportPopulation(int transportPopulation) {
-        this.transportPopulation = transportPopulation;
-    }
-
-    public int getTransportMaxPercent() {
-        return transportMaxPercent;
-    }
-
-    public void setTransportMaxPercent(int transportMaxPercent) {
-        this.transportMaxPercent = transportMaxPercent;
     }
 
     public int getTransportMaxTurns() {

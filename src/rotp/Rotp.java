@@ -101,7 +101,7 @@ public class Rotp {
         stopIfNoFilePermissions(frame);
 
         Image img = ImageManager.current().image("LANDSCAPE_RUINS_ORION");
-        BufferedImage bimg = toBufferedImage(img);
+        BufferedImage bimg = RotpGovernor.toBufferedImage(img);
         BufferedImage square = bimg.getSubimage(bimg.getWidth()-bimg.getHeight(), 0, bimg.getHeight(), bimg.getHeight());
         frame.setIconImage(square);
 
@@ -133,24 +133,6 @@ public class Rotp {
         becomeVisible();
     }
     public static void becomeVisible() {   frame.setVisible(true); }
-    public static BufferedImage toBufferedImage(Image img)
-    {
-        if (img instanceof BufferedImage)
-        {
-            return (BufferedImage) img;
-        }
-
-        // Create a buffered image with transparency
-        BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-
-        // Draw the image on to the buffered image
-        Graphics2D bGr = bimage.createGraphics();
-        bGr.drawImage(img, 0, 0, null);
-        bGr.dispose();
-
-        // Return the buffered image
-        return bimage;
-    }
     public static boolean containsArg(String[] argList, String key) {
         for (String s: argList) {
             if (s.equalsIgnoreCase(key))

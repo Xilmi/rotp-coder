@@ -1101,7 +1101,8 @@ public final class Empire implements Base, NamedObject, Serializable {
         for (int i = 0; i < this.sv.count(); ++i) {
             if (this.sv.empire(i) == this && this.sv.isColonized(i)) {
                 Colony c = this.sv.colony(i);
-                if (c.planet().currentSize() - c.expectedPopulation() > options.getTransportPopulation() ) {
+                // don't transport to populations that are missing less than 4 population
+                if (c.planet().currentSize() - c.expectedPopulation() > 4 ) {
                     colonies.add(c);
                 }
             }
@@ -1125,11 +1126,15 @@ public final class Empire implements Base, NamedObject, Serializable {
                 if (!c.isGovernor()) {
                     continue;
                 }
-                if (c.transporting() || !c.canTransport() || c.maxTransportsAllowed() < options.getTransportPopulation()) {
+                if (c.transporting() || !c.canTransport() || c.maxTransportsAllowed() < 1) {
                     continue;
                 }
-                // we don't have excess population
-                if (c.expectedPopulation() < c.planet().currentSize()) {
+                // don't ship population from planets with 20 or less population
+                if (c.planet().currentSize() <= 20) {
+                    continue;
+                }
+                // we don't have excess population. Allow transporting 1 pop to stabilize planet ant max-1
+                if (c.expectedPopulation() < (c.planet().currentSize() - 2)) {
                     continue;
                 }
                 // if this option is checked, don't send out population out of planets which are Rich or Artefacts
@@ -1138,18 +1143,8 @@ public final class Empire implements Base, NamedObject, Serializable {
                                 c.planet().isArtifact() || c.planet().isOrionArtifact())) {
                     continue;
                 }
-                // TODO: ship population out earlier?
-                if (!c.ecology().isCompleted()) {
-                    continue;
-                }
-                // TODO: ship population out earlier?
-                if (!c.industry().isCompleted()) {
-                    continue;
-                }
-                int size = options.getTransportPopulation() * 100 / options.getTransportMaxPercent();
-                if (c.planet().currentSize() < size) {
-                    continue;
-                }
+                // ship population out earlier, don't check if ecology is all done.
+                // ship population out earlier, don't check if industry is all done.
                 donors.add(c);
             }
         }
@@ -1170,7 +1165,7 @@ public final class Empire implements Base, NamedObject, Serializable {
             Colony donor = Collections.min(donors, (Colony o1, Colony o2) -> (int) Math.signum(
                     o1.travelTime(o1, c, this.tech().transportTravelSpeed()) -
                             o2.travelTime(o2, c, this.tech().transportTravelSpeed())));
-            if (neededPopulation > options.getTransportPopulation()) {
+            if (neededPopulation > 1) {
                 float transportTime = donor.travelTime(donor, c, this.tech().transportTravelSpeed());
                 // limit max transport time
                 double maxTime = c.starSystem().inNebula() ? options.getTransportMaxTurns() * 1.5 : options.getTransportMaxTurns();
@@ -1185,7 +1180,7 @@ public final class Empire implements Base, NamedObject, Serializable {
                 // produces ships
                 // if population will grow large enough naturally before transports arrive, don't transport.
                 double expectedPopAtTransportTime = c.population() +
-                        Math.pow(1+c.normalPopGrowth() / c.population(), transportTime);
+                        Math.pow(1+c.unrestrictedPopGrowth() / c.population(), transportTime);
                 if (expectedPopAtTransportTime >= c.planet().currentSize()) {
                     // colony will be full by the time population arrives from the closest donor, skip this colony
                     colonies.remove(c);
@@ -1194,9 +1189,13 @@ public final class Empire implements Base, NamedObject, Serializable {
 
 //                System.out.println("Will transport from "+donor.name()+" to "+c.name());
 //                System.out.println("Before transport expectedPopulation= "+c.expectedPopulation());
-                int populationToTransport = options.getTransportPopulation();
+                // if we expect transports in excess of maximum population, ship that away too.
+                int expectedOverPopulation = Math.round(donor.expectedPopulation() - donor.planet().currentSize());
+                int growth = Math.max(1, Math.round(donor.unrestrictedPopGrowth()));
+                System.out.println("Donor "+donor.name()+" overPopulation="+expectedOverPopulation+" growth="+growth);
+                int populationToTransport = Math.max(expectedOverPopulation, growth);
                 // if this option is set, transport 2x population from poor planets
-                if (options.isTransportPoorDouble() && (c.planet().isResourcePoor() || c.planet().isResourceUltraPoor()) ) {
+                if (options.isTransportPoorDouble() && (donor.planet().isResourcePoor() || donor.planet().isResourceUltraPoor()) ) {
                     populationToTransport *= 2;
                 }
                 donor.scheduleTransportsToSystem(c.starSystem(), populationToTransport);

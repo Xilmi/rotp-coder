@@ -1091,7 +1091,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
     public void acceptTransport(Transport t) {
         if (!t.empire().canColonize(starSystem())) {
             // no appropriate alert message for this transport loss. This is an edge case anyway
-            // as it occurs only when the destination system has been rendered inhabitable by a 
+            // as it occurs only when the destination system has been rendered inhabitable by a
             // random event while the transport was in transits
             t.size(0);
             return;
@@ -1106,13 +1106,13 @@ public final class Colony implements Base, IMappedObject, Serializable {
     public void resistTransportWithRebels(Transport tr) {
         log(str(rebels), " ", empire().raceName(), " rebels at ", starSystem().name(), " resisting ",
                     str(tr.size()), " ", tr.empire().raceName(), " transports");
-        
+
         if (!tr.empire().canColonize(starSystem())) {
             // no appropriate alert message for this transport loss. Even more of an edge case.
             tr.size(0);
             return;
         }
-        
+
         captives = population() - rebels;
         setPopulation(rebels);
 
@@ -1139,16 +1139,16 @@ public final class Colony implements Base, IMappedObject, Serializable {
     public void resistTransport(Transport tr) {
         log(empire().raceName() + " colony at " + starSystem().name() + " resisting " + tr.size() + " "
                         + tr.empire().raceName() + " transports");
-        
+
         if (!tr.empire().canColonize(starSystem())) {
-            if (tr.empire().isPlayerControlled()) 
+            if (tr.empire().isPlayerControlled())
                 TransportsKilledAlert.create(empire(), starSystem(), tr.launchSize());
-            else if (empire().isPlayerControlled()) 
+            else if (empire().isPlayerControlled())
                 InvadersKilledAlert.create(tr.empire(), starSystem(), tr.launchSize());
             tr.size(0);
             return;
         }
-        
+
         int passed = 0;
         int num = tr.size();
         float pct = tr.combatTransportPct();
@@ -1551,17 +1551,20 @@ public final class Colony implements Base, IMappedObject, Serializable {
         // lock ship slider while we allocate spending elsewhere
         locked(SHIP, true);
 
-        /* I took this out with the new autotransport logic.  If you want to slow down autotransports,
+        /**
+         * 2022-02-20 Obsolete, back to old transport logic. 10bc transport cost was never implemented by Ray.
+         *
+         * I took this out with the new autotransport logic.  If you want to slow down autotransports,
          * then change it back to something like this that will leave 2 population to grow naturally.
          * Leaving it at always balanceEcoAndInd(1) will enable rapid growth and much more spending on
          * population growth.
+        */
+//        balanceEcoAndInd(1);
         // Leave some room for normal population growth if we're auto transporting
         if (session().getGovernorOptions().isAutotransport())
-            balanceEcoAndInd(1 - Math.max(normalPopGrowth(), 2) / maxSize());
+            balanceEcoAndInd(1 - Math.max(normalPopGrowth(), 3) / maxSize());
         else
             balanceEcoAndInd(1);
-        */
-        balanceEcoAndInd(1);
 
         // add maximum defence
         // don't allocate just for "upgrades" if there are no bases or if there are more bases than we want
@@ -1789,13 +1792,14 @@ public final class Colony implements Base, IMappedObject, Serializable {
     }
 
     public float unrestrictedPopGrowth() {
-        // assume we send out 2 population, calc growth then
-        float baseGrowthRate = this.max(0.0f, (1.0f - this.workingPopulation() / (this.planet.currentSize()-2)) / 10.0f);
-        baseGrowthRate *= this.empire.race().growthRateMod();
-        if (!this.empire.race().ignoresPlanetEnvironment()) {
-            baseGrowthRate *= this.planet.growthAdj();
-        }
-        float newGrownPopulation = this.max(0.1f, this.workingPopulation() * baseGrowthRate);
+        // calculate growth rate based on current pop, environment & race
+        float baseGrowthRate = max(0, (1 - (workingPopulation() / planet.currentSize())) / 10);
+        baseGrowthRate *= empire.growthRateMod();
+        if (!empire.ignoresPlanetEnvironment())
+            baseGrowthRate *= planet.growthAdj();
+
+        // always at least .1 base growth in pop
+        float newGrownPopulation = max(.1f, workingPopulation() * baseGrowthRate);
         return newGrownPopulation;
     }
     // Try to transport extra population to other plants.

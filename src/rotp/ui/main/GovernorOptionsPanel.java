@@ -23,12 +23,9 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         GovernorOptions options = GameSession.instance().getGovernorOptions();
         this.governorDefault.setSelected(options.isGovernorOnByDefault());
         this.autotransport.setSelected(options.isAutotransport());
-        this.transportPop.setValue(options.getTransportPopulation());
-        this.transportMaxPercent.setValue(options.getTransportMaxPercent());
         this.transportMaxTurns.setValue(options.getTransportMaxTurns());
         this.transportRichDisabled.setSelected(options.isTransportRichDisabled());
         this.transportPoorDouble.setSelected(options.isTransportPoorDouble());
-        changePopulationLabel();
         switch (GameSession.instance().getGovernorOptions().getGates()) {
             case None:
                 this.stargateOff.setSelected(true);
@@ -102,11 +99,6 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         governorDefault = new javax.swing.JCheckBox();
         javax.swing.JPanel autotransportPanel = new javax.swing.JPanel();
         autotransport = new javax.swing.JCheckBox();
-        transportPop = new javax.swing.JSpinner();
-        javax.swing.JLabel transportPopLabel = new javax.swing.JLabel();
-        transportMaxPercent = new javax.swing.JSpinner();
-        javax.swing.JLabel transportMaxPercentLabel = new javax.swing.JLabel();
-        transportSizeLabel = new javax.swing.JLabel();
         transportMaxTurns = new javax.swing.JSpinner();
         javax.swing.JLabel transportMaxTurnsLabel = new javax.swing.JLabel();
         javax.swing.JLabel transportMaxTurnsNebula = new javax.swing.JLabel();
@@ -143,46 +135,6 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
 
         autotransport.setText("Population automatically transported from colonies at max production capacity");
 
-        transportPop.setModel(new javax.swing.SpinnerNumberModel(10, 1, 30, 1));
-        transportPop.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                transportPopStateChanged(evt);
-            }
-        });
-        transportPop.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
-            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
-                transportPopMouseWheelMoved(evt);
-            }
-        });
-
-        transportPopLabel.setText("Population to transport");
-        transportPopLabel.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
-            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
-                transportPopLabelMouseWheelMoved(evt);
-            }
-        });
-
-        transportMaxPercent.setModel(new javax.swing.SpinnerNumberModel(20, 3, 20, 1));
-        transportMaxPercent.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                transportMaxPercentStateChanged(evt);
-            }
-        });
-        transportMaxPercent.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
-            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
-                transportMaxPercentMouseWheelMoved(evt);
-            }
-        });
-
-        transportMaxPercentLabel.setText("Maximum population % to transport");
-        transportMaxPercentLabel.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
-            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
-                transportMaxPercentLabelMouseWheelMoved(evt);
-            }
-        });
-
-        transportSizeLabel.setText("Only planets size X and above will transport population");
-
         transportMaxTurns.setModel(new javax.swing.SpinnerNumberModel(15, 1, 15, 1));
         transportMaxTurns.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
@@ -212,15 +164,6 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
                 .addGroup(autotransportPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(autotransport)
                     .addGroup(autotransportPanelLayout.createSequentialGroup()
-                        .addGroup(autotransportPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(transportPop)
-                            .addComponent(transportMaxPercent))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(autotransportPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(transportPopLabel)
-                            .addComponent(transportMaxPercentLabel)))
-                    .addComponent(transportSizeLabel)
-                    .addGroup(autotransportPanelLayout.createSequentialGroup()
                         .addComponent(transportMaxTurns, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(transportMaxTurnsLabel))
@@ -233,16 +176,6 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
             autotransportPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(autotransportPanelLayout.createSequentialGroup()
                 .addComponent(autotransport)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(autotransportPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(transportPop, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(transportPopLabel))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(autotransportPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(transportMaxPercent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(transportMaxPercentLabel))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(transportSizeLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(autotransportPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(transportMaxTurns, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -501,25 +434,9 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_allGovernorsOnActionPerformed
 
-    private void transportPopMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_transportPopMouseWheelMoved
-        mouseWheel(transportPop, evt);
-    }//GEN-LAST:event_transportPopMouseWheelMoved
-
-    private void transportMaxPercentMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_transportMaxPercentMouseWheelMoved
-        mouseWheel(transportMaxPercent, evt);
-    }//GEN-LAST:event_transportMaxPercentMouseWheelMoved
-
     private void transportMaxTurnsMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_transportMaxTurnsMouseWheelMoved
         mouseWheel(transportMaxTurns, evt);
     }//GEN-LAST:event_transportMaxTurnsMouseWheelMoved
-
-    private void transportPopLabelMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_transportPopLabelMouseWheelMoved
-        mouseWheel(transportPop, evt);
-    }//GEN-LAST:event_transportPopLabelMouseWheelMoved
-
-    private void transportMaxPercentLabelMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_transportMaxPercentLabelMouseWheelMoved
-        mouseWheel(transportMaxPercent, evt);
-    }//GEN-LAST:event_transportMaxPercentLabelMouseWheelMoved
 
     private void transportMaxTurnsLabelMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_transportMaxTurnsLabelMouseWheelMoved
         mouseWheel(transportMaxTurns, evt);
@@ -539,8 +456,6 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         GovernorOptions options = GameSession.instance().getGovernorOptions();
         options.setGovernorOnByDefault(governorDefault.isSelected());
         options.setAutotransport(autotransport.isSelected());
-        options.setTransportPopulation((Integer)transportPop.getValue());
-        options.setTransportMaxPercent((Integer)transportMaxPercent.getValue());
         options.setTransportMaxTurns((Integer)transportMaxTurns.getValue());
         options.setTransportRichDisabled(transportRichDisabled.isSelected());
         options.setTransportPoorDouble(transportPoorDouble.isSelected());
@@ -568,14 +483,6 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         frame.setVisible(false);
     }//GEN-LAST:event_cancelButtonActionPerformed
 
-    private void transportPopStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_transportPopStateChanged
-        changePopulationLabel();
-    }//GEN-LAST:event_transportPopStateChanged
-
-    private void transportMaxPercentStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_transportMaxPercentStateChanged
-        changePopulationLabel();
-    }//GEN-LAST:event_transportMaxPercentStateChanged
-
     private void missileBasesMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_missileBasesMouseWheelMoved
         mouseWheel(missileBases, evt);
     }//GEN-LAST:event_missileBasesMouseWheelMoved
@@ -600,13 +507,6 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         mouseWheel(autoAttackShipCount, evt);
     }//GEN-LAST:event_autoAttackShipCountMouseWheelMoved
 
-    private void changePopulationLabel() {
-        int pop = (int)this.transportPop.getValue();
-        int maxPercent = (int)this.transportMaxPercent.getValue();
-        int size = pop * 100 / maxPercent;
-        String msg = String.format("Only planets size %d and above will transport population", size);
-        transportSizeLabel.setText(msg);
-    }
     private static void mouseWheel(JSpinner spinner, java.awt.event.MouseWheelEvent evt) {
         if (evt.getScrollType() != MouseWheelEvent.WHEEL_UNIT_SCROLL) {
             return;
@@ -653,12 +553,9 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
     private javax.swing.JRadioButton stargateOn;
     private javax.swing.ButtonGroup stargateOptions;
     private javax.swing.JRadioButton stargateRich;
-    private javax.swing.JSpinner transportMaxPercent;
     private javax.swing.JSpinner transportMaxTurns;
     private javax.swing.JCheckBox transportPoorDouble;
-    private javax.swing.JSpinner transportPop;
     private javax.swing.JCheckBox transportRichDisabled;
-    private javax.swing.JLabel transportSizeLabel;
     // End of variables declaration//GEN-END:variables
 
     // Just test the layout

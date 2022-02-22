@@ -26,7 +26,7 @@ import java.awt.image.BufferedImage;
 import java.util.List; // modnar: change to cleaner icon set
 import java.util.ArrayList; // modnar: change to cleaner icon set
 
-import rotp.Rotp;
+import rotp.RotpGovernor;
 import rotp.model.colony.Colony;
 import rotp.model.galaxy.StarSystem;
 import rotp.ui.BasePanel;
