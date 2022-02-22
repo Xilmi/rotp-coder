@@ -446,8 +446,11 @@ public class RotPUI extends BasePanel implements ActionListener, KeyListener {
         session().waitUntilNextTurnCanProceed();
     }
     public void showAdvice(String key, Empire emp1, String var1, String var2, String var3) {
-        mainUI().showAdvice(key, emp1, var1, var2, var3);
-        selectMainPanel();
+        if(!UserPreferences.disableAdvisor())
+        {
+            mainUI().showAdvice(key, emp1, var1, var2, var3);
+            selectMainPanel();
+        }
     }
     public void showBombardmentNotice(int sysId, ShipFleet fl) {
         try {
