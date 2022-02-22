@@ -28,7 +28,7 @@ public class GovernorOptions implements Serializable {
     private boolean transportPoorDouble = true;
 
     private int minimumMissileBases = 0;
-    private boolean autospend = true;
+    private boolean autospend = UserPreferences.governorAutoSpendByDefault();
     private int reserve = 1000;
     private boolean shipbuilding = true;
 
@@ -112,6 +112,7 @@ public class GovernorOptions implements Serializable {
 
     public void setAutospend(boolean autospend) {
         this.autospend = autospend;
+        UserPreferences.setAutoSpendOn(autospend);
     }
 
     public int getReserve() {

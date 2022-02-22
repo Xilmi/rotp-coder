@@ -65,6 +65,7 @@ public class UserPreferences {
     private static int defaultMaxBases = 0;
     private static boolean displayYear = false;
     private static boolean governorOnByDefault = true;
+    private static boolean governorAutoSpendByDefault = false;
     private static int customDifficulty = 100; // mondar: add custom difficulty level option, in units of percent
     private static boolean dynamicDifficulty = false; // modnar: add dynamic difficulty option, change AI colony production
     private static boolean alwaysStarGates = false; // modnar: add option to always have Star Gates tech
@@ -286,6 +287,8 @@ public class UserPreferences {
     public static int defaultMaxBases()    { return defaultMaxBases; }
     public static void setGovernorOn(boolean governorOn)    { governorOnByDefault = governorOn; save(); }
     public static boolean governorOnByDefault() { return governorOnByDefault; }
+    public static void setAutoSpendOn(boolean autospendOn)  { governorAutoSpendByDefault = autospendOn; save(); }
+    public static boolean governorAutoSpendByDefault() { return governorAutoSpendByDefault; }
     public static boolean divertColonyExcessToResearch()  { return divertColonyExcessToResearch; }
     public static boolean disableAdvisor() { return disableAdvisor; }
     public static void uiTexturePct(int i)    { uiTexturePct = i / 100.0f; }
@@ -335,6 +338,7 @@ public class UserPreferences {
             out.println(keyFormat("DISPLAY_YEAR")+ yesOrNo(displayYear));
             out.println(keyFormat("DEFAULT_MAX_BASES") + defaultMaxBases);
             out.println(keyFormat("GOVERNOR_ON_BY_DEFAULT") + yesOrNo(governorOnByDefault));
+            out.println(keyFormat("AUTOSPEND_ON_BY_DEFAULT") + yesOrNo(governorAutoSpendByDefault));
             out.println(keyFormat("DIVERT_COLONY_EXCESS_TO_RESEARCH")+ yesOrNo(divertColonyExcessToResearch));
             out.println(keyFormat("DISABLE_ADVISOR")+ yesOrNo(disableAdvisor));
             out.println(keyFormat("SCREEN_SIZE_PCT")+ screenSizePct());
@@ -393,6 +397,7 @@ public class UserPreferences {
             case "DISPLAY_YEAR": displayYear = yesOrNo(val); return;
             case "DEFAULT_MAX_BASES": defaultMaxBases = Integer.valueOf(val); return;
             case "GOVERNOR_ON_BY_DEFAULT": governorOnByDefault = yesOrNo(val); return;
+            case "AUTOSPEND_ON_BY_DEFAULT": governorAutoSpendByDefault = yesOrNo(val); return;
             case "DIVERT_COLONY_EXCESS_TO_RESEARCH": divertColonyExcessToResearch = yesOrNo(val); return;
             case "DISABLE_ADVISOR": disableAdvisor = yesOrNo(val); return;
             case "SCREEN_SIZE_PCT": screenSizePct(Integer.valueOf(val)); return;
