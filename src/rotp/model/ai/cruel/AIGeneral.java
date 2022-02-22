@@ -723,39 +723,19 @@ public class AIGeneral implements Base, General {
         }
         for(Empire emp : empire.contactedEmpires())
         {
-            //Since there's allied victory, there's no reason to ever break up with our alliance
-            if(empire.alliedWith(emp.id))
-                continue;
-            //skip allies of our allies too because that makes for stupid situations
-            boolean skip = false;
-            for(Empire ally : empire.allies())
-            {
-                if(ally.alliedWith(emp.id))
-                {
-                    skip = true;
-                    break;
-                }
-            }
-            if(skip)
-                continue;
-            //Attacking stronger empires is okay unless it would be suicidal. It's considered suicidal when all their enemies combined + me are less than half their power
-            float enemyPower = empire.powerLevel(empire);
+            float enemyPower = empire.militaryPowerLevel();
             for(Empire enemy : emp.warEnemies())
             {
-                enemyPower += enemy.powerLevel(enemy);
+                enemyPower += enemy.militaryPowerLevel();
             }
-            if(emp.powerLevel(emp) > enemyPower * 2)
-                continue;
-            //or when my power is less than 1/4th their power
-            if(emp.powerLevel(emp) > empire.powerLevel(empire) * 4)
+            if(emp.militaryPowerLevel() > enemyPower && empire.diplomatAI().facCapRank() > 1)
                 continue;
             if(!empire.inShipRange(emp.id))
-                continue;
-            if(empire.tech().topSpeed() < empire.viewForEmpire(emp).spies().tech().topSpeed())
                 continue;
             float currentScore = totalEmpirePopulationCapacity(emp) / (fleetCenter(empire).distanceTo(colonyCenter(emp)) + colonyCenter(empire).distanceTo(colonyCenter(emp)));
             currentScore *= empire.tech().avgTechLevel() / emp.tech().avgTechLevel();
             currentScore *= enemyPower;
+            currentScore *= empire.tech().topSpeed() / empire.viewForEmpire(emp).spies().tech().topSpeed();
             float tradeMod = 1;
             if(empire.viewForEmpire(emp).trade() != null && empire.totalPlanetaryIncome() > 0)
                 tradeMod += empire.viewForEmpire(emp).trade().profit() / empire.totalPlanetaryIncome();

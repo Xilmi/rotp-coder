@@ -36,6 +36,7 @@ import static rotp.model.empires.Leader.Objective.TECHNOLOGIST;
 import static rotp.model.empires.Leader.Personality.AGGRESSIVE;
 import static rotp.model.empires.Leader.Personality.PACIFIST;
 import static rotp.model.empires.Leader.Personality.XENOPHOBIC;
+import rotp.model.empires.TreatyWar;
 import rotp.model.events.StarSystemEvent;
 import rotp.model.galaxy.Galaxy;
 import rotp.model.galaxy.ShipFleet;
@@ -1404,6 +1405,18 @@ public class AIDiplomat implements Base, Diplomat {
             warAllowed = false;
         if(!techIsAdequateForWar())
             warAllowed = false;
+        float enemyPower = empire.militaryPowerLevel();
+        Empire victim = empire.generalAI().bestVictim();
+        if(victim != null)
+        {
+            for(Empire enemy : victim.warEnemies())
+            {
+                enemyPower += enemy.militaryPowerLevel();
+            }
+            //System.out.println(galaxy().currentTurn()+" "+empire.name()+" my power: "+enemyPower+" "+victim.name()+" power: "+victim.militaryPowerLevel());
+            if(victim.militaryPowerLevel() > enemyPower && empire.diplomatAI().facCapRank() > 1)
+                warAllowed = false;
+        }
         //Ail: If there's only two empires left, there's no time for preparation. We cannot allow them the first-strike-advantage!
         if(galaxy().numActiveEmpires() < 3)
             warAllowed = true;
@@ -1719,9 +1732,10 @@ public class AIDiplomat implements Base, Diplomat {
         float enemyPower = 0;
         for(Empire enemy : empire.enemies())
         {
-            enemyPower+= enemy.powerLevel(enemy);
+            enemyPower+= enemy.militaryPowerLevel();
         }
-        if(empire.powerLevel(empire) < enemyPower * 2)
+        boolean scared = false;
+        if(empire.militaryPowerLevel() < enemyPower)
         {
             //ail: If we are not fighting our preferred target, we don't really want a war
             if(v.empire() != empire.generalAI().bestVictim())
@@ -1729,6 +1743,7 @@ public class AIDiplomat implements Base, Diplomat {
             //ail: If I have more than one war, we try to go to peace with everyone of our multiple enemies to increase the likelyness of at least one saying yes
             if(empire.warEnemies().size() > 1)
                 return true;
+            scared = true;
         }
         //ail: If I'm outteched by others I also don't really want to stick to a war anymore, except for aggressive leader as that would lead to contradictory behavior
         if(techLevelRank() > popCapRank(empire, false))
@@ -1743,6 +1758,12 @@ public class AIDiplomat implements Base, Diplomat {
                 everythingUnderSiege = false;
                 break;
             }
+        }
+        if(scared && v.embassy().treaty() != null && v.embassy().treaty().isWar())
+        {
+            TreatyWar treaty = (TreatyWar) v.embassy().treaty();
+            if (treaty.colonyChange(empire) < 1.0f)
+                return true;
         }
         if(everythingUnderSiege)
             return true;
@@ -1903,15 +1924,18 @@ public class AIDiplomat implements Base, Diplomat {
     {
         int rank = 1;
         float myFacCap = facCapPct(empire, true);
+        //System.out.print("\n"+empire.galaxy().currentTurn()+" "+empire.name()+" my Fac Cap: "+myFacCap);
         for(Empire emp:empire.contactedEmpires())
         {
             if(!empire.inEconomicRange(emp.id))
                 continue;
+            //System.out.print("\n"+empire.galaxy().currentTurn()+" "+empire.name()+" Fac cap of "+emp.name()+": "+facCapPct(emp, true));
             if(facCapPct(emp, true) > myFacCap)
                 rank++;
         }
         if(myFacCap >= 1)
             rank = 1;
+        //System.out.print("\n"+empire.galaxy().currentTurn()+" "+empire.name()+" my facCapRank: "+rank);
         return rank;
     }
     public float facCapPct(Empire emp, boolean ignorePoor)
