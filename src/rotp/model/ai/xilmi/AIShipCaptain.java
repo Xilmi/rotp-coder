@@ -422,6 +422,8 @@ public class AIShipCaptain implements Base, ShipCaptain {
                     if(!target.isColony() || onlyShips)
                         desirability /= 100;
                 }
+                if(!stack.hasBombs() && target.isColony() && !target.isArmed())
+                    desirability = Float.MIN_VALUE;
                 //System.out.print("\n"+stack.fullName()+" looking at "+target.fullName()+" desirability: "+desirability+" oir: "+onlyInAttackRange+" os: "+onlyShips+" can attack: "+stack.canAttack(target));
                 if (desirability > maxDesirability) {  // this might be a better target, adjust desirability for pathing
                     if (stack.mgr.autoResolve) {
