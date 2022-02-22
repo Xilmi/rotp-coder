@@ -1076,6 +1076,7 @@ public final class Colony implements Base, IMappedObject, Serializable {
                 oldDest.colony().governIfNeeded();
             }
         }
+        empire().flagColoniesToRecalcSpending();
         checkEcoAtClean();
         // reset ship views
         if (empire.isPlayerControlled())
