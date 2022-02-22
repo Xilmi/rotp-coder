@@ -381,6 +381,7 @@
                                 <asset>target/rotp-${project.version}.jar</asset>
                                 <asset>target/rotp-${project.version}-mini.jar</asset>
                                 <asset>target/rotp-${project.version}-windows.zip</asset>
+                                <asset>target/rotp-${project.version}-governor.jar</asset>
                             </assets>
                         </configuration>
                     </execution>
