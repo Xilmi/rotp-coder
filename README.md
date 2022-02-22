@@ -1,11 +1,20 @@
-Bugfixes:
+UI:
 
-Fixed ecology-spending not being updated to when increasing or decreasing the amount of spies impacts remaining income enough to warrant adjustments.
+The previously integrated option to disable the advisor-popup now should actually work.
 
-Game mechanics:
+Governor:
 
-Instead of making the Legacy-AI use an exploit to generate more trade-income more quickly by maximizing it's relationship with everyione, the presence of at least one AI in the game that doesn't use relations for their decision-making now normalizes the trade-pact-improvement-speed to where it would be if everyone had neutral relationship.
+Auto-spending of the reserve is now disabled by default but switching it on shall make the game remember via a corresponding parameter in Remnants.cfg.
 
 AI:
 
-Renamed "Cruel" back to "Legacy".
+Ships with leftover movement point but no weapons to fire will no longer move towards the colony which made it easier to kite them.
+Colonies without bases will now always be the lowest-priority target for ships without bombs to fix an exploit using scouts to make enemy fleets-retreat.
+Reworked algorithm that determines which size to use for ships. It should now tend to use Large and Huge hulls more frequently.
+Fixed an issue that caused the score of automated-repair-system to be too low and increased the base-score. It should be seen in use much more often now.
+
+Advanced:
+Another attempt of fixing when you can threaten them to stop spying.
+
+Legacy:
+Supposedly improved logic of both when to go to war and when to sue for peace. Overall tendency is to be more careful before starting wars, want peace quicker when losing and be more rutheless when winning.
