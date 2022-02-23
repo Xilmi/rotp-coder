@@ -1405,16 +1405,16 @@ public class AIDiplomat implements Base, Diplomat {
             warAllowed = false;
         if(!techIsAdequateForWar())
             warAllowed = false;
-        float enemyPower = empire.militaryPowerLevel();
+        float enemyPower = empire.powerLevel(empire);
         Empire victim = empire.generalAI().bestVictim();
         if(victim != null)
         {
             for(Empire enemy : victim.warEnemies())
             {
-                enemyPower += enemy.militaryPowerLevel();
+                enemyPower += enemy.powerLevel(enemy);
             }
             //System.out.println(galaxy().currentTurn()+" "+empire.name()+" my power: "+enemyPower+" "+victim.name()+" power: "+victim.militaryPowerLevel());
-            if(victim.militaryPowerLevel() > enemyPower && empire.diplomatAI().facCapRank() > 1)
+            if(victim.powerLevel(victim) > enemyPower && empire.diplomatAI().facCapRank() > 1)
                 warAllowed = false;
         }
         //Ail: If there's only two empires left, there's no time for preparation. We cannot allow them the first-strike-advantage!
