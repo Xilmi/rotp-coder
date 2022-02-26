@@ -275,6 +275,7 @@ public class AIDiplomat implements Base, Diplomat {
         // include only those techs which have a research value >= the trade value
         // of the requestedTech we would be trading away
         //System.out.println(empire.galaxy().currentTurn()+" "+empire.name()+" report age on "+requestor.name()+": "+view.spies().reportAge());
+        //System.out.println(empire.galaxy().currentTurn()+" "+empire.name()+" was asked what they want in return for "+tech.name()+" by "+requestor.name());
         List<Tech> worthyTechs = new ArrayList<>(allTechs.size());
         for (Tech t: allTechs) {
             if(!empire.scientistAI().isOptional(tech))
@@ -293,6 +294,7 @@ public class AIDiplomat implements Base, Diplomat {
             if (!t.isObsolete(empire) && t.baseValue(empire) > 0)
                 worthyTechs.add(t);
         }
+        //System.out.println(empire.galaxy().currentTurn()+" "+empire.name()+" found "+worthyTechs.size()+" techs adequate "+requestor.name());
 
         // sort techs by the diplomat's research priority (hi to low)
         Collections.sort(worthyTechs, tech.OBJECT_TRADE_PRIORITY);        
@@ -331,7 +333,7 @@ public class AIDiplomat implements Base, Diplomat {
                     {
                         //now check if I would give them something for their counter
                         List<Tech> countersToCounter = techsRequestedForCounter(v.empire(), t);
-                        if(!countersToCounter.isEmpty())
+                        if(countersToCounter.contains(wantedTech))
                             willingToTradeCounterTechs.add(t);
                     }
                 }

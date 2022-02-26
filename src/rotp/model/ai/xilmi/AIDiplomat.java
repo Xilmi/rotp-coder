@@ -328,7 +328,7 @@ public class AIDiplomat implements Base, Diplomat {
                     {
                         //now check if I would give them something for their counter
                         List<Tech> countersToCounter = techsRequestedForCounter(v.empire(), t);
-                        if(!countersToCounter.isEmpty())
+                        if(countersToCounter.contains(wantedTech))
                             willingToTradeCounterTechs.add(t);
                     }
                 }
