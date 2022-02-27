@@ -319,7 +319,8 @@ public class AIGovernor implements Base, Governor {
         if((col.industry().factories() < col.maxUseableFactories() + (col.normalPopGrowth() + empire.transportsInTransit(col.starSystem())) * empire.maxRobotControls())
             && enemyBombardPower == 0
             && !needToMilitarize
-            && !(!col.ecology().terraformCompleted() && needRefit))
+            && ((col.ecology().terraformCompleted() && needRefit)
+                || col.industry().effectiveRobotControls() * (col.population() + col.normalPopGrowth() + empire.transportsInTransit(col.starSystem())) > col.industry().factories()))
         {
             float prodCost = min(netProd, col.industry().maxSpendingNeeded(), factoriesNeeded * empire.tech().newFactoryCost(col.industry().robotControls()));
             int alloc = (int)Math.ceil(prodCost/totalProd*MAX_TICKS);
