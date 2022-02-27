@@ -890,15 +890,48 @@ public class AIGeneral implements Base, General {
             float totalMissileBaseCost = 0.0f;
             float totalShipCost = 0.0f;
             float highestPower = 0.0f;
+            float enemyPop = 0.0f;
+            float enemyPlanetaryShield = 0.0f;
+            float totalKillingPower = 0.0f;
+            StarSystem dummySys = null;
+            float dummyScore = 0.0f;
             for(Empire enemy : empire.contactedEmpires())
             {
+                if(empire.enemies().contains(enemy))
+                    enemyPop += enemy.totalPlanetaryPopulation();
                 totalMissileBaseCost += enemy.missileBaseCostPerBC();
                 totalShipCost += enemy.shipMaintCostPerBC();
                 if(enemy.militaryPowerLevel() > highestPower)
                     highestPower = enemy.militaryPowerLevel();
+                for(StarSystem sys : enemy.allColonizedSystems())
+                {
+                    if(sys.colony() != null)
+                    {
+                        float score = (1 + sys.colony().defense().shieldLevel()) * sys.population();
+                        if(score > dummyScore)
+                        {
+                            dummyScore = score;
+                            dummySys = sys;
+                        }
+                    }
+                }
             }
+            if(dummySys != null)
+            {
+                for(ShipFleet fl : empire.allFleets())
+                {
+                    totalKillingPower += fl.expectedBombardDamage(dummySys) / 200.0;
+                }
+            }
+            float overKill = 0.0f;
+            if(enemyPop > 0)
+                overKill = totalKillingPower / enemyPop;
             if(highestPower + empire.militaryPowerLevel() > 0)
                 dr = 0.25f + 0.75f * (highestPower / (highestPower + empire.militaryPowerLevel()));
+            //System.out.print("\n"+empire.name()+" enemyPop: "+enemyPop+" totalKillingPower: "+totalKillingPower+" overKill: "+overKill+" dr-pre adjust: "+dr);
+            if(overKill > 1)
+                dr = 1 - ((1 - dr) / overKill);
+            //System.out.print("\n"+empire.name()+" dr-post adjust: "+dr);
             if(totalMissileBaseCost+totalShipCost > 0)
             {
                 dr = min(dr, totalShipCost / (totalMissileBaseCost+totalShipCost));
