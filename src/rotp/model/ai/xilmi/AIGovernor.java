@@ -322,7 +322,7 @@ public class AIGovernor implements Base, Governor {
             && ((col.ecology().terraformCompleted() && needRefit)
                 || col.industry().effectiveRobotControls() * (col.population() + col.normalPopGrowth() + empire.transportsInTransit(col.starSystem())) > col.industry().factories()))
         {
-            float prodCost = min(netProd, col.industry().maxSpendingNeeded(), factoriesNeeded * empire.tech().newFactoryCost(col.industry().robotControls()));
+            float prodCost = min(netProd, col.industry().maxSpendingNeeded(), factoriesNeeded * empire.tech().newFactoryCost(col.industry().robotControls()) / col.planet().productionAdj());
             int alloc = (int)Math.ceil(prodCost/totalProd*MAX_TICKS);
             alloc = min(alloc, col.allocationRemaining());
             col.allocation(INDUSTRY, alloc);
