@@ -741,6 +741,10 @@ public class AIShipCaptain implements Base, ShipCaptain {
         
         if (!currStack.canMove()) 
             return false;
+        
+        // threatened to be completely disabled by warp-dissipater
+        if(currStack.maxMove() <= 1 && currStack.design().combatSpeed() > currStack.maxMove())
+            return true;
 
         // don't retreat if we still have missiles in flight
         float killPct = 0;
@@ -773,10 +777,6 @@ public class AIShipCaptain implements Base, ShipCaptain {
         if ((colView != null) && !empire.enemies().contains(colView.empire()))  
             return true;
         
-        // threatened to be completely disabled by warp-dissipater
-        if(currStack.maxMove() <= 1 && currStack.design().combatSpeed() > currStack.maxMove())
-            return true;
-
         // don't retreat if all enemies can only target planets
         boolean canBeTargeted = false;
         boolean canTarget = false;
