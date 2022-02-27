@@ -241,6 +241,7 @@ public class AIGovernor implements Base, Governor {
         float prodScore = productionScore(col.starSystem());
         float factoriesNeeded = max(0, col.maxUseableFactories() + col.normalPopGrowth() * empire.maxRobotControls() - col.industry().factories());
         float workerGoal = max(0, col.industry().factories() / empire.maxRobotControls() - col.workingPopulation() - col.normalPopGrowth());
+        boolean needRefit = col.industry().effectiveRobotControls() < empire.maxRobotControls() && !empire.race().ignoresFactoryRefit;
         if(popGrowthROI > workerROI && !needToMilitarize)
             workerGoal = col.maxSize() - col.workingPopulation();
         
@@ -317,7 +318,8 @@ public class AIGovernor implements Base, Governor {
         // prod spending gets up to 100% of planet's remaining net prod
         if((col.industry().factories() < col.maxUseableFactories() + (col.normalPopGrowth() + empire.transportsInTransit(col.starSystem())) * empire.maxRobotControls())
             && enemyBombardPower == 0
-            && !needToMilitarize)
+            && !needToMilitarize
+            && !(!col.ecology().terraformCompleted() && needRefit))
         {
             float prodCost = min(netProd, col.industry().maxSpendingNeeded(), factoriesNeeded * empire.tech().newFactoryCost(col.industry().robotControls()));
             int alloc = (int)Math.ceil(prodCost/totalProd*MAX_TICKS);
