@@ -2226,7 +2226,7 @@ public class AIDiplomat implements Base, Diplomat {
         }
         return warAllowed;
     }
-    boolean willingToTradeTech(Tech tech)
+    public boolean willingToTradeTech(Tech tech)
     {
         //The player can decide for themselves what they want to give away!
         if(!empire.isAIControlled())
@@ -2300,6 +2300,10 @@ public class AIDiplomat implements Base, Diplomat {
     public boolean setSeverityAndDuration(SpyConfessionIncident inc, float spySeverity)  { 
         inc.severity = max(-40, -10+spySeverity); // modnar: increase spy confession severity
         inc.duration = 15; // modnar: increase spy confession duration
+        return true;
+    }
+    @Override
+    public boolean wantsToReviewCounterOffers() {
         return true;
     }
 }

@@ -294,7 +294,7 @@ public class AIDiplomat implements Base, Diplomat {
             if (!t.isObsolete(empire) && t.baseValue(empire) > 0)
                 worthyTechs.add(t);
         }
-        //System.out.println(empire.galaxy().currentTurn()+" "+empire.name()+" found "+worthyTechs.size()+" techs adequate "+requestor.name());
+        //System.out.println(empire.galaxy().currentTurn()+" "+empire.name()+" found "+worthyTechs.size()+" techs adequate to exchange for "+tech.name());
 
         // sort techs by the diplomat's research priority (hi to low)
         Collections.sort(worthyTechs, tech.OBJECT_TRADE_PRIORITY);        
@@ -337,7 +337,7 @@ public class AIDiplomat implements Base, Diplomat {
                             willingToTradeCounterTechs.add(t);
                     }
                 }
-                //System.out.println(empire.galaxy().currentTurn()+" "+empire.name()+" wants from "+v.empire().name()+" the tech "+wantedTech.name() +" countertechs: "+counterTechs.size());
+                //System.out.println(empire.galaxy().currentTurn()+" "+empire.name()+" wants from "+v.empire().name()+" the tech "+wantedTech.name() +" countertechs: "+willingToTradeCounterTechs.size());
                 if (!willingToTradeCounterTechs.isEmpty()) {
                     List<Tech> previouslyOffered;
                     if(v.empire().isPlayerControlled())
@@ -345,9 +345,9 @@ public class AIDiplomat implements Base, Diplomat {
                     else
                         previouslyOffered = v.embassy().alreadyOfferedTechs(wantedTech);
                     // simplified logic so that if we have ever asked for wantedTech before, don't ask again
-                    if (previouslyOffered == null || !previouslyOffered.containsAll(counterTechs)) {
+                    if (previouslyOffered == null || !previouslyOffered.containsAll(willingToTradeCounterTechs)) {
                         //System.out.println(empire.galaxy().currentTurn()+" "+empire.name()+" ask "+v.empire().name()+" for "+wantedTech.name());
-                        v.embassy().logTechExchangeRequest(wantedTech, counterTechs);
+                        v.embassy().logTechExchangeRequest(wantedTech, willingToTradeCounterTechs);
                         //only now send the request
                         DiplomaticReply reply = v.empire().diplomatAI().receiveRequestTech(empire, wantedTech);
                         if ((reply != null) && reply.accepted()) {
@@ -2007,7 +2007,8 @@ public class AIDiplomat implements Base, Diplomat {
         //System.out.println(galaxy().currentTurn()+" "+empire.name()+" techLevelRank(): " +techLevelRank()+" popCapRank: "+popCapRank+" has good RP-ROI: "+reseachHasGoodROI+" war Allowed: "+warAllowed);
         return warAllowed;
     }
-    boolean willingToTradeTech(Tech tech)
+    @Override
+    public boolean willingToTradeTech(Tech tech)
     {
         //The player can decide for themselves what they want to give away!
         if(!empire.isAIControlled())
@@ -2029,6 +2030,10 @@ public class AIDiplomat implements Base, Diplomat {
     public boolean setSeverityAndDuration(SpyConfessionIncident inc, float spySeverity)  { 
         inc.severity = max(-40, -10+spySeverity); // modnar: increase spy confession severity
         inc.duration = 15; // modnar: increase spy confession duration
+        return true;
+    }
+    @Override
+    public boolean wantsToReviewCounterOffers() {
         return true;
     }
 }

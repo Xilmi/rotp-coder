@@ -15,6 +15,7 @@
  */
 package rotp.ui.diplomacy;
 
+import java.util.ArrayList;
 import java.util.List;
 import rotp.model.empires.Empire;
 import rotp.model.tech.Tech;
@@ -39,7 +40,25 @@ public class DiplomacyTechOfferMenu extends DiplomacyRequestReply {
     @Override
     public void diplomat(Empire v)               { 
         super.diplomat(v); 
-        counterOffers = requestee.diplomatAI().techsRequestedForCounter(diplomat(), requestedTech);
+        List<Tech> unreviewedCounterTechs = requestee.diplomatAI().techsRequestedForCounter(diplomat(), requestedTech);
+        counterOffers = new ArrayList<>(unreviewedCounterTechs.size());
+        //System.out.println(galaxy().currentTurn()+" Requestee: "+requestee.name()+" Diplomat: "+diplomat().name()+" requested tech "+requestedTech.name());
+        if(diplomat().diplomatAI().wantsToReviewCounterOffers())
+        {
+            for (Tech t: unreviewedCounterTechs) {
+                //System.out.println(galaxy().currentTurn()+" "+diplomat().name()+" wants from "+requestee.name()+" the tech "+requestedTech.name() + " "+requestee.name()+" would like in return: "+t.name());
+                if (diplomat().diplomatAI().willingToTradeTech(t))
+                {
+                    //now check if I would give them something for their counter
+                    List<Tech> countersToCounter = diplomat().diplomatAI().techsRequestedForCounter(requestee, t);
+                    if(countersToCounter.contains(requestedTech))
+                    {
+                        System.out.println(galaxy().currentTurn()+" "+diplomat().name()+" is okay with "+t.name()+" in return for "+requestedTech.name());
+                        counterOffers.add(t);
+                    }
+                }
+            }
+        }
     }
     @Override
     public boolean showTalking()        { return false; }
