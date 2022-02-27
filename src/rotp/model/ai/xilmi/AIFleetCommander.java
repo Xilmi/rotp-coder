@@ -1185,6 +1185,20 @@ public class AIFleetCommander implements Base, FleetCommander {
         if(!fl.isInTransit() && !fl.system().isColonized() && empire.canColonize(fl.system()))
             needToKeep = max(needToKeep, 1);
         
+        boolean handleEvent = false;
+        if(!fl.isInTransit())
+        {
+            StarSystem current = fl.system();
+            if (current.empire() == empire && current.hasEvent()) {
+                if (current.eventKey().equals("MAIN_PLANET_EVENT_PIRACY")) {
+                    handleEvent = true;
+                }
+                if (current.eventKey().equals("MAIN_PLANET_EVENT_COMET")) {
+                    handleEvent = true;
+                }
+            }
+        }
+        
         for (int speed=(int)fl.slowestStackSpeed();speed<=(int)empire.tech().topSpeed();speed++)
         {
             boolean haveToDeploy = false;
@@ -1223,7 +1237,7 @@ public class AIFleetCommander implements Base, FleetCommander {
                         counts[i] = (int)Math.ceil(num * bombAmount);
                 else
                     counts[i] = (int)Math.ceil(num * amount);
-                if(needToKeep > 0 && empire.shipDesignerAI().fightingAdapted(d) >= 0.5 && !d.isColonyShip())
+                if(needToKeep > 0 && ( (empire.shipDesignerAI().fightingAdapted(d) >= 0.5 && !d.isColonyShip()) || handleEvent) )
                 {
                     int toKeep = (int)Math.ceil(needToKeep / d.cost());
                     if(num - counts[i] <= toKeep)
