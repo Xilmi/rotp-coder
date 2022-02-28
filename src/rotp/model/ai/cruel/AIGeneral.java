@@ -876,6 +876,17 @@ public class AIGeneral implements Base, General {
         defenseRatio = dr;
         return defenseRatio;
     }
+    public boolean amSieging(StarSystem sys)
+    {
+        for(ShipFleet fl : sys.orbitingFleets())
+        {
+            if(fl.empire() != empire)
+                continue;
+            if(fl.expectedBombardDamage() > 0 && allowedToBomb(sys))
+                return true;
+        }
+        return false;
+    }
     @Override
     public int additionalColonizersToBuild(boolean returnPotentialUncolonizedInstead)
     {
@@ -886,7 +897,7 @@ public class AIGeneral implements Base, General {
         List<StarSystem> alreadyCounted = new ArrayList<>();
         for(StarSystem sys : empire.uncolonizedPlanetsInRange(colonizerRange))
         {
-            if(empire.sv.isColonized(sys.id))
+            if(empire.sv.isColonized(sys.id) && !amSieging(sys))
                 continue;
             if(sys.monster() == null)
             {
@@ -977,6 +988,14 @@ public class AIGeneral implements Base, General {
     }
     public float colonizationProbability(StarSystem sys)
     {
+        if(sys.orbitingFleets().size() == 1)
+        {
+            for(ShipFleet fl : sys.orbitingFleets())
+            {
+                if(fl.isArmed() && fl.empire() == empire)
+                    return 1;
+            }
+        }
         float myProduction = empire.totalPlanetaryProduction();
         float myDistance = colonyCenter(empire).distanceTo(sys);
         float myScore = myProduction / myDistance;
