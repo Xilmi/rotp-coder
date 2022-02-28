@@ -1050,6 +1050,8 @@ public class AIGeneral implements Base, General {
         float totalScore = myScore;
         for(Empire emp : empire.contactedEmpires())
         {
+            if(empire.sv.planetType(sys.id) != null && !emp.canColonize(empire.sv.planetType(sys.id)))
+                continue;
             float currentProd = emp.totalPlanetaryProduction();
             float currentDistance = colonyCenter(emp).distanceTo(sys);
             totalScore += currentProd / currentDistance;
