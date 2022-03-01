@@ -843,7 +843,10 @@ public class AIShipDesigner implements Base, ShipDesigner {
         int lowestCount = Integer.MAX_VALUE;
         for (int slot=0;slot<ShipDesignLab.MAX_DESIGNS;slot++) {
             ShipDesign d = lab.design(slot);
-            float score = bombingAdapted(d) * (1 - d.availableSpace() / d.totalSpace()) * d.warpSpeed();
+            float score = 0;
+            //Any hybrid with bombs should be preferred to a bad pure bomber
+            if(bombingAdapted(d) > 0)
+                score = (fightingAdapted(d) + bombingAdapted(d)) * (1 - d.availableSpace() / d.totalSpace()) * d.warpSpeed();
             if(score > bombScore)
             {
                 bombScore = score;
