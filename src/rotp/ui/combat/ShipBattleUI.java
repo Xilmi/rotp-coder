@@ -387,6 +387,11 @@ public class ShipBattleUI extends FadeInPanel implements Base, MouseListener, Mo
         Graphics2D g = (Graphics2D) screenBuffer().getGraphics();
         super.paintComponent(g);
         g.drawImage(combatBackground, 0, 0, null);
+        if(mgr.system().inNebula())
+        {
+            g.setColor(SystemPanel.nebulaC);
+            g.fillRect(0,0,w,h);
+        }
 
         // find the x,y of the grid being currently hovered
         int hoveringX = -1;
