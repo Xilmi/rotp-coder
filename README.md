@@ -1,12 +1,9 @@
+UI:
+
+Fighting over a planet inside of a nebula will now have a distinct background-color.
+
 AI:
 
 General:
 
-Tech-trading restrictions now working as intended.
-Terraforming will now be performed before refitting.
-Retreating out of fear for becoming incapaciated now has priority over waiting for fired missiles to hit.
-Ships without guns will also stay to help with pirates or asteroids.
-Fix for not properly building the last few factories on poor planets.
-Avoid building too many bombers in late-game.
-Hybrids will now ignore unarmed planets in combat.
-Small improvements for colony-ship-need estimates.
+When picking to build the best design to bombard now the best overall design that happens to have bombs on it will be chosen.
