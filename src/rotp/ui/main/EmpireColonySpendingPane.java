@@ -35,6 +35,7 @@ import rotp.ui.SystemViewer;
 import rotp.util.ImageManager;
 
 import javax.swing.*;
+import static rotp.model.colony.ColonySpendingCategory.MAX_TICKS;
 
 public class EmpireColonySpendingPane extends BasePanel {
     private static final long serialVersionUID = 1L;
@@ -149,6 +150,7 @@ public class EmpireColonySpendingPane extends BasePanel {
         private final Polygon rightArrow = new Polygon();
         private final Rectangle labelBox = new Rectangle();
         private final Rectangle sliderBox = new Rectangle();
+        private final Rectangle resultBox = new Rectangle();
         private Shape hoverBox;
         // polygon coordinates for left & right increment buttons
         private final int leftButtonX[] = new int[3];
@@ -313,13 +315,17 @@ public class EmpireColonySpendingPane extends BasePanel {
             }
 
             // result
+            textC = SystemPanel.blackText;
+            if (hoverBox == resultBox)
+                textC = SystemPanel.yellowText;
             String resultText = text(colony.category(category).upcomingResult());
 
-            g.setColor(Color.black);
+            g.setColor(textC);
             scaledFont(g, resultText, rightMargin()-s10, 18, 14);
-            //g.setFont(narrowFont(18));
+            g.setFont(narrowFont(18));
             int sw = g.getFontMetrics().stringWidth(resultText);
             drawString(g,resultText, getWidth()-sw-s10, getHeight()-s10);
+            resultBox.setBounds(getWidth()-rightMargin(), 0, rightMargin(), getHeight());
         }
         private int leftMargin()        { return s58; }
         private int rightMargin()       { return s70; }
@@ -356,6 +362,19 @@ public class EmpireColonySpendingPane extends BasePanel {
             }
             else if (click)
                 misClick();
+        }
+        public void maxSlider(boolean click) {
+            StarSystem sys = parent.systemViewToDisplay();
+            if (sys == null)
+                return;
+            Colony colony = sys.colony();
+            if (colony == null)
+                return;
+            colony.clearUnlockedSpending();
+            colony.setAllocation(this.category, colony.allocationRemaining());
+            colony.checkEcoAtClean();
+            if (click)
+                softClick();
         }
         public void increment(boolean click) {
             StarSystem sys = parent.systemViewToDisplay();
@@ -417,6 +436,8 @@ public class EmpireColonySpendingPane extends BasePanel {
                 decrement(true);
             else if (rightArrow.contains(x,y))
                 increment(true);
+            else if (resultBox.contains(x,y))
+                maxSlider(true);
             else {
                 if (this.category < 0) {
 // TODO: for future use
@@ -475,6 +496,8 @@ public class EmpireColonySpendingPane extends BasePanel {
                 newHover = leftArrow;
             else if (rightArrow.contains(x,y))
                 newHover = rightArrow;
+            else if (resultBox.contains(x,y))
+                newHover = resultBox;
 
             if (newHover != hoverBox) {
                 hoverBox = newHover;
