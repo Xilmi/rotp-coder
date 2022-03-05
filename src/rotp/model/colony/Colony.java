@@ -1733,6 +1733,16 @@ public final class Colony implements Base, IMappedObject, Serializable {
 
             // room left we can grow
             maxGrowth = Math.max(maxGrowth - popGrowth, 0);
+            float workerROI = empire.tech().populationCost() / empire.workerProductivity();
+            float popGrowthROI = Float.MAX_VALUE;
+            if(normalPopGrowth() > 0)
+                popGrowthROI = empire.tech().populationCost() / normalPopGrowth();
+            maxGrowth = min(0, maxGrowth, industry().factories() / empire.maxRobotControls() - workingPopulation() - normalPopGrowth());
+            if(popGrowthROI > workerROI)
+                maxGrowth = maxSize() - workingPopulation();
+
+            maxGrowth -= additionalTransports;
+            maxGrowth = max(0, maxGrowth);
             //System.out.println("balance "+this.name()+" maxGrowth "+maxGrowth);
 
             // Allocate remaining BC between ECO and IND to get max production benefit
