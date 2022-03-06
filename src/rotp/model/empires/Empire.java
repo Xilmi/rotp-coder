@@ -1093,9 +1093,13 @@ public final class Empire implements Base, NamedObject, Serializable {
     // New autotransport. Start with targets first.
     public void autotransport() {
         GovernorOptions options = session().getGovernorOptions();
-        if (isAIControlled() || !options.isAutotransport()) {
+        if (isAIControlled()) {
             return;
         }
+        if(options.isAutotransportXilmi())
+            ai.sendTransports();
+        if(!options.isAutotransport())
+            return;
 
         List<Colony> colonies = new LinkedList<>();
         for (int i = 0; i < this.sv.count(); ++i) {

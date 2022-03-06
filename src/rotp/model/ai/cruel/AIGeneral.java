@@ -764,7 +764,7 @@ public class AIGeneral implements Base, General {
     @Override
     public float totalEmpirePopulationCapacity(Empire emp)
     {
-        if(totalEmpirePopulationCapacity >= 0 && emp == empire)
+        if(totalEmpirePopulationCapacity >= 0 && emp == empire && emp.isAIControlled())
             return totalEmpirePopulationCapacity;
         float capacity = 0;
         for (int id=0;id<emp.sv.count();id++) 

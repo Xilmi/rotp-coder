@@ -17,6 +17,7 @@ public class GovernorOptions implements Serializable {
     // keep backwards compatibility with system properties
     private boolean governorOnByDefault = UserPreferences.governorOnByDefault();
     private boolean autotransport = "true".equalsIgnoreCase(System.getProperty("autotransport", "false"));
+    private boolean autotransportXilmi = "true".equalsIgnoreCase(System.getProperty("autotransportXilmi", "false"));
     private GatesGovernor gates = "false".equalsIgnoreCase(System.getProperty("autogate", "true")) ? GatesGovernor.None : GatesGovernor.Rich;
 
     @Deprecated
@@ -57,6 +58,10 @@ public class GovernorOptions implements Serializable {
     public boolean isAutotransport() {
         return autotransport;
     }
+    
+    public boolean isAutotransportXilmi() {
+        return autotransportXilmi;
+    }
 
     public GatesGovernor getGates() {
         return gates;
@@ -69,6 +74,10 @@ public class GovernorOptions implements Serializable {
 
     public void setAutotransport(boolean autotransport) {
         this.autotransport = autotransport;
+    }
+    
+    public void setAutotransportXilmi(boolean autotransportXilmi) {
+        this.autotransportXilmi = autotransportXilmi;
     }
 
     public void setGates(GatesGovernor gates) {
