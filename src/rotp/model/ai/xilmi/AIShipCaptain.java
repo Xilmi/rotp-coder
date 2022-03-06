@@ -871,6 +871,8 @@ public class AIShipCaptain implements Base, ShipCaptain {
                 {
                     killPct = 0;
                 }
+                if(st2.maxMove < st1.maxMove && st2.maxFiringRange(st1) < st1.maxFiringRange(st2))
+                    killPct = 0;
                 damagePerTurn += killPct;
             }
             float healPerTurn = 0;
@@ -908,6 +910,8 @@ public class AIShipCaptain implements Base, ShipCaptain {
                 {
                     killPct = 0;
                 }
+                if(st2.maxMove < st1.maxMove && st2.maxFiringRange(st1) < st1.maxFiringRange(st2))
+                    killPct = 0;
                 damagePerTurn += killPct;
             }
             float healPerTurn = 0;
