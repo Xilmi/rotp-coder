@@ -30,6 +30,7 @@ public class GovernorOptions implements Serializable {
     private boolean transportPoorDouble = true;
 
     private int minimumMissileBases = 0;
+    private boolean shieldWithoutBases = false;
     private boolean autospend = UserPreferences.governorAutoSpendByDefault();
     private int reserve = 1000;
     private boolean shipbuilding = true;
@@ -95,11 +96,19 @@ public class GovernorOptions implements Serializable {
     public int getMinimumMissileBases() {
         return minimumMissileBases;
     }
-
+    
     public void setMinimumMissileBases(int minimumMissileBases) {
         this.minimumMissileBases = minimumMissileBases;
     }
 
+    public boolean getShieldWithoutBases() {
+        return shieldWithoutBases;
+    }
+    
+    public void setShieldWithoutBases(boolean shieldWithoutBases) {
+        this.shieldWithoutBases = shieldWithoutBases;
+    }
+    
     public boolean isAutospend() {
         return autospend;
     }
