@@ -609,8 +609,6 @@ public class AIShipCaptain implements Base, ShipCaptain {
             distanceToBeAt = max(distanceToBeAt, 2);
         if(tgt.repulsorRange() > 0 && !st.ignoreRepulsors())
             distanceToBeAt = max(distanceToBeAt, 2);
-        if(st.repulsorRange() > 0 && st.optimalFiringRange(tgt) == 1 && (st.move < st.movePointsTo(tgt) || (tgt.initiative() > st.initiative() && tgt.maxFiringRange(st) < 2)) && !tgt.ignoreRepulsors())
-            distanceToBeAt = max(distanceToBeAt, 2);
         boolean shallGoForFirstStrike = true;
         if(galaxy().shipCombat().results().damageSustained(st.empire) > 0
                 || galaxy().shipCombat().results().damageSustained(tgt.empire) > 0)
@@ -867,7 +865,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
                 if(st2.inStasis)
                     continue;
                 float killPct = min(1.0f,st2.estimatedKillPct(st1));
-                if(st2.maxFiringRange(st1) <= st1.repulsorRange() && !st2.canCloak && !st2.canTeleport())
+                if(st2.maxFiringRange(st1) <= st1.repulsorRange() && st1.maxFiringRange(st2) > 1 && !st2.canCloak && !st2.canTeleport())
                 {
                     killPct = 0;
                 }
@@ -906,7 +904,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
                 if(st2.inStasis)
                     continue;
                 float killPct = min(1.0f,st2.estimatedKillPct(st1));
-                if(st2.maxFiringRange(st1) <= st1.repulsorRange() && !st2.canCloak && !st2.canTeleport())
+                if(st2.maxFiringRange(st1) <= st1.repulsorRange() && st1.maxFiringRange(st2) > 1 && !st2.canCloak && !st2.canTeleport())
                 {
                     killPct = 0;
                 }
@@ -945,9 +943,10 @@ public class AIShipCaptain implements Base, ShipCaptain {
         //System.out.print("\n"+stack.mgr.system().name()+" "+stack.fullName()+" allyKillTime: "+allyKillTime+" enemyKillTime: "+enemyKillTime);
         if (enemyKillTime == allyKillTime)
             return false;
-        else {
+        else if (stack.num == 1 && friends.size() == 1)
+            return enemyKillTime <= 1;
+        else
             return allyKillTime > enemyKillTime;
-        }
     }
     @Override
     public StarSystem retreatSystem(StarSystem sys) {
