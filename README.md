@@ -1,17 +1,14 @@
+Game-mechanics:
+
+When transports are landing on a planet owned by their owner, they will now be attacked in case enemy-forces are orbiting the system.
+
 UI:
 
-You can now max out a colony-slider while ensuring the ecology is kept at clean without locking it by clicking on the text to the right of the slider.
-
-Governor:
-
-Now uses more sophisticated algorithm to decide whether to build population or let it grow naturally. When it lets it grow naturally, it will still not build more factories than could be operated with the natural growh and instead spend the leftover into something else.
-Now has a new option "Let AI handle population transportation", which uses the AI's approach to population-transport-management.
-Now has a new option "Allow shields without bases", which allows the governor to build shields on planets where no bases where ordered.
-
-Bugfixes:
-
-Workaround to a glitch where the assumed cost of a missile base is marginally higher than the actual cost which caused the governor to put 1 tick to be spent into defense when nothing was to do. Note: I had previously implemented another workaround for the same issue when you don't use the governor. The new workaround works for both governor and AIs.
+There now will also be a message for destroyed transports if only a part of the landing transports were destroyed by enemy forces.
 
 AI:
 
-Ships that are both slower and have less range than opponent ships, will now consider the opponent ships as invincible and retreat instead of letting themselves be kited to death.
+Stacks with missiles will no longer be considered to be able to kite another stack forever if they are also faster.
+Stacks with repulsors and weapons with range 1 will no longer avoid ever getting into the range of other stacks with range 1.
+Stacks with repulsors and weapons with range 1 will no longer consider themselves invincible against other stacks with range 1.
+Fleets consisting of a single ship will no longer retreat until it's hitpoints are low enough for it to die within one more turn.

@@ -51,7 +51,7 @@ public class Rotp {
     public static boolean countWords = false;
     private static String startupDir = System.getProperty("startupdir");
     private static JFrame frame;
-    public static String releaseId = "Fusion-Mod 1.03.6";
+    public static String releaseId = "Fusion-Mod 1.03.7";
     public static long startMs = System.currentTimeMillis();
     public static long maxHeapMemory = Runtime.getRuntime().maxMemory() / 1048576;
     public static long maxUsedMemory;
