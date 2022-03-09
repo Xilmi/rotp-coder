@@ -871,7 +871,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
                 {
                     killPct = 0;
                 }
-                if(st2.maxMove < st1.maxMove && st2.maxFiringRange(st1) < st1.maxFiringRange(st2))
+                if(st2.maxMove < st1.maxMove && maxFiringRange(st2, st1, true) < maxFiringRange(st1, st2, true))
                     killPct = 0;
                 damagePerTurn += killPct;
             }
@@ -910,7 +910,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
                 {
                     killPct = 0;
                 }
-                if(st2.maxMove < st1.maxMove && st2.maxFiringRange(st1) < st1.maxFiringRange(st2))
+                if(st2.maxMove < st1.maxMove && maxFiringRange(st2, st1, true) < maxFiringRange(st1, st2, true))
                     killPct = 0;
                 damagePerTurn += killPct;
             }
@@ -1191,5 +1191,18 @@ public class AIShipCaptain implements Base, ShipCaptain {
     public boolean useSmartRangeForBeams()
     {
         return true;
+    }
+    public int maxFiringRange(CombatStack attacker, CombatStack defender, boolean ignoreWeaponsWithAmmo) {
+        int maxRange = 0;
+        for (int i=0;i<attacker.numWeapons();i++) {
+            ShipComponent wpn = attacker.weapon(i);
+            if (wpn.groundAttacksOnly() && !defender.isColony())
+                continue;
+            if(ignoreWeaponsWithAmmo && wpn.isLimitedShotWeapon())
+                continue;
+            if (!attacker.shipComponentIsOutOfMissiles(i))
+                maxRange = max(maxRange,wpn.range());
+        }
+        return maxRange;
     }
 }
