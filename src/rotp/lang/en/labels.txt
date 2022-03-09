@@ -756,9 +756,9 @@ MAIN_ALERT_FACTORIES_DESTROYED2   | Unknown saboteurs have destroyed %1 factorie
 MAIN_ALERT_BASES_DESTROYED2       | Unknown saboteurs have destroyed %1 missile bases defending the %2 system.
 MAIN_ALERT_TRANSPORTS_PERISHED    | The colony in the %1 system has been destroyed. Our transports attempting to land there have perished.
 MAIN_ALERT_TRANSPORTS_CAPTURED    | Our %2 transports arriving in the %1 system have surrendered to [alien_race] forces.
-MAIN_ALERT_TRANSPORTS_KILLED      | Our %2 transports attempting to reach %1 have been destroyed by defending [alien_race] forces.
+MAIN_ALERT_TRANSPORTS_KILLED      | %2 transports attempting to reach %1 have been destroyed by enemy forces.
 MAIN_ALERT_INVADERS_CAPTURED      | %2 [alien_race] transports arriving in the %1 system have surrendered to our defensive forces.
-MAIN_ALERT_INVADERS_KILLED        | %2 [alien_race] transports attempting to invade %1 have been completely destroyed by our defensive forces.
+MAIN_ALERT_INVADERS_KILLED        | %2 [alien_race] transports attempting to invade %1 have been destroyed by allied forces.
 MAIN_ALERT_TRESPASSING1           | [alien_race] ships have been spotted trespassing near our colony in the %1 system.
 MAIN_ALERT_TRESPASSING2           | The [alien_race] ambassador protests our ships trespassing in the %1 system.
 MAIN_ALERT_TRADE_MATURED          | Our trade treaty with the [alien_empire] has reached its maximum value of %2 BC.

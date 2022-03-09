@@ -1096,6 +1096,30 @@ public final class Colony implements Base, IMappedObject, Serializable {
             t.size(0);
             return;
         }
+        // Xilmi: when landing on our own planet we also can be shot down by orbiting enemies
+        float defenderDmg = 0;
+        List<ShipFleet> fleets = starSystem().orbitingFleets();
+        for (ShipFleet fl : fleets) {
+            if (fl.empire().aggressiveWith(t.empId()))
+                defenderDmg += fl.firepowerAntiShip(0);
+        }
+        int passed = 0;
+        int lost = 0;
+        int num = t.size();
+        // run the gauntlet
+        for (int j = 0; j < t.gauntletRounds(); j++)
+            lost += (int) (defenderDmg / t.hitPoints());
+        passed += max(0, (num - lost));
+        t.size(passed);
+        if (lost > 0) {
+            log(concat(str(t.launchSize()), " ", t.empire().raceName(), " transports perished at ", name()));
+            if (t.empire().isPlayerControlled()) 
+                TransportsKilledAlert.create(empire(), starSystem(), lost);
+            else if (empire().isPlayerControlled()) 
+                InvadersKilledAlert.create(t.empire(), starSystem(), lost);
+            if(t.size() == 0)
+                return;
+        }
         setPopulation(min(planet.currentSize(), (population() + t.size())));
         log("Accepting ", str(t.size()), " transports at: ", starSystem().name(), ". New pop:", fmt(population(), 2));
         t.size(0);
@@ -1112,7 +1136,31 @@ public final class Colony implements Base, IMappedObject, Serializable {
             tr.size(0);
             return;
         }
-
+        // Xilmi: when landing on our own planet we also can be shot down by orbiting enemies
+        float defenderDmg = 0;
+        List<ShipFleet> fleets = starSystem().orbitingFleets();
+        for (ShipFleet fl : fleets) {
+            if (fl.empire().aggressiveWith(tr.empId()))
+                defenderDmg += fl.firepowerAntiShip(0);
+        }
+        int passed = 0;
+        int lost = 0;
+        int num = tr.size();
+        // run the gauntlet
+        for (int j = 0; j < tr.gauntletRounds(); j++)
+            lost += (int) (defenderDmg / tr.hitPoints());
+        passed += max(0, (num - lost));
+        tr.size(passed);
+        if (lost > 0) {
+            log(concat(str(tr.launchSize()), " ", tr.empire().raceName(), " transports perished at ", name()));
+            if (tr.empire().isPlayerControlled()) 
+                TransportsKilledAlert.create(empire(), starSystem(), lost);
+            else if (empire().isPlayerControlled()) 
+                InvadersKilledAlert.create(tr.empire(), starSystem(), lost);
+            if(tr.size() == 0)
+                return;
+        }
+        
         captives = population() - rebels;
         setPopulation(rebels);
 
@@ -1216,13 +1264,14 @@ public final class Colony implements Base, IMappedObject, Serializable {
         // if gauntlet not passed, stop and inform player (if player)
         // neither of these incidents are added to the embassies. They are for
         // player notification only.
-        if (tr.size() == 0) {
+        if (lost > 0) {
             log(concat(str(tr.launchSize()), " ", tr.empire().raceName(), " transports perished at ", name()));
             if (tr.empire().isPlayerControlled()) 
-                TransportsKilledAlert.create(empire(), starSystem(), tr.launchSize());
+                TransportsKilledAlert.create(empire(), starSystem(), lost);
             else if (empire().isPlayerControlled()) 
-                InvadersKilledAlert.create(tr.empire(), starSystem(), tr.launchSize());
-            return;
+                InvadersKilledAlert.create(tr.empire(), starSystem(), lost);
+            if(tr.size() == 0)
+                return;
         }
 
         float startingPop = population();
