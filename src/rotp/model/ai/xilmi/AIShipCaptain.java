@@ -412,7 +412,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
                 if(stack.isColony())
                     desirability *= 1 + target.estimatedKillPct(stack) * stack.designCost();
                 if(target.isShip() && stack.isShip())
-                    desirability *= target.maxMove + target.maxFiringRange(stack);
+                    desirability /= stack.distanceTo(target.x(), target.y());
                 if(!target.canPotentiallyAttack(stack))
                 {
                     if(!target.isColony() || onlyShips)
