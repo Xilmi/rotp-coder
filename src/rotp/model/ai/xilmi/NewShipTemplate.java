@@ -835,9 +835,9 @@ public class NewShipTemplate implements Base {
                         overKillMod = avgHP / expectedDamagePerShot;
                     currentScore *= overKillMod;
                         
-                    if(wpn.isBioWeapon() && allowBioWeapons(ai))
+                    if(wpn.isBioWeapon())
                         currentScore = bioWeaponScoreMod(ai) * TechBiologicalWeapon.avgDamage(wpn.maxDamage(), (int)antiDote) * 200 / wpn.space(d);
-                    //System.out.print("\n"+ai.empire().name()+" "+d.name()+" wpn: "+wpn.name()+" score: "+currentScore+" overKillMod: "+overKillMod+" avgHP: "+avgHP+" expectedDamagePerShot: "+expectedDamagePerShot);
+                    //System.out.print("\n"+ai.empire().name()+" "+d.name()+" wpn: "+wpn.name()+" score: "+currentScore+" overKillMod: "+overKillMod+" avgHP: "+avgHP+" expectedDamagePerShot: "+expectedDamagePerShot+"  bioWeaponScoreMod(ai): "+ bioWeaponScoreMod(ai));
                     if(currentScore > bestScore)
                     {
                         bestWeapon = wpn;
@@ -929,44 +929,18 @@ public class NewShipTemplate implements Base {
         float scoreMod = 1;
         float totalMissileBaseCost = 0;
         float totalShipCost = 0;
+        float totalPopulationCost = 0;
         for(Empire enemy : ai.empire().contactedEmpires())
         {
-            totalMissileBaseCost += enemy.missileBaseCostPerBC();
+            totalMissileBaseCost += enemy.totalMissileBaseCost();
             totalShipCost += enemy.shipMaintCostPerBC();
+            totalPopulationCost += enemy.totalPlanetaryPopulation() * enemy.tech().populationCost();
         }
         if(totalMissileBaseCost > 0)
         {
-            scoreMod = totalShipCost / (totalMissileBaseCost + totalShipCost);
+            scoreMod = totalPopulationCost / (totalMissileBaseCost + totalPopulationCost);
         }
         return scoreMod;
-    }
-    private boolean allowBioWeapons(ShipDesigner ai)
-    {
-        boolean allow = false;
-        int DesignsWithRegularBombs = 0;
-        int DesignsWithBioWeapons = 0;
-        for (int slot=0;slot<ShipDesignLab.MAX_DESIGNS;slot++) {
-            ShipDesign ourDesign = ai.lab().design(slot);
-            boolean hasRegular = false;
-            boolean hasBio = false;
-            for (int j=0;j<maxWeapons();j++)
-            {
-                if(ourDesign.weapon(j).groundAttacksOnly())
-                {
-                    if(ourDesign.weapon(j).isBioWeapon())
-                        hasBio = true;
-                    else if(ourDesign.weapon(j).tech() == ai.empire().tech().topBombWeaponTech())
-                        hasRegular = true;
-                }
-            }
-            if(hasRegular && ai.empire().shipDesignerAI().MaintenanceLimitReached(ourDesign))
-                DesignsWithRegularBombs++;
-            if(hasBio)
-                DesignsWithBioWeapons++;
-        }
-        if(DesignsWithRegularBombs > 1 && DesignsWithBioWeapons < 2)
-            allow = true;
-        return allow;
     }
     public float weaponSpace(ShipDesign d)
     {

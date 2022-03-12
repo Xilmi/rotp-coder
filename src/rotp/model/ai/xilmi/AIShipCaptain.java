@@ -893,7 +893,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
             for (CombatStack st2: friends) {
                 if(st2.inStasis)
                     continue;
-                float killPct = min(1.0f,st2.estimatedKillPct(st1));
+                float killPct = min(1.0f,max(st2.estimatedKillPct(st1), expectedPopLossPct(st2, st1)));
                 if(st2.maxFiringRange(st1) <= st1.repulsorRange() && st1.maxFiringRange(st2) > 1 && !st2.canCloak && !st2.canTeleport())
                 {
                     killPct = 0;
@@ -937,7 +937,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
             for (CombatStack st2: foes) {
                 if(st2.inStasis)
                     continue;
-                float killPct = min(1.0f,st2.estimatedKillPct(st1));
+                float killPct = min(1.0f,max(st2.estimatedKillPct(st1), expectedPopLossPct(st2, st1)));
                 if(st2.maxFiringRange(st1) <= st1.repulsorRange() && st1.maxFiringRange(st2) > 1 && !st2.canCloak && !st2.canTeleport())
                 {
                     killPct = 0;
@@ -1156,7 +1156,8 @@ public class AIShipCaptain implements Base, ShipCaptain {
 
         ShipDesign d = ship.design();
         for (int j=0;j<ShipDesign.maxWeapons();j++)
-            popLoss += (num * d.wpnCount(j) * d.weapon(j).estimatedBioweaponDamage(ship, colony) / d.weapon(j).bombardAttacks()); //divide by bombard-attacks as the return-value is for orbital-bombard, not during-combat-bombard
+            if(d.weapon(j).bombardAttacks() > 0)
+                popLoss += (num * d.wpnCount(j) * d.weapon(j).estimatedBioweaponDamage(ship, colony) / d.weapon(j).bombardAttacks()); //divide by bombard-attacks as the return-value is for orbital-bombard, not during-combat-bombard
         return popLoss;
     }
     public float expectedPopulationLoss(CombatStackShip ship, CombatStackColony colony) {

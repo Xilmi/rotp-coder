@@ -315,6 +315,17 @@ public class AIShipDesigner implements Base, ShipDesigner {
         boolean newHasBHG = false;
         boolean maintenanceLimitReached = MaintenanceLimitReached(currDesign);
         boolean oldIsBomber = bombingAdapted(currDesign) > 0.5;
+        boolean bioWeaponObsolete = false;
+        
+        float antiDote = 0;
+        for(EmpireView ev : empire().contacts())
+            if(ev.spies().tech().antidoteLevel() > antiDote)
+                antiDote = ev.spies().tech().antidoteLevel();
+        
+        for (int i=0; i<maxWeapons(); i++)
+            if(currDesign.weapon(i).isBioWeapon() && currDesign.wpnCount(i) > 0)
+                if(currDesign.weapon(i).maxDamage() - antiDote <= 0)
+                    bioWeaponObsolete = true;
         
         for (int i=0;i<maxSpecials();i++) {
             if(currDesign.special(i).allowsCloaking() == true)
@@ -341,7 +352,7 @@ public class AIShipDesigner implements Base, ShipDesigner {
         //System.out.print("\n"+galaxy().currentYear()+" "+empire.name()+" Bomber upgrade "+currDesign.name()+" val: "+upgradeChance+" DPBC: "+newDPBC / currentDPBC+" better-Engine: "+betterEngine+" betterArmor: "+betterArmor);
         
         if(oldIsBomber || currDesign.matchesDesign(newDesign))
-            if (!maintenanceLimitReached && !betterComputer && !betterSpecial && !betterEngine && !betterArmor && (upgradeChance < upgradeThreshold) && currDesign.active() )
+            if (!maintenanceLimitReached && !bioWeaponObsolete && !betterComputer && !betterSpecial && !betterEngine && !betterArmor && (upgradeChance < upgradeThreshold) && currDesign.active() )
                 return;
         
         //System.out.print("\n"+empire.name()+" designed new bomber which is "+upgradeChance+" better and should go to slot: "+slot);
