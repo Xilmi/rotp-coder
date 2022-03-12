@@ -898,7 +898,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
                 {
                     killPct = 0;
                 }
-                if(st2.maxMove < st1.maxMove)
+                if(st2.maxMove < st1.maxMove && st2.isShip())
                 {
                     float mySpeedRange = st2.maxMove + maxFiringRange(st2, st1, true);
                     float enemySpeedRange = st1.maxMove + maxFiringRange(st1, st2, true);
@@ -942,7 +942,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
                 {
                     killPct = 0;
                 }
-                if(st2.maxMove < st1.maxMove)
+                if(st2.maxMove < st1.maxMove && st2.isShip())
                 {
                     float mySpeedRange = st2.maxMove + maxFiringRange(st2, st1, true);
                     float enemySpeedRange = st1.maxMove + maxFiringRange(st1, st2, true);
@@ -960,7 +960,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
             damagePerTurn -= healPerTurn;
             //System.out.print("\n"+stack.mgr.system().name()+" "+st1.fullName()+" takes "+damagePerTurn+" damage per turn with heal. heal per turn: "+healPerTurn);
             if(damagePerTurnWithoutHeal > 0)
-                enemyKillTimeWithoutHeal = pctOfMaxHP / min(damagePerTurnWithoutHeal, 1.0f);
+                enemyKillTimeWithoutHeal += pctOfMaxHP / min(damagePerTurnWithoutHeal, 1.0f);
             else
                 enemyKillTimeWithoutHeal = Float.MAX_VALUE;
             if(damagePerTurn > 0)
