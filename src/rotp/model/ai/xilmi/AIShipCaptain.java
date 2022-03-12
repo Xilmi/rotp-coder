@@ -960,7 +960,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
             damagePerTurn -= healPerTurn;
             //System.out.print("\n"+stack.mgr.system().name()+" "+st1.fullName()+" takes "+damagePerTurn+" damage per turn with heal. heal per turn: "+healPerTurn);
             if(damagePerTurnWithoutHeal > 0)
-                enemyKillTimeWithoutHeal = pctOfMaxHP / min(damagePerTurn, 1.0f);
+                enemyKillTimeWithoutHeal = pctOfMaxHP / min(damagePerTurnWithoutHeal, 1.0f);
             else
                 enemyKillTimeWithoutHeal = Float.MAX_VALUE;
             if(damagePerTurn > 0)
@@ -983,7 +983,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
         if(dpsOnColony * enemyKillTime > 1 && (!enemyHasRepulsor || weCounterRepulsor) && foesBlockPlanet < 5)
             return false;
         
-        //System.out.print("\n"+stack.mgr.system().name()+" "+stack.fullName()+" allyKillTime: "+allyKillTime+" enemyKillTime: "+enemyKillTime);
+        //System.out.print("\n"+stack.mgr.system().name()+" "+stack.fullName()+" allyKillTime: "+allyKillTime+" enemyKillTime: "+enemyKillTime+" enemyKillTimeWithoutHeal: "+enemyKillTimeWithoutHeal);
         if (enemyKillTime == allyKillTime)
             return false;
         else if (stack.num == 1 && friends.size() == 1)
