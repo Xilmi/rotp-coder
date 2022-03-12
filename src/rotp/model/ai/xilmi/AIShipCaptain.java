@@ -147,15 +147,42 @@ public class AIShipCaptain implements Base, ShipCaptain {
                     }
                 }
             }
-            
+            boolean moved = false;            
             if (currentTarget != null) {
-                if (stack.mgr.autoResolve) {
-                    Point destPt = findClosestPoint(stack, currentTarget);
-                    if (destPt != null)
-                        mgr.performMoveStackToPoint(stack, destPt.x, destPt.y);
+                boolean repulsorDefender = currentTarget.maxFiringRange(stack) <= stack.repulsorRange() && stack.hasWard();
+                if(repulsorDefender)
+                {
+                    int y = stack.ward().y;
+                    int x = stack.ward().x + 1;
+                    if(x > 8)
+                        x = stack.ward().x - 1;
+                    if (stack.mgr.autoResolve) {
+                        mgr.performMoveStackToPoint(stack, x, y);
+                        moved = true;
+                    }
+                    else {
+                        FlightPath bestPath = null;
+                        List<FlightPath> validPaths = new ArrayList<>();
+                        allValidPaths(stack.x,stack.y,x,y,9,stack, validPaths, bestPath);
+                        if(!validPaths.isEmpty())
+                        {
+                            Collections.sort(validPaths,FlightPath.SORT);
+                            mgr.performMoveStackAlongPath(stack, validPaths.get(0));
+                            moved = true;
+                        }
+                    }
+                    if(stack.x == x && stack.y == y)
+                        moved = true;
                 }
-                else if ((bestPathToTarget != null) && (bestPathToTarget.size() > 0)) {
-                    mgr.performMoveStackAlongPath(stack, bestPathToTarget);
+                if(!moved) {
+                    if (stack.mgr.autoResolve) {
+                        Point destPt = findClosestPoint(stack, currentTarget);
+                        if (destPt != null)
+                            mgr.performMoveStackToPoint(stack, destPt.x, destPt.y);
+                    }
+                    else if ((bestPathToTarget != null) && (bestPathToTarget.size() > 0)) {
+                        mgr.performMoveStackAlongPath(stack, bestPathToTarget);
+                    }
                 }
             }
             
@@ -223,7 +250,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
                 }
             }
             
-            if(shouldPerformKiting && !atLeastOneWeaponCanStillFire)
+            if(shouldPerformKiting && !atLeastOneWeaponCanStillFire && !moved)
             {
                 if (stack.mgr.autoResolve) {
                     Point destPt = findSafestPoint(stack);
@@ -246,7 +273,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
                 turnActive = false;
             }
             //ail: no more handling retreat from here, only kiting
-            if(stack.maxMove == stack.move && allWeaponsCanStillFire && stack.isShip())
+            if(stack.maxMove == stack.move && allWeaponsCanStillFire && stack.isShip() && !moved)
             {
                 if(currentTarget == null)
                 {
@@ -420,6 +447,8 @@ public class AIShipCaptain implements Base, ShipCaptain {
                 }
                 if(empire.shipDesignerAI().bombingAdapted(stack.design()) < 0.5 && target.isColony() && !target.isArmed())
                     desirability = Float.MIN_VALUE;
+                if(stack.maxFiringRange(target) <= target.repulsorRange() && stack.movePointsTo(target) > 1)
+                    desirability = 0;
                 //System.out.print("\n"+stack.fullName()+" looking at "+target.fullName()+" desirability: "+desirability+" oir: "+onlyInAttackRange+" os: "+onlyShips+" can attack: "+stack.canAttack(target));
                 if (desirability > maxDesirability) {  // this might be a better target, adjust desirability for pathing
                     if (stack.mgr.autoResolve) {
