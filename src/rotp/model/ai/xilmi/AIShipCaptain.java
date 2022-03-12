@@ -149,7 +149,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
             }
             boolean moved = false;            
             if (currentTarget != null) {
-                boolean repulsorDefender = currentTarget.maxFiringRange(stack) <= stack.repulsorRange() && stack.hasWard() && !currentTarget.canCloak && !currentTarget.canTeleport();
+                boolean repulsorDefender = stack.repulsorRange() >= 1 && currentTarget.maxFiringRange(stack) <= stack.repulsorRange() && stack.hasWard() && !currentTarget.canCloak && !currentTarget.canTeleport();
                 if(repulsorDefender)
                 {
                     int y = stack.ward().y;
