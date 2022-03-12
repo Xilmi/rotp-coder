@@ -1156,7 +1156,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
 
         ShipDesign d = ship.design();
         for (int j=0;j<ShipDesign.maxWeapons();j++)
-            popLoss += (num * d.wpnCount(j) * d.weapon(j).estimatedBioweaponDamage(ship, colony));
+            popLoss += (num * d.wpnCount(j) * d.weapon(j).estimatedBioweaponDamage(ship, colony) / d.weapon(j).bombardAttacks()); //divide by bombard-attacks as the return-value is for orbital-bombard, not during-combat-bombard
         return popLoss;
     }
     public float expectedPopulationLoss(CombatStackShip ship, CombatStackColony colony) {
@@ -1166,6 +1166,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
             popLost = bombDamage / 200;
         else
             popLost = bombDamage / 400;
+        popLost += expectedBioweaponDamage(ship, colony);
         
         return popLost;
     }
