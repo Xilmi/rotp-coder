@@ -210,6 +210,8 @@ public class AIShipCaptain implements Base, ShipCaptain {
             {
                 if(stack.movePointsTo(currentTarget) + stack.maxMove > currentTarget.optimalFiringRange(stack) + currentTarget.maxMove)
                     shouldPerformKiting = true;
+                if(!currentTarget.canPotentiallyAttack(stack))
+                    shouldPerformKiting = false;
             }
          
             boolean enemyColonyPresent = false;
@@ -439,8 +441,22 @@ public class AIShipCaptain implements Base, ShipCaptain {
                 if(stack.isColony())
                     desirability *= 1 + target.estimatedKillPct(stack) * stack.designCost();
                 if(target.isShip() && stack.isShip())
-                    desirability /= stack.distanceTo(target.x(), target.y());
-                if(!target.canPotentiallyAttack(stack))
+                {
+                    boolean shouldPerformKiting = false;
+                    for (int i=0;i<stack.numWeapons(); i++) {
+                        if(stack.weapon(i).isMissileWeapon())
+                            shouldPerformKiting = true;
+                    }
+                    if(stack.repulsorRange() > 0)
+                        shouldPerformKiting = true;
+                    if(stack.movePointsTo(target) + stack.maxMove > target.optimalFiringRange(stack) + target.maxMove)
+                        shouldPerformKiting = true;
+                    if(!target.canPotentiallyAttack(stack))
+                        shouldPerformKiting = false;
+                    if(shouldPerformKiting)
+                        desirability /= stack.movePointsTo(target);
+                }
+                if(!target.canPotentiallyAttack(stack) && stack.isColony())
                 {
                     if(!target.isColony() || onlyShips)
                         desirability /= 100;
@@ -814,7 +830,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
         }
         if (!canBeTargeted)
             return false;
-        if(!canTarget && combat().currentStack() != null)
+        if(!canTarget)
             return true;
         
         if (facingOverwhelmingForce(currStack)) {
@@ -844,6 +860,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
         float allyKillTime = 0;
         float enemyKillTime = 0;
         float enemyKillTimeWithoutHeal = 0;
+        float bomberKillTime = 0;
         
         float dpsOnColony = 0;
         boolean enemyHasRepulsor = false;
@@ -880,7 +897,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
         for (CombatStack st1 : foes) {
             if(st1.repulsorRange() > 0)
                 enemyHasRepulsor = true;
-            if(col != null && col.empire == st1.empire)
+            if(col != null && col.empire == st1.empire && col.mgr.currentStack() != null)
                 if(col.movePointsTo(st1) == 1)
                     foesBlockPlanet++;
             if(st1.inStasis)
@@ -964,12 +981,18 @@ public class AIShipCaptain implements Base, ShipCaptain {
             else
                 enemyKillTimeWithoutHeal = Float.MAX_VALUE;
             if(damagePerTurn > 0)
+            {
                 enemyKillTime += pctOfMaxHP / min(damagePerTurn, 1.0f);
+                if(empire.shipDesignerAI().bombingAdapted(st1.design()) >= 0.5)
+                    bomberKillTime += pctOfMaxHP / min(damagePerTurn, 1.0f);
+            }
             else
             {
                 if(st1.isColony())
                     invulnerableFriend = st1;
                 enemyKillTime = Float.MAX_VALUE;
+                if(empire.shipDesignerAI().bombingAdapted(st1.design()) >= 0.5)
+                    bomberKillTime = Float.MAX_VALUE;
                 break;
             }
             st1.cloaked = previousCloakingState;
@@ -979,15 +1002,15 @@ public class AIShipCaptain implements Base, ShipCaptain {
             return true;
         
         /*if(dpsOnColony > 0)
-            System.out.print("\n"+stack.mgr.system().name()+" "+stack.fullName()+" allyKillTime: "+allyKillTime+" enemyKillTime: "+enemyKillTime+" dpsOnColony: "+dpsOnColony+" col dies in: "+1 / dpsOnColony);*/
-        if(dpsOnColony * enemyKillTime > 1 && (!enemyHasRepulsor || weCounterRepulsor) && foesBlockPlanet < 5)
+            System.out.print("\n"+stack.mgr.system().name()+" "+stack.fullName()+" allyKillTime: "+allyKillTime+" enemyKillTime: "+enemyKillTime+" bomberKillTime: "+bomberKillTime+" dpsOnColony: "+dpsOnColony+" col dies in: "+1 / dpsOnColony+" foesBlockPlanet: "+foesBlockPlanet);*/
+        if(dpsOnColony * bomberKillTime > 1 && (!enemyHasRepulsor || weCounterRepulsor) && foesBlockPlanet < 5)
             return false;
         
         //System.out.print("\n"+stack.mgr.system().name()+" "+stack.fullName()+" allyKillTime: "+allyKillTime+" enemyKillTime: "+enemyKillTime+" enemyKillTimeWithoutHeal: "+enemyKillTimeWithoutHeal);
         if (enemyKillTime == allyKillTime)
             return false;
         else if (stack.num == 1 && friends.size() == 1)
-            return enemyKillTimeWithoutHeal <= 1;
+            return enemyKillTimeWithoutHeal < 2;
         else
             return allyKillTime > enemyKillTime;
     }
@@ -1168,8 +1191,9 @@ public class AIShipCaptain implements Base, ShipCaptain {
         else
             popLost = bombDamage / 400;
         popLost += expectedBioweaponDamage(ship, colony);
-        
-        return popLost;
+        float pct = (5 + ship.attackLevel() - colony.bombDefense()) / 10;
+        pct = max(.05f, pct);
+        return popLost * pct;
     }
     public float expectedPopLossPct(CombatStack source, CombatStack target) {
         if (!source.isShip())
