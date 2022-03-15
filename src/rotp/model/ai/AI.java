@@ -180,7 +180,10 @@ public class AI implements Base {
                 if ((col.popNeeded >= minTransportSize) && (col.popNeeded >= col.maxPopToGive))
                     needy.add(col);
                 else if ((col.maxPopToGive >= minTransportSize) && (col.maxPopToGive > col.popNeeded))
-                    givey.add(col);
+                {
+                    if(empire.isAI() || sys.colony().isGovernor())
+                        givey.add(col);
+                }
             }
         }
 
