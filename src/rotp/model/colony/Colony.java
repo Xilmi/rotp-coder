@@ -1589,17 +1589,9 @@ public final class Colony implements Base, IMappedObject, Serializable {
         boolean buildingStargate = allocation[SHIP] > 0 &&
                 shipyard().design().equals(empire.shipLab().stargateDesign()) &&
                 !shipyard().stargateCompleted();
-
+        
         // start from scratch
         clearSpending();
-        // if we were building ships, or a stargate, keep 1 tick in shipbuilding
-        if ((buildingShips && session().getGovernorOptions().isShipbuilding()) ||
-            (buildingStargate && session().getGovernorOptions().getGates() != GovernorOptions.GatesGovernor.None)) {
-            increment(SHIP, 1);
-        }
-        // lock ship slider while we allocate spending elsewhere
-        locked(SHIP, true);
-
         /**
          * 2022-02-20 Obsolete, back to old transport logic. 10bc transport cost was never implemented by Ray.
          *
@@ -1614,7 +1606,10 @@ public final class Colony implements Base, IMappedObject, Serializable {
             balanceEcoAndInd(1 - Math.max(normalPopGrowth(), 3) / maxSize());
         else
             balanceEcoAndInd(1);
-
+        // unlock all sliders except for ECO. Thanks DM666a
+        for (int i = 0; i <= 4; i++) {
+            locked(i, false);
+        }
         // add maximum defence
         // don't allocate just for "upgrades" if there are no bases or if there are more bases than we want
         if (!defense().isCompleted() && (defense().maxBases() > 0 && defense().maxBases() >= defense().bases()) || session().getGovernorOptions().getShieldWithoutBases()) {
@@ -1643,16 +1638,17 @@ public final class Colony implements Base, IMappedObject, Serializable {
 //            System.out.println("NO SPENDING "+this.name());
             allocation(RESEARCH, allocationRemaining());
         }
+        // if we were building ships, or a stargate, keep 1 tick in shipbuilding
+        if ((buildingShips && session().getGovernorOptions().isShipbuilding()) ||
+            (buildingStargate && session().getGovernorOptions().getGates() != GovernorOptions.GatesGovernor.None)) {
+            increment(SHIP, 1);
+        }
         // if we finished building stargate, don't build any ships.
         if (!shipyard().stargateCompleted() && buildingShips
                 && session().getGovernorOptions().isShipbuilding() && allocation[RESEARCH] > 0) {
             // if we were building ships, push all research into shipbuilding.
             locked(Colony.SHIP, false);
             increment(Colony.SHIP, allocation[RESEARCH]);
-        }
-        // unlock all sliders except for ECO. Thanks DM666a
-        for (int i = 0; i <= 4; i++) {
-            locked(i, false);
         }
         locked(Colony.ECOLOGY, true);
     }
