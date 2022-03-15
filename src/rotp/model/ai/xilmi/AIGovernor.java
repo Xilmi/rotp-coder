@@ -579,20 +579,6 @@ public class AIGovernor implements Base, Governor {
     @Override
     public float targetPopPct(int sysId) {
         SystemView sv = empire.sv.view(sysId);
-        //too risky during war
-        if(!empire.warEnemies().isEmpty())
-        {
-            for(Empire warEnemy : empire.warEnemies())
-            {
-                if(warEnemy.sv.inShipRange(sysId))
-                    return 0;
-            }
-        }
-        for(ShipFleet fl : sv.system().orbitingFleets())
-        {
-            if(fl.isArmed() && empire.enemies().contains(fl.empire()))
-                return 0;
-        }
         if(empire.generalAI().totalEmpirePopulationCapacity(empire) > 0)
         {
             float tgtPercentage = empire.totalEmpirePopulation() / empire.generalAI().totalEmpirePopulationCapacity(empire);
@@ -605,6 +591,23 @@ public class AIGovernor implements Base, Governor {
                 tgtPercentage = min(0.9f, tgtPercentage);
             else
                 tgtPercentage = 1;
+            //we don't want to bolster systems in a war-zone but also not send their pop away
+            float currentPercentage = tgtPercentage;
+            if(sv.system().colony() != null)
+                currentPercentage = sv.system().colony().populationPct();
+            if(!empire.warEnemies().isEmpty())
+            {
+                for(Empire warEnemy : empire.warEnemies())
+                {
+                    if(warEnemy.sv.inShipRange(sysId))
+                        return currentPercentage;
+                }
+            }
+            for(ShipFleet fl : sv.system().orbitingFleets())
+            {
+                if(fl.isArmed() && empire.enemies().contains(fl.empire()))
+                    return currentPercentage;
+            }
             return tgtPercentage;
         }
         return 0;
