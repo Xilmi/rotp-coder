@@ -1,10 +1,16 @@
+Bugfixes:
+
+Fixed an issue that allowed the player to accidentally send a fleet from a system to that same system.
+
+Governor:
+
+Fixed an issue that caused the governor to sometimes forget that it was supposed to continue building ships after doing something else.
+Only systems with enabled governor will be considered for automatically sending transports to other colonies.
+Now has the option "Develop colonies as quickly as possible" which uses the old growing-behavior that some people missed.
+
 AI:
 
-Fixed an issue where stacks without repulsors would think they can repel ships without anti-ship-weapons from attacking the planet.
-Fixed an issue where unarmed ships would initiate a combat to then retreat anyways.
-Hit-chance now taken into consideration for the calculations of whether a colony can be destroyed by bombers during combat.
-No longer kiting ships that can't shoot back anyways.
-During target-selection the score for ships is no longer divided by distance if the ship shouldn't be kited anyways.
-Fixed an issue that caused bombers to be laregely ignored if other targets were available.
-The decision to stay in a losing battle due to hopes of destroying the enemy colony now depends soley on the life-expectency of our dedicated bombers rather than our entire fleet.
-Single ships staying in until their hitpoints are low now are only half as brave and will retreat when they expect to be killed in less than 2 turns rather than one.
+Transport-management no longer considers all systems within the reach of an enemy as systems willing to send all their pop to bolster new colonies. This also applies to governor when using the "Let AI handle transports"-option.
+Now aware that reserve spent on artifact-planets is more effective.
+No longer will keep an emergency fund in reserve for the rare events. Instead will only cut reserve-spending for other things when an event actually happens.
+When deciding which planets to build ships or do research on, production obtained from reserve is no longer considered as otherwise Artifact planets might build ships instead of doing reserach after receiving financial aid.
