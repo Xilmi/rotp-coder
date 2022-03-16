@@ -1783,9 +1783,9 @@ public final class Colony implements Base, IMappedObject, Serializable {
             if(normalPopGrowth() > 0)
                 popGrowthROI = empire.tech().populationCost() / normalPopGrowth();
             maxGrowth = min(0, maxGrowth, industry().factories() / empire.maxRobotControls() - workingPopulation() - normalPopGrowth());
-            if(popGrowthROI > workerROI)
+            if(popGrowthROI > workerROI || session().getGovernorOptions().legacyGrowthMode())
                 maxGrowth = maxSize() - workingPopulation();
-
+            
             maxGrowth -= additionalTransports;
             maxGrowth = max(0, maxGrowth);
             //System.out.println("balance "+this.name()+" maxGrowth "+maxGrowth);

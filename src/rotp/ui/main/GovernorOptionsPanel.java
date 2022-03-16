@@ -22,6 +22,7 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         // initial values
         GovernorOptions options = GameSession.instance().getGovernorOptions();
         this.governorDefault.setSelected(options.isGovernorOnByDefault());
+        this.legacyGrowthMode.setSelected(options.legacyGrowthMode());
         this.autotransport.setSelected(options.isAutotransport());
         this.autotransportXilmi.setSelected(options.isAutotransportXilmi());
         this.transportMaxTurns.setValue(options.getTransportMaxTurns());
@@ -132,6 +133,7 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         autoScoutShipCountLabel = new javax.swing.JLabel();
         autoAttackShipCountLabel = new javax.swing.JLabel();
         shieldWithoutBases = new javax.swing.JCheckBox();
+        legacyGrowthMode = new javax.swing.JCheckBox();
 
         governorDefault.setText("Governor is on by default");
 
@@ -330,6 +332,8 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
 
         shieldWithoutBases.setText("Allow shields without bases");
 
+        legacyGrowthMode.setText("Develop colonies as quickly as possible");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -353,15 +357,16 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(resrveLabel))
                             .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(shipbuilding)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(missileBases, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(missileBasesLabel)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(shieldWithoutBases)))
-                                .addGap(0, 0, Short.MAX_VALUE))))
+                                .addComponent(missileBases, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(missileBasesLabel)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(shieldWithoutBases)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(shipbuilding)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(legacyGrowthMode, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(okButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -431,7 +436,9 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
                     .addComponent(reserve, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(resrveLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(shipbuilding)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(shipbuilding)
+                    .addComponent(legacyGrowthMode))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(completionist)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -474,6 +481,7 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
     private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
         GovernorOptions options = GameSession.instance().getGovernorOptions();
         options.setGovernorOnByDefault(governorDefault.isSelected());
+        options.setLegacyGrowthMode(legacyGrowthMode.isSelected());
         options.setAutotransport(autotransport.isSelected());
         options.setAutotransportXilmi(autotransportXilmi.isSelected());
         options.setTransportMaxTurns((Integer)transportMaxTurns.getValue());
@@ -569,6 +577,7 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
     private javax.swing.JButton cancelButton;
     private javax.swing.JButton completionist;
     private javax.swing.JCheckBox governorDefault;
+    private javax.swing.JCheckBox legacyGrowthMode;
     private javax.swing.JSpinner missileBases;
     private javax.swing.JLabel missileBasesLabel;
     private javax.swing.JButton okButton;

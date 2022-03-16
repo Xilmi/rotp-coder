@@ -41,17 +41,17 @@
                               <Component id="resrveLabel" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <Group type="102" attributes="0">
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="shipbuilding" alignment="0" min="-2" max="-2" attributes="0"/>
-                                  <Group type="102" alignment="0" attributes="0">
-                                      <Component id="missileBases" min="-2" pref="64" max="-2" attributes="0"/>
-                                      <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="missileBasesLabel" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                      <Component id="shieldWithoutBases" min="-2" max="-2" attributes="0"/>
-                                  </Group>
-                              </Group>
+                              <Component id="missileBases" min="-2" pref="64" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="missileBasesLabel" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Component id="shieldWithoutBases" min="-2" max="-2" attributes="0"/>
                               <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                          </Group>
+                          <Group type="102" attributes="0">
+                              <Component id="shipbuilding" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Component id="legacyGrowthMode" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -141,7 +141,10 @@
                   <Component id="resrveLabel" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="shipbuilding" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="shipbuilding" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="legacyGrowthMode" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="completionist" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
@@ -492,6 +495,11 @@
     <Component class="javax.swing.JCheckBox" name="shieldWithoutBases">
       <Properties>
         <Property name="text" type="java.lang.String" value="Allow shields without bases"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JCheckBox" name="legacyGrowthMode">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Develop colonies as quickly as possible"/>
       </Properties>
     </Component>
   </SubComponents>
