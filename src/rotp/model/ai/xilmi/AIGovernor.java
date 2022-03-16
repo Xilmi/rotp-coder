@@ -639,7 +639,7 @@ public class AIGovernor implements Base, Governor {
     @Override
     public float productionScore(StarSystem sys)
     {
-        float Score = sqrt(max(0, sys.colony().totalIncome()));
+        float Score = sqrt(max(0, sys.colony().totalProductionIncome()));
         Score *= sys.planet().productionAdj();
         Score /= sys.planet().researchAdj();
         float avgScore = 0;
