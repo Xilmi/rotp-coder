@@ -20,10 +20,10 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" attributes="0">
+          <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="autotransportPanel" alignment="0" max="32767" attributes="0"/>
+                  <Component id="autotransportPanel" max="32767" attributes="0"/>
                   <Component id="stargatePanel" alignment="0" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="allGovernorsOn" min="-2" max="-2" attributes="0"/>
@@ -186,7 +186,6 @@
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                      <Component id="autotransport" max="32767" attributes="0"/>
                       <Group type="102" alignment="0" attributes="0">
                           <Component id="transportMaxTurns" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
@@ -195,7 +194,20 @@
                       <Component id="transportMaxTurnsNebula" alignment="0" min="-2" max="-2" attributes="0"/>
                       <Component id="transportRichDisabled" alignment="0" min="-2" max="-2" attributes="0"/>
                       <Component id="transportPoorDouble" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Component id="autotransportXilmi" alignment="0" max="32767" attributes="0"/>
+                      <Group type="102" attributes="0">
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="autotransport" max="32767" attributes="0"/>
+                              <Group type="102" alignment="0" attributes="0">
+                                  <Component id="autotransportXilmi" max="32767" attributes="0"/>
+                                  <EmptySpace min="-2" pref="187" max="-2" attributes="0"/>
+                              </Group>
+                              <Group type="102" alignment="0" attributes="0">
+                                  <Component id="allowUngoverned" min="-2" pref="393" max="-2" attributes="0"/>
+                                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                              </Group>
+                          </Group>
+                          <EmptySpace min="187" pref="187" max="-2" attributes="0"/>
+                      </Group>
                   </Group>
                   <EmptySpace max="32767" attributes="0"/>
               </Group>
@@ -205,6 +217,8 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
                   <Component id="autotransportXilmi" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="allowUngoverned" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="autotransport" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
@@ -276,6 +290,11 @@
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="autotransportXilmiActionPerformed"/>
           </Events>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="allowUngoverned">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="allow sending population from ungoverned colonies"/>
+          </Properties>
         </Component>
       </SubComponents>
     </Container>

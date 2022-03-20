@@ -35,6 +35,7 @@ import rotp.model.empires.SystemView;
 import rotp.model.galaxy.IMappedObject;
 import rotp.model.galaxy.ShipFleet;
 import rotp.model.galaxy.StarSystem;
+import rotp.model.game.GameSession;
 import rotp.model.planet.Planet;
 import rotp.model.ships.ShipDesign;
 import rotp.ui.UserPreferences;
@@ -181,7 +182,7 @@ public class AI implements Base {
                     needy.add(col);
                 else if ((col.maxPopToGive >= minTransportSize) && (col.maxPopToGive > col.popNeeded))
                 {
-                    if(empire.isAI() || sys.colony().isGovernor())
+                    if(empire.isAI() || sys.colony().isGovernor() || GameSession.instance().getGovernorOptions().isAutotransportUngoverned())
                         givey.add(col);
                 }
             }
