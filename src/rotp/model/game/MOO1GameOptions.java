@@ -256,7 +256,7 @@ public class MOO1GameOptions implements Base, IGameOptions, Serializable {
     }
     @Override
     public int defaultOpponentsOptions() {
-        int maxEmpires = min((int)Math.ceil(numberStarSystems()/16f), colors.size(), MAX_OPPONENT_TYPE*startingRaceOptions().size());
+        int maxEmpires = min((int)Math.ceil(numberStarSystems()/10f), colors.size(), MAX_OPPONENT_TYPE*startingRaceOptions().size());
         int maxOpponents = min(SetupGalaxyUI.MAX_DISPLAY_OPPS);
         return min(maxOpponents, maxEmpires-1);
     }
