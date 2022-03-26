@@ -316,6 +316,7 @@ public class AIShipDesigner implements Base, ShipDesigner {
         boolean maintenanceLimitReached = MaintenanceLimitReached(currDesign);
         boolean oldIsBomber = bombingAdapted(currDesign) > 0.5;
         boolean bioWeaponObsolete = false;
+        boolean sameWeapon = MainWeapon(currDesign) == MainWeapon(newDesign);
         
         float antiDote = 0;
         for(EmpireView ev : empire().contacts())
@@ -345,14 +346,14 @@ public class AIShipDesigner implements Base, ShipDesigner {
 
         // switch to new design when damage is floatd
         // more willing to upgrade when not at war
-        float upgradeThreshold = empire.atWar() ? 1.5f : 1.25f;
+        float upgradeThreshold = 1.25f;
         
         float upgradeChance = 1 + currDesign.availableSpace() / currDesign.totalSpace();
         
         //System.out.print("\n"+galaxy().currentYear()+" "+empire.name()+" Bomber upgrade "+currDesign.name()+" val: "+upgradeChance+" DPBC: "+newDPBC / currentDPBC+" better-Engine: "+betterEngine+" betterArmor: "+betterArmor);
         
         if(oldIsBomber || currDesign.matchesDesign(newDesign))
-            if (!maintenanceLimitReached && !bioWeaponObsolete && !betterComputer && !betterSpecial && !betterEngine && !betterArmor && (upgradeChance < upgradeThreshold) && currDesign.active() )
+            if (sameWeapon && !maintenanceLimitReached && !bioWeaponObsolete && !betterComputer && !betterSpecial && !betterEngine && !betterArmor && (upgradeChance < upgradeThreshold) && currDesign.active() )
                 return;
         
         //System.out.print("\n"+empire.name()+" designed new bomber which is "+upgradeChance+" better and should go to slot: "+slot);
@@ -442,6 +443,12 @@ public class AIShipDesigner implements Base, ShipDesigner {
         boolean oldHasBHG = false;
         boolean newHasBHG = false;
         boolean maintenanceLimitReached = MaintenanceLimitReached(currDesign);
+        boolean sameWeapon = MainWeapon(currDesign) == MainWeapon(newDesign);
+        
+        boolean betterShield = false;
+        if(currDesign.size() == newDesign.size())
+            if(newDesign.shieldLevel() > currDesign.shieldLevel())
+                betterShield = true;
         
         for (int i=0;i<maxSpecials();i++) {
             if(currDesign.special(i).allowsCloaking() == true)
@@ -461,14 +468,14 @@ public class AIShipDesigner implements Base, ShipDesigner {
         
         // switch to new design when damage is floatd
         // more willing to upgrade when not at war
-        float upgradeThreshold = empire.atWar() ? 1.5f : 1.25f;
+        float upgradeThreshold = 1.25f;
         
         float upgradeChance = 1 + currDesign.availableSpace() / currDesign.totalSpace();
-
+        
         //System.out.print("\n"+galaxy().currentYear()+" "+empire.name()+" Fighter upgrade "+currDesign.name()+" val: "+upgradeChance+" better-Engine: "+betterEngine+" betterArmor: "+betterArmor+" curr-id: "+currDesign.id());
         
         //System.out.print("\n"+empire.name()+" designed new fighter which is "+upgradeChance+" better and should go to slot: "+slot);
-        if (!maintenanceLimitReached && !betterSpecial && !betterComputer && !betterEngine && !betterArmor && (upgradeChance < upgradeThreshold) && !needRange && currDesign.active())
+        if (sameWeapon && !betterShield && !maintenanceLimitReached && !betterSpecial && !betterComputer && !betterEngine && !betterArmor && (upgradeChance < upgradeThreshold) && !needRange && currDesign.active())
             return;
         //System.out.print("\n"+empire.name()+" designed new fighter and it went through.");
 
@@ -918,5 +925,20 @@ public class AIShipDesigner implements Base, ShipDesigner {
             //System.out.print("\n"+empire.name()+" "+d.name()+" is marked obsolete.");
             d.obsolete(true);
         }
+    }
+    ShipWeapon MainWeapon(ShipDesign d)
+    {
+        ShipWeapon weaponWithMostSpace = null;
+        float highestWeaponSpace = 0;
+        for (int i=0; i<maxWeapons(); i++)
+        {
+            float weaponspace = d.weapon(i).space(d) * d.wpnCount(i);
+            if(weaponspace > highestWeaponSpace)
+            {
+                highestWeaponSpace = weaponspace;
+                weaponWithMostSpace = d.weapon(i);
+            }
+        }
+        return weaponWithMostSpace;
     }
 }
