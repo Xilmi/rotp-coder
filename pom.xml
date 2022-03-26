@@ -7,7 +7,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.rayfowler</groupId>
 
-    <version>1.03.11</version>
+    <version>1.03.12</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>8</java.version>
@@ -348,7 +348,7 @@
                             <owner>xilmi</owner>
                             <repository>rotp-coder</repository>
                             <authToken>${GITHUB_TOKEN}</authToken>
-                            <tagName>v${project.version}</tagName>
+                            <tagName>${project.version}</tagName>
                             <name>ROTP with Fusion-MOD v${project.version}</name>
                             <targetCommitish>master</targetCommitish>
                             <releaseNotes>target/classes/README.md</releaseNotes>
