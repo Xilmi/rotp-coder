@@ -817,62 +817,66 @@ public class AIGeneral implements Base, General {
         {
             return defenseRatio;
         }
-        float dr = 1.0f;
-        //System.out.print("\n"+empire.name()+" myFighterCost: "+myFighterCost()+" visibleEnemyFighterCost: "+visibleEnemyFighterCost());
-        if(!empire.enemies().isEmpty() && myFighterCost() >= visibleEnemyFighterCost())
+        float dr = 0.0f;
+        float totalMissileBaseCost = 0.0f;
+        float totalShipCost = 0.0f;
+        float highestPower = 0.0f;
+        float enemyPop = 0.0f;
+        float biggestPop = 0.0f;
+        float enemyPlanetaryShield = 0.0f;
+        float totalKillingPower = 0.0f;
+        StarSystem dummySys = null;
+        float dummyScore = 0.0f;
+        boolean empireInRange = false;
+        for(Empire enemy : empire.contactedEmpires())
         {
-            dr = 0.0f;
-            float totalMissileBaseCost = 0.0f;
-            float totalShipCost = 0.0f;
-            float highestPower = 0.0f;
-            float enemyPop = 0.0f;
-            float enemyPlanetaryShield = 0.0f;
-            float totalKillingPower = 0.0f;
-            StarSystem dummySys = null;
-            float dummyScore = 0.0f;
-            for(Empire enemy : empire.contactedEmpires())
+            if(empire.enemies().contains(enemy))
+                enemyPop += enemy.totalPlanetaryPopulation();
+            if(enemy.totalPlanetaryPopulation() > biggestPop)
+                biggestPop = enemy.totalPlanetaryPopulation();
+            if(!empireInRange && empire.inShipRange(enemy.id))
+                empireInRange = true;
+            totalMissileBaseCost += enemy.missileBaseCostPerBC();
+            totalShipCost += enemy.shipMaintCostPerBC();
+            if(enemy.militaryPowerLevel() > highestPower)
+                highestPower = enemy.militaryPowerLevel();
+            for(StarSystem sys : enemy.allColonizedSystems())
             {
-                if(empire.enemies().contains(enemy))
-                    enemyPop += enemy.totalPlanetaryPopulation();
-                totalMissileBaseCost += enemy.missileBaseCostPerBC();
-                totalShipCost += enemy.shipMaintCostPerBC();
-                if(enemy.militaryPowerLevel() > highestPower)
-                    highestPower = enemy.militaryPowerLevel();
-                for(StarSystem sys : enemy.allColonizedSystems())
+                if(sys.colony() != null)
                 {
-                    if(sys.colony() != null)
+                    float score = (1 + sys.colony().defense().shieldLevel()) * sys.population();
+                    if(score > dummyScore)
                     {
-                        float score = (1 + sys.colony().defense().shieldLevel()) * sys.population();
-                        if(score > dummyScore)
-                        {
-                            dummyScore = score;
-                            dummySys = sys;
-                        }
+                        dummyScore = score;
+                        dummySys = sys;
                     }
                 }
             }
-            if(dummySys != null)
+        }
+        if(dummySys != null)
+        {
+            for(ShipFleet fl : empire.allFleets())
             {
-                for(ShipFleet fl : empire.allFleets())
-                {
-                    totalKillingPower += fl.expectedBombardDamage(dummySys) / 200.0;
-                }
-            }
-            float overKill = 0.0f;
-            if(enemyPop > 0)
-                overKill = totalKillingPower / enemyPop;
-            if(highestPower + empire.militaryPowerLevel() > 0)
-                dr = 0.25f + 0.75f * (highestPower / (highestPower + empire.militaryPowerLevel()));
-            //System.out.print("\n"+empire.name()+" enemyPop: "+enemyPop+" totalKillingPower: "+totalKillingPower+" overKill: "+overKill+" dr-pre adjust: "+dr);
-            if(overKill > 1)
-                dr = 1 - ((1 - dr) / overKill);
-            //System.out.print("\n"+empire.name()+" dr-post adjust: "+dr);
-            if(totalMissileBaseCost+totalShipCost > 0)
-            {
-                dr = min(dr, totalShipCost / (totalMissileBaseCost+totalShipCost));
+                totalKillingPower += fl.expectedBombardDamage(dummySys) / 200.0;
             }
         }
-        //System.out.print("\n"+empire.name()+" dr: "+dr);
+        float overKill = 0.0f;
+        enemyPop = max(enemyPop, biggestPop);
+        if(enemyPop > 0)
+            overKill = totalKillingPower / enemyPop;
+        if(highestPower + empire.militaryPowerLevel() > 0)
+            dr = 0.25f + 0.75f * (highestPower / (highestPower + empire.militaryPowerLevel()));
+        //System.out.print("\n"+empire.name()+" enemyPop: "+enemyPop+" totalKillingPower: "+totalKillingPower+" overKill: "+overKill+" dr-pre adjust: "+dr);
+        if(overKill > 1)
+            dr = 1 - ((1 - dr) / overKill);
+        //System.out.print("\n"+empire.name()+" dr-post adjust: "+dr);
+        if(totalMissileBaseCost+totalShipCost > 0)
+        {
+            dr = min(dr, totalShipCost / (totalMissileBaseCost+totalShipCost));
+        }
+        if(myFighterCost() < visibleEnemyFighterCost() || !empireInRange)
+            dr = 1.0f;
+        //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" dr: "+dr+" myFighterCost: "+myFighterCost()+" visibleEnemyFighterCost: "+visibleEnemyFighterCost());
         defenseRatio = dr;
         return defenseRatio;
     }
