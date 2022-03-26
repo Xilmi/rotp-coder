@@ -802,7 +802,6 @@ public class AIFleetCommander implements Base, FleetCommander {
                 StarSystem previousAttacked = null;
                 while(canStillSend)
                 {
-                    float attackThreshold = 0.625f;
                     boolean allowFighters = true;
                     boolean allowBombers = true;
                     boolean allowColonizers = true;
@@ -952,11 +951,11 @@ public class AIFleetCommander implements Base, FleetCommander {
                             //System.out.println(galaxy().currentTurn()+" "+fleet.empire().name()+" bridgeHeadConfidence for "+target.name()+": "+bridgeHeadConfidence(target));
                             if(!empire.tech().hyperspaceCommunications() && !targetHasEvent && bridgeHeadConfidence(target) < 1)
                                 enemyFightingBC += systemInfoBuffer.get(target.id).myTotalBc;
+                            //System.out.print("\n"+galaxy().currentTurn()+" "+fleet.empire().name()+" Fleet at "+target.name()+" gets boosted by my own fighting-BC of "+systemInfoBuffer.get(target.id).myTotalBc);
                             if(empire.alliedWith(tgtEmpire.id) && (enemyFightingBC > 0 || empire.unfriendlyTransportsInTransit(target) > 0))
                             {
                                 allowBombers = false;
                                 allowColonizers = false;
-                                attackThreshold = 1.0f;
                                 float ourFightingBC = bcValue(fleet, false, true, false, false);
                                 float incomingTransports = empire.unfriendlyTransportsInTransit(target);
                                 float TransportKillBCNeeded = 0;
@@ -1050,7 +1049,6 @@ public class AIFleetCommander implements Base, FleetCommander {
                         if(ourEffectiveBC - keepBc > 0)
                             sendAmount = max(sendBombAmount, sendAmount, min(1.0f, enemyFightingBC*(targetTech+10.0f)*2.0f / ((ourEffectiveBC - keepBc) * (civTech+10.0f))));
                         //System.out.print("\n"+fleet.empire().name()+" Fleet at "+fleet.system().name()+" should attack "+empire.sv.name(target.id)+" "+bcValue(fleet, false, allowFighters, allowBombers, allowColonizers)+":"+enemyFightingBC+" sendAmount: "+sendAmount+" sendBombAmount: "+sendBombAmount);
-                        //System.out.print("\n"+fleet.empire().name()+" Fleet at "+fleet.system().name()+" should attack "+empire.sv.name(target.id)+" HP "+target.colony().untargetedHitPoints() +" Bomb-Dmg: "+fleet.expectedBombardDamage(target)*sendAmount);
                         //ail: if we have Hyperspace-communications, we can't split
                         if(fleet.inTransit())
                         {
@@ -1065,8 +1063,9 @@ public class AIFleetCommander implements Base, FleetCommander {
                             sendAmount = 1.0f;
                             sendBombAmount = 1.0f;
                         }
-                        if(((ourEffectiveBC - keepBc) * (civTech+10.0f) * attackThreshold >= enemyFightingBC * (targetTech+10.0f)
-                                && ourEffectiveBombBC * (civTech+10.0f) * attackThreshold >= enemyBaseBC * (targetTech+10.0f))
+                        //System.out.print("\n"+fleet.empire().name()+" Fleet at "+fleet.system().name()+" => "+empire.sv.name(target.id)+" "+((ourEffectiveBC - keepBc) * (civTech+10.0f))+":"+(enemyFightingBC * (targetTech+10.0f))+" sendAmount: "+sendAmount+" sendBombAmount: "+sendBombAmount+" civTech: "+civTech+" targetTech: "+targetTech+" keepBc: "+keepBc);
+                        if(((ourEffectiveBC - keepBc) * (civTech+10.0f) >= enemyFightingBC * (targetTech+10.0f)
+                                && ourEffectiveBombBC * (civTech+10.0f) >= enemyBaseBC * (targetTech+10.0f))
                                 || (previousAttacked == target))
                         {
                             StarSystem targetBeforeSmartPath = target;
@@ -1316,7 +1315,7 @@ public class AIFleetCommander implements Base, FleetCommander {
                 }
             }
         }
-        //System.out.print("\n"+empire.name()+" Fleet at "+fl.system().name()+" has BC: "+bc);
+        //System.out.print("\n"+fl.empire().name()+" Fleet at "+fl.system().name()+" has BC: "+bc);
         return bc;
     }
     public float designBombardDamage(ShipDesign d, StarSystem sys) {
