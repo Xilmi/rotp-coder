@@ -453,7 +453,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
                         shouldPerformKiting = true;
                     if(!target.canPotentiallyAttack(stack))
                         shouldPerformKiting = false;
-                    if(shouldPerformKiting)
+                    if(shouldPerformKiting || preferClosestTarget(stack))
                         desirability /= stack.movePointsTo(target);
                 }
                 if(!target.canPotentiallyAttack(stack) && stack.isColony())
@@ -795,20 +795,17 @@ public class AIShipCaptain implements Base, ShipCaptain {
                     return false;
                 if (miss.target == currStack && st.isShip())
                 {
-                    if(miss.maxMove > currStack.maxMove * sqrt(2) || miss.distanceTo(currStack.x(), currStack.y()) + currStack.maxMove <= miss.missile.range())
+                    float hitPct;
+                    hitPct = (5 + miss.attackLevel - miss.target.missileDefense()) / 10;
+                    hitPct = max(.05f, hitPct);
+                    hitPct = min(hitPct, 1.0f);
+                    killPct += ((miss.maxDamage()-miss.target.shieldLevel())*miss.num*hitPct)/(miss.target.maxHits*miss.target.num);
+                    maxHit += (miss.maxDamage() - currStack.shieldLevel()) * miss.num; //don't use hitPct for max-hit as we have to expect the worst in this case
+                    System.out.print("\n"+currStack.fullName()+" will be hit by missiles for approx "+killPct+" dmg: "+maxHit+" hp: "+currStack.hits);
+                    if((killPct > 0.2f && maxHit >= currStack.hits) || (currStack.num == 1 && maxHit >= currStack.hits))
                     {
-                        float hitPct;
-                        hitPct = (5 + miss.attackLevel - miss.target.missileDefense()) / 10;
-                        hitPct = max(.05f, hitPct);
-                        hitPct = min(hitPct, 1.0f);
-                        killPct += ((miss.maxDamage()-miss.target.shieldLevel())*miss.num*hitPct)/(miss.target.maxHits*miss.target.num);
-                        maxHit += (miss.maxDamage() - currStack.shieldLevel()) * miss.num; //don't use hitPct for max-hit as we have to expect the worst in this case
-                        //System.out.print("\n"+currStack.fullName()+" will be hit by missiles for approx "+killPct+" dmg: "+maxHit+" hp: "+currStack.hits);
-                        if((killPct > 0.2f && maxHit >= currStack.hits) || (currStack.num == 1 && maxHit >= currStack.hits))
-                        {
-                            retreatImmediately = true; //when we have incoming missiles we can't do damage first
-                            return true;
-                        }
+                        retreatImmediately = true; //when we have incoming missiles we can't do damage first
+                        return true;
                     }
                 }
             }
@@ -1245,5 +1242,19 @@ public class AIShipCaptain implements Base, ShipCaptain {
                 maxRange = max(maxRange,wpn.range());
         }
         return maxRange;
+    }
+    //If the enemy has repulsors that we can't counter, they could mess with us so we'd rather just go straight for the closest target
+    public boolean preferClosestTarget(CombatStack st)
+    {
+        boolean enemyHasRepulsor = false;
+        for(CombatStack enemy : enemies())
+        {
+            if(enemy.repulsorRange() > 0)
+                enemyHasRepulsor = true;
+        }
+        boolean canByPassRepulsor = false;
+        if(st.cloaked || st.canTeleport())
+            canByPassRepulsor = true;
+        return enemyHasRepulsor && !canByPassRepulsor;
     }
 }
