@@ -1,13 +1,11 @@
-Governor:
+Bugfixes:
 
-Added option to allow sending transports from planets where the governor is not enabled too.
-
-Game-Setup:
-
-Increased default for total factions to one per every 10 systems.
+Fixed an issue that allowed missiles to travel over an infinite amount of space within one turn.
 
 AI:
 
-Now more likely to use hybrid-designs.
-Reduced threshold for making new designs.
-Decreased minimum expected superiority required to attack.
+More likely to select closer targets if the opponent has repulsor-beams.
+
+Versioning:
+
+Now using a date as version to prevent further issues with wrong ordering in github.
