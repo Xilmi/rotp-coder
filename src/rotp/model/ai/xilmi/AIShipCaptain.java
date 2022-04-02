@@ -774,7 +774,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
         }
      
         // AI STACKS
-        //System.out.print("\n"+currStack.fullName()+" canRetreat: "+currStack.canRetreat());
+        //System.out.print("\n"+currStack.fullName()+" canRetreat: "+currStack.canRetreat()+" maneuverability: "+currStack.maneuverability);
         if (!currStack.canRetreat()) 
             return false;
         
@@ -782,7 +782,8 @@ public class AIShipCaptain implements Base, ShipCaptain {
             return false;
         
         // threatened to be completely disabled by warp-dissipater
-        if(currStack.maxMove() <= 1 && currStack.design().combatSpeed() > currStack.maxMove())
+        //System.out.print("\n"+currStack.fullName()+" currStack.maxMove(): "+currStack.maxMove()+" currStack.design().combatSpeed(): "+currStack.design().combatSpeed());
+        if(currStack.maneuverablity() <= 2 && currStack.design().maneuverability() > currStack.maneuverablity())
             return true;
 
         // don't retreat if we still have missiles in flight
@@ -801,7 +802,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
                     hitPct = min(hitPct, 1.0f);
                     killPct += ((miss.maxDamage()-miss.target.shieldLevel())*miss.num*hitPct)/(miss.target.maxHits*miss.target.num);
                     maxHit += (miss.maxDamage() - currStack.shieldLevel()) * miss.num; //don't use hitPct for max-hit as we have to expect the worst in this case
-                    System.out.print("\n"+currStack.fullName()+" will be hit by missiles for approx "+killPct+" dmg: "+maxHit+" hp: "+currStack.hits);
+                    //System.out.print("\n"+currStack.fullName()+" will be hit by missiles for approx "+killPct+" dmg: "+maxHit+" hp: "+currStack.hits);
                     if((killPct > 0.2f && maxHit >= currStack.hits) || (currStack.num == 1 && maxHit >= currStack.hits))
                     {
                         retreatImmediately = true; //when we have incoming missiles we can't do damage first
