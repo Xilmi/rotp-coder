@@ -105,7 +105,7 @@ public class AIScientist implements Base, Scientist {
         //ail: first I stop researching where there's no techs left
         int leftOverAlloc = 0;
         for (int j=0; j<TechTree.NUM_CATEGORIES; j++) {
-            //System.out.print("\n"+empire.name()+" "+empire.tech().category(j).id()+" alloc before adjust: "+empire.tech().category(j).allocation());
+            //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" "+empire.tech().category(j).id()+" alloc before adjust: "+empire.tech().category(j).allocation());
             if (empire.tech().category(j).possibleTechs().isEmpty())
             {
                 leftOverAlloc+=empire.tech().category(j).allocation();
@@ -142,7 +142,7 @@ public class AIScientist implements Base, Scientist {
                     //System.out.print("\n"+empire.name()+" "+empire.tech().category(j).id()+" reduced because "+currentTechResearching.name()+" is either owned by someone else or not something we want.");
                 }
             }
-            if (discoveryChanceOfCategoryIfAllocationWasZero(j) > empire.tech().category(j).allocation() || researchingSomethingWeDontReallyWant)
+            if (discoveryChanceOfCategoryIfAllocationWasZero(j) > min(empire.tech().category(j).allocation(), 50f/3f) || researchingSomethingWeDontReallyWant)
             {
                 leftOverAlloc+=empire.tech().category(j).allocation();
                 empire.tech().category(j).allocation(0);
@@ -158,7 +158,7 @@ public class AIScientist implements Base, Scientist {
                     if(researchPriority(currentTechResearching) == 0)
                         researchingSomethingWeDontReallyWant = true;
                 if (!empire.tech().category(j).possibleTechs().isEmpty()
-                        && discoveryChanceOfCategoryIfAllocationWasZero(j) <= empire.tech().category(j).allocation()
+                        && discoveryChanceOfCategoryIfAllocationWasZero(j) <= min(empire.tech().category(j).allocation(), 50f/3f)
                         && !researchingSomethingWeDontReallyWant)
                 {
                     empire.tech().category(j).adjustAllocation(1);
@@ -202,7 +202,7 @@ public class AIScientist implements Base, Scientist {
             for (int j=0; j<TechTree.NUM_CATEGORIES; j++) {
                 if (!empire.tech().category(j).possibleTechs().isEmpty()
                         && !empire.tech().category(j).studyingFutureTech()
-                        && discoveryChanceOfCategoryIfAllocationWasZero(j) <= empire.tech().category(j).allocation())
+                        && discoveryChanceOfCategoryIfAllocationWasZero(j) <= min(empire.tech().category(j).allocation(), 50f/3f))
                 {
                     empire.tech().category(j).adjustAllocation(1);
                     leftOverAlloc--;
@@ -215,7 +215,7 @@ public class AIScientist implements Base, Scientist {
             {
                 for (int j=0; j<TechTree.NUM_CATEGORIES; j++) {
                     if (!empire.tech().category(j).possibleTechs().isEmpty()
-                            && discoveryChanceOfCategoryIfAllocationWasZero(j) <= empire.tech().category(j).allocation())
+                            && discoveryChanceOfCategoryIfAllocationWasZero(j) <= min(empire.tech().category(j).allocation(), 50f/3f))
                     {
                         empire.tech().category(j).adjustAllocation(1);
                         leftOverAlloc--;
@@ -239,7 +239,8 @@ public class AIScientist implements Base, Scientist {
             }
         }
         /*for (int j=0; j<TechTree.NUM_CATEGORIES; j++) {
-            System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" "+empire.tech().category(j).key()+": "+empire.tech().category(j).currentTechName()+": "+empire.tech().category(j).allocationPct()+" of "+empire.totalPlanetaryResearch());
+            if(empire.tech().category(j).currentTech() != null)
+                System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" "+empire.tech().category(j).key()+": "+empire.tech().category(j).currentTechName()+": "+empire.tech().category(j).allocation());
         }*/
     }
     @Override
@@ -255,7 +256,7 @@ public class AIScientist implements Base, Scientist {
             return;
         }
         
-        if (empire.tech().topFuelRangeTech().range() < 4) {
+        if (empire.tech().topFuelRangeTech().range() < 4 && empire.tech().propulsion().techLevel() < 5) {
             empire.tech().computer().allocation(0);
             empire.tech().construction().allocation(0);
             empire.tech().forceField().allocation(0);
@@ -306,6 +307,15 @@ public class AIScientist implements Base, Scientist {
                 empire.tech().propulsion().adjustAllocation(18);
                 empire.tech().weapon().adjustAllocation(-9);
             }
+        }
+        else if(stealableTechs() > 0)
+        {
+            empire.tech().computer().adjustAllocation(stealableTechs()*5);
+            empire.tech().construction().adjustAllocation(stealableTechs()*-1);
+            empire.tech().forceField().adjustAllocation(stealableTechs()*-1);
+            empire.tech().planetology().adjustAllocation(stealableTechs()*-1);
+            empire.tech().propulsion().adjustAllocation(stealableTechs()*-1);
+            empire.tech().weapon().adjustAllocation(stealableTechs()*-1);
         }
         
         int futureTechs = 0;
@@ -917,5 +927,29 @@ public class AIScientist implements Base, Scientist {
             || t.techType == Tech.TORPEDO_WEAPON)
             return true;
         return false;
+    }
+    public int stealableTechs()
+    {
+        int stealables = 0;
+        for(EmpireView ev : empire.contacts())
+        {
+            if(ev.spies().hasSpies() && ev.spies().isEspionage())
+            {
+                for(Tech tech : ev.spies().unknownTechs())
+                {
+                    //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" could steal "+tech.name()+" from "+ev.empire().name());
+                    if(tech.isFutureTech())
+                        continue;
+                    if(tech.cat.index() == TechCategory.COMPUTER)
+                        continue;
+                    if(tech.isObsolete(empire))
+                        continue;
+                    //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" want to steal "+tech.name()+" from "+ev.empire().name());
+                    stealables++;
+                }
+            }
+        }
+        //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" stealables: "+stealables);
+        return stealables;
     }
 }
