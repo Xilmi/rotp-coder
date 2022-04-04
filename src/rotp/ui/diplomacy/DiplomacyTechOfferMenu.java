@@ -53,7 +53,7 @@ public class DiplomacyTechOfferMenu extends DiplomacyRequestReply {
                     List<Tech> countersToCounter = diplomat().diplomatAI().techsRequestedForCounter(requestee, t);
                     if(countersToCounter.contains(requestedTech))
                     {
-                        System.out.println(galaxy().currentTurn()+" "+diplomat().name()+" is okay with "+t.name()+" in return for "+requestedTech.name());
+                        //System.out.println(galaxy().currentTurn()+" "+diplomat().name()+" is okay with "+t.name()+" in return for "+requestedTech.name());
                         counterOffers.add(t);
                     }
                 }
