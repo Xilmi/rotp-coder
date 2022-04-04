@@ -212,6 +212,8 @@ public class AIShipCaptain implements Base, ShipCaptain {
                     shouldPerformKiting = true;
                 if(!currentTarget.canPotentiallyAttack(stack))
                     shouldPerformKiting = false;
+                if(currentTarget.repairPct > 0)
+                    shouldPerformKiting = false;
             }
          
             boolean enemyColonyPresent = false;
