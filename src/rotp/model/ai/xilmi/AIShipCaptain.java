@@ -89,7 +89,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
             else*/
             bestPathToTarget = chooseTarget(stack, false, false);
             CombatStack tgtBeforeClose = currentTarget;
-            //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" "+stack.fullName()+" performTurn");
+            //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" "+stack.fullName()+" performTurn.");
             if (stack.isColony() && stack.canAttack(currentTarget)) 
             {
                 //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" "+stack.fullName()+" supposed to fire at: "+currentTarget.fullName());
@@ -466,8 +466,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
                 if(empire.shipDesignerAI().bombingAdapted(stack.design()) < 0.5 && target.isColony() && !target.isArmed())
                     desirability = Float.MIN_VALUE;
                 if(stack.maxFiringRange(target) <= target.repulsorRange() && stack.movePointsTo(target) > 1)
-                    desirability = 0;
-                //System.out.print("\n"+stack.fullName()+" looking at "+target.fullName()+" desirability: "+desirability+" oir: "+onlyInAttackRange+" os: "+onlyShips+" can attack: "+stack.canAttack(target));
+                    desirability = -1;
                 if (desirability > maxDesirability) {  // this might be a better target, adjust desirability for pathing
                     if (stack.mgr.autoResolve) {
                         bestTarget = target;
@@ -638,7 +637,8 @@ public class AIShipCaptain implements Base, ShipCaptain {
         //we start at r = 1 and increase up to our optimal firing-range
         FlightPath bestPath = null;
         int distanceToBeAt = DistanceToBeAt(st, tgt);
-        while(bestPath == null && distanceToBeAt <= max(st.maxFiringRange(tgt),distanceToBeAt))
+        int distanceToBeAtLimit = distanceToBeAt;
+        while(bestPath == null && distanceToBeAt <= max(st.maxFiringRange(tgt),distanceToBeAtLimit))
         {
             bestPath = findBestPathToAttack(st, tgt, distanceToBeAt);
             distanceToBeAt++;
@@ -744,7 +744,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
         }  
 
         Collections.sort(validPaths,FlightPath.SORT);
-        //System.out.println("Paths found: "+validPaths.size());
+        //System.out.println("\n"+st.fullName()+" Paths found to "+tgt.fullName()+": "+validPaths.size());
         return validPaths.get(0);
     }
     @Override
