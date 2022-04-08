@@ -109,7 +109,7 @@ public class AIFleetCommander implements Base, FleetCommander {
             {
                 enemyPower += enemy.militaryPowerLevel();
             }
-            if(techsLeft && enemyPower < empire.militaryPowerLevel())
+            if(techsLeft && enemyPower < empire.generalAI().smartPowerLevel())
                 maxMaintenance = sqrt(max(10, empire.tech().avgTechLevel())) * threatFactor;
             else
                 maxMaintenance = 0.9f;
@@ -1487,7 +1487,7 @@ public class AIFleetCommander implements Base, FleetCommander {
             }
         }
         //count other enemies of them as more targets to split their attention between
-        float myPower = empire.militaryPowerLevel();
+        float myPower = empire.generalAI().smartPowerLevel();
         float allTheirEnemiesPower = myPower;
         for(Empire eno : empire.sv.empire(sys.id).warEnemies())
         {

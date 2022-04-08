@@ -55,6 +55,7 @@ public class AIGeneral implements Base, General {
     private float warROI = -1;
     private float visibleEnemyFighterCost = -1;
     private float myFighterCost = -1;
+    private float smartPower = -1;
 
     public AIGeneral (Empire c) {
         empire = c;
@@ -89,6 +90,7 @@ public class AIGeneral implements Base, General {
         warROI = -1;
         visibleEnemyFighterCost = -1;
         myFighterCost = -1;
+        smartPower = -1;
         
         //empire.tech().learnAll();
         //System.out.println(galaxy().currentTurn()+" "+empire.name()+" "+empire.leader().name()+" personality: "+empire.leader().personality()+" objective: "+empire.leader().objective());
@@ -805,7 +807,7 @@ public class AIGeneral implements Base, General {
             if(empire.leader().isErratic() || empire.leader().isRuthless())
                 diploMod = 1;
             
-            float myPower = empire.militaryPowerLevel();
+            float myPower = smartPowerLevel();
             float enemyPower = emp.militaryPowerLevel();
             for(Empire theirEnemy : emp.enemies())
             {
@@ -929,8 +931,8 @@ public class AIGeneral implements Base, General {
         enemyPop = max(enemyPop, biggestPop);
         if(enemyPop > 0)
             overKill = totalKillingPower / enemyPop;
-        if(highestPower + empire.militaryPowerLevel() > 0)
-            dr = 0.25f + 0.75f * (highestPower / (highestPower + empire.militaryPowerLevel()));
+        if(highestPower + smartPowerLevel() > 0)
+            dr = 0.25f + 0.75f * (highestPower / (highestPower + smartPowerLevel()));
         //System.out.print("\n"+empire.name()+" enemyPop: "+enemyPop+" totalKillingPower: "+totalKillingPower+" overKill: "+overKill+" dr-pre adjust: "+dr);
         if(overKill > 1)
             dr = 1 - ((1 - dr) / overKill);
@@ -1269,7 +1271,7 @@ public class AIGeneral implements Base, General {
                     bestScoreForContactToAttack = score;
                 }
             }
-            if(bestTargetOfContact == empire && contact.militaryPowerLevel() > empire.militaryPowerLevel())
+            if(bestTargetOfContact == empire && contact.militaryPowerLevel() > smartPowerLevel())
             {
                 senseDanger = true;
                 break;
@@ -1307,4 +1309,24 @@ public class AIGeneral implements Base, General {
     }
     @Override
     public float absolution() { return 0f; }
+    @Override
+    public float smartPowerLevel()
+    {
+        if(smartPower > -1)
+            return smartPower;
+        float power = 0;
+        int[] counts = galaxy().ships.shipDesignCounts(empire.id);
+        for (int i=0;i<ShipDesignLab.MAX_DESIGNS; i++) {
+            ShipDesign d = empire.shipLab().design(i);
+            if (d.active() && d.isArmed() && !d.isColonyShip()) 
+            {
+                float keepScore = (1 - d.availableSpace()/d.totalSpace()) * (float)d.engine().warp() / (float)empire.shipLab().fastestEngine().warp();
+                keepScore *= keepScore;
+                power += (counts[i] *d.hullPoints() * keepScore);
+            }
+        }
+        power *= empire.tech().avgTechLevel();
+        smartPower = power;
+        return smartPower;
+    }
 }
