@@ -900,7 +900,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
             if(col != null && col.empire == st1.empire && col.mgr.currentStack() != null)
                 if(col.movePointsTo(st1) == 1)
                     foesBlockPlanet++;
-            if(st1.inStasis)
+            if(st1.inStasis || st1.maneuverablity() == 0)
                 continue;
             boolean previousCloakingState = st1.cloaked;
             st1.cloaked = false; //decloack in our mind for estimates
@@ -944,7 +944,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
         CombatStack invulnerableFriend = null;
         
         for (CombatStack st1 : friends) {
-            if(st1.inStasis)
+            if(st1.inStasis || st1.maneuverablity() == 0)
                 continue;
             boolean previousCloakingState = st1.cloaked;
             st1.cloaked = false;
