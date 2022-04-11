@@ -582,6 +582,9 @@ public class AIShipDesigner implements Base, ShipDesigner {
             if (bestWpn != null && design.availableSpace() >= bestWpn.space(design))
                 design.addWeapon(bestWpn, 1);
         }
+        ShipSpecial cloak = lab.specialCloak();
+        if(cloak != null && cloak.space(design) <= design.availableSpace())
+            design.special(2, cloak);
         lab.iconifyDesign(design);
         return design;
     }
