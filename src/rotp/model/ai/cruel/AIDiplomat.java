@@ -1420,7 +1420,7 @@ public class AIDiplomat implements Base, Diplomat {
                 warAllowed = false;
         }
         //Ail: If there's only two empires left, there's no time for preparation. We cannot allow them the first-strike-advantage!
-        if(galaxy().numActiveEmpires() < 3)
+        if(galaxy().numActiveEmpires() < 3 && minWarTechsAvailable())
             warAllowed = true;
         //System.out.println(galaxy().currentTurn()+" "+empire.name()+" col: "+empire.generalAI().additionalColonizersToBuild(false)+" tech: "+techIsAdequateForWar());
         return warAllowed;
@@ -1533,6 +1533,8 @@ public class AIDiplomat implements Base, Diplomat {
 // PRIVATE METHODS
 // ----------------------------------------------------------
     private Empire castVoteFor(Empire c) {
+        if(c != null && c != empire && !giveLoyaltyTo(c))
+            c = null;
         if (c == null)
             empire.lastCouncilVoteEmpId(Empire.ABSTAIN_ID);
         else
@@ -1980,12 +1982,18 @@ public class AIDiplomat implements Base, Diplomat {
             empire.leader().objective = DIPLOMAT;
     }
     @Override
-    public boolean techIsAdequateForWar()
+    public boolean minWarTechsAvailable()
     {
-        boolean warAllowed = true;
-        int popCapRank = popCapRank(empire, false);
-        /*if(!everyoneMet() && popCapRank < 3)
-            warAllowed = false;*/
+        if(empire.shipLab().fastestEngine().warp() < 2)
+            return false;
+        if(empire.tech().topShipWeaponTech().damageHigh() <= 4)
+            return false;
+        if(empire.tech().topDeflectorShieldTech().level() < 2)
+            return false;
+        return true;
+    }
+    public boolean hasGoodTechRoi()
+    {
         boolean reseachHasGoodROI = false;
         for(int i = 0; i < NUM_CATEGORIES; ++i)
         {
@@ -1998,6 +2006,16 @@ public class AIDiplomat implements Base, Diplomat {
                 break;
             }
         }
+        return reseachHasGoodROI;
+    }
+    @Override
+    public boolean techIsAdequateForWar()
+    {
+        boolean warAllowed = minWarTechsAvailable();
+        int popCapRank = popCapRank(empire, false);
+        /*if(!everyoneMet() && popCapRank < 3)
+            warAllowed = false;*/
+        boolean reseachHasGoodROI = hasGoodTechRoi();
         if(reseachHasGoodROI && techLevelRank() > 1)
             warAllowed = false;
         if(techLevelRank() > popCapRank)
