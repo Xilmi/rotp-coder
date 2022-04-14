@@ -135,4 +135,5 @@ public interface Diplomat {
     default boolean techIsAdequateForWar() { return true; }
     default boolean willingToTradeTech(Tech t) { return true; }
     default boolean wantsToReviewCounterOffers() { return false; }
+    default boolean minWarTechsAvailable() { return true; }
 }
