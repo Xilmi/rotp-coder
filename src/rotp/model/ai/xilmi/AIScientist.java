@@ -308,6 +308,29 @@ public class AIScientist implements Base, Scientist {
                 empire.tech().weapon().adjustAllocation(-9);
             }
         }
+        else if(!empire.enemies().isEmpty() && !empire.diplomatAI().minWarTechsAvailable())
+        {
+            empire.tech().computer().allocation(0);
+            empire.tech().construction().allocation(0);
+            empire.tech().planetology().allocation(0);
+            empire.tech().propulsion().allocation(0);
+            empire.tech().weapon().allocation(0);
+            empire.tech().forceField().allocation(0);
+            float totalMinWarTechSplit = 3;
+            if(empire.shipLab().fastestEngine().warp() >= 2)
+                totalMinWarTechSplit--;
+            if(empire.tech().topShipWeaponTech().damageHigh() > 4)
+                totalMinWarTechSplit--;
+            if(empire.tech().topDeflectorShieldTech().level() >= 2)
+                totalMinWarTechSplit--;
+            
+            if(empire.shipLab().fastestEngine().warp() < 2)
+                empire.tech().propulsion().allocationPct(1/totalMinWarTechSplit);
+            if(empire.tech().topShipWeaponTech().damageHigh() <= 4)
+                empire.tech().weapon().allocationPct(1/totalMinWarTechSplit);
+            if(empire.tech().topDeflectorShieldTech().level() < 2)
+                empire.tech().forceField().allocationPct(1/totalMinWarTechSplit);
+        }
         else if(stealableTechs() > 0)
         {
             empire.tech().computer().adjustAllocation(stealableTechs()*5);
