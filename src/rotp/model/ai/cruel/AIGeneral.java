@@ -876,7 +876,7 @@ public class AIGeneral implements Base, General {
         {
             dr = min(dr, totalShipCost / (totalMissileBaseCost+totalShipCost));
         }
-        if(myFighterCost() < visibleEnemyFighterCost() || !empireInRange)
+        if(myFighterCost() < visibleEnemyFighterCost() || !empireInRange || !empire.diplomatAI().minWarTechsAvailable())
             dr = 1.0f;
         //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" dr: "+dr+" myFighterCost: "+myFighterCost()+" visibleEnemyFighterCost: "+visibleEnemyFighterCost());
         defenseRatio = dr;
@@ -1226,8 +1226,6 @@ public class AIGeneral implements Base, General {
         float highestThreat = 0;
         for(Empire emp : empire.contactedEmpires())
         {
-            if(!empire.inShipRange(emp.id))
-                continue;
             if(!empire.enemies().isEmpty() && !empire.enemies().contains(emp))
                 continue;
             if(emp == empire)
@@ -1236,6 +1234,8 @@ public class AIGeneral implements Base, General {
                 continue;
             float threat = emp.powerLevel(emp) * 1 / (fleetCenter(emp).distanceTo(colonyCenter(empire)));
             //System.out.println(galaxy().currentTurn()+" "+empire.name()+" fear-level of: "+emp.name()+": "+threat);
+            if(!empire.inShipRange(emp.id))
+                threat /= 2;
             if(threat > highestThreat)
             {
                 highestThreat = threat;
