@@ -110,7 +110,11 @@ public class AIFleetCommander implements Base, FleetCommander {
                 enemyPower += enemy.militaryPowerLevel();
             }
             if(techsLeft && enemyPower < empire.generalAI().smartPowerLevel())
+            {
                 maxMaintenance = sqrt(max(10, empire.tech().avgTechLevel())) * threatFactor;
+                if(!empire.diplomatAI().minWarTechsAvailable())
+                    maxMaintenance = 0;
+            }
             else
                 maxMaintenance = 0.9f;
         }
@@ -492,6 +496,8 @@ public class AIFleetCommander implements Base, FleetCommander {
             {
                 if(empire.sv.isColonized(id))
                 {
+                    if(!empire.diplomatAI().minWarTechsAvailable())
+                        continue;
                     if(!empire.enemies().contains(currEmp))
                     {
                         continue;
@@ -909,7 +915,7 @@ public class AIFleetCommander implements Base, FleetCommander {
                             attackWithFleet(fleet, target, sendAmount - keepAmount, sendBombAmount - keepAmount, false, true, true, true, keepBc, true);
                             break;
                         }
-                        StarSystem stagingPoint = galaxy().system(empire.optimalStagingPoint(target, 1));
+                        StarSystem stagingPoint = StageSystem(fleet, target);
                         float enemyFightingBC = 0.0f;
                         float enemyBaseBC = 0.0f;
                         float targetTech = civTech;
@@ -1064,6 +1070,8 @@ public class AIFleetCommander implements Base, FleetCommander {
                             sendBombAmount = 1.0f;
                         }
                         //System.out.print("\n"+fleet.empire().name()+" Fleet at "+fleet.system().name()+" => "+empire.sv.name(target.id)+" "+((ourEffectiveBC - keepBc) * (civTech+10.0f))+":"+(enemyFightingBC * (targetTech+10.0f))+" sendAmount: "+sendAmount+" sendBombAmount: "+sendBombAmount+" civTech: "+civTech+" targetTech: "+targetTech+" keepBc: "+keepBc);
+                        /*if(stagingPoint != null)
+                            System.out.print("\n"+fleet.empire().name()+" Fleet at "+fleet.system().name()+" => "+empire.sv.name(target.id)+" should stage at "+empire.sv.name(stagingPoint.id));*/
                         if(((ourEffectiveBC - keepBc) * (civTech+10.0f) >= enemyFightingBC * (targetTech+10.0f)
                                 && ourEffectiveBombBC * (civTech+10.0f) >= enemyBaseBC * (targetTech+10.0f))
                                 || (previousAttacked == target))
@@ -1387,6 +1395,30 @@ public class AIFleetCommander implements Base, FleetCommander {
             {
                 shortestDistance = fl.distanceTo(sys);
                 best = sys;
+            }
+        }
+        return best;
+    }
+    public StarSystem StageSystem(ShipFleet fl, StarSystem target) {
+        float shortestDistance = Float.MAX_VALUE;
+        StarSystem best = null;
+        for (int id=0;id<empire.sv.count();id++)
+        {
+            StarSystem current = galaxy().system(id);
+            Empire currEmp = current.empire();
+            if(!fl.canReach(current))
+                continue;
+            if(currEmp != null && !currEmp.alliedWith(empire.id) && !empire.warEnemies().contains(currEmp))
+                continue;
+            if(current.monster() != null)
+                continue;
+            UpdateSystemInfo(id);
+            if(systemInfoBuffer.get(id).enemyFightingBc > bcValue(fl, false, true, false, false) + systemInfoBuffer.get(id).myFightingBc)
+                continue;
+            if(target.distanceTo(current) < shortestDistance)
+            {
+                shortestDistance = target.distanceTo(current);
+                best = current;
             }
         }
         return best;
