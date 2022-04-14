@@ -730,25 +730,9 @@ public class AIShipDesigner implements Base, ShipDesigner {
     @Override
     public boolean wantHybrid()
     {
-        if(empire.generalAI().defenseRatio() == 1.0)
+        if(empire.generalAI().defenseRatio() == 1.0 || empire.generalAI().defenseRatio() < 0.5)
             return false;
-        int freeSlots = 0;
-        for (int slot=0;slot<ShipDesignLab.MAX_DESIGNS;slot++) {
-            ShipDesign d = lab().design(slot);
-            
-            if(d.isColonyShip() || d.isScout())
-                continue;
-            if(empire.isAnyColonyConstructing(d))
-                continue;
-            if(shipCounts[d.id()] == 0 && !empire.isAnyColonyConstructing(d))
-                freeSlots++;
-        }
-        //System.out.print("\n"+empire.name()+" free slots: "+freeSlots);
-        if(freeSlots < 2)
-        {
-            return true;
-        }
-        return false;
+        return true;
     } 
     public void ScrapDesign(ShipDesign d)
     {
