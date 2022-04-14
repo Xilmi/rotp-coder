@@ -408,7 +408,9 @@ public class AIGovernor implements Base, Governor {
             bomberCost += lab.design(i).cost() * counts[i] * empire.shipDesignerAI().bombingAdapted(lab.design(i));
         }
         //ail: No use to build any ships if they won't do damage anyways. Better tech up.
-        boolean viableForShipProduction = prodScore >= 1 || needToMilitarize;
+        boolean allInShipProducer = col.planet().productionAdj() >= 1 && col.planet().researchAdj() <= 1;
+        boolean allIn = allInShipProducer && empire.diplomatAI().techIsAdequateForWar();
+        boolean viableForShipProduction = prodScore >= 1 || needToMilitarize || allIn;
         float turnsBeforeColonyDestroyed = Float.MAX_VALUE;
         if(popLoss > 0)
             turnsBeforeColonyDestroyed = col.population() / popLoss;
