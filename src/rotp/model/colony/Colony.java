@@ -1131,11 +1131,6 @@ public final class Colony implements Base, IMappedObject, Serializable {
         log(str(rebels), " ", empire().raceName(), " rebels at ", starSystem().name(), " resisting ",
                     str(tr.size()), " ", tr.empire().raceName(), " transports");
 
-        if (!tr.empire().canColonize(starSystem())) {
-            // no appropriate alert message for this transport loss. Even more of an edge case.
-            tr.size(0);
-            return;
-        }
         // Xilmi: when landing on our own planet we also can be shot down by orbiting enemies
         float defenderDmg = 0;
         List<ShipFleet> fleets = starSystem().orbitingFleets();
