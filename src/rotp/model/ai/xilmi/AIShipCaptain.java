@@ -217,7 +217,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
             }
          
             boolean enemyColonyPresent = false;
-            if (stack.mgr.results().colonyStack != null && stack.mgr.results().colonyStack.colony.empire() != empire)
+            if (stack.mgr.results().colonyStack != null && stack.mgr.results().colonyStack.colony.empire() != empire && stack.mgr.results().colonyStack.isArmed())
                 enemyColonyPresent = true;
             
             //ail: only move away if I have fired at our best target and am a missile-user or have repulsors
@@ -561,6 +561,8 @@ public class AIShipCaptain implements Base, ShipCaptain {
                 }
                 if(blocked)
                     continue;
+                /*float distFromCenter = sqrt(((x-4.5f)*(x-4.5f)) + ((y-3.5f)*(y-3.5f)));
+                currentScore /= (5.7f + distFromCenter);*/
                 if(currentScore > safestScore)
                 {
                     safestScore = currentScore;
