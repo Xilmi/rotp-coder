@@ -123,7 +123,10 @@ public class AIDiplomat implements Base, Diplomat {
          
         List<Tech> allTechs = new ArrayList<>();
         for (String id: allMyTechIds)
-            allTechs.add(tech(id));
+        {
+            if(willingToTradeTech(tech(id), e))
+                allTechs.add(tech(id));
+        }
         allTechs.removeAll(e.tech().tradedTechs());
         
         int maxTechs = 5;
@@ -231,7 +234,7 @@ public class AIDiplomat implements Base, Diplomat {
     public DiplomaticReply receiveCounterOfferTech(Empire diplomat, Tech offeredTech, Tech requestedTech) {
         EmpireView view = empire.viewForEmpire(diplomat);
         view.embassy().resetTechTimer();
-        //System.out.println(empire.galaxy().currentTurn()+" "+empire.name()+" gets "+offeredTech.name()+" Trade-Value: "+offeredTech.tradeValue(empire) + " for "+requestedTech.name()+" "+requestedTech.tradeValue(empire)+" from "+diplomat.name());
+        System.out.println(empire.galaxy().currentTurn()+" "+empire.name()+" gets "+offeredTech.name()+" Trade-Value: "+offeredTech.tradeValue(empire) + " for "+requestedTech.name()+" "+requestedTech.tradeValue(empire)+" from "+diplomat.name());
         DiplomaticIncident inc = view.embassy().exchangeTechnology(offeredTech, requestedTech);
         return view.otherView().accept(DialogueManager.ACCEPT_TECH_EXCHANGE, inc);
     }
@@ -263,7 +266,7 @@ public class AIDiplomat implements Base, Diplomat {
         if (tech.isObsolete(requestor))
             return new ArrayList<>();
         
-        if(!willingToTradeTech(tech))
+        if(!willingToTradeTech(tech, requestor))
             return new ArrayList<>();
         
         EmpireView view = empire.viewForEmpire(requestor);
@@ -329,7 +332,7 @@ public class AIDiplomat implements Base, Diplomat {
                 List<Tech> counterTechs = v.empire().diplomatAI().techsRequestedForCounter(empire, wantedTech);
                 List<Tech> willingToTradeCounterTechs = new ArrayList<>(counterTechs.size());
                 for (Tech t: counterTechs) {
-                    if (willingToTradeTech(t))
+                    if (willingToTradeTech(t, v.empire()))
                     {
                         //now check if I would give them something for their counter
                         List<Tech> countersToCounter = techsRequestedForCounter(v.empire(), t);
@@ -1420,7 +1423,7 @@ public class AIDiplomat implements Base, Diplomat {
                 warAllowed = false;
         }
         //Ail: If there's only two empires left, there's no time for preparation. We cannot allow them the first-strike-advantage!
-        if(galaxy().numActiveEmpires() < 3 && minWarTechsAvailable())
+        if(galaxy().numActiveEmpires() < 3)
             warAllowed = true;
         //System.out.println(galaxy().currentTurn()+" "+empire.name()+" col: "+empire.generalAI().additionalColonizersToBuild(false)+" tech: "+techIsAdequateForWar());
         return warAllowed;
@@ -1806,7 +1809,7 @@ public class AIDiplomat implements Base, Diplomat {
     } 
     @Override
     public float leaderBioweaponMod()         { 
-        return empire.leader().bioweaponMod();
+        return 0;
     }
     @Override
     public int leaderOathBreakerDuration() { 
@@ -2011,7 +2014,7 @@ public class AIDiplomat implements Base, Diplomat {
     @Override
     public boolean techIsAdequateForWar()
     {
-        boolean warAllowed = minWarTechsAvailable();
+        boolean warAllowed = true;
         int popCapRank = popCapRank(empire, false);
         /*if(!everyoneMet() && popCapRank < 3)
             warAllowed = false;*/
@@ -2026,11 +2029,13 @@ public class AIDiplomat implements Base, Diplomat {
         return warAllowed;
     }
     @Override
-    public boolean willingToTradeTech(Tech tech)
+    public boolean willingToTradeTech(Tech tech, Empire tradePartner)
     {
         //The player can decide for themselves what they want to give away!
         if(!empire.isAIControlled())
             return true;
+        if(!tech.isObsolete(empire) && !empire.alliedWith(tradePartner.id))
+            return false;
         for(Empire emp : empire.contactedEmpires())
         {
             EmpireView ev = empire.viewForEmpire(emp);
