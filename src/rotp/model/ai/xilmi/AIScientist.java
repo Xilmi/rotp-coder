@@ -240,7 +240,7 @@ public class AIScientist implements Base, Scientist {
         }
         /*for (int j=0; j<TechTree.NUM_CATEGORIES; j++) {
             if(empire.tech().category(j).currentTech() != null)
-                System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" "+empire.tech().category(j).key()+": "+empire.tech().category(j).currentTechName()+": "+empire.tech().category(j).allocation());
+                System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" "+empire.tech().category(j).key()+": "+empire.tech().category(j).currentTechName()+": "+empire.tech().category(j).allocation()+" of "+empire.totalPlanetaryResearch()+" "+discoveryChanceOfCategoryIfAllocationWasZero(j)+"%");
         }*/
     }
     @Override
@@ -308,7 +308,7 @@ public class AIScientist implements Base, Scientist {
                 empire.tech().weapon().adjustAllocation(-9);
             }
         }
-        else if(!empire.enemies().isEmpty() && !empire.diplomatAI().minWarTechsAvailable())
+        else if((!empire.enemies().isEmpty() || empire.generalAI().sensePotentialAttack()) && !empire.diplomatAI().minWarTechsAvailable())
         {
             empire.tech().computer().allocation(0);
             empire.tech().construction().allocation(0);
@@ -598,11 +598,25 @@ public class AIScientist implements Base, Scientist {
     }
     @Override
     public float baseValue(TechBiologicalAntidote t) {
-        return 1;
+        float bioWeapon = 0;
+        for(EmpireView ev : empire.contacts())
+            if(ev.spies().tech().biologicalAttackLevel() > bioWeapon)
+                bioWeapon = ev.spies().tech().antidoteLevel();
+        if(empire.tech().topBiologicalAntidoteTech() == null || bioWeapon >= empire.tech().topBiologicalAntidoteTech().attackReduction)
+            return t.level();
+        else
+            return 1;
     }
     @Override
     public float baseValue(TechBiologicalWeapon t) {
-        return 1;
+        float antiDote = 0;
+        for(EmpireView ev : empire.contacts())
+            if(ev.spies().tech().antidoteLevel() > antiDote)
+                antiDote = ev.spies().tech().antidoteLevel();
+        if(antiDote >= t.maxDamage)
+            return 1;
+        else
+            return t.level() / antiDote + 1;
     }
     @Override
     public float baseValue(TechBlackHole t) {
