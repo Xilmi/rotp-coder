@@ -1,18 +1,13 @@
-Game-mechanics:
+UI:
 
-When invading a system that is in rebellion but got an uncolonizable environment due to an event the invaders no longer automatically die.
+When the oribital-bombardment-dialogue comes up while you are in orbit of a faction you are not currently at war with, it will no longer refer to them as enemies, asks it's question in a red text and has the "Yes"- and "No"-buttons swapped. This should avoid accidentally bombarding someone who you are at peace with.
+The game over-screen will now display the "Replay"- and "Exit"-buttons immediately instead of forcing you to wait until the fade-in-animation is completed.
 
 AI:
 
-No longer allowing hybrid-designs with more than 50% of their weapon-space used for bombs. This indirectly fixes an issue where the AI could get stuck redesigning ships every turn but not actually building any.
-Simplified decision-making when to use hybrids.
-The AI now can use uncolonized systems and systems of their enemy as staging points for their attacks.
-
-Legacy:
-
-There is now a new state when the AI doesn't have the following core-techs for going to war: A beam-weapon better than lasers, an engine faster than warp 1, a shield with more absorption-rate than 1.
-In this state the AI won't declare war. If someone declares war on an AI in that state, it will only make enough defensive ships to meet the fleet-strength of their enemy, only defend and try to rush the missing ones of the aforementioned techs.
-This state is also taken into consideration in a 1v1 and overrules the otherwise enforced immediate war-declaration.
-In a situation where the AI's potential tech-pace has slowed down enough while the core-techs are already available it will now use all systems that are neither poor nor have a research-bonus for ship-production.
-When deciding where to put fleets while no valid target is in range, opponents that can't be reached yet are no longer ignored. Instead their score is reduced compared to those that can. This drastically improves fleet behavior as those now stay near the front-line instead running back into the center of their owner's empire.
-No longer voting for empires that wouldn't actually be accepted as leader.
+AI now is much more reserved about trading away techs and will only trade away techs that are outdated to itself except to it's allies, where their behaviour doesn't change.
+The distance at which missiles should be fired now depends on how close to a corner the opponent already is.
+Fixed an issue where ships would not always kite in tactical combat when they should.
+Feeling threatened by a potential attack now also triggers trying to rush out the core-techs deemed required for successfull warfare.
+Will no longer all-in on fleet-building when technologically behind.
+Designs with bombs now can once again be built without having the core-techs deemed required for successfull warfare.
