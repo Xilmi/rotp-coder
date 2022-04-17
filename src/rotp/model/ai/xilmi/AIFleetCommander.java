@@ -109,14 +109,13 @@ public class AIFleetCommander implements Base, FleetCommander {
             {
                 enemyPower += enemy.militaryPowerLevel();
             }
-            if(techsLeft && enemyPower < empire.generalAI().smartPowerLevel())
+            if(techsLeft && (enemyPower < empire.generalAI().smartPowerLevel() || empire.diplomatAI().techLevelRank() > 1 || !empire.diplomatAI().minWarTechsAvailable()))
             {
                 maxMaintenance = sqrt(max(10, empire.tech().avgTechLevel())) * threatFactor;
-                if(!empire.diplomatAI().minWarTechsAvailable())
-                    maxMaintenance = 0;
             }
             else
                 maxMaintenance = 0.9f;
+            //System.out.println(galaxy().currentTurn()+" "+empire.name()+" maxMaintenance: "+maxMaintenance+ " enemyPower: "+enemyPower+" smartPower: "+empire.generalAI().smartPowerLevel()+" techrank: "+empire.diplomatAI().techLevelRank());
         }
         return maxMaintenance;
     }
@@ -496,8 +495,6 @@ public class AIFleetCommander implements Base, FleetCommander {
             {
                 if(empire.sv.isColonized(id))
                 {
-                    if(!empire.diplomatAI().minWarTechsAvailable())
-                        continue;
                     if(!empire.enemies().contains(currEmp))
                     {
                         continue;
@@ -1411,6 +1408,8 @@ public class AIFleetCommander implements Base, FleetCommander {
             if(currEmp != null && !currEmp.alliedWith(empire.id) && !empire.warEnemies().contains(currEmp))
                 continue;
             if(current.monster() != null)
+                continue;
+            if(empire.enemies().contains(currEmp) && bridgeHeadConfidence(target) < 1)
                 continue;
             UpdateSystemInfo(id);
             if(systemInfoBuffer.get(id).enemyFightingBc > bcValue(fl, false, true, false, false) + systemInfoBuffer.get(id).myFightingBc)
