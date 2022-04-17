@@ -47,7 +47,7 @@ public class DiplomacyTechOfferMenu extends DiplomacyRequestReply {
         {
             for (Tech t: unreviewedCounterTechs) {
                 //System.out.println(galaxy().currentTurn()+" "+diplomat().name()+" wants from "+requestee.name()+" the tech "+requestedTech.name() + " "+requestee.name()+" would like in return: "+t.name());
-                if (diplomat().diplomatAI().willingToTradeTech(t))
+                if (diplomat().diplomatAI().willingToTradeTech(t, v));
                 {
                     //now check if I would give them something for their counter
                     List<Tech> countersToCounter = diplomat().diplomatAI().techsRequestedForCounter(requestee, t);
