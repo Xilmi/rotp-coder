@@ -876,7 +876,7 @@ public class AIGeneral implements Base, General {
         {
             dr = min(dr, totalShipCost / (totalMissileBaseCost+totalShipCost));
         }
-        if(myFighterCost() < visibleEnemyFighterCost() || !empireInRange || !empire.diplomatAI().minWarTechsAvailable())
+        if(myFighterCost() < visibleEnemyFighterCost() || !empireInRange)
             dr = 1.0f;
         //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" dr: "+dr+" myFighterCost: "+myFighterCost()+" visibleEnemyFighterCost: "+visibleEnemyFighterCost());
         defenseRatio = dr;
