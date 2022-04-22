@@ -112,6 +112,8 @@ public class AIFleetCommander implements Base, FleetCommander {
             if(techsLeft && (enemyPower < empire.generalAI().smartPowerLevel() || empire.diplomatAI().techLevelRank() > 1 || !empire.diplomatAI().minWarTechsAvailable()))
             {
                 maxMaintenance = sqrt(max(10, empire.tech().avgTechLevel())) * threatFactor;
+                if(!empire.diplomatAI().minWarTechsAvailable())
+                    maxMaintenance = 0.025f;
             }
             else
                 maxMaintenance = 0.9f;
@@ -512,26 +514,10 @@ public class AIFleetCommander implements Base, FleetCommander {
             } 
             else if(bombardDamage > 0 && fleet.system() == current)
                 score = 0; //score will be 0 and the amount of ships that stay there will be handled via keepBC
-            if(fleet.system() != current)
+            if (bc > 0 && fleet.sysId() != current.id && (currEmp == null || empire.alliedWith(empire.sv.empId(id))))
             {
-                //System.out.print("\n"+galaxy().currentTurn()+" "+fleet.empire().name()+" Fleet at "+empire.sv.name(fleet.system().id)+" => "+empire.sv.name(current.id)+" score before fleetstr: "+score+" enemy-transports: "+transports+" val: "+bcValue(fleet, false, true, true, false));
-                float scoreMul = sqrt(2.0f);
-                if(enemyFightingBc > 0)
-                    scoreMul = min(scoreMul, bcValue(fleet, false, true, false, false) / enemyFightingBc);
-                if(baseBc > 0)
-                    scoreMul = min(scoreMul, bcValue(fleet, false, false, true, false) / baseBc);
-                scoreMul = max(scoreMul, 0.01f);
-                score *= scoreMul;
-                //System.out.print("\n"+galaxy().currentTurn()+" "+fleet.empire().name()+" Fleet at "+empire.sv.name(fleet.system().id)+" => "+empire.sv.name(current.id)+" score after fleetstr: "+score+" enemy-transports: "+transports);
-            }
-            else 
-            {
-                score *= sqrt(2.0f);
-                if (bc > 0 && fleet.sysId() != current.id && (currEmp == null || empire.alliedWith(empire.sv.empId(id))))
-                {
-                    if(!(currEmp == null && fleet.canColonizeSystem(current) && colonizerEnroute == 0))
-                        score /= bc;
-                }
+                if(!(currEmp == null && fleet.canColonizeSystem(current) && colonizerEnroute == 0))
+                    score /= bc;
             }
             if(handleEvent)
             {
