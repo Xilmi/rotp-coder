@@ -23,7 +23,7 @@ public interface ShipCaptain {
     void performTurn(CombatStack stack);
     StarSystem retreatSystem(StarSystem fr);
     boolean wantToRetreat(CombatStack stack);
-    boolean facingOverwhelmingForce(CombatStack stack);
+    //boolean facingOverwhelmingForce(CombatStack stack); //isn't called from outside, so no point for being in interface
     FlightPath pathTo(CombatStack st, int x, int y);
     
     //differentiation between behavior in Xilmi- and Base-AI

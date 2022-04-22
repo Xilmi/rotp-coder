@@ -797,7 +797,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
         for (CombatStack st: activeStacks) {
             for (CombatStackMissile miss: st.missiles()) {
                 if (miss.owner == currStack) 
-                    return false;
+                    return facingOverwhelmingForce(currStack, true);
                 if (miss.target == currStack && st.isShip())
                 {
                     float hitPct;
@@ -835,15 +835,14 @@ public class AIShipCaptain implements Base, ShipCaptain {
         if(!canTarget)
             return true;
         
-        if (facingOverwhelmingForce(currStack)) {
+        if (facingOverwhelmingForce(currStack, false)) {
             log(currStack.toString()+" retreating from overwhelming force");
             return true;
         }
 
         return false;
     }
-    @Override
-    public boolean facingOverwhelmingForce(CombatStack stack) {
+    public boolean facingOverwhelmingForce(CombatStack stack, boolean missileShooterMode) {
         // build list of allies & enemies
         allies().clear(); enemies().clear();
         for (CombatStack st : combat().activeStacks()) {
@@ -885,7 +884,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
                 {
                     if(empire.shipDesignerAI().bombingAdapted(friend.design()) < 0.5)
                         continue;
-                    float currentDamage = expectedPopLossPct(friend, enemy);
+                    float currentDamage = min(1.0f, expectedPopLossPct(friend, enemy));
                     dpsOnColony += currentDamage;
                     if(currentDamage > 0 && (friend.canCloak || friend.canTeleport()))
                         weCounterRepulsor = true;
@@ -1011,7 +1010,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
         //System.out.print("\n"+stack.mgr.system().name()+" "+stack.fullName()+" allyKillTime: "+allyKillTime+" enemyKillTime: "+enemyKillTime+" enemyKillTimeWithoutHeal: "+enemyKillTimeWithoutHeal);
         if (enemyKillTime == allyKillTime)
             return false;
-        else if (stack.num == 1 && friends.size() == 1)
+        else if (stack.num == 1 && friends.size() == 1 || missileShooterMode)
             return enemyKillTimeWithoutHeal < 2;
         else
             return allyKillTime > enemyKillTime;

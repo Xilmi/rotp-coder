@@ -371,7 +371,6 @@ public class AIShipCaptain implements Base, ShipCaptain {
 
         return false;
     }
-    @Override
     public boolean facingOverwhelmingForce(CombatStack stack) {
         // build list of allies & enemies
         allies().clear(); enemies().clear();

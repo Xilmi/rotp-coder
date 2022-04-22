@@ -149,7 +149,6 @@ public class CombatStack implements Base {
 
     public void performTurn()        { captain.performTurn(this); }
     public boolean wantToRetreat()   { return captain.wantToRetreat(this); }
-    public boolean facingOverwhelmingForce()   { return captain.facingOverwhelmingForce(this); }
 
     public float maxHits()          { return maxHits; }
     public float maxMove()          { return maxMove; }
