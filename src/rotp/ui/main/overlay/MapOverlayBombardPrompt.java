@@ -282,18 +282,12 @@ public class MapOverlayBombardPrompt extends MapOverlay {
             // yes button
             parent.addNextTurnControl(yesButton);
             yesButton.parent(this);
-            if(fleet.empire().atWarWith(sys.empId()))
-                yesButton.setBounds(x2, buttonY, buttonW, buttonH);
-            else
-                yesButton.setBounds(x3, buttonY, buttonW, buttonH);
+            yesButton.setBounds(x2, buttonY, buttonW, buttonH);
             yesButton.draw(parent.map(), g);
             // no button
             parent.addNextTurnControl(noButton);
             noButton.parent(this);
-            if(fleet.empire().atWarWith(sys.empId()))
-                noButton.setBounds(x3, buttonY, buttonW, buttonH);
-            else
-                noButton.setBounds(x2, buttonY, buttonW, buttonH);
+            noButton.setBounds(x3, buttonY, buttonW, buttonH);
             noButton.draw(parent.map(), g);
         }
 
