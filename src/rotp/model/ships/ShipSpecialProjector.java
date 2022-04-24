@@ -37,6 +37,12 @@ public final class ShipSpecialProjector extends ShipSpecial {
     @Override
     public boolean isWeapon()         { return true; }
     @Override
+    public float estimatedKills(CombatStack source, CombatStack target, int num) {
+        float armorMod = tech().armorMod(num);
+        float dam = max(1, target.maxHits*armorMod) * target.num;
+        return dam / target.maxHits * target.num;
+    }
+    @Override
     public void fireUpon(CombatStack source, CombatStack target, int count)      {
         float armorMod = tech().armorMod(count);
         if (target.isShip()) {
