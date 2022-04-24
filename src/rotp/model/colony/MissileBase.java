@@ -57,7 +57,7 @@ public class MissileBase implements Base, Serializable {
     }
     public float cost(Empire emp) {
         float cost = MINIMUM_COST;
-        if (armor != null)
+        /*if (armor != null)
             cost += armor.cost(emp);
         if (shield != null)
             cost += shield.cost(emp);
@@ -70,7 +70,7 @@ public class MissileBase implements Base, Serializable {
         if (computer != null)
             cost += computer.cost(emp);
         if (ecm != null)
-            cost += ecm.cost(emp);
+            cost += ecm.cost(emp);*/
         return cost;
     }
 }
