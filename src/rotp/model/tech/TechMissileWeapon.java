@@ -94,9 +94,9 @@ public final class TechMissileWeapon extends Tech {
             case 0: // NUCLEAR MISSILE
                 damage = 4;
                 speed = 3; speed2 = 2;
-                cost = 11;
-                size = 50;
-                power = 20;
+                cost = 7;
+                size = 33;
+                power = 13;
                 shots = 2;  shots2 = 5;
                 range = 6;  range2 = 4;
                 baseMissile = new MissileBaseMissile(this, 27);
@@ -105,9 +105,9 @@ public final class TechMissileWeapon extends Tech {
             case 1: // HYPER-V ROCKETS
                 damage = 6;
                 speed = 3.5f; speed2 = 2.5f;
-                size = 70;
-                power = 20;
-                cost = 12;
+                size = 47;
+                power = 13;
+                cost = 8;
                 shots = 2;  shots2 = 5;
                 range = 7;  range2 = 5;
                 baseMissile = new MissileBaseMissile(this, 38);
@@ -116,9 +116,9 @@ public final class TechMissileWeapon extends Tech {
             case 2: // HYPER-X ROCKETS
                 damage = 8;
                 speed = 3.5f; speed2 = 2.5f;
-                size = 100;
-                power = 20;
-                cost = 14;
+                size = 67;
+                power = 13;
+                cost = 9;
                 computer = 1;
                 shots = 2;  shots2 = 5;
                 range = 7;  range2 = 5;
@@ -128,9 +128,9 @@ public final class TechMissileWeapon extends Tech {
             case 3: // SCATTER PACK V ROCKETS
                 damage = 6;
                 speed = 3.5f; speed2 = 2.5f;
-                size = 115;
-                power = 50;
-                cost = 28;
+                size = 77;
+                power = 33;
+                cost = 19;
                 attacks = 5;
                 shots = 2;  shots2 = 5;
                 range = 7;  range2 = 5;
@@ -140,9 +140,9 @@ public final class TechMissileWeapon extends Tech {
             case 4: // MERCULITE MISSILES
                 damage = 10;
                 speed = 4; speed2 = 3;
-                size = 105;
-                power = 20;
-                cost = 15;
+                size = 70;
+                power = 13;
+                cost = 10;
                 computer = 2;
                 shots = 2;  shots2 = 5;
                 range = 8;  range2 = 6;
@@ -152,9 +152,9 @@ public final class TechMissileWeapon extends Tech {
             case 5: // STINGER MISSILES
                 damage = 15;
                 speed = 4.5f; speed2 = 3.5f;
-                size = 155;
-                power = 30;
-                cost = 25;
+                size = 103;
+                power = 20;
+                cost = 17;
                 computer = 3;
                 shots = 2;  shots2 = 5;
                 range = 9;  range2 = 7;
@@ -164,9 +164,9 @@ public final class TechMissileWeapon extends Tech {
             case 6: // SCATTER PACK VII MISSILES
                 damage = 10;
                 speed = 4; speed2 = 3;
-                cost = 50;
-                size = 230;
-                power = 50;
+                cost = 33;
+                size = 153;
+                power = 30;
                 computer = 2;
                 attacks = 7;
                 shots = 2;  shots2 = 5;
@@ -177,9 +177,9 @@ public final class TechMissileWeapon extends Tech {
             case 7: // PULSON MISSILES
                 damage = 20;
                 speed = 5; speed2 = 4;
-                cost = 25;
-                size = 160;
-                power = 40;
+                cost = 17;
+                size = 107;
+                power = 27;
                 computer = 4;
                 shots = 2;  shots2 = 5;
                 range = 10;  range2 = 8;
@@ -189,9 +189,9 @@ public final class TechMissileWeapon extends Tech {
             case 8: // HERCULAR MISSILES
                 damage = 25;
                 speed = 5.5f; speed2 = 4.5f;
-                size = 220;
-                power = 40;
-                cost = 30;
+                size = 147;
+                power = 27;
+                cost = 20;
                 computer = 5;
                 shots = 2;  shots2 = 5;
                 range = 10;  range2 = 9;
@@ -201,9 +201,9 @@ public final class TechMissileWeapon extends Tech {
             case 9: // ZEON MISSILES
                 damage = 30;
                 speed = 6; speed2 = 5;
-                size = 250;
-                power = 50;
-                cost = 36;
+                size = 167;
+                power = 33;
+                cost = 24;
                 computer = 6;
                 shots = 2;  shots2 = 5;
                 range = 10;  range2 = 10; // modnar: correct missile range
@@ -213,9 +213,9 @@ public final class TechMissileWeapon extends Tech {
             case 10: // SCATTER PACK X MISSILES
                 damage = 15;
                 speed = 4.5f; speed2 = 3.5f;
-                size = 250;
-                power = 50;
-                cost = 36;
+                size = 167;
+                power = 33;
+                cost = 24;
                 computer = 3;
                 attacks = 10;
                 shots = 2;  shots2 = 5;
