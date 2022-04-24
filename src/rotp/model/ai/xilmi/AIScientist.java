@@ -650,11 +650,10 @@ public class AIScientist implements Base, Scientist {
     }
     @Override
     public float baseValue(TechFuelRange t) {
-        TechFuelRange curr = empire.tech().topFuelRangeTech();
         float val = 2;
         if(empire.fleetCommanderAI().inExpansionMode())
         {
-            val += 2;
+            val += 1;
         }
         return val;
     }
