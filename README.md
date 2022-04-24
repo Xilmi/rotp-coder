@@ -1,13 +1,22 @@
+Balance (Experimental):
+
+All missiles got their size, power-requirements and cost reduced to 2/3rd of their previous values, allowing to fit more of them onto a ship.
+Missile-bases now have a fixed cost of 120 BC.
+
+Governor:
+
+Will no longer send auto-transports to colonies further than 8 turns away.
+
 UI:
 
-When the oribital-bombardment-dialogue comes up while you are in orbit of a faction you are not currently at war with, it will no longer refer to them as enemies, asks it's question in a red text and has the "Yes"- and "No"-buttons swapped. This should avoid accidentally bombarding someone who you are at peace with.
-The game over-screen will now display the "Replay"- and "Exit"-buttons immediately instead of forcing you to wait until the fade-in-animation is completed.
+Reversed swapping of "Yes"- and "No"-button on bombard-dialogue when orbiting non-hostile empire's colonies.
 
 AI:
 
-AI now is much more reserved about trading away techs and will only trade away techs that are outdated to itself except to it's allies, where their behaviour doesn't change.
-The distance at which missiles should be fired now depends on how close to a corner the opponent already is.
-Fixed an issue where ships would not always kite in tactical combat when they should.
-Feeling threatened by a potential attack now also triggers trying to rush out the core-techs deemed required for successfull warfare.
-Will no longer all-in on fleet-building when technologically behind.
-Designs with bombs now can once again be built without having the core-techs deemed required for successfull warfare.
+Improved logic about when ships with missiles will retreat or not.
+Will once again offer a tech for a trade again if there's a new tech it could trade it for.
+When getting into a war before having basic war-techs will now rather try to risk rushing the techs instead of wasting resources on building lots of base-tech-ships.
+Simplified tech-selection-logic. This is experimental and likely worse than before.
+Fixed an issue where current colonization-tech was considered obsolete.
+Will no longer send transports to colonies further than 8 turns away.
+Fixed that projector-specials weren't taken into account for retreat-logic-calculation.
