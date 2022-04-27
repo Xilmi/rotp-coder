@@ -594,6 +594,9 @@ public class AIScientist implements Base, Scientist {
     }
     @Override
     public float baseValue(TechBombWeapon t) {
+        for(Tech o : t.cat.techsAvailableForResearch())
+            if(o.isType(t.techType) && o.level() > t.level())
+                return 0;
         return 3;
     }
     @Override
@@ -602,6 +605,9 @@ public class AIScientist implements Base, Scientist {
     }
     @Override
     public float baseValue(TechCloning t) {
+        for(Tech o : t.cat.techsAvailableForResearch())
+            if(o.isType(t.techType) && o.level() > t.level())
+                return 0;
         return 3;
     }
     @Override
@@ -612,6 +618,9 @@ public class AIScientist implements Base, Scientist {
     public float baseValue(TechControlEnvironment t) {
         if (empire.ignoresPlanetEnvironment())
             return 0;
+        for(Tech o : t.cat.techsAvailableForResearch())
+            if(o.isType(t.techType) && o.level() > t.level())
+                return 0;
         List<StarSystem> possible = empire.uncolonizedPlanetsInRange(empire.shipRange());
         List<StarSystem> newPossible = empire.uncolonizedPlanetsInShipRange(t.environment());
         float newPlanets = newPossible.size() - possible.size();
@@ -626,6 +635,9 @@ public class AIScientist implements Base, Scientist {
     }
     @Override
     public float baseValue(TechDeflectorShield t) {
+        for(Tech o : t.cat.techsAvailableForResearch())
+            if(o.isType(t.techType) && o.level() > t.level())
+                return 0;
         return 3;
     }
     @Override
@@ -634,22 +646,37 @@ public class AIScientist implements Base, Scientist {
     }
     @Override
     public float baseValue(TechECMJammer t) {
+        for(Tech o : t.cat.techsAvailableForResearch())
+            if(o.isType(t.techType) && o.level() > t.level())
+                return 0;
         return 1;
     }
     @Override
     public float baseValue(TechEcoRestoration t) {
+        for(Tech o : t.cat.techsAvailableForResearch())
+            if(o.isType(t.techType) && o.level() > t.level())
+                return 0;
         return 3;
     }
     @Override
     public float baseValue(TechEngineWarp t) {
+        for(Tech o : t.cat.techsAvailableForResearch())
+            if(o.isType(t.techType) && o.level() > t.level())
+                return 0;
         return 3;
     }
     @Override
     public float baseValue(TechEnergyPulsar t) {
+        for(Tech o : t.cat.techsAvailableForResearch())
+            if(o.isType(t.techType) && o.level() > t.level())
+                return 0;
         return 1;
     }
     @Override
     public float baseValue(TechFuelRange t) {
+        for(Tech o : t.cat.techsAvailableForResearch())
+            if(o.isType(t.techType) && o.level() > t.level())
+                return 0;
         float val = 2;
         if(empire.fleetCommanderAI().inExpansionMode())
         {
@@ -691,32 +718,53 @@ public class AIScientist implements Base, Scientist {
     }
     @Override
     public float baseValue(TechImprovedIndustrial t) {
+        for(Tech o : t.cat.techsAvailableForResearch())
+            if(o.isType(t.techType) && o.level() > t.level())
+                return 0;
         return 3;
     }
     @Override
     public float baseValue(TechImprovedTerraforming t) {
+        for(Tech o : t.cat.techsAvailableForResearch())
+            if(o.isType(t.techType) && o.level() > t.level())
+                return 0;
         return 3;
     }
     @Override
     public float baseValue(TechIndustrialWaste t) {
         if (empire.ignoresPlanetEnvironment())
             return 0;
+        for(Tech o : t.cat.techsAvailableForResearch())
+            if(o.isType(t.techType) && o.level() > t.level())
+                return 0;
         return 3;
     }
     @Override
     public float baseValue(TechMissileShield t) {
+        for(Tech o : t.cat.techsAvailableForResearch())
+            if(o.isType(t.techType) && o.level() > t.level())
+                return 0;
         return 1;
     }
     @Override
     public float baseValue(TechMissileWeapon t) {
+        for(Tech o : t.cat.techsAvailableForResearch())
+            if(o.isType(t.techType) && o.level() > t.level())
+                return 0;
         return 2;
     }
     @Override
     public float baseValue(TechPersonalShield t) {
+        for(Tech o : t.cat.techsAvailableForResearch())
+            if(o.isType(t.techType) && o.level() > t.level())
+                return 0;
         return 3;
     }
     @Override
     public float baseValue(TechPlanetaryShield t) {
+        for(Tech o : t.cat.techsAvailableForResearch())
+            if(o.isType(t.techType) && o.level() > t.level())
+                return 0;
         return 3;
     }
     @Override
@@ -725,30 +773,52 @@ public class AIScientist implements Base, Scientist {
     }
     @Override
     public float baseValue(TechRoboticControls t) {
+        for(Tech o : t.cat.techsAvailableForResearch())
+            if(o.isType(t.techType) && o.level() > t.level())
+                return 0;
         return 4;
     }
     @Override
     public float baseValue(TechScanner t) {
+        for(Tech o : t.cat.techsAvailableForResearch())
+            if(o.isType(t.techType) && o.level() > t.level())
+                return 0;
         return 2; //more important than ECM for proper attack-fleet-sizing and avoiding having to retreat
     }
     @Override
     public float baseValue(TechShipInertial t) {
+        for(Tech o : t.cat.techsAvailableForResearch())
+            if(o.isType(t.techType) && o.level() > t.level())
+                return 0;
         return 2;
     }
     @Override
     public float baseValue(TechShipNullifier t) {
+        for(Tech o : t.cat.techsAvailableForResearch())
+            if(o.isType(t.techType) && o.level() > t.level())
+                return 0;
         return 1;
     }
     @Override
     public float baseValue(TechShipWeapon t) {
+        for(Tech o : t.cat.techsAvailableForResearch())
+            if(o.isType(t.techType) && o.level() > t.level())
+                return 0;
         TechShipWeapon curr = empire.tech().topShipWeaponTech();
         float val = 3;
         if(curr != null && curr.damageHigh() <= 4 && t.damageHigh() > 4)
+            val += 1;
+        if(t.damageHigh() <= 4)
+            val = 0;
+        if(t.range > 1 || t.heavyAllowed)
             val += 1;
         return val;
     }
     @Override
     public float baseValue(TechSoilEnrichment t) {
+        for(Tech o : t.cat.techsAvailableForResearch())
+            if(o.isType(t.techType) && o.level() > t.level())
+                return 0;
         if (empire.ignoresPlanetEnvironment())
             return 0;
         return 4;
@@ -763,6 +833,9 @@ public class AIScientist implements Base, Scientist {
     }
     @Override
     public float baseValue(TechStreamProjector t) {
+        for(Tech o : t.cat.techsAvailableForResearch())
+            if(o.isType(t.techType) && o.level() > t.level())
+                return 0;
         return 3;
     }
     @Override
