@@ -56,6 +56,7 @@ public class StartModOptionsUI extends BasePanel implements MouseListener, Mouse
     BaseText randomTechStartText;
     BaseText customDifficultyText;
     BaseText dynamicDifficultyText;
+    BaseText missileSizeModifierText;
     
     public StartModOptionsUI() {
         init0();
@@ -71,6 +72,7 @@ public class StartModOptionsUI extends BasePanel implements MouseListener, Mouse
         randomTechStartText = new BaseText(this, false, 20, 20,-78,  textC, textC, hoverC, depressedC, textC, 0, 0, 0);
         customDifficultyText = new BaseText(this, false, 20, 20,-78,  textC, textC, hoverC, depressedC, textC, 0, 0, 0);
         dynamicDifficultyText = new BaseText(this, false, 20, 20,-78,  textC, textC, hoverC, depressedC, textC, 0, 0, 0);
+        missileSizeModifierText = new BaseText(this, false, 20, 20,-78,  textC, textC, hoverC, depressedC, textC, 0, 0, 0);
         addMouseListener(this);
         addMouseMotionListener(this);
         addMouseWheelListener(this);
@@ -84,6 +86,7 @@ public class StartModOptionsUI extends BasePanel implements MouseListener, Mouse
         randomTechStartText.displayText(randomTechStartStr());
         customDifficultyText.displayText(customDifficultyStr());
         dynamicDifficultyText.displayText(dynamicDifficultyStr());
+        missileSizeModifierText.displayText(missileSizeModifierStr());
     }
     public void open(BasePanel p) {
         parent = p;
@@ -287,6 +290,23 @@ public class StartModOptionsUI extends BasePanel implements MouseListener, Mouse
             y3 += lineH;
             drawString(g,line, x2+s20, y3);
         }
+        
+        y2 += (h2+s20);
+        g.setColor(SystemPanel.blackText);
+        g.drawRect(x2, y2, w2, h2);
+        g.setPaint(GameUI.settingsSetupBackground(w));
+        g.fillRect(x2+s10, y2-s10, missileSizeModifierText.stringWidth(g)+s10,s30);
+        missileSizeModifierText.setScaledXY(x2+s20, y2+s7);
+        missileSizeModifierText.draw(g);
+        desc = text("SETTINGS_MOD_MISSILE_SIZE_MODIFIER_DESC");
+        g.setColor(SystemPanel.blackText);
+        g.setFont(descFont);
+        lines = this.wrappedLines(g,desc, w2-s30);
+        y3 = y2+s10;
+        for (String line: lines) {
+            y3 += lineH;
+            drawString(g,line, x2+s20, y3);
+        }
 
         g.setStroke(prev);
 
@@ -358,6 +378,10 @@ public class StartModOptionsUI extends BasePanel implements MouseListener, Mouse
         String opt = text(yesOrNo(UserPreferences.dynamicDifficulty()));
         return text("SETTINGS_MOD_DYNAMIC_DIFFICULTY", opt)+"   ";
     }
+    private String missileSizeModifierStr() {
+        String opt = String.format("%d",(int)(UserPreferences.missileSizeModifier() * 100));
+        return text("SETTINGS_MOD_MISSILE_SIZE_MODIFIER", opt)+"   ";
+    }
 
     private void toggleAlwaysStarGates() {
         softClick();
@@ -403,6 +427,10 @@ public class StartModOptionsUI extends BasePanel implements MouseListener, Mouse
         UserPreferences.toggleDynamicDifficulty();
         dynamicDifficultyText.repaint(dynamicDifficultyStr());
     }
+    private void scrollMissileSizeModifier(float f) {
+        UserPreferences.toggleMissileSizeModifier(f);
+        missileSizeModifierText.repaint(missileSizeModifierStr());
+    }
 
     @Override
     public void keyPressed(KeyEvent e) {
@@ -440,6 +468,8 @@ public class StartModOptionsUI extends BasePanel implements MouseListener, Mouse
             hoverBox = customDifficultyText.bounds();
         else if (dynamicDifficultyText.contains(x,y))
             hoverBox = dynamicDifficultyText.bounds();
+        else if (missileSizeModifierText.contains(x, y))
+            hoverBox = missileSizeModifierText.bounds();
         else if (okBox.contains(x,y))
             hoverBox = okBox;
         else if (defaultBox.contains(x,y))
@@ -462,6 +492,8 @@ public class StartModOptionsUI extends BasePanel implements MouseListener, Mouse
                 customDifficultyText.mouseExit();
             else if (prevHover == dynamicDifficultyText.bounds())
                 dynamicDifficultyText.mouseExit();
+            else if (prevHover == missileSizeModifierText.bounds())
+                missileSizeModifierText.mouseExit();
             if (hoverBox == alwaysStarGatesText.bounds())
                 alwaysStarGatesText.mouseEnter();
             else if (hoverBox == alwaysThoriumText.bounds())
@@ -478,6 +510,8 @@ public class StartModOptionsUI extends BasePanel implements MouseListener, Mouse
                 customDifficultyText.mouseEnter();
             else if (hoverBox == dynamicDifficultyText.bounds())
                 dynamicDifficultyText.mouseEnter();
+            else if (hoverBox == missileSizeModifierText.bounds())
+                missileSizeModifierText.mouseEnter();
             if (prevHover != null)
                 repaint(prevHover);
             if (hoverBox != null)
@@ -549,6 +583,26 @@ public class StartModOptionsUI extends BasePanel implements MouseListener, Mouse
                     scrollCustomDifficulty(-20);
                 else
                     scrollCustomDifficulty(-1); 
+                return;
+            }
+        }
+        if (hoverBox == missileSizeModifierText.bounds()) {
+            if (up) {
+                if (shiftPressed) 
+                    scrollMissileSizeModifier(0.05f);
+                else if (ctrlPressed)
+                    scrollMissileSizeModifier(0.2f);
+                else
+                    scrollMissileSizeModifier(0.01f); 
+                return;
+            }
+            else {
+                if (shiftPressed) 
+                    scrollMissileSizeModifier(-0.05f);
+                else if (ctrlPressed)
+                    scrollMissileSizeModifier(-0.2f);
+                else
+                    scrollMissileSizeModifier(-0.01f); 
                 return;
             }
         }

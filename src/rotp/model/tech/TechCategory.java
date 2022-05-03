@@ -251,6 +251,7 @@ public final class TechCategory implements Base, Serializable {
         for (int i=0; i<baseCat.possibleTechs.size(); i++) {
             String id = baseCat.possibleTechs.get(i);
             Tech t = tech(id);
+            t.init();
             if (t.free && !tree.spy())
                 learnTech(id);
         }

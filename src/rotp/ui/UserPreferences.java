@@ -74,6 +74,7 @@ public class UserPreferences {
     private static boolean randomTechStart = false; // modnar: add option to start all Empires with 2 techs, no Artifacts
     private static boolean battleScout = false; // modnar: add battleScout option to give player super Scout design
     private static int companionWorlds = 0; // modnar: add option to start game with additional colonies
+    private static float missileSizeModifier = 2.0f/3.0f; //xilmi: add option to buff missiles by making them take less space and cost
     private static boolean autoColonize = false;
     private static boolean divertColonyExcessToResearch = true;
     private static boolean disableAdvisor = true;
@@ -126,6 +127,7 @@ public class UserPreferences {
         randomTechStart = false; // modnar: add option to start all Empires with 2 techs, no Artifacts
         battleScout = false; // modnar: add battleScout option to give player super Scout design
         companionWorlds = 0; // modnar: add option to start game with additional colonies
+        missileSizeModifier = 2.0f/3.0f;
         save();
     }
     public static void setForNewGame() {
@@ -154,6 +156,11 @@ public class UserPreferences {
             customDifficulty = 20;
         else
             customDifficulty += i;
+        save();
+    }
+    public static void toggleMissileSizeModifier(float f) {
+        float newVal = missileSizeModifier + f;
+        missileSizeModifier = Math.max(0.1f, Math.min(1, newVal));
         save();
     }
     public static void toggleDynamicDifficulty()     { dynamicDifficulty = !dynamicDifficulty; save(); }
@@ -249,6 +256,7 @@ public class UserPreferences {
     public static boolean randomTechStart()  { return randomTechStart; } // modnar: add option to start all Empires with 2 techs, no Artifacts
     public static boolean battleScout()      { return battleScout; } // modnar: add battleScout option to give player super Scout design
     public static int companionWorlds()      { return companionWorlds; } // modnar: add option to start game with additional colonies
+    public static float missileSizeModifier() { return missileSizeModifier; } 
     public static int screenSizePct()       { return screenSizePct; }
     public static void screenSizePct(int i) { setScreenSizePct(i); }
     public static String saveDirectoryPath() {
@@ -351,6 +359,7 @@ public class UserPreferences {
             out.println(keyFormat("RANDOM_TECH_START")+ yesOrNo(randomTechStart)); // modnar: add option to start all Empires with 2 techs, no Artifacts
             out.println(keyFormat("BATTLE_SCOUT")+ yesOrNo(battleScout)); // modnar: add battleScout option to give player super Scout design
             out.println(keyFormat("COMPANION_WORLDS")+ companionWorlds); // modnar: add option to start game with additional colonies
+            out.println(keyFormat("MISSILE_SIZE_MODIFIER")+ missileSizeModifier);
             out.println(keyFormat("LANGUAGE")+ languageDir());
             return 0;
         }
@@ -410,6 +419,7 @@ public class UserPreferences {
             case "RANDOM_TECH_START": randomTechStart = yesOrNo(val); return; // modnar: add option to start all Empires with 2 techs, no Artifacts
             case "BATTLE_SCOUT": battleScout = yesOrNo(val); return; // modnar: add battleScout option to give player super Scout design
             case "COMPANION_WORLDS": setNumCompanionWorlds(val); return; // modnar: add option to start game with additional colonies
+            case "MISSILE_SIZE_MODIFIER": setMissileSizeModifier(val); return;
             case "LANGUAGE":     selectLanguage(val); return;
             default:
                 break;
@@ -433,6 +443,10 @@ public class UserPreferences {
     private static void setCustomDifficulty(String s) {
         int val = Integer.valueOf(s);
         customDifficulty = Math.max(20, Math.min(500, val)); // custom difficulty range: 20% to 500%
+    }
+    private static void setMissileSizeModifier(String s) {
+        float val = Float.valueOf(s);
+        missileSizeModifier = Math.max(0.1f, Math.min(1, val));
     }
     private static void setMusicVolume(String s) {
         int val = Integer.valueOf(s);
