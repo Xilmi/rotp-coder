@@ -25,6 +25,7 @@ import rotp.model.empires.SystemView;
 import rotp.model.galaxy.StarSystem;
 import rotp.model.game.GameSession;
 import rotp.model.planet.Planet;
+import rotp.ui.UserPreferences;
 import rotp.util.Base;
 
 public class AIGovernor implements Base, Governor {
@@ -381,6 +382,8 @@ public class AIGovernor implements Base, Governor {
             baseMultiplier *= 2.5f;
         else if (empire.sv.isRich(sys.id))
             baseMultiplier *= 1.5f;
+        
+        baseMultiplier /= UserPreferences.missileSizeModifier();
         
         if (sys == null)  // this can happen at startup
             col.defense().maxBases(0);
