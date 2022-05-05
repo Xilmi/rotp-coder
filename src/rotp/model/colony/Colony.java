@@ -199,6 +199,16 @@ public final class Colony implements Base, IMappedObject, Serializable {
         defense().updateMissileBase();
         defense().maxBases(empire().defaultMaxBases());
         cleanupAllocation = -1;
+
+        // empires of orbiting fleets should see ownership change
+        StarSystem sys = starSystem();
+        List<ShipFleet> fleets = sys.orbitingFleets();
+        for (ShipFleet fl: fleets) {
+            Empire flEmp = fl.empire();
+            if (flEmp != empire)
+                flEmp.sv.refreshFullScan(sys.id);
+        }
+
     }
     public boolean isBuildingShip() { return shipyard().design() instanceof ShipDesign; }
     private void buildFortress()    { fortressNum = empire.race().randomFortress(); }
@@ -1372,8 +1382,16 @@ public final class Colony implements Base, IMappedObject, Serializable {
         rebellion = false;
         clearReserveIncome();
         clearTransport();
-        loser.sv.refreshFullScan(starSystem().id);
-        empire.sv.refreshFullScan(starSystem().id);
+        loser.sv.refreshFullScan(sys.id);
+        empire.sv.refreshFullScan(sys.id);
+        
+        // empires of orbiting fleets should see ownership change
+        List<ShipFleet> fleets = sys.orbitingFleets();
+        for (ShipFleet fl: fleets) {
+            Empire flEmp = fl.empire();
+            if ((flEmp != loser) && (flEmp != empire))
+                flEmp.sv.refreshFullScan(sys.id);
+        }
 
         // if system was captured, clear shipbuilding, we don't want systems just captured building ships
         // Do that if governor is on by default, otherwise stick to default behaviour
