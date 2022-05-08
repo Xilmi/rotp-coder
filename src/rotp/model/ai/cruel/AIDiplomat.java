@@ -234,7 +234,7 @@ public class AIDiplomat implements Base, Diplomat {
     public DiplomaticReply receiveCounterOfferTech(Empire diplomat, Tech offeredTech, Tech requestedTech) {
         EmpireView view = empire.viewForEmpire(diplomat);
         view.embassy().resetTechTimer();
-        System.out.println(empire.galaxy().currentTurn()+" "+empire.name()+" gets "+offeredTech.name()+" Trade-Value: "+offeredTech.tradeValue(empire) + " for "+requestedTech.name()+" "+requestedTech.tradeValue(empire)+" from "+diplomat.name());
+        //System.out.println(empire.galaxy().currentTurn()+" "+empire.name()+" gets "+offeredTech.name()+" Trade-Value: "+offeredTech.tradeValue(empire) + " for "+requestedTech.name()+" "+requestedTech.tradeValue(empire)+" from "+diplomat.name());
         DiplomaticIncident inc = view.embassy().exchangeTechnology(offeredTech, requestedTech);
         return view.otherView().accept(DialogueManager.ACCEPT_TECH_EXCHANGE, inc);
     }
@@ -1983,11 +1983,27 @@ public class AIDiplomat implements Base, Diplomat {
     @Override
     public boolean minWarTechsAvailable()
     {
-        if(empire.shipLab().fastestEngine().warp() < 2)
+        float currentComputerCost = 0;
+        float currentPropulsionCost = 0;
+        float currentWeaponCost = 0;
+        float currentForceFieldCost = 0;
+        
+        if(empire.tech().tech(empire.tech().computer().currentTech()) != null)
+            currentComputerCost = empire.tech().computer().costForTech(empire.tech().tech(empire.tech().computer().currentTech()));
+        if(empire.tech().tech(empire.tech().propulsion().currentTech()) != null)
+            currentPropulsionCost = empire.tech().propulsion().costForTech(empire.tech().tech(empire.tech().propulsion().currentTech()));
+        if(empire.tech().tech(empire.tech().weapon().currentTech()) != null)
+            currentWeaponCost = empire.tech().weapon().costForTech(empire.tech().tech(empire.tech().weapon().currentTech()));
+        if(empire.tech().tech(empire.tech().forceField().currentTech()) != null)
+            currentForceFieldCost = empire.tech().forceField().costForTech(empire.tech().tech(empire.tech().forceField().currentTech()));
+        
+        if(empire.tech().topBattleComputerTech().level() < 2 && currentComputerCost < empire.totalIncome() * 5)
             return false;
-        if(empire.tech().topShipWeaponTech().damageHigh() <= 4)
+        if(empire.shipLab().fastestEngine().warp() < 2 && currentPropulsionCost < empire.totalIncome() * 5)
             return false;
-        if(empire.tech().topDeflectorShieldTech().level() < 2)
+        if(empire.tech().topShipWeaponTech().damageHigh() <= 4 && currentWeaponCost < empire.totalIncome() * 5)
+            return false;
+        if(empire.tech().topDeflectorShieldTech().level() < 2 && currentForceFieldCost < empire.totalIncome() * 5)
             return false;
         return true;
     }
