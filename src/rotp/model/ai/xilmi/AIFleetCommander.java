@@ -1169,7 +1169,7 @@ public class AIFleetCommander implements Base, FleetCommander {
         
         ShipDesign Repeller = null;
         
-        if(empire.generalAI().needScoutRepellers())
+        if(empire.generalAI().needScoutRepellers(false))
             Repeller = empire.shipDesignerAI().BestDesignToRepell();
         //when the system is colonizable we'll also leave at least one ship that can fight behind
         if(!fl.isInTransit() && !fl.system().isColonized() && empire.canColonize(fl.system()))

@@ -264,7 +264,7 @@ public class AIGeneral implements Base, General {
         if (!empire.sv.inShipRange(sysId))
             return;
 
-        if(needScoutRepellers() && (sys.empire() == empire || !empire.sv.isColonized(sysId)) && !sys.hasMonster())
+        if(needScoutRepellers(false) && (sys.empire() == empire || !empire.sv.isColonized(sysId)) && !sys.hasMonster())
         {
             //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" making repel-plan for "+sys.name());
             if(empire.shipDesignerAI().BestDesignToRepell() != null)
@@ -1212,11 +1212,11 @@ public class AIGeneral implements Base, General {
         return center;
     }
     @Override
-    public boolean needScoutRepellers()
+    public boolean needScoutRepellers(boolean potential)
     {
         if(empire.tech().topFuelRangeTech().unlimited == true || empire.scanPlanets() || !empire.shipLab().needScouts)
             return false;
-        if(empire.enemies().isEmpty() && !empire.enemyFleets().isEmpty())
+        if((empire.enemies().isEmpty() && !empire.enemyFleets().isEmpty()) || potential)
             return true;
         return false;
     }

@@ -139,11 +139,11 @@ public class AIShipDesigner implements Base, ShipDesigner {
                 }
                 float keepScore = 1;
                 //ail: for colony-ship we don't care about available space but engine- and colony-base-discrepancy
-                if(d.isColonyShip())
+                if(d.hasColonySpecial())
                 {
                     keepScore = ((float)d.engine().warp() / (float)lab().fastestEngine().warp()) * ((float)(d.special(0).tech()).level / (float)bestColonySpecial().tech().level);
                 }
-                else if(d.isScout())
+                else if(BestDesignToScout() == d)
                 {
                     keepScore = (float)d.engine().warp() / (float)lab().fastestEngine().warp();
                 }
@@ -206,7 +206,7 @@ public class AIShipDesigner implements Base, ShipDesigner {
         // NEW DESIGN IS BETTER THAN CURRENT
         if (slot >= 0) {
             lab.setScoutDesign(newScout, slot);
-            currDesign.becomeObsolete(OBS_SCOUT_TURNS);
+            //currDesign.becomeObsolete(OBS_SCOUT_TURNS);
             //System.out.print("\n"+empire.name()+" "+newDesign.name()+" put in slot "+slot);
         }
         else
@@ -256,7 +256,7 @@ public class AIShipDesigner implements Base, ShipDesigner {
         // if there is a slot available, use it for the new design
         if (slot >= 0) {
             lab.setColonyDesign(newDesign, slot);
-            currDesign.becomeObsolete(OBS_COLONY_TURNS);
+            //currDesign.becomeObsolete(OBS_COLONY_TURNS);
             //System.out.print("\n"+empire.name()+" "+newDesign.name()+" put in slot "+slot);
             return;
         }
@@ -362,7 +362,7 @@ public class AIShipDesigner implements Base, ShipDesigner {
         if (slot >= 0) {
             log("Slot available: Bomber upgrade chance:"+upgradeChance);
             lab.setBomberDesign(newDesign, slot);
-            currDesign.becomeObsolete(OBS_BOMBER_TURNS);
+            //currDesign.becomeObsolete(OBS_BOMBER_TURNS);
         }
         else
         {
@@ -483,7 +483,7 @@ public class AIShipDesigner implements Base, ShipDesigner {
         if (slot >= 0) {
             log("Slot available: Fighter upgrade chance:"+upgradeChance);
             lab.setFighterDesign(newDesign, slot);
-            currDesign.becomeObsolete(OBS_FIGHTER_TURNS);
+            //currDesign.becomeObsolete(OBS_FIGHTER_TURNS);
         }
         else
         {
@@ -896,7 +896,9 @@ public class AIShipDesigner implements Base, ShipDesigner {
         ShipDesignLab lab = lab();
         for (int slot=0;slot<ShipDesignLab.MAX_DESIGNS;slot++) {
             ShipDesign d = lab.design(slot);
-            //System.out.print("\n"+empire.name()+" cheking "+d.name());
+            //System.out.print("\n"+empire.name()+" cheking "+d.name()+" already obsolete: "+d.obsolete());
+            if(!d.active())
+                continue;
             if(d.obsolete())
                 continue;
             if(d == BestDesignToColonize())
@@ -907,7 +909,7 @@ public class AIShipDesigner implements Base, ShipDesigner {
                 continue;
             if(d == BestDesignToScout() && empire.shipLab().needScouts)
                 continue;
-            if(d == BestDesignToRepell() && (empire.generalAI().needScoutRepellers() || !empire.hasAnyContact()))
+            if(d == BestDesignToRepell() && empire.generalAI().needScoutRepellers(true))
                 continue;
             //System.out.print("\n"+empire.name()+" "+d.name()+" is marked obsolete.");
             d.obsolete(true);
