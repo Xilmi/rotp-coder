@@ -1,14 +1,12 @@
-Game-Options / Balance:
+General:
 
-The size-, cost- and power-usage of missiles as well as the cost of missile-bases can now be altered in the MOD Options. The range is between 10% and 100%. Referring to the size/cost/power-usage in the base-game. The default is set to 66% for now.
+Include not yet merged changes from official 1.04.
 
 AI:
 
-Rookie:
+Legacy:
 
-Missile-size-factor is now taken into account for how many missile-bases to build. The lower the multiplier the more bases will be built.
-
-Advanced/Legacy:
-
-Systems that have built shields will now also build at least one missile-base. If missile-bases are cheap enough more than one may be built.
-Improvements to the new tech-selection-logic: When there's several options for the same tech-type, the one with the highest level is prefered.
+Will now immediately start getting essential war-techs when in contact with opponent instead of only doing so when wanting to go to war or opponent having declared war.
+When one or more of the essential war-techs are too expensive (more than 5 times the total production of the empire), which usually happens if they are not present in the first two tiers, they are no longer seen as requirement for commiting to military.
+Fixed an issues that prevented holding on to a cheap fighter-design to repell scouts.
+Fixed a rare issue where the AI could end up spending in ships while not actually producing ships.
