@@ -309,7 +309,7 @@ public class AIScientist implements Base, Scientist {
                 empire.tech().weapon().adjustAllocation(-9);
             }
         }
-        else if((!empire.enemies().isEmpty() || empire.generalAI().sensePotentialAttack()) && !empire.diplomatAI().minWarTechsAvailable())
+        else if(!empire.diplomatAI().minWarTechsAvailable())
         {
             empire.tech().computer().allocation(0);
             empire.tech().construction().allocation(0);
