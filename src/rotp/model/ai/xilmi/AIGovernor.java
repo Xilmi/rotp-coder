@@ -252,7 +252,8 @@ public class AIGovernor implements Base, Governor {
         boolean buildingVitalShip = false;
         //Mostly for Sakkra and Meklar, so they expand quicker when they can 72% pop is where the growth drops below 80%
         if(col.shipyard().desiredShips() > 0
-                && (col.currentProductionCapacity() > 0.5f || col.production() > col.shipyard().design().cost()))
+                && (col.currentProductionCapacity() > 0.5f || col.production() > col.shipyard().design().cost())
+                && col.shipyard().design().active())
         {
             workerGoal = 0;
             buildingVitalShip = true;
