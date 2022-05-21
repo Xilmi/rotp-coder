@@ -31,6 +31,7 @@ import rotp.model.empires.Empire;
 import rotp.model.empires.EmpireView;
 import rotp.model.galaxy.Galaxy;
 import rotp.model.galaxy.Location;
+import rotp.model.galaxy.Ship;
 import rotp.model.galaxy.ShipFleet;
 import rotp.model.galaxy.StarSystem;
 import rotp.model.galaxy.Transport;
@@ -112,7 +113,7 @@ public class AIFleetCommander implements Base, FleetCommander {
             if(techsLeft && (enemyPower < empire.generalAI().smartPowerLevel() || empire.diplomatAI().techLevelRank() > 1 || !empire.diplomatAI().minWarTechsAvailable()))
             {
                 maxMaintenance = sqrt(max(10, empire.tech().avgTechLevel())) * threatFactor;
-                if(!empire.diplomatAI().minWarTechsAvailable())
+                if(!empire.diplomatAI().minWarTechsAvailable() && !incomingInvasion() && !underSiege())
                     maxMaintenance = 0.025f;
             }
             else
@@ -470,6 +471,8 @@ public class AIFleetCommander implements Base, FleetCommander {
                 //attacking is a lot better than defending, so defending should have a lower score in general. Unless there's incoming transports, that is.
                 if(transports == 0)
                     score *= bcValue(fleet, false, true, false, false) / fleet.bcValue();
+                else
+                    score *= 1 + transports / current.population();
                 if (currEmp == empire && current.hasEvent()) {
                     if (current.eventKey().equals("MAIN_PLANET_EVENT_PIRACY")) {
                         handleEvent = true;
@@ -514,7 +517,7 @@ public class AIFleetCommander implements Base, FleetCommander {
             } 
             else if(bombardDamage > 0 && fleet.system() == current)
                 score = 0; //score will be 0 and the amount of ships that stay there will be handled via keepBC
-            if (bc > 0 && fleet.sysId() != current.id && (currEmp == null || empire.alliedWith(empire.sv.empId(id))))
+            if (bc > enemyFightingBc && transports == 0 && fleet.sysId() != current.id && (currEmp == null || empire.alliedWith(empire.sv.empId(id))))
             {
                 if(!(currEmp == null && fleet.canColonizeSystem(current) && colonizerEnroute == 0))
                     score /= bc;
@@ -1517,5 +1520,31 @@ public class AIFleetCommander implements Base, FleetCommander {
         float confidence = min(1, knownSituation / (totalEnemyFleet / uniqueTargets));
         bridgeHeadConfidenceBuffer.put(sys.id, confidence);
         return confidence;
+    }
+    public boolean incomingInvasion()
+    {
+        for(Ship sh : empire.visibleShips())
+        {
+            if(empire.aggressiveWith(sh.empId()))
+                if(!sh.nullDest() && galaxy().system(sh.destSysId()).empire() == empire)
+                    if(sh.isTransport())
+                        return true;
+        }
+        return false;
+    }
+    public boolean underSiege()
+    {
+        boolean underSiege = false;
+        for(StarSystem sys : empire.allColonizedSystems())
+        {
+            if(sys.colony() == null)
+                continue;
+            if(sys.enemyShipsInOrbit(empire))
+            {
+                underSiege = true;
+                break;
+            }
+        }
+        return underSiege;
     }
 }

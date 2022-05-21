@@ -1420,7 +1420,7 @@ public class AIDiplomat implements Base, Diplomat {
                 warAllowed = false;
         }
         //Ail: If there's only two empires left, there's no time for preparation. We cannot allow them the first-strike-advantage!
-        if(galaxy().numActiveEmpires() < 3)
+        if(galaxy().numActiveEmpires() < 3 && minWarTechsAvailable())
             warAllowed = true;
         //System.out.println(galaxy().currentTurn()+" "+empire.name()+" col: "+empire.generalAI().additionalColonizersToBuild(false)+" tech: "+techIsAdequateForWar());
         return warAllowed;
@@ -1749,7 +1749,7 @@ public class AIDiplomat implements Base, Diplomat {
             scared = true;
         }
         //ail: If I'm outteched by others I also don't really want to stick to a war anymore, except for aggressive leader as that would lead to contradictory behavior
-        if(techLevelRank() > popCapRank(empire, false))
+        if(!readyForWar())
             return true;
         boolean everythingUnderSiege = true;
         for(StarSystem sys : empire.allColonizedSystems())
@@ -2037,6 +2037,8 @@ public class AIDiplomat implements Base, Diplomat {
         {
             warAllowed = false;
         }
+        if(!minWarTechsAvailable())
+            warAllowed = false;
         //System.out.println(galaxy().currentTurn()+" "+empire.name()+" techLevelRank(): " +techLevelRank()+" popCapRank: "+popCapRank+" has good RP-ROI: "+reseachHasGoodROI+" war Allowed: "+warAllowed);
         return warAllowed;
     }

@@ -30,6 +30,7 @@ import rotp.model.galaxy.Location;
 import rotp.model.galaxy.Ship;
 import rotp.model.galaxy.ShipFleet;
 import rotp.model.galaxy.StarSystem;
+import rotp.model.galaxy.Transport;
 import rotp.model.incidents.DiplomaticIncident;
 import rotp.model.ships.ShipDesign;
 import rotp.model.ships.ShipDesignLab;
@@ -53,6 +54,7 @@ public class AIGeneral implements Base, General {
     private float totalEmpirePopulationCapacity = -1;
     private float warROI = -1;
     private float visibleEnemyFighterCost = -1;
+    private float visibleEnemyTransportCost = -1;
     private float myFighterCost = -1;
     private float smartPower = -1;
 
@@ -86,6 +88,7 @@ public class AIGeneral implements Base, General {
         totalEmpirePopulationCapacity = -1;
         warROI = -1;
         visibleEnemyFighterCost = -1;
+        visibleEnemyTransportCost = -1;
         myFighterCost = -1;
         smartPower = -1;
         
@@ -146,14 +149,17 @@ public class AIGeneral implements Base, General {
             }
             if(bestCol == null)
                 break;
-            bestCol.shipyard().design(design);
-            bestCol.shipyard().addQueuedBC(design.cost());
-            float colonyProduction = (bestCol.totalIncome() - bestCol.minimumCleanupCost()) * bestCol.planet().productionAdj();
-            int desiredCount = min(additionalColonizersToBuild, (int)Math.floor((float)colonyProduction / (float)design.cost()));
-            desiredCount = max(1, desiredCount);
-            bestCol.shipyard().addDesiredShips(desiredCount);
-            //System.out.println(galaxy().currentTurn()+" "+empire.name()+" should order "+desiredCount+" colonizers at "+bestCol.name());
-            additionalColonizersToBuild-=desiredCount;
+            if(!bestCol.shipyard().building() || bestCol.shipyard().design().cost() >= design.cost())
+            {
+                bestCol.shipyard().design(design);
+                bestCol.shipyard().addQueuedBC(design.cost());
+                float colonyProduction = (bestCol.totalIncome() - bestCol.minimumCleanupCost()) * bestCol.planet().productionAdj();
+                int desiredCount = min(additionalColonizersToBuild, (int)Math.floor((float)colonyProduction / (float)design.cost()));
+                desiredCount = max(1, desiredCount);
+                bestCol.shipyard().addDesiredShips(desiredCount);
+                //System.out.println(galaxy().currentTurn()+" "+empire.name()+" should order "+desiredCount+" colonizers at "+bestCol.name());
+                additionalColonizersToBuild-=desiredCount;
+            }
         }
     }
     // modnar: adjustments to invasion valuation
@@ -797,6 +803,23 @@ public class AIGeneral implements Base, General {
         }
         visibleEnemyFighterCost = cost;
         return visibleEnemyFighterCost;
+    }
+    public float visibleEnemyTransportCost()
+    {
+        if(visibleEnemyTransportCost >= 0)
+            return visibleEnemyTransportCost;
+        float cost = 0;
+        for(Ship sh : empire.visibleShips())
+        {
+            if(empire.aggressiveWith(sh.empId()))
+                if(!sh.nullDest() && galaxy().system(sh.destSysId()).empire() == empire)
+                    if(sh.isTransport())
+                    {
+                        Transport tr = (Transport)sh;
+                        cost += tr.size() * tr.empire().tech().populationCost();
+                    }
+        }
+        return cost;
     }
     public float myFighterCost()
     {

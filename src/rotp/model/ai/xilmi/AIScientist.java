@@ -479,7 +479,8 @@ public class AIScientist implements Base, Scientist {
                     }
                 }
             }
-            techsOnlyBest.add(highestOfType);
+            if(!techsOnlyBest.contains(highestOfType))
+                techsOnlyBest.add(highestOfType);
         }
         
         Tech.comparatorCiv = empire;
@@ -490,6 +491,10 @@ public class AIScientist implements Base, Scientist {
         /*for(Tech t : techs)
         {
             System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" "+cat.id()+" option: "+t.name()+" "+researchPriority(t));
+        }
+        for(Tech t : techsOnlyBest)
+        {
+            System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" "+cat.id()+" option (only best): "+t.name()+" "+researchPriority(t));
         }
         System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" "+cat.id()+" picked: "+cat.currentTechName()+" "+researchPriority(techsOnlyBest.get(0)));*/
     }
@@ -758,7 +763,10 @@ public class AIScientist implements Base, Scientist {
     }
     @Override
     public float baseValue(TechShipNullifier t) {
-        return 1;
+        if(t.isWarpDissipator())
+            return 2;
+        else
+            return 1;
     }
     @Override
     public float baseValue(TechShipWeapon t) {
