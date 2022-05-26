@@ -348,6 +348,7 @@ public class AIGeneral implements Base, General {
         float expectedDefenders = 0;
         float attackers = 0;
         float allowableTurns = (float) (1 + Math.min(7, Math.floor(22 / empire.tech().topSpeed())));
+        float nonBioBombardDamage = 0;
         if(sys.colony() != null)
             expectedDefenders += allowableTurns * sys.colony().totalProductionIncome() * sys.planet().productionAdj() + sys.colony().defense().bases() * sys.colony().defense().missileBase().cost(sys.empire());
         for(ShipFleet orbiting : sys.orbitingFleets())
@@ -355,7 +356,11 @@ public class AIGeneral implements Base, General {
             if(!orbiting.isArmed())
                 continue;
             if(orbiting.empire() == empire)
+            {
                 attackers += empire.ai().fleetCommander().bcValue(orbiting, false, true, false, false);
+                if(sys.colony() != null && sys.colony().defense().bases() > 0)
+                    nonBioBombardDamage += empire.governorAI().expectedBombardDamageAsIfBasesWereThere(orbiting, sys);
+            }
             else if (orbiting.empire().aggressiveWith(empire.id) && empire.visibleShips().contains(orbiting))
                 expectedDefenders += empire.ai().fleetCommander().bcValue(orbiting, false, true, false, false);
         }
@@ -364,12 +369,18 @@ public class AIGeneral implements Base, General {
             if(!incoming.isArmed())
                 continue;
             if(incoming.empire() == empire)
+            {
                 attackers += empire.ai().fleetCommander().bcValue(incoming, false, true, false, false);
+                if(sys.colony() != null && sys.colony().defense().bases() > 0)
+                    nonBioBombardDamage += empire.governorAI().expectedBombardDamageAsIfBasesWereThere(incoming, sys);
+            }
             else if (incoming.empire().aggressiveWith(empire.id) && empire.visibleShips().contains(incoming))
                 expectedDefenders += empire.ai().fleetCommander().bcValue(incoming, false, true, false, false);
         }
+        if(sys.colony() != null && sys.colony().defense().bases() > 0 && nonBioBombardDamage < sys.colony().defense().bases() * sys.colony().defense().missileBase().maxHits())
+            return;
         //ail: old check would also be positive when our fleet is retreating
-        //System.out.println(galaxy().currentTurn()+" "+empire.name()+" invading "+sys.name()+" haveOrbitingFleet: "+haveOrbitingFleet+" bases: "+sys.colony().defense().bases());
+        //System.out.println(galaxy().currentTurn()+" "+empire.name()+" invading "+sys.name()+" nonBioBombardDamage: "+nonBioBombardDamage+" base-health: "+sys.colony().defense().bases() * sys.colony().defense().missileBase().maxHits());
         if (attackers > expectedDefenders && attackers > troopsNecessaryToTakePlanet(v, sys) * empire.tech().populationCost())
             launchGroundTroops(v, sys, 1);
     }

@@ -1403,7 +1403,7 @@ public class AIDiplomat implements Base, Diplomat {
     }
     public boolean readyForWar() {
         boolean warAllowed = true;
-        if(empire.generalAI().additionalColonizersToBuild(false) > 0)
+        if(empire.generalAI().additionalColonizersToBuild(false) > 0 && !empire.atWar())
             warAllowed = false;
         if(!techIsAdequateForWar())
             warAllowed = false;
@@ -1903,6 +1903,23 @@ public class AIDiplomat implements Base, Diplomat {
         return rank;
     }
     @Override
+    public int warTechLevelRank()
+    {
+        int rank = 1;
+        float myTechLevel = empire.tech().avgWarTechLevel();
+        for(Empire emp:empire.contactedEmpires())
+        {
+            if(!empire.inEconomicRange(emp.id))
+                continue;
+            //System.out.println(galaxy().currentTurn()+" "+empire.name()+" myTechLevel: " +myTechLevel+" their TechLevel: "+emp.tech().avgTechLevel());
+            if(emp.tech().avgWarTechLevel() > myTechLevel)
+                rank++;
+        }
+        if(myTechLevel >= 99)
+            rank = 1;
+        return rank;
+    }
+    @Override
     public int militaryRank(Empire etc, boolean inAttackRange)
     {
         int rank = 1;
@@ -1983,29 +2000,9 @@ public class AIDiplomat implements Base, Diplomat {
     @Override
     public boolean minWarTechsAvailable()
     {
-        float currentComputerCost = 0;
-        float currentPropulsionCost = 0;
-        float currentWeaponCost = 0;
-        float currentForceFieldCost = 0;
-        
-        if(empire.tech().tech(empire.tech().computer().currentTech()) != null)
-            currentComputerCost = empire.tech().computer().costForTech(empire.tech().tech(empire.tech().computer().currentTech()));
-        if(empire.tech().tech(empire.tech().propulsion().currentTech()) != null)
-            currentPropulsionCost = empire.tech().propulsion().costForTech(empire.tech().tech(empire.tech().propulsion().currentTech()));
-        if(empire.tech().tech(empire.tech().weapon().currentTech()) != null)
-            currentWeaponCost = empire.tech().weapon().costForTech(empire.tech().tech(empire.tech().weapon().currentTech()));
-        if(empire.tech().tech(empire.tech().forceField().currentTech()) != null)
-            currentForceFieldCost = empire.tech().forceField().costForTech(empire.tech().tech(empire.tech().forceField().currentTech()));
-        
-        if(empire.tech().topBattleComputerTech().level() < 2 && currentComputerCost < empire.totalIncome() * 5)
-            return false;
-        if(empire.shipLab().fastestEngine().warp() < 2 && currentPropulsionCost < empire.totalIncome() * 5)
-            return false;
-        if(empire.tech().topShipWeaponTech().damageHigh() <= 4 && currentWeaponCost < empire.totalIncome() * 5)
-            return false;
-        if(empire.tech().topDeflectorShieldTech().level() < 2 && currentForceFieldCost < empire.totalIncome() * 5)
-            return false;
-        return true;
+        if(warTechLevelRank() <= techLevelRank())
+            return true;
+        return false;
     }
     public boolean hasGoodTechRoi()
     {
@@ -2031,9 +2028,9 @@ public class AIDiplomat implements Base, Diplomat {
         /*if(!everyoneMet() && popCapRank < 3)
             warAllowed = false;*/
         boolean reseachHasGoodROI = hasGoodTechRoi();
-        if(reseachHasGoodROI && techLevelRank() > 1)
+        if(reseachHasGoodROI && warTechLevelRank() > 1)
             warAllowed = false;
-        if(techLevelRank() > popCapRank)
+        if(warTechLevelRank() > popCapRank)
         {
             warAllowed = false;
         }
