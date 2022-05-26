@@ -77,7 +77,7 @@ public class RacesSetColorUI extends BasePanel implements MouseListener, MouseMo
         title = emp.replaceTokens(title, "alien");
         int titleSW = g.getFontMetrics().stringWidth(title);
 
-        int n = options().numColors();
+        int n = 16;
 
         int boxWidth = max(n*s30, titleSW+s70);
 
