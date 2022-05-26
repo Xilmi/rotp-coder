@@ -665,6 +665,7 @@ public class AIGovernor implements Base, Governor {
             return Score/avgScore;
         return 0;
     }
+    @Override
     public float expectedBombardDamageAsIfBasesWereThere(ShipFleet fl, StarSystem sys) {
         if (!sys.isColonized())
             return 0;

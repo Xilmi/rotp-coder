@@ -132,11 +132,11 @@ public class AIScientist implements Base, Scientist {
         }
         //second I stop researching techs with too high of a discovery-chance
         for (int j=0; j<TechTree.NUM_CATEGORIES; j++) {
-            //System.out.print("\n"+empire.name()+" "+empire.tech().category(j).id()+" "+discoveryChanceOfCategoryIfAllocationWasZero(j)+" > "+empire.tech().category(j).allocation());
             Tech currentTechResearching = empire.tech().category(j).tech(empire.tech().category(j).currentTech());
             boolean researchingSomethingWeDontReallyWant = false;
             if(currentTechResearching != null)
             {
+                //System.out.print("\n"+empire.name()+" "+empire.tech().category(j).id()+" "+discoveryChanceOfCategoryIfAllocationWasZero(j)+" > "+empire.tech().category(j).allocation()+" Prio: "+researchPriority(currentTechResearching)+" warmode: "+warMode());
                 if(researchPriority(currentTechResearching) == 0)
                 {
                     researchingSomethingWeDontReallyWant = true;
@@ -165,6 +165,7 @@ public class AIScientist implements Base, Scientist {
                     empire.tech().category(j).adjustAllocation(1);
                     leftOverAlloc--;
                     couldSpend = true;
+                    //System.out.print("\n"+empire.name()+" "+empire.tech().category(j).id()+" put leftover into "+currentTechResearching.name());
                 }
                 if(leftOverAlloc <= 0)
                     break;
@@ -309,34 +310,7 @@ public class AIScientist implements Base, Scientist {
                 empire.tech().weapon().adjustAllocation(-9);
             }
         }
-        else if(!empire.diplomatAI().minWarTechsAvailable())
-        {
-            empire.tech().computer().allocation(0);
-            empire.tech().construction().allocation(0);
-            empire.tech().planetology().allocation(0);
-            empire.tech().propulsion().allocation(0);
-            empire.tech().weapon().allocation(0);
-            empire.tech().forceField().allocation(0);
-            float totalMinWarTechSplit = 4;
-            if(empire.tech().topBattleComputerTech().mark >= 2)
-                totalMinWarTechSplit--;
-            if(empire.shipLab().fastestEngine().warp() >= 2)
-                totalMinWarTechSplit--;
-            if(empire.tech().topShipWeaponTech().damageHigh() > 4)
-                totalMinWarTechSplit--;
-            if(empire.tech().topDeflectorShieldTech().level() >= 2)
-                totalMinWarTechSplit--;
-            
-            if(empire.tech().topBattleComputerTech().mark < 2)
-                empire.tech().computer().allocationPct(1/totalMinWarTechSplit);
-            if(empire.shipLab().fastestEngine().warp() < 2)
-                empire.tech().propulsion().allocationPct(1/totalMinWarTechSplit);
-            if(empire.tech().topShipWeaponTech().damageHigh() <= 4)
-                empire.tech().weapon().allocationPct(1/totalMinWarTechSplit);
-            if(empire.tech().topDeflectorShieldTech().level() < 2)
-                empire.tech().forceField().allocationPct(1/totalMinWarTechSplit);
-        }
-        else if(stealableTechs() > 0)
+        else if(stealableTechs() > 0 && !warMode())
         {
             empire.tech().computer().adjustAllocation(stealableTechs()*5);
             empire.tech().construction().adjustAllocation(stealableTechs()*-1);
@@ -521,12 +495,14 @@ public class AIScientist implements Base, Scientist {
             if(ev.spies().possibleTechs().contains(t.id()) && ev.spies().isEspionage() && ev.spies().hasSpies())
                 return 0;
         }
-        return max(researchValue(t) * ownerFactor, 1);
+        return researchValue(t) * ownerFactor;
     }
     @Override
     public float researchValue(Tech t) {
         //ail: for something that has 0 base-value, we also don't add random
         if (t.isObsolete(empire))
+            return 0;
+        if (t.warModeFactor() <= 1 && warMode())
             return 0;
         return t.baseValue(empire);
     }
@@ -772,10 +748,6 @@ public class AIScientist implements Base, Scientist {
     public float baseValue(TechShipWeapon t) {
         TechShipWeapon curr = empire.tech().topShipWeaponTech();
         float val = 3;
-        if(curr != null && curr.damageHigh() <= 4 && t.damageHigh() > 4)
-            val += 1;
-        if(t.damageHigh() <= 4)
-            val = 0;
         if(t.range > 1 || t.heavyAllowed)
             val += 1;
         return val;
@@ -885,5 +857,12 @@ public class AIScientist implements Base, Scientist {
         }
         //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" stealables: "+stealables);
         return stealables;
+    }
+    public boolean warMode()
+    {
+        boolean warMode = !empire.enemies().isEmpty();
+        if(empire.diplomatAI().techLevelRank() < empire.diplomatAI().warTechLevelRank())
+            warMode = true;
+        return warMode;
     }
 }

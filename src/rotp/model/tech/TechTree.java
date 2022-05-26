@@ -587,6 +587,12 @@ public final class TechTree implements Base, Serializable {
             sum += cat.techLevel();
         return sum/category.length;
     }
+    public Float avgWarTechLevel() {
+        float sum = 0;
+        for (TechCategory cat: category)
+            sum += cat.warTechLevel();
+        return sum/category.length;
+    }
     public void preNextTurn() {
         totalResearchThisTurn = empire().totalPlanetaryResearch();
     }

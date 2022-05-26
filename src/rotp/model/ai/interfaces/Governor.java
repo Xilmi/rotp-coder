@@ -17,6 +17,7 @@ package rotp.model.ai.interfaces;
 
 import rotp.model.ai.ShipPlan;
 import rotp.model.colony.Colony;
+import rotp.model.galaxy.ShipFleet;
 import rotp.model.galaxy.StarSystem;
 
 public interface Governor {
@@ -30,4 +31,5 @@ public interface Governor {
     
     // specific to Xilmi AI
     default float productionScore(StarSystem sys) { return 0; }
+    default float expectedBombardDamageAsIfBasesWereThere(ShipFleet fl, StarSystem sys) { return 0; }
 }
