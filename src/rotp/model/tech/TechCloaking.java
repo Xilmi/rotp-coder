@@ -35,6 +35,8 @@ public final class TechCloaking extends Tech {
         init();
     }
     @Override
+    public float warModeFactor()        { return 1.5f; }
+    @Override
     public boolean canBeMiniaturized()      { return true; }
     @Override
     public void init() {

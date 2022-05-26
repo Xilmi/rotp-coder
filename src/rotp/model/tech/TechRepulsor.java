@@ -42,6 +42,8 @@ public final class TechRepulsor extends Tech {
         init();
     }
     @Override
+    public float warModeFactor()        { return 2; }
+    @Override
     public boolean canBeMiniaturized()      { return true; }
     @Override
     public void init() {

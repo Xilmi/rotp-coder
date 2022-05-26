@@ -27,6 +27,8 @@ public final class TechHyperspaceComm extends Tech {
         init();
     }
     @Override
+    public float warModeFactor()        { return 1.5f; }
+    @Override
     public void init() {
         super.init();
         techType = Tech.HYPERSPACE_COMM;
