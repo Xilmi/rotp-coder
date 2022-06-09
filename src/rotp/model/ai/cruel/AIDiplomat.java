@@ -1405,8 +1405,6 @@ public class AIDiplomat implements Base, Diplomat {
         boolean warAllowed = true;
         if(empire.generalAI().additionalColonizersToBuild(false) > 0 && !empire.atWar())
             warAllowed = false;
-        if(!techIsAdequateForWar())
-            warAllowed = false;
         float enemyPower = empire.powerLevel(empire);
         Empire victim = empire.generalAI().bestVictim();
         if(victim != null)
@@ -1420,7 +1418,7 @@ public class AIDiplomat implements Base, Diplomat {
                 warAllowed = false;
         }
         //Ail: If there's only two empires left, there's no time for preparation. We cannot allow them the first-strike-advantage!
-        if(galaxy().numActiveEmpires() < 3 && minWarTechsAvailable())
+        if(galaxy().numActiveEmpires() < 3)
             warAllowed = true;
         //System.out.println(galaxy().currentTurn()+" "+empire.name()+" col: "+empire.generalAI().additionalColonizersToBuild(false)+" tech: "+techIsAdequateForWar());
         return warAllowed;
@@ -1981,29 +1979,6 @@ public class AIDiplomat implements Base, Diplomat {
     {
         return true;
     }
-    public void updatePersonality()
-    {
-        empire.leader().personality = XENOPHOBIC;
-        if(empire.atWar() || !empire.enemies().isEmpty())
-            empire.leader().objective = MILITARIST;
-        else if(empire.generalAI().additionalColonizersToBuild(false) > 0)
-            empire.leader().objective = EXPANSIONIST;
-        else if(!empire.generalAI().isRusher() && facCapRank() > 1)
-            empire.leader().objective = INDUSTRIALIST;
-        else if(!techIsAdequateForWar())
-            empire.leader().objective = TECHNOLOGIST;
-        else if(empire.totalPlanetaryPopulation() < empire.generalAI().totalEmpirePopulationCapacity(empire))
-            empire.leader().objective = ECOLOGIST;
-        else
-            empire.leader().objective = DIPLOMAT;
-    }
-    @Override
-    public boolean minWarTechsAvailable()
-    {
-        if(warTechLevelRank() <= techLevelRank())
-            return true;
-        return false;
-    }
     public boolean hasGoodTechRoi()
     {
         boolean reseachHasGoodROI = false;
@@ -2019,25 +1994,6 @@ public class AIDiplomat implements Base, Diplomat {
             }
         }
         return reseachHasGoodROI;
-    }
-    @Override
-    public boolean techIsAdequateForWar()
-    {
-        boolean warAllowed = true;
-        int popCapRank = popCapRank(empire, false);
-        /*if(!everyoneMet() && popCapRank < 3)
-            warAllowed = false;*/
-        boolean reseachHasGoodROI = hasGoodTechRoi();
-        if(reseachHasGoodROI && warTechLevelRank() > 1)
-            warAllowed = false;
-        if(warTechLevelRank() > popCapRank)
-        {
-            warAllowed = false;
-        }
-        if(!minWarTechsAvailable())
-            warAllowed = false;
-        //System.out.println(galaxy().currentTurn()+" "+empire.name()+" techLevelRank(): " +techLevelRank()+" popCapRank: "+popCapRank+" has good RP-ROI: "+reseachHasGoodROI+" war Allowed: "+warAllowed);
-        return warAllowed;
     }
     @Override
     public boolean willingToTradeTech(Tech tech, Empire tradePartner)
