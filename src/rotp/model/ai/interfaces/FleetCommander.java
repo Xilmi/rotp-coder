@@ -27,4 +27,6 @@ public interface FleetCommander {
     //Xilmi
     default float bcValue(ShipFleet fl, boolean countScouts, boolean countFighters, boolean countBombers, boolean countColonizers) { return 0; }
     default float bridgeHeadConfidence(StarSystem sys) { return 1; }
+    default boolean underSiege() { return false; }
+    default boolean incomingInvasion() { return false; }
 }

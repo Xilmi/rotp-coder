@@ -51,6 +51,7 @@ class AISystemInfo {
     float myBombardDamage;
     float myIncomingTransports;
     float myTotalBc;
+    float myRetreatingBc;
     int additionalSystemsInRangeWhenColonized;
     boolean inScannerRange;
     int colonizersEnroute;
@@ -96,29 +97,17 @@ public class AIFleetCommander implements Base, FleetCommander {
     public float maxShipMaintainance() {
         if (maxMaintenance < 0) 
         {
-            boolean techsLeft = false;
-            for (int j=0; j<TechTree.NUM_CATEGORIES; j++) {
-                if (!empire.tech().category(j).possibleTechs().isEmpty())
-                {
-                    techsLeft = true;
-                    break;
-                }
-            }
-            float threatFactor = 0.04f;
-            float enemyPower = 0;
-            for(Empire enemy : empire.enemies())
-            {
-                enemyPower += enemy.militaryPowerLevel();
-            }
-            if(techsLeft && (enemyPower < empire.generalAI().smartPowerLevel() || empire.diplomatAI().warTechLevelRank() > 1 || !empire.diplomatAI().minWarTechsAvailable()))
-            {
-                maxMaintenance = sqrt(max(10, empire.tech().avgTechLevel())) * threatFactor;
-                if(!empire.diplomatAI().minWarTechsAvailable() && !incomingInvasion() && !underSiege())
-                    maxMaintenance = 0.025f;
-            }
+            if(underSiege() 
+                    || incomingInvasion() 
+                    || ((empire.tech().topShipWeaponTech().quintile() > 1 
+                        || empire.tech().topBaseMissileTech().quintile() > 1 
+                        || empire.tech().topBaseScatterPackTech() != null) 
+                        && empire.tech().topSpeed() > 1
+                        && (empire.diplomatAI().warTechLevelRank() < 2 || empire.contactedEmpires().size() < 2)))
+                maxMaintenance = min(max(gameEndForeCast(), empire.tech().avgWarTechLevel() / 100.0f), 0.9f);
             else
-                maxMaintenance = 0.9f;
-            //System.out.println(galaxy().currentTurn()+" "+empire.name()+" maxMaintenance: "+maxMaintenance+ " enemyPower: "+enemyPower+" smartPower: "+empire.generalAI().smartPowerLevel()+" techrank: "+empire.diplomatAI().techLevelRank());
+                maxMaintenance = enemyMaintenance();
+            //System.out.println(galaxy().currentTurn()+" "+empire.name()+" maxMaintenance: "+maxMaintenance+ " enemyMaintenance(): "+enemyMaintenance()+" progress: "+gameEndForeCast());
         }
         return maxMaintenance;
     }
@@ -160,6 +149,11 @@ public class AIFleetCommander implements Base, FleetCommander {
                         }
                     }
                 }
+            }
+            for(ShipFleet retreating : galaxy().ships.fleeingFleets(empire.id, id))
+            {
+                buffy.myRetreatingBc += retreating.bcValue();
+                //System.out.print("\n"+empire.name()+"  recorded "+retreating.bcValue()+" worth of ships retreating from "+current.name());
             }
             for(ShipFleet incoming : current.incomingFleets())
             {
@@ -376,6 +370,7 @@ public class AIFleetCommander implements Base, FleetCommander {
             float bombardDamage = 0.0f;
             float bc = 0.0f;
             float myFightingBc = 0.0f;
+            float myRetreatingBc = 0.0f;
             int colonizationBonus = 0;
             int colonizerEnroute = 0;
             boolean canScanTo = false;
@@ -392,10 +387,11 @@ public class AIFleetCommander implements Base, FleetCommander {
                 colonizationBonus = systemInfoBuffer.get(id).additionalSystemsInRangeWhenColonized;
                 colonizerEnroute = systemInfoBuffer.get(id).colonizersEnroute;
                 canScanTo = systemInfoBuffer.get(id).inScannerRange;
+                myRetreatingBc = systemInfoBuffer.get(id).myRetreatingBc;
             }
             //When it is ourselves who are en-route, don't let that reduce the score
             //If we already sent a fleet to an enemy system out of our scanner-range we don't send more there to reinforce as long as we don't get better information
-            if((bc > 0 || bombardDamage > 0) && !canScanTo && empire.aggressiveWith(empire.sv.empId(id)))
+            if((bc > 0 || bombardDamage > 0 || myRetreatingBc > 0) && !canScanTo && empire.aggressiveWith(empire.sv.empId(id)))
             {
                 //System.out.print("\n"+fleet.empire().name()+" check if I can attack "+empire.sv.name(current.id)+" out of range expected bombard: "+fleet.expectedBombardDamage(empire.sv.system(id))+" HP: "+empire.sv.system(id).colony().untargetedHitPoints());
                 if(empire.sv.system(id).colony() != null && fleet.expectedBombardDamage(empire.sv.system(id)) < empire.sv.system(id).colony().untargetedHitPoints())
@@ -1388,9 +1384,13 @@ public class AIFleetCommander implements Base, FleetCommander {
             UpdateSystemInfo(id);
             if(systemInfoBuffer.get(id).enemyFightingBc > bcValue(fl, false, true, false, false) + systemInfoBuffer.get(id).myFightingBc)
                 continue;
-            if(target.distanceTo(current) < shortestDistance)
+            float distToTarget = target.distanceTo(current);
+            //Foreign-systems need to be significantly closer to become a valid staging-point
+            if(currEmp != empire)
+                distToTarget *= 2;
+            if(distToTarget < shortestDistance)
             {
-                shortestDistance = target.distanceTo(current);
+                shortestDistance = distToTarget;
                 best = current;
             }
         }
@@ -1531,5 +1531,46 @@ public class AIFleetCommander implements Base, FleetCommander {
             }
         }
         return underSiege;
+    }
+    float gameEndForeCast()
+    {
+        float fastestVictory = Float.MAX_VALUE;
+        float myOwnedPerc = 0;
+        float highestOwnedPerc = 0;
+        for(Empire emp: galaxy().activeEmpires())
+        {
+            if(emp == empire || empire.contacts().contains(empire.viewForEmpire(emp)))
+            {
+                float ownedPerc = (float)emp.numColonies() / (float)galaxy().systemCount;
+                ownedPerc *= 3.0f/2.0f;
+                if(emp == empire)
+                    myOwnedPerc = ownedPerc;
+                if(ownedPerc > highestOwnedPerc)
+                    highestOwnedPerc = ownedPerc;
+                float victoryTurn = galaxy().currentTurn() / ownedPerc;
+                //System.out.println(galaxy().currentTurn()+" "+empire.name()+" thinks "+emp.name()+" will win at turn "+victoryTurn);
+                if(victoryTurn < fastestVictory)
+                    fastestVictory = victoryTurn;
+            }
+        }
+        float defeatTurn = fastestVictory * myOwnedPerc / highestOwnedPerc;
+        float gameEndTurn = min(fastestVictory, defeatTurn);
+        float progress = galaxy().currentTurn() / gameEndTurn;
+        //System.out.println(galaxy().currentTurn()+" "+empire.name()+" thinks the game will end at turn "+gameEndTurn+" current Progress: "+progress);
+        return progress;
+    }
+    float enemyMaintenance()
+    {
+        float highest = 0;
+        for(Empire enemy : empire.contactedEmpires())
+        {
+            if(!empire.inShipRange(enemy.id))
+                continue;
+            if(enemy.totalShipMaintenanceCost() <= empire.totalShipMaintenanceCost())
+                continue;
+            if(enemy.shipMaintCostPerBC() > highest)
+                highest = enemy.shipMaintCostPerBC();
+        }
+        return highest;
     }
 }
