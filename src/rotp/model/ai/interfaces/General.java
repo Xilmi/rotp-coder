@@ -50,4 +50,5 @@ public interface General {
     default Location fleetCenter(Empire emp) { return new Location(0, 0); }
     default float absolution() { return 0f; }
     default float smartPowerLevel() { return 0f; }
+    default float highestProdScore() { return 1f; }
 }

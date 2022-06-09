@@ -56,6 +56,7 @@ public class AIGeneral implements Base, General {
     private float visibleEnemyFighterCost = -1;
     private float myFighterCost = -1;
     private float smartPower = -1;
+    private float highestProdScore = -1;
 
     public AIGeneral (Empire c) {
         empire = c;
@@ -91,6 +92,7 @@ public class AIGeneral implements Base, General {
         visibleEnemyFighterCost = -1;
         myFighterCost = -1;
         smartPower = -1;
+        highestProdScore = -1;
         
         //empire.tech().learnAll();
         //System.out.println(galaxy().currentTurn()+" "+empire.name()+" "+empire.leader().name()+" personality: "+empire.leader().personality()+" objective: "+empire.leader().objective());
@@ -1328,5 +1330,20 @@ public class AIGeneral implements Base, General {
         power *= empire.tech().avgTechLevel();
         smartPower = power;
         return smartPower;
+    }
+    @Override
+    public float highestProdScore()
+    {
+        if(highestProdScore > 0)
+            return highestProdScore;
+        float highest = 0;
+        for(StarSystem sys: empire.allColonizedSystems())
+        {
+            float curr = empire.governorAI().productionScore(sys);
+            if(curr > highest)
+                highest = curr;
+        }
+        highestProdScore = highest;
+        return highestProdScore;
     }
 }
