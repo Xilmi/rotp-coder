@@ -22,7 +22,11 @@ import rotp.model.ai.interfaces.Scientist;
 import rotp.model.empires.Empire;
 import rotp.model.empires.EmpireView;
 import rotp.model.galaxy.StarSystem;
+import rotp.model.ships.ShipDesign;
 import rotp.model.tech.Tech;
+import static rotp.model.tech.Tech.ARMOR;
+import static rotp.model.tech.Tech.BIOLOGICAL_WEAPON;
+import static rotp.model.tech.Tech.CLOAKING;
 import rotp.model.tech.TechArmor;
 import rotp.model.tech.TechAtmosphereEnrichment;
 import rotp.model.tech.TechAutomatedRepair;
@@ -34,6 +38,8 @@ import rotp.model.tech.TechBiologicalWeapon;
 import rotp.model.tech.TechBlackHole;
 import rotp.model.tech.TechBombWeapon;
 import rotp.model.tech.TechCategory;
+import static rotp.model.tech.TechCategory.PROPULSION;
+import static rotp.model.tech.TechCategory.WEAPON;
 import rotp.model.tech.TechCloaking;
 import rotp.model.tech.TechCloning;
 import rotp.model.tech.TechCombatTransporter;
@@ -130,6 +136,11 @@ public class AIScientist implements Base, Scientist {
                     break;
             }
         }
+        int futureTechs = 0;
+        for (int j=0; j<TechTree.NUM_CATEGORIES; j++) {
+            if (empire.tech().category(j).studyingFutureTech())
+                futureTechs++;
+        }
         //second I stop researching techs with too high of a discovery-chance
         for (int j=0; j<TechTree.NUM_CATEGORIES; j++) {
             Tech currentTechResearching = empire.tech().category(j).tech(empire.tech().category(j).currentTech());
@@ -137,7 +148,7 @@ public class AIScientist implements Base, Scientist {
             if(currentTechResearching != null)
             {
                 //System.out.print("\n"+empire.name()+" "+empire.tech().category(j).id()+" "+discoveryChanceOfCategoryIfAllocationWasZero(j)+" > "+empire.tech().category(j).allocation()+" Prio: "+researchPriority(currentTechResearching)+" warmode: "+warMode());
-                if(researchPriority(currentTechResearching) == 0)
+                if(researchPriority(currentTechResearching) == 0 && futureTechs < 6)
                 {
                     researchingSomethingWeDontReallyWant = true;
                     //System.out.print("\n"+empire.name()+" "+empire.tech().category(j).id()+" reduced because "+currentTechResearching.name()+" is either owned by someone else or not something we want.");
@@ -156,7 +167,7 @@ public class AIScientist implements Base, Scientist {
                 Tech currentTechResearching = empire.tech().category(j).tech(empire.tech().category(j).currentTech());
                 boolean researchingSomethingWeDontReallyWant = false;
                 if(currentTechResearching != null)
-                    if(researchPriority(currentTechResearching) == 0)
+                    if(researchPriority(currentTechResearching) == 0 && futureTechs < 6)
                         researchingSomethingWeDontReallyWant = true;
                 if (!empire.tech().category(j).possibleTechs().isEmpty()
                         && discoveryChanceOfCategoryIfAllocationWasZero(j) <= min(empire.tech().category(j).allocation(), 50f/3f)
@@ -184,11 +195,6 @@ public class AIScientist implements Base, Scientist {
             }
         }
         //and lastly i stop researching future techs when there's still others
-        int futureTechs = 0;
-        for (int j=0; j<TechTree.NUM_CATEGORIES; j++) {
-            if (empire.tech().category(j).studyingFutureTech())
-                futureTechs++;
-        }
         if(futureTechs == 6)
             return;
         for (int j=0; j<TechTree.NUM_CATEGORIES; j++) {
@@ -310,7 +316,7 @@ public class AIScientist implements Base, Scientist {
                 empire.tech().weapon().adjustAllocation(-9);
             }
         }
-        else if(stealableTechs() > 0 && !warMode())
+        else if(stealableTechs() > 0)
         {
             empire.tech().computer().adjustAllocation(stealableTechs()*5);
             empire.tech().construction().adjustAllocation(stealableTechs()*-1);
@@ -442,11 +448,44 @@ public class AIScientist implements Base, Scientist {
             int type = t.techType;
             Tech highestOfType = t;
             int highestLevel = 0;
+            int highestQuintile = 0;
+            float lowestResearchCostInQuintile = Float.MAX_VALUE;
+            float bestScore = 0;
             for(Tech inner : techs)
             {
                 if(inner.techType == type)
                 {
-                    if(inner.level > highestLevel)
+                    if(t.cat.index() == WEAPON)
+                    {
+                        //special case for weapons, here we want the cheapest within the same quintile
+                        float currentPrio = researchPriority(inner);
+                        if(currentPrio > bestScore)
+                        {
+                            bestScore = currentPrio;
+                            highestQuintile = inner.quintile();
+                            highestOfType = inner;
+                            lowestResearchCostInQuintile = inner.researchCost();
+                        }
+                        if(currentPrio < bestScore)
+                            continue;
+                        if(inner.quintile() > highestQuintile)
+                        {
+                            highestQuintile = inner.quintile();
+                            highestOfType = inner;
+                            bestScore = currentPrio;
+                            lowestResearchCostInQuintile = inner.researchCost();
+                        }
+                        if(inner.quintile() < t.quintile())
+                            continue;
+                        if(inner.researchCost() < lowestResearchCostInQuintile)
+                        {
+                            lowestResearchCostInQuintile = inner.researchCost();
+                            highestOfType = inner;
+                            bestScore = currentPrio;
+                            highestQuintile = inner.quintile();
+                        }
+                    }
+                    else if(inner.level > highestLevel)
                     {
                         highestOfType = inner;
                         highestLevel = inner.level;
@@ -457,20 +496,42 @@ public class AIScientist implements Base, Scientist {
                 techsOnlyBest.add(highestOfType);
         }
         
-        Tech.comparatorCiv = empire;
-        Collections.sort(techsOnlyBest, Tech.RESEARCH_PRIORITY);
-
+        float bestScore = 0;
+        float lowestCost = Float.MAX_VALUE;
+        Tech cheapestTech = null;
+        for(Tech current: techsOnlyBest)
+        {
+            float currentPrio = researchPriority(current);
+            float currentCost = current.researchCost();
+            if(currentPrio > bestScore)
+            {
+                bestScore = currentPrio;
+                lowestCost = currentCost;
+                cheapestTech = current;
+                continue;
+            }
+            if(currentPrio < bestScore)
+                continue;
+            if(currentCost < lowestCost)
+            {
+                bestScore = currentPrio;
+                lowestCost = currentCost;
+                cheapestTech = current;
+            }
+        }
+        
         // return highest priority
-        cat.currentTech(techsOnlyBest.get(0));
+        cat.currentTech(cheapestTech);
         /*for(Tech t : techs)
         {
             System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" "+cat.id()+" option: "+t.name()+" "+researchPriority(t));
         }
         for(Tech t : techsOnlyBest)
         {
-            System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" "+cat.id()+" option (only best): "+t.name()+" "+researchPriority(t));
+            System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" "+cat.id()+" option (only best): "+t.name()+" "+researchPriority(t)+" bestScore: "+bestScore);
         }
-        System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" "+cat.id()+" picked: "+cat.currentTechName()+" "+researchPriority(techsOnlyBest.get(0)));*/
+        System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" "+cat.id()+" picked: "+cat.currentTechName()+" "+researchPriority(cheapestTech));
+        */
     }
     //
     //  RESEARCH VALUES for various types of tech
@@ -491,19 +552,49 @@ public class AIScientist implements Base, Scientist {
             //If others, who we are not at war with, have it, we value it lower because in that case we can try and trade for it
             if(!empire.atWarWith(ev.empId()) && ev.empire().diplomatAI().techsAvailableForRequest(empire).contains(t))
                 ownerFactor /= 2;
-            //If we could steal it we don't want to research it ourselves at all
-            if(ev.spies().possibleTechs().contains(t.id()) && ev.spies().isEspionage() && ev.spies().hasSpies())
-                return 0;
+            else if(ev.spies().possibleTechs().contains(t.id()) && ev.spies().isEspionage() && ev.spies().hasSpies())
+                ownerFactor /= 2;
         }
         return researchValue(t) * ownerFactor;
     }
     @Override
     public float researchValue(Tech t) {
         //ail: for something that has 0 base-value, we also don't add random
+        //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" researchValue of "+t.name()+" t.warModeFactor(): "+t.warModeFactor()+" warMode(): "+warMode()+" is Weapon: "+(t.cat.index() == WEAPON)+" is obsolete: "+t.isObsolete(empire));
         if (t.isObsolete(empire))
             return 0;
-        if (t.warModeFactor() <= 1 && warMode())
-            return 0;
+        if(t.quintile() > 1 || t.baseValue(empire) < 3)
+        {
+            if(!empire.enemies().isEmpty())
+            {
+                boolean needWeapon = false;
+                boolean needWarp = false;
+                if(empire.tech().topShipWeaponTech().quintile() < 2 && empire.tech().topBaseMissileTech().quintile() < 2 && empire.tech().topBaseScatterPackTech() == null)
+                    needWeapon = true;
+                if(empire.tech().topEngineWarpTech().quintile() < 2)
+                    needWarp = true;
+                float prelim = t.baseValue(empire);
+                if(needWeapon && needWarp)
+                {
+                    if(t.cat.index() != WEAPON && t.cat.index() != PROPULSION)
+                       prelim = 0;
+                }
+                else if(needWeapon)
+                {
+                    if(t.cat.index() != WEAPON)
+                        prelim = 0;
+                }
+                else if(needWarp)
+                {
+                    if(t.cat.index() != PROPULSION)
+                        prelim = 0;
+                }
+                //certain exceptions get their old value back
+                if((t.isType(BIOLOGICAL_WEAPON) || t.isType(ARMOR)) && t.quintile() < 3)
+                    prelim = t.baseValue(empire);
+                return prelim;
+            }
+        }
         return t.baseValue(empire);
     }
     @Override
@@ -711,7 +802,10 @@ public class AIScientist implements Base, Scientist {
     }
     @Override
     public float baseValue(TechMissileWeapon t) {
-        return 2 / UserPreferences.missileSizeModifier();
+        float val = 2;
+        if(empire.tech().topShipWeaponTech().quintile() < 2 && empire.tech().topBaseMissileTech().quintile() < 2 && empire.tech().topBaseScatterPackTech() == null)
+            val += 1;
+        return val / UserPreferences.missileSizeModifier();
     }
     @Override
     public float baseValue(TechPersonalShield t) {
@@ -746,10 +840,14 @@ public class AIScientist implements Base, Scientist {
     }
     @Override
     public float baseValue(TechShipWeapon t) {
-        TechShipWeapon curr = empire.tech().topShipWeaponTech();
         float val = 3;
-        if(t.range > 1 || t.heavyAllowed)
+        //Gatling Lasers never worth it until you got nothing else available
+        if(empire.tech().topShipWeaponTech().quintile() < 2 && empire.tech().topBaseMissileTech().quintile() < 2 && empire.tech().topBaseScatterPackTech() == null)
             val += 1;
+        if((t.range > 1 || t.heavyAllowed) && needRange() && !empire.tech().knowsTechOfType(CLOAKING))
+            val += 1;
+        if(t.damageHigh() <= 4)
+            val = 1;
         return val;
     }
     @Override
@@ -860,9 +958,16 @@ public class AIScientist implements Base, Scientist {
     }
     public boolean warMode()
     {
-        boolean warMode = !empire.enemies().isEmpty();
-        if(empire.diplomatAI().techLevelRank() < empire.diplomatAI().warTechLevelRank())
-            warMode = true;
-        return warMode;
+        if(empire.diplomatAI().warTechLevelRank() > empire.diplomatAI().techLevelRank() && !empire.enemies().isEmpty())
+            return true;
+        return false;
+    }
+    public boolean needRange()
+    {
+        for(EmpireView ev : empire.contacts())
+            for(ShipDesign enemyDesign : ev.empire().shipLab().designs())
+                if(enemyDesign.repulsorRange() > 0)
+                    return true;
+        return false;
     }
 }
