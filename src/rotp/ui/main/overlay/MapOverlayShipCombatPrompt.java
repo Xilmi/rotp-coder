@@ -225,19 +225,17 @@ public class MapOverlayShipCombatPrompt extends MapOverlay {
         battleButton.mapY(boxY+boxH-battleButton.height());
         battleButton.draw(parent.map(), g);
 
-        if (aiEmpire != null) {
-            parent.addNextTurnControl(resolveButton);
-            resolveButton.init(this, g);
-            resolveButton.mapX(boxX);
-            resolveButton.mapY(battleButton.mapY());
-            resolveButton.draw(parent.map(), g);
+        parent.addNextTurnControl(resolveButton);
+        resolveButton.init(this, g);
+        resolveButton.mapX(boxX);
+        resolveButton.mapY(battleButton.mapY());
+        resolveButton.draw(parent.map(), g);
 
-            parent.addNextTurnControl(retreatButton);
-            retreatButton.init(this, g);
-            retreatButton.mapX(resolveButton.mapX()+resolveButton.width()+s10);
-            retreatButton.mapY(battleButton.mapY());
-            retreatButton.draw(parent.map(), g);
-        }
+        parent.addNextTurnControl(retreatButton);
+        retreatButton.init(this, g);
+        retreatButton.mapX(resolveButton.mapX()+resolveButton.width()+s10);
+        retreatButton.mapY(battleButton.mapY());
+        retreatButton.draw(parent.map(), g);
 
         // draw planet info, from bottom up
         int x1 = boxX+s15;
