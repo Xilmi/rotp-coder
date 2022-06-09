@@ -217,13 +217,6 @@ public class AIGovernor implements Base, Governor {
         }
 
         //System.out.print("\n"+empire.name()+" col.shipyard().maxSpendingNeeded(): "+col.shipyard().maxSpendingNeeded()+" bldg: "+col.shipyard().design().id()+ " active: "+col.shipyard().design().active());
-        boolean needToMilitarize = false;
-        if(empire.atWar() || empire.generalAI().sensePotentialAttack())
-        {
-            if(empire.diplomatAI().militaryRank(empire, false) > empire.diplomatAI().popCapRank(empire, false))
-                if(col.currentProductionCapacity() > 0.5f)
-                    needToMilitarize = true;
-        }
         float netFactoryProduction = 1;
         if(!empire.ignoresPlanetEnvironment())
             netFactoryProduction -= empire.tech().factoryWasteMod() / empire.tech().wasteElimination();
@@ -242,7 +235,7 @@ public class AIGovernor implements Base, Governor {
         float factoriesNeeded = max(0, col.maxUseableFactories() + col.normalPopGrowth() * empire.maxRobotControls() - col.industry().factories());
         float workerGoal = max(0, col.industry().factories() / empire.maxRobotControls() - col.workingPopulation() - col.normalPopGrowth());
         boolean needRefit = col.industry().effectiveRobotControls() < empire.maxRobotControls() && !empire.race().ignoresFactoryRefit;
-        if(popGrowthROI > workerROI && !needToMilitarize)
+        if(popGrowthROI > workerROI)
             workerGoal = col.maxSize() - col.workingPopulation();
         
         workerGoal -= empire.transportsInTransit(col.starSystem());
@@ -319,7 +312,6 @@ public class AIGovernor implements Base, Governor {
         // prod spending gets up to 100% of planet's remaining net prod
         if((col.industry().factories() < col.maxUseableFactories() + (col.normalPopGrowth() + empire.transportsInTransit(col.starSystem())) * empire.maxRobotControls())
             && enemyBombardPower == 0
-            && !needToMilitarize
             && ((col.ecology().terraformCompleted() && needRefit)
                 || col.industry().effectiveRobotControls() * (col.population() + col.normalPopGrowth() + empire.transportsInTransit(col.starSystem())) > col.industry().factories()))
         {
@@ -393,9 +385,10 @@ public class AIGovernor implements Base, Governor {
         for(Empire emp : empire.contactedEmpires())
         {
             EmpireView v = empire.viewForEmpire(emp);
-            if(v.embassy().isEnemy() && empire.inShipRange(emp.id))
+            if(!v.embassy().isFriend() && empire.inShipRange(emp.id))
             {
                 enemy = true;
+                break;
             }
         }
         int[] counts = galaxy().ships.shipDesignCounts(empire.id);
@@ -409,9 +402,7 @@ public class AIGovernor implements Base, Governor {
             bomberCost += lab.design(i).cost() * counts[i] * empire.shipDesignerAI().bombingAdapted(lab.design(i));
         }
         //ail: No use to build any ships if they won't do damage anyways. Better tech up.
-        boolean allInShipProducer = col.planet().productionAdj() >= 1 && col.planet().researchAdj() <= 1;
-        boolean allIn = allInShipProducer && empire.diplomatAI().techIsAdequateForWar();
-        boolean viableForShipProduction = prodScore >= 1 || needToMilitarize || allIn;
+        boolean viableForShipProduction = prodScore >= 1;
         float turnsBeforeColonyDestroyed = Float.MAX_VALUE;
         if(popLoss > 0)
             turnsBeforeColonyDestroyed = col.population() / popLoss;
@@ -426,9 +417,7 @@ public class AIGovernor implements Base, Governor {
             float fighterPercentage = empire.generalAI().defenseRatio();
             
             if(enemy || empire.generalAI().sensePotentialAttack())
-            {
                 maxShipMaintainance = empire.fleetCommanderAI().maxShipMaintainance();
-            }
 
             float maxShipMaintainanceBeforeAdj = maxShipMaintainance;
             maxShipMaintainance *= prodScore;
@@ -538,7 +527,7 @@ public class AIGovernor implements Base, Governor {
             }
         }
         //System.out.print("\n"+empire.name()+" "+col.name()+" expected bombard-Damage: "+enemyBombardDamage+" Bc: "+enemyBc);
-        if(enemyBc > 0 && enemyBombardDamage == 0 || col.defense().shieldLevel() > 0)
+        if((enemyBc > 0 || col.defense().shieldLevel() > 0) && enemyBombardDamage == 0)
             allowBases = true;
         if (sys == null)  // this can happen at startup
             col.defense().maxBases(0);
