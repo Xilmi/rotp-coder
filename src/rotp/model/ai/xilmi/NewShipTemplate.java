@@ -837,7 +837,7 @@ public class NewShipTemplate implements Base {
                         
                     if(wpn.isBioWeapon())
                         currentScore = bioWeaponScoreMod(ai) * TechBiologicalWeapon.avgDamage(wpn.maxDamage(), (int)antiDote) * 200 / wpn.space(d);
-                    //System.out.print("\n"+ai.empire().name()+" "+d.name()+" wpn: "+wpn.name()+" score: "+currentScore+" overKillMod: "+overKillMod+" avgHP: "+avgHP+" expectedDamagePerShot: "+expectedDamagePerShot+"  bioWeaponScoreMod(ai): "+ bioWeaponScoreMod(ai));
+                    //System.out.print("\n"+ai.empire().name()+" "+d.name()+" wpn: "+wpn.name()+" score: "+currentScore+" overKillMod: "+overKillMod+" avgHP: "+avgHP+" expectedDamagePerShot: "+expectedDamagePerShot+"  bioWeaponScoreMod(ai): "+ bioWeaponScoreMod(ai)+" space: "+wpn.space(d));
                     if(currentScore > bestScore)
                     {
                         bestWeapon = wpn;
@@ -932,10 +932,11 @@ public class NewShipTemplate implements Base {
         float totalPopulationCost = 0;
         for(Empire enemy : ai.empire().contactedEmpires())
         {
-            totalMissileBaseCost += enemy.totalMissileBaseCost();
+            totalMissileBaseCost += enemy.totalMissileBaseCost() * 50; //this is maintenance-cost but was supposed to be the actual cost, so times 50 to take that into account!
             totalShipCost += enemy.shipMaintCostPerBC();
             totalPopulationCost += enemy.totalPlanetaryPopulation() * enemy.tech().populationCost();
         }
+        //System.out.print("\n"+ai.empire().name()+" totalPopulationCost"+totalPopulationCost+" totalMissileBaseCost: "+totalMissileBaseCost);
         if(totalMissileBaseCost > 0)
         {
             scoreMod = totalPopulationCost / (totalMissileBaseCost + totalPopulationCost);
