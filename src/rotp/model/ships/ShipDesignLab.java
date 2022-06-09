@@ -291,8 +291,8 @@ public class ShipDesignLab implements Base, Serializable {
     }
     public ShipDesign startingBomberDesign() {
         ShipDesign design = newBlankDesign(ShipDesign.MEDIUM);
-        design.addWeapon(bombWeapon(0), 2);
-        design.addWeapon(beamWeapon(0, false), 2);
+        design.computer(computers().get(1));
+        design.addWeapon(bombWeapon(0), 3);
         design.mission(ShipDesign.BOMBER);
         if (empire.isAI())
             nameDesign(design);
@@ -304,8 +304,9 @@ public class ShipDesignLab implements Base, Serializable {
     public ShipDesign startingDestroyerDesign() {
         ShipDesign design = newBlankDesign(ShipDesign.MEDIUM);
         design.mission(ShipDesign.DESTROYER);
-        design.addWeapon(missileWeapon(0, 2), 1);
-        design.addWeapon(beamWeapon(0, false), 3);
+        design.addWeapon(beamWeapon(0, false), 4);
+        design.computer(computers().get(1));
+        design.shield(shields().get(1));
         if (empire.isAI())
             nameDesign(design);
         else
