@@ -142,8 +142,14 @@ public final class EmpireView implements Base, Serializable {
         return values;
     }
     public void setSuggestedAllocations() {
-        if (owner.isAIControlled()) {
+        if (owner.isAIControlled() || owner.session().getGovernorOptions().isAutoSpy()) {
             spies.setSuggestedAllocations();
+        } else if(owner.session().getGovernorOptions().isAutoInfiltrate())
+        {
+            if(spies.allocation() < 1)
+                spies.allocation(1);
+            if(spies.maxSpies() < 1)
+                spies.maxSpies(1);
         }
     }
     public void setContact() {

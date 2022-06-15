@@ -34,6 +34,8 @@ public class GovernorOptions implements Serializable {
     private int minimumMissileBases = 0;
     private boolean shieldWithoutBases = false;
     private boolean autospend = UserPreferences.governorAutoSpendByDefault();
+    private boolean autoInfiltrate = "true".equalsIgnoreCase(System.getProperty("autoInfiltrate", "true"));
+    private boolean autoSpy = "true".equalsIgnoreCase(System.getProperty("autoSpy", "false"));
     private int reserve = 1000;
     private boolean shipbuilding = true;
 
@@ -130,10 +132,26 @@ public class GovernorOptions implements Serializable {
     public boolean isAutospend() {
         return autospend;
     }
+    
+    public boolean isAutoInfiltrate() {
+        return autoInfiltrate;
+    }
+    
+    public boolean isAutoSpy() {
+        return autoSpy;
+    }
 
     public void setAutospend(boolean autospend) {
         this.autospend = autospend;
         UserPreferences.setAutoSpendOn(autospend);
+    }
+    
+    public void setAutoInfiltrate(boolean autoInfiltrate) {
+        this.autoInfiltrate = autoInfiltrate;
+    }
+        
+    public void setAutoSpy(boolean autoSpy) {
+        this.autoSpy = autoSpy;
     }
 
     public int getReserve() {

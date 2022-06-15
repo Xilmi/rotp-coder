@@ -25,6 +25,8 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         this.legacyGrowthMode.setSelected(options.legacyGrowthMode());
         this.autotransport.setSelected(options.isAutotransport());
         this.autotransportXilmi.setSelected(options.isAutotransportXilmi());
+        this.autoInfiltrate.setSelected(options.isAutoInfiltrate());
+        this.autoSpy.setSelected(options.isAutoSpy());
         this.allowUngoverned.setSelected(options.isAutotransportUngoverned());
         this.transportMaxTurns.setValue(options.getTransportMaxTurns());
         this.transportRichDisabled.setSelected(options.isTransportRichDisabled());
@@ -101,11 +103,11 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
 
         stargateOptions = new javax.swing.ButtonGroup();
         governorDefault = new javax.swing.JCheckBox();
-        autotransportPanel = new javax.swing.JPanel();
+        javax.swing.JPanel autotransportPanel = new javax.swing.JPanel();
         autotransport = new javax.swing.JCheckBox();
         transportMaxTurns = new javax.swing.JSpinner();
-        transportMaxTurnsLabel = new javax.swing.JLabel();
-        transportMaxTurnsNebula = new javax.swing.JLabel();
+        javax.swing.JLabel transportMaxTurnsLabel = new javax.swing.JLabel();
+        javax.swing.JLabel transportMaxTurnsNebula = new javax.swing.JLabel();
         transportRichDisabled = new javax.swing.JCheckBox();
         transportPoorDouble = new javax.swing.JCheckBox();
         autotransportXilmi = new javax.swing.JCheckBox();
@@ -136,6 +138,8 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         autoAttackShipCountLabel = new javax.swing.JLabel();
         shieldWithoutBases = new javax.swing.JCheckBox();
         legacyGrowthMode = new javax.swing.JCheckBox();
+        autoSpy = new javax.swing.JCheckBox();
+        autoInfiltrate = new javax.swing.JCheckBox();
 
         governorDefault.setText("Governor is on by default");
 
@@ -348,6 +352,12 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
 
         legacyGrowthMode.setText("Develop colonies as quickly as possible");
 
+        autoSpy.setText("Let AI handle spies");
+        autoSpy.setToolTipText("Hand control over spies to AI");
+
+        autoInfiltrate.setText("Autoinfiltrate");
+        autoInfiltrate.setToolTipText("Automatically sends spies to infiltrate other empires");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -361,34 +371,6 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
                         .addComponent(allGovernorsOn)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(allGovernorsOff))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(12, 12, 12)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(autospend)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(reserve, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(resrveLabel))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(missileBases, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(missileBasesLabel)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(shieldWithoutBases)
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(shipbuilding)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(legacyGrowthMode, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(okButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(cancelButton))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(181, 181, 181)
-                        .addComponent(completionist)
-                        .addGap(179, 179, 179))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(governorDefault)
@@ -408,7 +390,41 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
                                     .addComponent(autoColonyShipCountLabel)
                                     .addComponent(autoScoutShipCountLabel)
                                     .addComponent(autoAttackShipCountLabel))))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(okButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(cancelButton))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(12, 12, 12)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(shipbuilding)
+                                    .addComponent(autoInfiltrate, javax.swing.GroupLayout.PREFERRED_SIZE, 193, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(9, 9, 9)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(autoSpy, javax.swing.GroupLayout.PREFERRED_SIZE, 294, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(completionist)
+                                        .addGap(8, 8, 8))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(legacyGrowthMode, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addGap(193, 193, 193))))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(autospend)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(reserve, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(resrveLabel))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(missileBases, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(missileBasesLabel)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(shieldWithoutBases)
+                                .addGap(0, 0, Short.MAX_VALUE)))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -454,12 +470,15 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
                     .addComponent(shipbuilding)
                     .addComponent(legacyGrowthMode))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(completionist)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(completionist)
+                    .addComponent(autoSpy)
+                    .addComponent(autoInfiltrate))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(okButton)
                     .addComponent(cancelButton))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -504,6 +523,8 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
         options.setMinimumMissileBases((Integer)missileBases.getValue());
         options.setShieldWithoutBases(shieldWithoutBases.isSelected());
         options.setAutospend(autospend.isSelected());
+        options.setAutoInfiltrate(autoInfiltrate.isSelected());
+        options.setAutoSpy(autoSpy.isSelected());
         options.setReserve((Integer)reserve.getValue());
         options.setShipbuilding(shipbuilding.isSelected());
         options.setAutoScout(autoScout.isSelected());
@@ -584,12 +605,13 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
     private javax.swing.JCheckBox autoColonize;
     private javax.swing.JSpinner autoColonyShipCount;
     private javax.swing.JLabel autoColonyShipCountLabel;
+    private javax.swing.JCheckBox autoInfiltrate;
     private javax.swing.JCheckBox autoScout;
     private javax.swing.JSpinner autoScoutShipCount;
     private javax.swing.JLabel autoScoutShipCountLabel;
+    private javax.swing.JCheckBox autoSpy;
     private javax.swing.JCheckBox autospend;
     private javax.swing.JCheckBox autotransport;
-    private javax.swing.JPanel autotransportPanel;
     private javax.swing.JCheckBox autotransportXilmi;
     private javax.swing.JButton cancelButton;
     private javax.swing.JButton completionist;
@@ -607,8 +629,6 @@ public class GovernorOptionsPanel extends javax.swing.JPanel {
     private javax.swing.ButtonGroup stargateOptions;
     private javax.swing.JRadioButton stargateRich;
     private javax.swing.JSpinner transportMaxTurns;
-    private javax.swing.JLabel transportMaxTurnsLabel;
-    private javax.swing.JLabel transportMaxTurnsNebula;
     private javax.swing.JCheckBox transportPoorDouble;
     private javax.swing.JCheckBox transportRichDisabled;
     // End of variables declaration//GEN-END:variables
