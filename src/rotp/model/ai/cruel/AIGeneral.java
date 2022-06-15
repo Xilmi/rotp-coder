@@ -744,19 +744,9 @@ public class AIGeneral implements Base, General {
         }
         for(Empire emp : empire.contactedEmpires())
         {
-            float enemyPower = smartPowerLevel();
-            for(Empire enemy : emp.warEnemies())
-            {
-                enemyPower += enemy.militaryPowerLevel();
-            }
-            if(emp.militaryPowerLevel() > enemyPower && empire.diplomatAI().facCapRank() > 1)
-                continue;
             if(!empire.inShipRange(emp.id))
                 continue;
             float currentScore = totalEmpirePopulationCapacity(emp) / (fleetCenter(empire).distanceTo(colonyCenter(emp)) + colonyCenter(empire).distanceTo(colonyCenter(emp)));
-            currentScore *= empire.tech().avgWarTechLevel() / emp.tech().avgWarTechLevel();
-            currentScore *= enemyPower;
-            currentScore *= empire.tech().topSpeed() / empire.viewForEmpire(emp).spies().tech().topSpeed();
             float tradeMod = 1;
             if(empire.viewForEmpire(emp).trade() != null && empire.totalPlanetaryIncome() > 0)
                 tradeMod += empire.viewForEmpire(emp).trade().profit() / empire.totalPlanetaryIncome();
