@@ -30,7 +30,7 @@ import java.util.Properties;
  * to get more memory it uses the right jar file name.
  */
 public class RotpGovernor {
-    static String expectedROTPVersion = "Fusion-Mod 2022.06.10";
+    static String expectedROTPVersion = "Fusion-Mod 2022.06.16";
     public static boolean GRAALVM_NATIVE = System.getProperty("org.graalvm.nativeimage.imagecode") != null;
     private static String governorVersion = null;
 
