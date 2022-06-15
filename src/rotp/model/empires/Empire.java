@@ -1023,6 +1023,13 @@ public final class Empire implements Base, NamedObject, Serializable {
             autocolonize();
             autoattack();
             autoscout();
+            if(session().getGovernorOptions().isAutoSpy() || session().getGovernorOptions().isAutoInfiltrate())
+            {
+                for (EmpireView ev : empireViews()) {
+                    if ((ev != null) && ev.embassy().contact())
+                        ev.setSuggestedAllocations();
+                }
+            }
             // If planets are governed, redo allocations now
             for (int i = 0; i < this.sv.count(); ++i) {
                 if (this.sv.empire(i) == this && this.sv.isColonized(i)) {
@@ -1035,7 +1042,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         NoticeMessage.setSubstatus(text("TURN_COLONY_SPENDING"));
         for (int n=0; n<sv.count(); n++) {
             if (sv.empId(n) == id)
-                if(!sv.colony(n).isGovernor() || isAIControlled()) //do not overrule the governor if it is enabled!
+                if(!sv.colony(n).isGovernor() || isAIControlled() || sv.colony(n).shipyard().shipLimitReached()) //do not overrule the governor if it is enabled, except it's for ship-limit-reached
                     governorAI().setColonyAllocations(sv.colony(n));
         }
     }
