@@ -97,17 +97,20 @@ public class AIFleetCommander implements Base, FleetCommander {
     public float maxShipMaintainance() {
         if (maxMaintenance < 0) 
         {
-            if(underSiege() 
+            if(empire.tech().researchCompleted())
+                maxMaintenance = 0.8f;
+            else if((underSiege()     
                     || incomingInvasion() 
-                    || ((empire.tech().topShipWeaponTech().quintile() > 1 
+                    || empire.atWar())
+                    && ((empire.tech().topShipWeaponTech().quintile() > 1 
                         || empire.tech().topBaseMissileTech().quintile() > 1 
                         || empire.tech().topBaseScatterPackTech() != null) 
                         && empire.tech().topSpeed() > 1
-                        && (empire.diplomatAI().warTechLevelRank() < 2 || empire.contactedEmpires().size() < 2)))
-                maxMaintenance = min(max(gameEndForeCast(), empire.tech().avgWarTechLevel() / 100.0f), 0.9f);
+                        && empire.contactedEmpires().size() < 2))
+                maxMaintenance = min(empire.generalAI().gameProgress(), 0.8f);
             else
                 maxMaintenance = enemyMaintenance();
-            //System.out.println(galaxy().currentTurn()+" "+empire.name()+" maxMaintenance: "+maxMaintenance+ " enemyMaintenance(): "+enemyMaintenance()+" progress: "+gameEndForeCast());
+            //System.out.println(galaxy().currentTurn()+" "+empire.name()+" maxMaintenance: "+maxMaintenance+ " enemyMaintenance(): "+enemyMaintenance()+" progress: "+empire.generalAI().gameProgress());
         }
         return maxMaintenance;
     }
@@ -1156,8 +1159,9 @@ public class AIFleetCommander implements Base, FleetCommander {
         if(empire.generalAI().needScoutRepellers(false))
             Repeller = empire.shipDesignerAI().BestDesignToRepell();
         //when the system is colonizable we'll also leave at least one ship that can fight behind
-        if(!fl.isInTransit() && !fl.system().isColonized() && empire.canColonize(fl.system()))
-            needToKeep = max(needToKeep, 1);
+        //No we don't. We need our ships to apply pressure.
+        /*if(!fl.isInTransit() && !fl.system().isColonized() && empire.canColonize(fl.system()))
+            needToKeep = max(needToKeep, 1);*/
         
         boolean handleEvent = false;
         if(!fl.isInTransit())
@@ -1532,33 +1536,6 @@ public class AIFleetCommander implements Base, FleetCommander {
         }
         return underSiege;
     }
-    float gameEndForeCast()
-    {
-        float fastestVictory = Float.MAX_VALUE;
-        float myOwnedPerc = 0;
-        float highestOwnedPerc = 0;
-        for(Empire emp: galaxy().activeEmpires())
-        {
-            if(emp == empire || empire.contacts().contains(empire.viewForEmpire(emp)))
-            {
-                float ownedPerc = (float)emp.numColonies() / (float)galaxy().systemCount;
-                ownedPerc *= 3.0f/2.0f;
-                if(emp == empire)
-                    myOwnedPerc = ownedPerc;
-                if(ownedPerc > highestOwnedPerc)
-                    highestOwnedPerc = ownedPerc;
-                float victoryTurn = galaxy().currentTurn() / ownedPerc;
-                //System.out.println(galaxy().currentTurn()+" "+empire.name()+" thinks "+emp.name()+" will win at turn "+victoryTurn);
-                if(victoryTurn < fastestVictory)
-                    fastestVictory = victoryTurn;
-            }
-        }
-        float defeatTurn = fastestVictory * myOwnedPerc / highestOwnedPerc;
-        float gameEndTurn = min(fastestVictory, defeatTurn);
-        float progress = galaxy().currentTurn() / gameEndTurn;
-        //System.out.println(galaxy().currentTurn()+" "+empire.name()+" thinks the game will end at turn "+gameEndTurn+" current Progress: "+progress);
-        return progress;
-    }
     float enemyMaintenance()
     {
         float highest = 0;
@@ -1566,7 +1543,9 @@ public class AIFleetCommander implements Base, FleetCommander {
         {
             if(!empire.inShipRange(enemy.id))
                 continue;
-            if(enemy.totalShipMaintenanceCost() <= empire.totalShipMaintenanceCost())
+            if(empire.alliedWith(enemy.id))
+                continue;
+            if(enemy.militaryPowerLevel() <= empire.generalAI().smartPowerLevel())
                 continue;
             if(enemy.shipMaintCostPerBC() > highest)
                 highest = enemy.shipMaintCostPerBC();
