@@ -438,6 +438,13 @@ public class NewShipTemplate implements Base {
         {
             hybridBombRatio = 1 - ai.empire().generalAI().defenseRatio();
         }
+        float minBombSpace = 0;
+        for(ShipWeapon wpn : ai.lab().weapons())
+        {
+            if(wpn.groundAttacksOnly())
+                if(wpn.space(d) > minBombSpace)
+                    minBombSpace = wpn.space(d);
+        }
         //System.out.print("\n"+galaxy().currentTurn()+" "+ai.empire().name()+" hybridBombRatio: "+hybridBombRatio);
         // what's left will be used on non-bombs for bombers, second best weapon for destroyers
         // repeat calls of setOptimalShipCombatWeapon() will result in a weapon from another category (beam, missile, streaming) than already installed
@@ -453,7 +460,7 @@ public class NewShipTemplate implements Base {
                 bestNonBomb = setOptimalWeapon(ai, d, d.availableSpace(), 4, needRange, true, false, topSpeed, avgECM, bestSHD, antiDote, true, avgHP); // uses slots 0-3
             case FIGHTER:
             default:
-                setOptimalWeapon(ai, d, d.availableSpace() * hybridBombRatio, 1, false, false, false, topSpeed, avgECM, bestSHD, antiDote, false, avgHP);
+                setOptimalWeapon(ai, d, max(minBombSpace, d.availableSpace() * hybridBombRatio), 1, false, false, false, topSpeed, avgECM, bestSHD, antiDote, false, avgHP);
                 bestNonBomb = setOptimalWeapon(ai, d, d.availableSpace(), 4, needRange, true, false, topSpeed, avgECM, bestSHD, antiDote, false, avgHP); // uses slots 0-3
                 break;
         }
