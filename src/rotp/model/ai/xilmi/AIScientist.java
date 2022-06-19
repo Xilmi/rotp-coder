@@ -102,6 +102,8 @@ public class AIScientist implements Base, Scientist {
     }
     @Override
     public void setTechTreeAllocations() {
+        if(empire.tech().researchCompleted())
+            return;
         // invoked after nextTurn() processing is complete on each civ's turn
         setDefaultTechTreeAllocations();
         //ail: This happens at the beginning before we see whether we want to switch this off. But we want accidental excess to go to research so to not waste it.
@@ -119,11 +121,11 @@ public class AIScientist implements Base, Scientist {
                 empire.tech().category(j).allocation(0);
             }
         }
-        if(leftOverAlloc >= 60)
+        /*if(leftOverAlloc >= 60)
         {
             setDefaultTechTreeAllocations();
             return;
-        }
+        }*/
         while(leftOverAlloc > 0)
         {
             for (int j=0; j<TechTree.NUM_CATEGORIES; j++) {
@@ -565,35 +567,32 @@ public class AIScientist implements Base, Scientist {
             return 0;
         if(t.quintile() > 1 || t.baseValue(empire) < 3)
         {
-            if(!empire.enemies().isEmpty())
+            boolean needWeapon = false;
+            boolean needWarp = false;
+            if(empire.tech().topShipWeaponTech().quintile() < 2 && empire.tech().topBaseMissileTech().quintile() < 2 && empire.tech().topBaseScatterPackTech() == null)
+                needWeapon = true;
+            if(empire.tech().topEngineWarpTech().quintile() < 2)
+                needWarp = true;
+            float prelim = t.baseValue(empire);
+            if(needWeapon && needWarp)
             {
-                boolean needWeapon = false;
-                boolean needWarp = false;
-                if(empire.tech().topShipWeaponTech().quintile() < 2 && empire.tech().topBaseMissileTech().quintile() < 2 && empire.tech().topBaseScatterPackTech() == null)
-                    needWeapon = true;
-                if(empire.tech().topEngineWarpTech().quintile() < 2)
-                    needWarp = true;
-                float prelim = t.baseValue(empire);
-                if(needWeapon && needWarp)
-                {
-                    if(t.cat.index() != WEAPON && t.cat.index() != PROPULSION)
-                       prelim = 0;
-                }
-                else if(needWeapon)
-                {
-                    if(t.cat.index() != WEAPON)
-                        prelim = 0;
-                }
-                else if(needWarp)
-                {
-                    if(t.cat.index() != PROPULSION)
-                        prelim = 0;
-                }
-                //certain exceptions get their old value back
-                if((t.isType(BIOLOGICAL_WEAPON) || t.isType(ARMOR)) && t.quintile() < 3)
-                    prelim = t.baseValue(empire);
-                return prelim;
+                if(t.cat.index() != WEAPON && t.cat.index() != PROPULSION)
+                   prelim = 0;
             }
+            else if(needWeapon)
+            {
+                if(t.cat.index() != WEAPON)
+                    prelim = 0;
+            }
+            else if(needWarp)
+            {
+                if(t.cat.index() != PROPULSION)
+                    prelim = 0;
+            }
+            //certain exceptions get their old value back
+            if((t.isType(BIOLOGICAL_WEAPON) || t.isType(ARMOR)) && t.quintile() < 3)
+                prelim = t.baseValue(empire);
+            return prelim;
         }
         return t.baseValue(empire);
     }
@@ -709,7 +708,7 @@ public class AIScientist implements Base, Scientist {
         List<StarSystem> newPossible = empire.uncolonizedPlanetsInShipRange(t.environment());
         float newPlanets = newPossible.size() - possible.size();
         if (newPlanets < 1)
-            return 0;
+            return 1;
         float val = 3;
         if(empire.fleetCommanderAI().inExpansionMode())
         {
@@ -858,7 +857,7 @@ public class AIScientist implements Base, Scientist {
     }
     @Override
     public float baseValue(TechStargate t) {
-        return 0;
+        return 1;
     }
     @Override
     public float baseValue(TechStasisField t) {
@@ -880,7 +879,7 @@ public class AIScientist implements Base, Scientist {
             }
         }
         if(!anyEnemiesHaveTeleporter)
-            return 0;
+            return 1;
         return 3;
     }
     @Override
@@ -893,7 +892,7 @@ public class AIScientist implements Base, Scientist {
             }
         }
         if (allEnemiesHaveInterdiction)
-            return 0;
+            return 1;
         return 3;
     }
     @Override
