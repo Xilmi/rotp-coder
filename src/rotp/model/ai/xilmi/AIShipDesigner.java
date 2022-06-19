@@ -118,10 +118,10 @@ public class AIShipDesigner implements Base, ShipDesigner {
     }
     private void countdownObsoleteDesigns() {
         if(((empire.shipMaintCostPerBC() > (max(0.35f, empire.fleetCommanderAI().maxShipMaintainance()) * 1.5) && empire.enemies().isEmpty() && !empire.fleetCommanderAI().inExpansionMode()))
-                || (empire.netIncome() <= 0 && !empire.atWar()))
+                || (empire.netIncome() + empire.totalReserve() <= 0 && !empire.atWar()))
         {
-            System.out.print("\n"+empire.name()+" scrapWorstDesign max-maint: "+empire.fleetCommanderAI().maxShipMaintainance());
-            scrapWorstDesign(empire.netIncome() <= 0);
+            //System.out.print("\n"+empire.name()+" scrapWorstDesign max-maint: "+empire.fleetCommanderAI().maxShipMaintainance()+" empire.netIncome(): "+empire.netIncome()+ " empire.totalReserve(): "+empire.totalReserve());
+            scrapWorstDesign(empire.netIncome() + empire.totalReserve() <= 0);
         }
     }
     private void scrapWorstDesign(boolean forceCosting) {
@@ -163,6 +163,8 @@ public class AIShipDesigner implements Base, ShipDesigner {
                     shouldScrap = false;
                     if(!forceCosting)
                         break;
+                    else
+                        forceCosting = false;
                 }
                 else if(keepScore < lowestKeepScore)
                 {
