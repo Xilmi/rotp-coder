@@ -310,6 +310,7 @@ public class AIGovernor implements Base, Governor {
         }
         
         // prod spending gets up to 100% of planet's remaining net prod
+        //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" "+col.name()+" empire.maxRobotControls(): "+empire.maxRobotControls()+" col.maxUseableFactories(): "+col.maxUseableFactories()+" col.industry().factories(): "+col.industry().factories()+" needRefit: "+needRefit+" col.industry().effectiveRobotControls(): "+col.industry().effectiveRobotControls());
         if((col.industry().factories() < col.maxUseableFactories() + (col.normalPopGrowth() + empire.transportsInTransit(col.starSystem())) * empire.maxRobotControls())
             && enemyBombardPower == 0
             && ((col.ecology().terraformCompleted() && needRefit)
@@ -403,12 +404,15 @@ public class AIGovernor implements Base, Governor {
         }
         //ail: No use to build any ships if they won't do damage anyways. Better tech up.
         boolean viableForShipProduction = prodScore >= 1;
+        boolean techsLeft = !empire.tech().researchCompleted();
         float turnsBeforeColonyDestroyed = Float.MAX_VALUE;
         if(popLoss > 0)
             turnsBeforeColonyDestroyed = col.population() / popLoss;
         float fighterBuildTime = empire.shipDesignerAI().BestDesignToFight().cost() / totalProd;
         if(fighterBuildTime > turnsBeforeColonyDestroyed)
             viableForShipProduction = false;
+        if(!techsLeft)
+            viableForShipProduction = true;
         //System.out.print("\n"+empire.name()+" "+col.name()+" production-score "+productionScore(col.starSystem())+" needToMilitarize: "+needToMilitarize+" viableForShipProduction: "+viableForShipProduction+" Mil-Rank: "+empire.diplomatAI().militaryRank(empire, false)+" Pop-Rank: "+empire.diplomatAI().popCapRank(empire, false));
         //System.out.print("\n"+empire.name()+" "+col.name()+" col.allocation(SHIP): "+col.allocation(SHIP));
         if(col.allocation(SHIP) == 0 && viableForShipProduction)
@@ -423,15 +427,6 @@ public class AIGovernor implements Base, Governor {
             maxShipMaintainance *= prodScore;
             if(maxShipMaintainance > maxShipMaintainanceBeforeAdj)
                 maxShipMaintainance = (min(maxShipMaintainance, 1) + maxShipMaintainanceBeforeAdj) / 2;
-            boolean techsLeft = false;
-            for (int j=0; j<TechTree.NUM_CATEGORIES; j++) {
-                if (!empire.tech().category(j).possibleTechs().isEmpty())
-                {
-                    techsLeft = true;
-                    break;
-                }
-            }
-            
             if(!techsLeft)
                 maxShipMaintainance = empire.fleetCommanderAI().maxShipMaintainance();
             //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" "+col.name()+" adjMaxMaint: "+maxShipMaintainance+" baseMaxMaint: "+maxShipMaintainanceBeforeAdj+" CurrMaint: "+empire.shipMaintCostPerBC());
