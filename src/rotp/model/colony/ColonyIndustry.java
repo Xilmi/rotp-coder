@@ -45,7 +45,11 @@ public class ColonyIndustry extends ColonySpendingCategory {
     public int deltaFactories()             { return (int)factories - (int)previousFactories; }
     public int robotControls()              { return robotControls; }
     public float newFactoryCost()          { return tech().newFactoryCost(robotControls()); }
-    public int effectiveRobotControls()     { return robotControls() + empire().robotControlsAdj(); }
+    public int effectiveRobotControls()     { 
+        if(empire().ignoresFactoryRefit())
+            return maxRobotControls();
+        return robotControls() + empire().robotControlsAdj(); 
+    }
     public int maxRobotControls()           { return tech().baseRobotControls() + empire().robotControlsAdj(); }
     @Override
     public float totalBC()              { return super.totalBC() * planet().productionAdj(); }
