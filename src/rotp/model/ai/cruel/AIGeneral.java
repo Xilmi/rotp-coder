@@ -736,14 +736,11 @@ public class AIGeneral implements Base, General {
             bestVictim = archEnemy;
             return bestVictim;
         }
-        int opponentsInRange = 1;
         for(Empire emp : empire.contactedEmpires())
         {
-            if(empire.inShipRange(emp.id))
-                opponentsInRange++;
-        }
-        for(Empire emp : empire.contactedEmpires())
-        {
+            //we don't want to fight smaller empires that might vote for us when we're up for the vote
+            if(empire.allies().contains(emp))
+                continue;
             if(!empire.inShipRange(emp.id))
                 continue;
             float currentScore = totalEmpirePopulationCapacity(emp) / (fleetCenter(empire).distanceTo(colonyCenter(emp)) + colonyCenter(empire).distanceTo(colonyCenter(emp)));
@@ -752,7 +749,13 @@ public class AIGeneral implements Base, General {
                 tradeMod += empire.viewForEmpire(emp).trade().profit() / empire.totalPlanetaryIncome();
             else
                 tradeMod = 0.9f;
+            float enemyMultiplyer = 1.0f;
+            for(Empire theirFoe : emp.warEnemies()) {
+                enemyMultiplyer += theirFoe.powerLevel(theirFoe) / (emp.powerLevel(emp) + theirFoe.powerLevel(theirFoe));
+            }
+            currentScore *= enemyMultiplyer;
             currentScore /= tradeMod;
+            currentScore /= emp.powerLevel(emp);
             float spyAnnoyanceMod = 100f;
             for(DiplomaticIncident inc : empire.viewForEmpire(emp).embassy().allIncidents())
             {
@@ -1317,5 +1320,33 @@ public class AIGeneral implements Base, General {
         }
         highestProdScore = highest;
         return highestProdScore;
+    }
+    @Override
+    public float gameProgress()
+    {
+        float fastestVictory = Float.MAX_VALUE;
+        float myOwnedPerc = 0;
+        float highestOwnedPerc = 0;
+        for(Empire emp: galaxy().activeEmpires())
+        {
+            if(emp == empire || empire.contacts().contains(empire.viewForEmpire(emp)))
+            {
+                float ownedPerc = (float)emp.numColonies() / (float)galaxy().systemCount;
+                ownedPerc *= 3.0f/2.0f;
+                if(emp == empire)
+                    myOwnedPerc = ownedPerc;
+                if(ownedPerc > highestOwnedPerc)
+                    highestOwnedPerc = ownedPerc;
+                float victoryTurn = galaxy().currentTurn() / ownedPerc;
+                //System.out.println(galaxy().currentTurn()+" "+empire.name()+" thinks "+emp.name()+" will win at turn "+victoryTurn);
+                if(victoryTurn < fastestVictory)
+                    fastestVictory = victoryTurn;
+            }
+        }
+        float defeatTurn = fastestVictory * myOwnedPerc / highestOwnedPerc;
+        float gameEndTurn = min(fastestVictory, defeatTurn);
+        float progress = galaxy().currentTurn() / gameEndTurn;
+        //System.out.println(galaxy().currentTurn()+" "+empire.name()+" thinks the game will end at turn "+gameEndTurn+" current Progress: "+progress);
+        return progress;
     }
 }

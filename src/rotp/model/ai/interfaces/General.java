@@ -51,4 +51,5 @@ public interface General {
     default float absolution() { return 0f; }
     default float smartPowerLevel() { return 0f; }
     default float highestProdScore() { return 1f; }
+    default float gameProgress() { return 0f; }
 }
