@@ -106,6 +106,8 @@ public class AITreasurer implements Base, Treasurer {
                 if (empire.totalReserve() <= 0)
                     break;
                 Colony col = sys.colony();
+                if(empire.tech().researchCompleted() && col.allocation(4) > 0)
+                    continue;
                 float max = col.industry().maxSpendingNeeded();
                 float curr = col.maxProduction();
                 int rsvNeeded = (int) max(0, min(col.maxReserveUseable(), max-curr));
