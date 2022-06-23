@@ -28,11 +28,6 @@ import rotp.model.empires.EmpireView;
 import rotp.model.empires.GalacticCouncil;
 import rotp.model.empires.Leader;
 import static rotp.model.empires.Leader.Objective.DIPLOMAT;
-import static rotp.model.empires.Leader.Objective.ECOLOGIST;
-import static rotp.model.empires.Leader.Objective.EXPANSIONIST;
-import static rotp.model.empires.Leader.Objective.INDUSTRIALIST;
-import static rotp.model.empires.Leader.Objective.MILITARIST;
-import static rotp.model.empires.Leader.Objective.TECHNOLOGIST;
 import static rotp.model.empires.Leader.Personality.AGGRESSIVE;
 import static rotp.model.empires.Leader.Personality.PACIFIST;
 import static rotp.model.empires.Leader.Personality.XENOPHOBIC;
@@ -728,8 +723,8 @@ public class AIDiplomat implements Base, Diplomat {
         }    
         if (v.embassy().alliedWithEnemy())
             return false;
-        if(empire.generalAI().gameProgress() > 1)
-            return true;
+        /*if(empire.generalAI().gameProgress() > 1)
+            return true;*/
         /*
         if(UserPreferences.xilmiRoleplayMode() && empire.leader().isPacifist())
         {
@@ -1411,7 +1406,9 @@ public class AIDiplomat implements Base, Diplomat {
                 victimPower += ally.powerLevel(ally);
             }
             //System.out.println(galaxy().currentTurn()+" "+empire.name()+" my power: "+enemyPower+" "+victim.name()+" power: "+victim.powerLevel(victim));
-            if(victimPower > 1.0f / 2.0f * enemyPower)
+            if(enemyPower <= empire.powerLevel(empire) && victimPower > 1.0f / 2.0f * enemyPower)
+                warAllowed = false;
+            if(enemyPower > empire.powerLevel(empire) && victimPower > enemyPower)
                 warAllowed = false;
         }
         //Ail: If there's only two empires left, there's no time for preparation. We cannot allow them the first-strike-advantage!
