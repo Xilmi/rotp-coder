@@ -830,6 +830,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
             if(currStack.canPotentiallyAttack(st))
                 canTarget = true;
         }
+        //System.out.print("\n"+currStack.mgr.system().name()+" "+currStack.fullName()+" canBeTargeted: "+canBeTargeted);
         if (!canBeTargeted)
             return false;
         if(!canTarget)
@@ -1166,7 +1167,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
         for (int j=0;j<ShipDesign.maxWeapons();j++)
         {
             float dmg = num * d.wpnCount(j) * d.weapon(j).estimatedBombardDamage(d, colony);
-            if(d.weapon(j).bombardAttacks() > 0)
+            if(ship.roundsRemaining[j] > 0)
                 dmg /= d.weapon(j).bombardAttacks();
             damage += dmg;
         }
@@ -1180,7 +1181,7 @@ public class AIShipCaptain implements Base, ShipCaptain {
 
         ShipDesign d = ship.design();
         for (int j=0;j<ShipDesign.maxWeapons();j++)
-            if(d.weapon(j).bombardAttacks() > 0)
+            if(ship.roundsRemaining[j] > 0)
                 popLoss += (num * d.wpnCount(j) * d.weapon(j).estimatedBioweaponDamage(ship, colony) / d.weapon(j).bombardAttacks()); //divide by bombard-attacks as the return-value is for orbital-bombard, not during-combat-bombard
         return popLoss;
     }
