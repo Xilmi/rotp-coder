@@ -355,7 +355,7 @@ public final class TechCategory implements Base, Serializable {
         List<String> ids = new ArrayList<>(knownTechs());
         for (String id: ids) {
             Tech t = tech(id);
-            if(t.warModeFactor() <= 1)
+            if(t.warModeFactor() <= 1 && warMode)
                 continue;
             if (t.free)
                 free++;
