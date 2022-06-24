@@ -1,5 +1,3 @@
-AI:
+Bugfix:
 
-Legacy AI will no longer form alliances.
-Legacy AI now more likely to backstab someone who already is at war.
-Fixed an issue that made ships that had already dropped all their bombs or bio-weapons stay and fight against missile-bases as if they still had bombs or bio-weapons.
+Fixed a recently introduced bug where tech-levels for non-military-techs were not added to tech-level as intended. This primarily impacted minitaturization and espionage.
