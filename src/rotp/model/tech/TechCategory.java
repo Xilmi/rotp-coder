@@ -84,8 +84,7 @@ public final class TechCategory implements Base, Serializable {
     public void toggleLock()               { locked = !locked; }
     public String id()                     { return id(index); }
     public float totalBC()                 { return totalBC; }
-    public float techLevel()               { return currentTechLevel(false); }
-    public float warTechLevel()            { return currentTechLevel(true); }
+    public float techLevel()               { return currentTechLevel(); }
     public String researchKey()            { return researchKeys[index]; }
     public String key()                    { return categoryKeys[index]; }
     public boolean isWeaponTechCategory()  { return (this == tree.weapon()); }
@@ -349,14 +348,12 @@ public final class TechCategory implements Base, Serializable {
         }
         return max(1, min(max, ((.80f * max) + ids.size() - free)));
     }
-    private float currentTechLevel(boolean warMode) {
+    private float currentTechLevel() {
         int max = 0;
         int free = 0;
         List<String> ids = new ArrayList<>(knownTechs());
         for (String id: ids) {
             Tech t = tech(id);
-            if(t.warModeFactor() <= 1 && warMode)
-                continue;
             if (t.free)
                 free++;
             if (t.level > max)

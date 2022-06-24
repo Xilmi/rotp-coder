@@ -1903,23 +1903,6 @@ public class AIDiplomat implements Base, Diplomat {
         return rank;
     }
     @Override
-    public int warTechLevelRank()
-    {
-        int rank = 1;
-        float myTechLevel = empire.tech().avgWarTechLevel();
-        for(Empire emp:empire.contactedEmpires())
-        {
-            if(!empire.inEconomicRange(emp.id))
-                continue;
-            //System.out.println(galaxy().currentTurn()+" "+empire.name()+" myTechLevel: " +myTechLevel+" their TechLevel: "+emp.tech().avgTechLevel());
-            if(emp.tech().avgWarTechLevel() > myTechLevel)
-                rank++;
-        }
-        if(myTechLevel >= 99)
-            rank = 1;
-        return rank;
-    }
-    @Override
     public int militaryRank(Empire etc, boolean inAttackRange)
     {
         int rank = 1;

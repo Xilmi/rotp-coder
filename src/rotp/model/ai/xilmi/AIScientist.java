@@ -955,12 +955,6 @@ public class AIScientist implements Base, Scientist {
         //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" stealables: "+stealables);
         return stealables;
     }
-    public boolean warMode()
-    {
-        if(empire.diplomatAI().warTechLevelRank() > empire.diplomatAI().techLevelRank() && !empire.enemies().isEmpty())
-            return true;
-        return false;
-    }
     public boolean needRange()
     {
         for(EmpireView ev : empire.contacts())
