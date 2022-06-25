@@ -39,6 +39,7 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import rotp.model.colony.Colony;
 import rotp.model.galaxy.SpaceMonster;
+import rotp.ui.UserPreferences;
 
 public class ShipBattleUI extends FadeInPanel implements Base, MouseListener, MouseMotionListener {
     private static final long serialVersionUID = 1L;
@@ -1524,8 +1525,14 @@ public class ShipBattleUI extends FadeInPanel implements Base, MouseListener, Mo
 
             if (!mgr.autoResolve) {
                 String retreatText = text("SHIP_COMBAT_RETREAT_ALL");
+                boolean retreatDisabled = performingTurn;
+                if(UserPreferences.retreatRestrictions() >= 2 && UserPreferences.retreatRestrictionTurns() > mgr.turnCounter())
+                {
+                    retreatText += " - "+(UserPreferences.retreatRestrictionTurns()-mgr.turnCounter());
+                    retreatDisabled = true;
+                }
                 buttX = buttX+s10+buttW;
-                drawButton(g, retreatButtonBackC, retreatText, retreatBox, redButtonEdgeC, redButtonCenterC, buttX, buttY, buttW, buttH, performingTurn);
+                drawButton(g, retreatButtonBackC, retreatText, retreatBox, redButtonEdgeC, redButtonCenterC, buttX, buttY, buttW, buttH, retreatDisabled);
 
                 tacticalBox.setBounds(0,0,0,0);
                 String tacticalText = showTacticalInfo() ? text("SHIP_COMBAT_STATS_ON") : text("SHIP_COMBAT_STATS_OFF");
@@ -2013,6 +2020,8 @@ public class ShipBattleUI extends FadeInPanel implements Base, MouseListener, Mo
         finish();
     }
     private void retreatAllPlayerShips(boolean inCombat) {
+        if(UserPreferences.retreatRestrictions() >= 2 && UserPreferences.retreatRestrictionTurns() > mgr.turnCounter())
+            return;
         List<CombatStack> stacks = new ArrayList<>(mgr.activeStacks());
         for (CombatStack stack: stacks) 
             retreatStack(stack, inCombat);

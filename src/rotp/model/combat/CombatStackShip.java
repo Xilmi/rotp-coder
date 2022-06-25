@@ -26,6 +26,7 @@ import rotp.model.ships.*;
 import rotp.model.tech.TechCloaking;
 import rotp.model.tech.TechStasisField;
 import rotp.ui.BasePanel;
+import rotp.ui.UserPreferences;
 import rotp.ui.combat.ShipBattleUI;
 
 public class CombatStackShip extends CombatStack {
@@ -112,7 +113,19 @@ public class CombatStackShip extends CombatStack {
     @Override
     public boolean canScan()        { return design.allowsScanning(); }
     @Override
-    public boolean canRetreat()     { return !atLastColony && (maneuverability > 0); }
+    public boolean canRetreat()     {
+        boolean checkRetreatTurn = false;
+        if(empire.isAIControlled()) {
+            if(UserPreferences.retreatRestrictions() == 1 || UserPreferences.retreatRestrictions() == 3)
+                checkRetreatTurn = true;
+        } else {
+            if(UserPreferences.retreatRestrictions() >= 2)
+                checkRetreatTurn = true;
+        }
+        if(checkRetreatTurn && mgr.turnCounter() < UserPreferences.retreatRestrictionTurns())
+            return false;
+        return !atLastColony && (maneuverability > 0); 
+    }
     @Override
     public float autoMissPct()      { return displacementPct; }
     @Override

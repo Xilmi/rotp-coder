@@ -27,6 +27,7 @@ import rotp.model.galaxy.StarSystem;
 import rotp.model.ships.ShipDesign;
 import rotp.model.ships.ShipDesignLab;
 import rotp.ui.RotPUI;
+import rotp.ui.UserPreferences;
 import rotp.ui.combat.ShipBattleUI;
 import rotp.util.Base;
 
@@ -72,6 +73,7 @@ public class ShipCombatManager implements Base {
         return (results.attacker() == emp) || (results.defender() == emp);
     }
     public boolean redrawMap = false;
+    public int turnCounter() { return turnCounter; }
     public void battle(StarSystem sys) {
         playerInBattle = false;
         if (sys.hasMonster()) {
@@ -435,7 +437,10 @@ public class ShipCombatManager implements Base {
                 if ((dest == null) || (dest == system))
                     destroyStack(sh);
                 else
+                {
+                    turnCounter = MAX_TURNS; //Set turn-counter to max-turns so retreating works in this case
                     retreatStack(sh, dest);
+                }
                 showAnimations = prevShow;
             }          
         }
@@ -474,7 +479,7 @@ public class ShipCombatManager implements Base {
         if (logIncidents)
             results.logIncidents();
     }
-    public void retreatStack(CombatStackShip stack, StarSystem s) {
+    public boolean retreatStack(CombatStackShip stack, StarSystem s) {
         log("Retreating: ", stack.fullName());
         performingStackTurn = true;
         stack.drawRetreat();
@@ -483,6 +488,7 @@ public class ShipCombatManager implements Base {
         stack.retreatToSystem(s);
         //turnDone(stack);
         performingStackTurn = false;
+        return true;
     }
     public void destroyStack(CombatStack stack) {
         log("Destroyed: ", stack.fullName());

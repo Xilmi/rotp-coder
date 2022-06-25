@@ -35,6 +35,7 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import rotp.model.combat.CombatStack;
+import rotp.ui.UserPreferences;
 import rotp.ui.combat.ShipBattleUI;
 
 public class MapOverlayShipCombatPrompt extends MapOverlay {
@@ -231,11 +232,14 @@ public class MapOverlayShipCombatPrompt extends MapOverlay {
         resolveButton.mapY(battleButton.mapY());
         resolveButton.draw(parent.map(), g);
 
-        parent.addNextTurnControl(retreatButton);
-        retreatButton.init(this, g);
-        retreatButton.mapX(resolveButton.mapX()+resolveButton.width()+s10);
-        retreatButton.mapY(battleButton.mapY());
-        retreatButton.draw(parent.map(), g);
+        if(UserPreferences.retreatRestrictions() < 2 || UserPreferences.retreatRestrictionTurns() == 0)
+        {
+            parent.addNextTurnControl(retreatButton);
+            retreatButton.init(this, g);
+            retreatButton.mapX(resolveButton.mapX()+resolveButton.width()+s10);
+            retreatButton.mapY(battleButton.mapY());
+            retreatButton.draw(parent.map(), g);
+        }
 
         // draw planet info, from bottom up
         int x1 = boxX+s15;

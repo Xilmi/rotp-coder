@@ -75,6 +75,8 @@ public class UserPreferences {
     private static boolean battleScout = false; // modnar: add battleScout option to give player super Scout design
     private static int companionWorlds = 0; // modnar: add option to start game with additional colonies
     private static float missileSizeModifier = 2.0f/3.0f; //xilmi: add option to buff missiles by making them take less space and cost
+    private static int retreatRestrictions = 0; //xilmi: add option to restrict retreating 0 - none, 1 - ai only, 2 - player only, 3 - everyone
+    private static int retreatRestrictionTurns = 100; //xilmi: When retreat-restrictions are enabled for how many turns
     private static boolean autoColonize = false;
     private static boolean divertColonyExcessToResearch = true;
     private static boolean disableAdvisor = true;
@@ -128,6 +130,8 @@ public class UserPreferences {
         battleScout = false; // modnar: add battleScout option to give player super Scout design
         companionWorlds = 0; // modnar: add option to start game with additional colonies
         missileSizeModifier = 2.0f/3.0f;
+        retreatRestrictions = 0;
+        retreatRestrictionTurns = 100;
         save();
     }
     public static void setForNewGame() {
@@ -161,6 +165,24 @@ public class UserPreferences {
     public static void toggleMissileSizeModifier(float f) {
         float newVal = missileSizeModifier + f;
         missileSizeModifier = Math.max(0.1f, Math.min(1, newVal));
+        save();
+    }
+    public static void toggleRetreatRestrictions(int i) {
+        if (retreatRestrictions+i >= 3)
+            retreatRestrictions = 3;
+        else if (retreatRestrictions+i < 0)
+            retreatRestrictions = 0;
+        else
+            retreatRestrictions += i;
+        save();
+    }
+    public static void toggleRetreatRestrictionTurns(int i) {
+        if (retreatRestrictionTurns+i >= 100)
+            retreatRestrictionTurns = 100;
+        else if (retreatRestrictionTurns+i < 0)
+            retreatRestrictionTurns = 0;
+        else
+            retreatRestrictionTurns += i;
         save();
     }
     public static void toggleDynamicDifficulty()     { dynamicDifficulty = !dynamicDifficulty; save(); }
@@ -257,6 +279,8 @@ public class UserPreferences {
     public static boolean battleScout()      { return battleScout; } // modnar: add battleScout option to give player super Scout design
     public static int companionWorlds()      { return companionWorlds; } // modnar: add option to start game with additional colonies
     public static float missileSizeModifier() { return missileSizeModifier; } 
+    public static int retreatRestrictions() { return retreatRestrictions; }
+    public static int retreatRestrictionTurns() { return retreatRestrictionTurns; }
     public static int screenSizePct()       { return screenSizePct; }
     public static void screenSizePct(int i) { setScreenSizePct(i); }
     public static String saveDirectoryPath() {
@@ -360,6 +384,8 @@ public class UserPreferences {
             out.println(keyFormat("BATTLE_SCOUT")+ yesOrNo(battleScout)); // modnar: add battleScout option to give player super Scout design
             out.println(keyFormat("COMPANION_WORLDS")+ companionWorlds); // modnar: add option to start game with additional colonies
             out.println(keyFormat("MISSILE_SIZE_MODIFIER")+ missileSizeModifier);
+            out.println(keyFormat("RETREAT_RESTRICTIONS")+ retreatRestrictions);
+            out.println(keyFormat("RETREAT_RESTRICTION_TURNS")+ retreatRestrictionTurns);
             out.println(keyFormat("LANGUAGE")+ languageDir());
             return 0;
         }
@@ -420,6 +446,8 @@ public class UserPreferences {
             case "BATTLE_SCOUT": battleScout = yesOrNo(val); return; // modnar: add battleScout option to give player super Scout design
             case "COMPANION_WORLDS": setNumCompanionWorlds(val); return; // modnar: add option to start game with additional colonies
             case "MISSILE_SIZE_MODIFIER": setMissileSizeModifier(val); return;
+            case "RETREAT_RESTRICTIONS": setRetreatRestrictions(val); return;
+            case "RETREAT_RESTRICTION_TURNS": setRetreatRestrictionTurns(val); return;
             case "LANGUAGE":     selectLanguage(val); return;
             default:
                 break;
@@ -447,6 +475,14 @@ public class UserPreferences {
     private static void setMissileSizeModifier(String s) {
         float val = Float.valueOf(s);
         missileSizeModifier = Math.max(0.1f, Math.min(1, val));
+    }
+    private static void setRetreatRestrictions(String s) {
+        int val = Integer.valueOf(s);
+        retreatRestrictions = Math.max(0, Math.min(3, val));
+    }
+    private static void setRetreatRestrictionTurns(String s) {
+        int val = Integer.valueOf(s);
+        retreatRestrictionTurns = Math.max(0, Math.min(100, val));
     }
     private static void setMusicVolume(String s) {
         int val = Integer.valueOf(s);

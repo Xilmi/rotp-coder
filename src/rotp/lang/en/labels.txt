@@ -1351,6 +1351,12 @@ SETTINGS_MOD_RANDOM_TECH_START       | Random Tech Start: %1
 SETTINGS_MOD_CUSTOM_DIFFICULTY       | Custom Difficulty: %1%
 SETTINGS_MOD_DYNAMIC_DIFFICULTY      | Dynamic Difficulty: %1
 SETTINGS_MOD_MISSILE_SIZE_MODIFIER   | Missile Size Modifier: %1%
+SETTINGS_MOD_RETREAT_RESTRICTIONS    | Retreating restricted for: %1
+SETTINGS_MOD_RETREAT_NONE            | None
+SETTINGS_MOD_RETREAT_AI              | AI
+SETTINGS_MOD_RETREAT_PLAYER          | Player
+SETTINGS_MOD_RETREAT_BOTH            | Both
+SETTINGS_MOD_RETREAT_RESTRICTION_TURNS | Retreat restricted turns: %1
 SETTINGS_MOD_ALWAYS_STARGATES_DESC   | Always include "Intergalactic Star Gates" in the Tech Tree for ALL Empires. Selecting NO leaves Tech availability up to chance.
 SETTINGS_MOD_ALWAYS_THORIUM_DESC     | Always include "Thorium Cells" in the Tech Tree for ALL Empires. Selecting NO leaves Tech availability up to chance.
 SETTINGS_MOD_CHALLENGE_MODE_DESC     | Give AI Empires additional starting resources (more Population, Factories, and Ships).
@@ -1360,6 +1366,8 @@ SETTINGS_MOD_RANDOM_TECH_START_DESC  | Give ALL Empires 2 random first Tier Tech
 SETTINGS_MOD_CUSTOM_DIFFICULTY_DESC  | Sets the AI Production Modifier from 20% to 500%. Make sure to select "Difficulty: Custom". (Hold down Shift/Ctrl, then scroll the mouse wheel to change in units of 5%/20%.)
 SETTINGS_MOD_DYNAMIC_DIFFICULTY_DESC | Scales the AI Production up/down when weaker/stronger than the Player. Effect ramps up at around Turn-150. (Will not infinitely scale, very strong AI Empires will be almost un-changed.)
 SETTINGS_MOD_MISSILE_SIZE_MODIFIER_DESC | Sets size, cost and power-consuption of missiles as well as cost of missile-bases from 10% to 100%. (Hold down Shift/Ctrl, then scroll the mouse wheel to change in units of 5%/20%.)
+SETTINGS_MOD_RETREAT_RESTRICTIONS_DESC | Sets for whom retreating shall be restricted. (scroll the mouse wheel to change)
+SETTINGS_MOD_RETREAT_RESTRICTION_TURNS_DESC | Sets for how many turns someone who's retreating is restricted must remain in combat. (Hold down Shift/Ctrl, then scroll the mouse wheel to change in units of 5/20.)
 
 // Tech UI labels
 TECH_RESEARCH                     | Technology Research
