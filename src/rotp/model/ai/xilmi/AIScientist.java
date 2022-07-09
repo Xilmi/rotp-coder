@@ -524,7 +524,8 @@ public class AIScientist implements Base, Scientist {
         
         // return highest priority
         cat.currentTech(cheapestTech);
-        /*for(Tech t : techs)
+        /*
+        for(Tech t : techs)
         {
             System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" "+cat.id()+" option: "+t.name()+" "+researchPriority(t));
         }
@@ -801,10 +802,10 @@ public class AIScientist implements Base, Scientist {
     }
     @Override
     public float baseValue(TechMissileWeapon t) {
-        float val = 2;
+        float val = 2 / UserPreferences.missileSizeModifier();
         if(empire.tech().topShipWeaponTech().quintile() < 2 && empire.tech().topBaseMissileTech().quintile() < 2 && empire.tech().topBaseScatterPackTech() == null)
             val += 1;
-        return val / UserPreferences.missileSizeModifier();
+        return val;
     }
     @Override
     public float baseValue(TechPersonalShield t) {
@@ -840,11 +841,11 @@ public class AIScientist implements Base, Scientist {
     @Override
     public float baseValue(TechShipWeapon t) {
         float val = 3;
-        //Gatling Lasers never worth it until you got nothing else available
         if(empire.tech().topShipWeaponTech().quintile() < 2 && empire.tech().topBaseMissileTech().quintile() < 2 && empire.tech().topBaseScatterPackTech() == null)
             val += 1;
         if((t.range > 1 || t.heavyAllowed) && needRange() && !empire.tech().knowsTechOfType(CLOAKING))
             val += 1;
+        //Gatling Lasers never worth it until you got nothing else available
         if(t.damageHigh() <= 4)
             val = 1;
         return val;
