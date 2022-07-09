@@ -3238,7 +3238,7 @@ public final class Empire implements Base, NamedObject, Serializable {
         int[] counts = galaxy().ships.shipDesignCounts(id);
         for (int i=0;i<ShipDesignLab.MAX_DESIGNS; i++) {
             ShipDesign d = shipLab().design(i);
-            if (d.active() && d.isArmed() && !d.isColonyShip()) 
+            if (d.active() && d.isArmed() && !d.hasColonySpecial())
                 pts += (counts[i] *d.hullPoints());
         }
         return pts;
