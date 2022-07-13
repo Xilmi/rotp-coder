@@ -566,7 +566,7 @@ public class AIScientist implements Base, Scientist {
         //System.out.print("\n"+galaxy().currentTurn()+" "+empire.name()+" researchValue of "+t.name()+" t.warModeFactor(): "+t.warModeFactor()+" warMode(): "+warMode()+" is Weapon: "+(t.cat.index() == WEAPON)+" is obsolete: "+t.isObsolete(empire));
         if (t.isObsolete(empire))
             return 0;
-        if(t.quintile() > 1 || t.baseValue(empire) < 3)
+        if(!empire.fleetCommanderAI().inExpansionMode() && (t.quintile() > 1 || t.baseValue(empire) < 3))
         {
             boolean needWeapon = false;
             boolean needWarp = false;
@@ -705,8 +705,8 @@ public class AIScientist implements Base, Scientist {
     public float baseValue(TechControlEnvironment t) {
         if (empire.ignoresPlanetEnvironment())
             return 0;
-        List<StarSystem> possible = empire.uncolonizedPlanetsInRange(empire.shipRange());
-        List<StarSystem> newPossible = empire.uncolonizedPlanetsInShipRange(t.environment());
+        List<StarSystem> possible = empire.uncolonizedPlanetsInRange(empire.scoutRange());
+        List<StarSystem> newPossible = empire.uncolonizedPlanetsInExtendedShipRange(t.environment());
         float newPlanets = newPossible.size() - possible.size();
         if (newPlanets < 1)
             return 1;
