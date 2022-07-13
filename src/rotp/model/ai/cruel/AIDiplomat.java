@@ -1756,7 +1756,7 @@ public class AIDiplomat implements Base, Diplomat {
             enemyPower+= enemy.militaryPowerLevel();
         }
         boolean scared = false;
-        if(empire.militaryPowerLevel() < enemyPower)
+        if(empire.generalAI().smartPowerLevel() < enemyPower)
         {
             //ail: If we are not fighting our preferred target, we don't really want a war
             if(v.empire() != empire.generalAI().bestVictim())
