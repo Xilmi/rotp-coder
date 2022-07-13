@@ -2936,6 +2936,16 @@ public final class Empire implements Base, NamedObject, Serializable {
         }
         return systems;
     }
+    public List<StarSystem> uncolonizedPlanetsInExtendedShipRange(int newType) {
+        Galaxy gal = galaxy();
+        List<StarSystem> systems = new ArrayList<>();
+        for (int i=0;i<sv.count();i++) {
+            StarSystem sys = gal.system(i);
+            if (sv.isScouted(i) && sv.inScoutRange(i) && canColonize(sys.planet().type(), newType) && !sv.isColonized(i))
+                systems.add(sys);
+        }
+        return systems;
+    }
     public List<StarSystem> uncolonizedPlanetsInRange(float range) {
         Galaxy gal = galaxy();
         List<StarSystem> systems = new ArrayList<>();
